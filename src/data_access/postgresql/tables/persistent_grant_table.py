@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import Column, Integer, DateTime, Text, PickleType
+from sqlalchemy import Column, Integer, DateTime, Text, PickleType, String
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,7 +10,7 @@ Base = declarative_base()
 class PersistentGrants(Base): 
     __tablename__ = "persistent_grants"
 
-    key = Column(Text, unique=True, nullabe=False)
+    key = Column(String, unique=True, nullabe=False)
     creation_time = Column(DateTime(timezone=True), server_default=func.now())
     data = Column(PickleType)
     subject_id = Column(Integer)
