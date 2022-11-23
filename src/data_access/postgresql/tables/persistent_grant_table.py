@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
+
 from sqlalchemy import Column, Integer, DateTime, Text, PickleType, String
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
 
-
-Base = declarative_base()
+from .base import Base
 
 
 class PersistentGrants(Base): 
