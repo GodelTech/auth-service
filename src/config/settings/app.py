@@ -1,8 +1,7 @@
 import logging
-import sys
 from typing import Any, Dict, List, Tuple
 
-from pydantic import PostgresDsn, SecretStr
+from pydantic import PostgresDsn
 
 from src.config.settings.base import BaseAppSettings
 
@@ -14,10 +13,10 @@ class AppSettings(BaseAppSettings):
     openapi_url: str = "/openapi.json"
     redoc_url: str = "/redoc"
     title: str = "IS POC application"
+    version: str = "0.1.0"
 
     database_url: PostgresDsn
     max_connection_count: int = 10
-    min_connection_count: int = 10
 
     allowed_hosts: List[str] = ["*"]
 
