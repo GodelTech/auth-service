@@ -42,7 +42,7 @@ class Client(Base):
     created = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.client_name}"
 
 
@@ -51,9 +51,9 @@ class ClientIdRestriction(Base):
 
     id = Column(Integer, primary_key=True)
     provider = Column(String, nullable=False)
-    client_id = Column(ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.provider}"
 
 
@@ -63,9 +63,9 @@ class ClientClaim(Base):
     id = Column(Integer, primary_key=True)
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"
 
 
@@ -74,9 +74,9 @@ class ClientScope(Base):
 
     id = Column(Integer, primary_key=True)
     scope = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -85,9 +85,9 @@ class ClientPostLogoutRedirectUri(Base):
 
     id = Column(Integer, primary_key=True)
     post_logout_redirect_uri = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -96,9 +96,9 @@ class ClientCorsOrigin(Base):
 
     id = Column(Integer, primary_key=True)
     origin = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -107,9 +107,9 @@ class ClientRedirectUri(Base):
 
     id = Column(Integer, primary_key=True, unique=True)
     redirect_uri = Column(String, nullable=False)
-    client_id = Column(ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -118,9 +118,9 @@ class ClientGrantType(Base):
 
     id = Column(Integer, primary_key=True, unique=True)
     grant_type = Column(String, nullable=False)
-    client_id = Column(ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -132,7 +132,7 @@ class ClientSecret(Base):
     expiration = Column(Integer, nullable=False)
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(ForeignKey("clients.client_id"))
+    client_id = Column(String, ForeignKey("clients.client_id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"

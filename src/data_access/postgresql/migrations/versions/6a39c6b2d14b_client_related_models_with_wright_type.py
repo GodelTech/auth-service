@@ -1,8 +1,8 @@
-"""first version of client related models
+"""Client related models with wright type
 
-Revision ID: 909f0f11a872
+Revision ID: 6a39c6b2d14b
 Revises: 
-Create Date: 2022-11-23 08:31:14.936774
+Create Date: 2022-11-23 10:49:51.432482
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '909f0f11a872'
+revision = '6a39c6b2d14b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -59,14 +59,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('type', sa.String(), nullable=False),
     sa.Column('value', sa.String(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('client_id', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('client_cors_origins',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('origin', sa.String(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('client_id', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -88,7 +88,7 @@ def upgrade() -> None:
     op.create_table('client_post_logout_redirect_uris',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('post_logout_redirect_uri', sa.String(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('client_id', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -103,7 +103,7 @@ def upgrade() -> None:
     op.create_table('client_scopes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('scope', sa.String(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('client_id', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
