@@ -1,4 +1,5 @@
-from .tables import (
+from .base import Base
+from .client_app_related_tables import (
     Client,
     ClientIdRestriction,
     ClientClaim,
@@ -7,8 +8,7 @@ from .tables import (
     ClientCorsOrigin,
     ClientSecret,
     ClientGrantType,
-    ClientRedirectUri,
-    Base
+    ClientRedirectUri
 )
 
 
