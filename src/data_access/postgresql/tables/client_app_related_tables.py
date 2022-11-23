@@ -11,8 +11,8 @@ class BaseModel(Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, server_default=datetime.datetime.now)
+    updated_at = Column(DateTime, server_default=datetime.datetime.now)
 
 
 class Client(BaseModel):
