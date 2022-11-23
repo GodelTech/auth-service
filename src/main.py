@@ -1,10 +1,7 @@
 from fastapi import FastAPI
-from src.config import get_app_settings
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from src.config.config import get_app_settings
+from src.config import get_app_settings
 from src.config.events import create_start_app_handler, create_stop_app_handler
 
 
