@@ -1,5 +1,5 @@
 from .base import Base
-from .client_app_related_tables import (
+from .client import (
     Client,
     ClientIdRestriction,
     ClientClaim,
