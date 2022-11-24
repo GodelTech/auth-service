@@ -4,15 +4,7 @@ from sqlalchemy import String, Integer, Column, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
 
-from .base import Base
-
-
-class BaseModel(Base):
-    __abstract__ = True
-
-    id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, server_default=datetime.datetime.now)
-    updated_at = Column(DateTime, server_default=datetime.datetime.now)
+from .base import BaseModel
 
 
 class Client(BaseModel):
