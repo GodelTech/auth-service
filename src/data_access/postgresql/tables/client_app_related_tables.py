@@ -27,7 +27,7 @@ class Client(BaseModel):
 
     __tablename__ = "clients"
 
-    client_id = Column(String(80), nullable=False, unique=True, )
+    client_id = Column(String(80), nullable=False, unique=True)
     absolute_refresh_token_lifetime = Column(Integer, default=2592000, nullable=False)
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
     access_token_type = Column(ChoiceType(ACCESS_TOKEN_TYPES))
