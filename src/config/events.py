@@ -3,7 +3,7 @@ from typing import Callable
 from fastapi import FastAPI
 
 from src.config.settings.app import AppSettings
-from src.data_access.postgresql.events import close_db_connection, connect_to_db
+from src.data_access.postgresql.events import connect_to_db, close_db_connection
 
 
 def create_start_app_handler(
