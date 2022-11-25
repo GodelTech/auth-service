@@ -20,8 +20,6 @@ class AppSettings(BaseAppSettings):
 
     allowed_hosts: List[str] = ["*"]
 
-    logging_level: int = logging.INFO
-
     class Config:
         validate_assignment = True
 

@@ -1,11 +1,17 @@
+import logging
+from logging.config import dictConfig
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src.config import get_app_settings
+from src.config import get_app_settings, LogConfig
 from src.config.events import create_start_app_handler, create_stop_app_handler
 
 
+
 def get_application() -> FastAPI:
+    # configure logging
+    dictConfig(LogConfig().to_dict)
+
     settings = get_app_settings()
 
     application = FastAPI(**settings.fastapi_kwargs)
