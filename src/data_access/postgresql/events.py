@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from src.config.settings.app import AppSettings
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('is_app')
 
 
 async def connect_to_db(app: FastAPI, settings: AppSettings) -> None:
@@ -19,8 +19,8 @@ async def connect_to_db(app: FastAPI, settings: AppSettings) -> None:
     logger.info('Connection pool created.')
 
 
-async def close_db_connection(app: FastAPI, settings: AppSettings) -> None:
-    logger.info('Closing connection pool.')
+async def close_db_connection(app: FastAPI) -> None:
+    logger.info('Closing PostgreSQL connection pool.')
 
     await app.state.pool.dispose()
 
