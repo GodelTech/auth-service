@@ -3,27 +3,6 @@ from sqlalchemy_utils import ChoiceType
 from .base import BaseModel
 
 
-API_CLAIM_TYPE = []
-API_SCOPE_CLAIM_TYPE = [
-    ("name", "Name"),
-    ("family_name", "Family Name"),
-    ("middle_name", "Middle name"),
-    ("nickname", "Nickname"),
-    ("preferred_username", "Preferred username"),
-    ("profile_picture", "Profile picture"),
-    ("website", "Website"),
-    ("gender", "Gender"),
-    ("birthdate", "Birthdate"),
-    ("zone_info", "Zone info"),
-    ("locale", "Locale"),
-    ("updated_at", "Updated at")
-]
-API_SECRET_TYPE = [
-    ("sha256", "Sha256"),
-    ("sha512", "Sha512")
-]
-
-
 class ApiResource(BaseModel):
     __tablename__ = "api_resources"
 
@@ -37,6 +16,10 @@ class ApiResource(BaseModel):
 
 
 class ApiSecret(BaseModel):
+    API_SECRET_TYPE = [
+        ("sha256", "Sha256"),
+        ("sha512", "Sha512")
+    ]
     __tablename__ = "api_secrets"
 
     api_resources_id = Column("ApiResource", Integer,
@@ -51,6 +34,7 @@ class ApiSecret(BaseModel):
 
 
 class ApiClaim(BaseModel):
+    API_CLAIM_TYPE = []
     __tablename__ = "api_slaims"
 
     api_resources_id = Column("ApiResource", Integer,
@@ -78,6 +62,20 @@ class ApiScope(BaseModel):
 
 
 class ApiScopeClaim(BaseModel):
+    API_SCOPE_CLAIM_TYPE = [
+        ("name", "Name"),
+        ("family_name", "Family Name"),
+        ("middle_name", "Middle name"),
+        ("nickname", "Nickname"),
+        ("preferred_username", "Preferred username"),
+        ("profile_picture", "Profile picture"),
+        ("website", "Website"),
+        ("gender", "Gender"),
+        ("birthdate", "Birthdate"),
+        ("zone_info", "Zone info"),
+        ("locale", "Locale"),
+        ("updated_at", "Updated at")
+    ]
     __tablename__ = "api_scope_claims"
 
     api_scopes_id = Column("ApiScope", Integer, ForeignKey('ApiScope.id'))
