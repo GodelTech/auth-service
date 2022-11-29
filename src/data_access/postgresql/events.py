@@ -10,7 +10,6 @@ logger = logging.getLogger('is_app')
 
 async def connect_to_db(app: FastAPI, settings: AppSettings) -> None:
     logger.info('Creating PostgreSQL connection pool.')
-    print('555555555555555555555', settings.database_url)
     app.state.pool = create_async_engine(
         str(settings.database_url),
         pool_size=settings.max_connection_count

@@ -3,31 +3,20 @@ import traceback
 
 from src.presentation.models.authorization import ResponseAuthorizationModel, PostRequestModel
 from src.data_access.postgresql.repositories.client import ClientRepository
-from src.business_logic.dependencies.database import get_repository
 
 
-async def get_authorisation_get(client_id, repo: ClientRepository):
-    print('??????????????????????????????????', repo, client_id)
+async def get_authorise(client_id: str, scope: str, repo: ClientRepository):
     try:
-        print('---------------------', repo, client_id)
-
         client = await repo.get_client_by_client_id(client_id=client_id)
-        print('=========================', client)
 
         if client:
+            scope_data = {item.split('=')[0]: item.split('=')[1] for item in scope.split('&')[1:]}
             return True
+            # password = data['password']
+            # user_name = data['user_name']
+            # access_code = repo.generate_code_by_user_name_and_password(password=password, user_name=user_name)
         else:
             return False
     except Exception:
-        print(traceback.format_exc())
         raise 'Something wrong in get_authorisation_get'
-
-
-
-
-# def get_authorisation_put(request_data):
-#     try:
-#         user = ClientRepository.get_user_by_client_id(request_data.client_id)
-#     except Exception:
-#         raise 'Something wrong with put'
 

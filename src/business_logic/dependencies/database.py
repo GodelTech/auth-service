@@ -14,19 +14,11 @@ def _get_db_pool() -> Pool:
 
 
 async def _get_connection_from_pool(
-    pool: Pool = Depends(_get_db_pool),
+    # pool: Pool = Depends(_get_db_pool),
 ) -> AsyncGenerator[Session, None]:
-    async_session = sessionmaker(pool)
-    print('&&&&&&&&&&&&&&&&&&&&&&&&', Session())
+    async_session = sessionmaker(main.app.state.pool, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         yield session
-
-    # Session = sessionmaker(pool)
-    # session = Session()
-    # try:
-    #     yield session
-    # finally:
-    #     session.close()
 
 
 def get_repository(
