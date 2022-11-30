@@ -1,8 +1,8 @@
-"""identity resource ans persistent grant
+"""identity resource and persistent grant
 
-Revision ID: 686f76b1071f
+Revision ID: 48e4720ceb05
 Revises: 1bbf3e5de93d
-Create Date: 2022-11-29 13:56:53.272268
+Create Date: 2022-11-30 09:18:47.834095
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '686f76b1071f'
+revision = '48e4720ceb05'
 down_revision = '1bbf3e5de93d'
 branch_labels = None
 depends_on = None
@@ -39,7 +39,7 @@ def upgrade() -> None:
     sa.Column('data', sa.JSON(), nullable=False),
     sa.Column('expiration', sa.DateTime(), nullable=False),
     sa.Column('subject_id', sa.Integer(), nullable=False),
-    sa.Column('type', sqlalchemy_utils.types.choice.ChoiceType(length=255), nullable=False),
+    sa.Column('type', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('key')
     )
