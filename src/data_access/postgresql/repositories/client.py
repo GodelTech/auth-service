@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy import select, and_
 
 from src.data_access.postgresql.repositories.base import BaseRepository
@@ -22,7 +24,9 @@ class ClientRepository(BaseRepository):
     #     )))
     #     user = user.first()[0]
     #     if user:
-    #         pass # functionality to generate code and redirect
+    #         secret_code = secrets.token_urlsafe(16)
+
+            # pass # functionality to generate code and redirect
 
     def __repr__(self):
         return "Client Repository"
