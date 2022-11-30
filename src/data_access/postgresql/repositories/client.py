@@ -9,8 +9,7 @@ class ClientRepository(BaseRepository):
 
     async def get_client_by_client_id(self, client_id: str):
         client = await self.session.execute(select(Client).where(Client.client_id == client_id))
-        client = client.scalars().first()
-
+        client = client.first()[0]
         if client:
             return client
         else:
@@ -21,7 +20,7 @@ class ClientRepository(BaseRepository):
     #         User.user_name == user_name,
     #         User.password == password
     #     )))
-    #     user = user.scalars().first()
+    #     user = user.first()[0]
     #     if user:
     #         pass # functionality to generate code and redirect
 

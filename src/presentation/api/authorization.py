@@ -29,7 +29,13 @@ async def get_authorize(
         acr_values: str = None,
         client_repo: ClientRepository = Depends(get_repository(ClientRepository))
 ):
-    if await get_authorise(client_id=client_id, scope=scope, repo=client_repo):
+    if await get_authorise(
+            client_id=client_id,
+            response_type=response_type,
+            scope=scope,
+            redirect_uri=redirect_uri,
+            repo=client_repo
+    ):
         result = True
     else:
         result = False

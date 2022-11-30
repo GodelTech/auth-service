@@ -5,7 +5,13 @@ from src.presentation.models.authorization import ResponseAuthorizationModel, Po
 from src.data_access.postgresql.repositories.client import ClientRepository
 
 
-async def get_authorise(client_id: str, scope: str, repo: ClientRepository):
+async def get_authorise(
+        client_id: str,
+        response_type: str,
+        scope: str,
+        redirect_uri: str,
+        repo: ClientRepository
+):
     try:
         client = await repo.get_client_by_client_id(client_id=client_id)
 
@@ -14,7 +20,7 @@ async def get_authorise(client_id: str, scope: str, repo: ClientRepository):
             return True
             # password = data['password']
             # user_name = data['user_name']
-            # access_code = repo.generate_code_by_user_name_and_password(password=password, user_name=user_name)
+            # access_code = await repo.generate_code_by_user_name_and_password(password=password, user_name=user_name)
         else:
             return False
     except Exception:
