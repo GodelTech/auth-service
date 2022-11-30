@@ -3,6 +3,9 @@ from fastapi import APIRouter, Depends
 from src.presentation.models.authorization import PostRequestModel, ResponseAuthorizationModel
 from src.business_logic.services.authorisation_services import get_authorise
 from src.data_access.postgresql.repositories.client import ClientRepository
+from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+
 from src.business_logic.dependencies.database import get_repository
 
 
@@ -27,14 +30,18 @@ async def get_authorize(
         id_token_hint: str = None,
         login_hint: str = None,
         acr_values: str = None,
-        client_repo: ClientRepository = Depends(get_repository(ClientRepository))
+        client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
+        user_repo: UserRepository = Depends(get_repository(UserRepository)),
+        persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
 ):
     if await get_authorise(
             client_id=client_id,
             response_type=response_type,
             scope=scope,
             redirect_uri=redirect_uri,
-            repo=client_repo
+            client_repo=client_repo,
+            user_repo=user_repo,
+            persistent_grant_repo=persistent_grant_repo
     ):
         result = True
     else:
