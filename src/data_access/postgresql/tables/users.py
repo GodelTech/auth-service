@@ -4,20 +4,21 @@ from sqlalchemy import Table, Date, String, Integer, Column, DateTime, Boolean, 
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
 
-from .base import BaseModel
+from .base import BaseModel, Base
 
 user_roles = Table(
     "project_team",
-    BaseModel.metadata,
+    Base.metadata,
     Column("role", Integer, ForeignKey("roles.id")),
     Column("user", Integer, ForeignKey("users.id")),
 )
+
 
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
     api_resources_id = Column("User", Integer,
-                              ForeignKey('user.id'))
+                              ForeignKey('users.id'))
     login_provider = Column(String, primary_key=True, nullable=False, unique=True, )
     provider_key = Column(String, primary_key=True, nullable=False, unique=True, )
 
@@ -37,9 +38,9 @@ class User(BaseModel):
     two_factors_enabled = Column(Boolean, default=True, nullable=True)
     lockout_end_date_utc = Column(Date, nullable=True)
     lockout_enabled = Column(Boolean, default=True, nullable=True)
-    access_failed_count = Column(Integer, default = 0, nullable=False)
+    access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
-    projects = relationship("Role", secondary = user_roles, back_populates = 'users')
+    roles = relationship("Role", secondary=user_roles, back_populates='users')
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
@@ -49,17 +50,20 @@ class Role(BaseModel):
     __tablename__ = "roles"
 
     name = Column(String, nullable=False, unique=True)
-    users = relationship("User", secondary = user_roles, back_populates = 'roles')
+    users = relationship("User", secondary=user_roles, back_populates='roles')
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
 
 
 class UserClaim(BaseModel):
-    USER_CLAIM_TYPE = []
+    USER_CLAIM_TYPE = [
+        ('string', 'String')
+    ]
     __tablename__ = "user_claims"
 
     claim_type = type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
+
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"

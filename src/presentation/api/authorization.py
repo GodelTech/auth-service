@@ -59,7 +59,7 @@ async def post_authorize(
         client_repo: ClientRepository = Depends(get_repository(ClientRepository))
 ):
 
-    if await get_authorise(client_id=request_body.client_id, scope=request_body.scope, repo=client_repo):
+    if await get_authorise(client_id=request_body.client_id, scope=request_body.scope, client_repo=client_repo):
         result = True
     else:
         result = False
