@@ -7,8 +7,9 @@ from src.data_access.postgresql.tables.users import User
 class UserRepository(BaseRepository):
 
     async def get_hash_password(self, user_name: str) -> str | bool:
+
         user = await self.session.execute(select(User).where(
-            User.user_name == user_name
+            User.username == user_name
         ))
         try:
             user = user.first()[0]

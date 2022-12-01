@@ -62,7 +62,7 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
-    claim_type = type = Column(ChoiceType(USER_CLAIM_TYPE))
+    claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 
     def __str__(self):

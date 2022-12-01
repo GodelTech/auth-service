@@ -5,5 +5,5 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 
 class PersistentGrantRepository(BaseRepository):
 
-    def create_new_grant(self, client_id: str, secret_code: str):
+    async def create_new_grant(self, client_id: str, secret_code: str):
         pass

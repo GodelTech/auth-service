@@ -31,8 +31,8 @@ async def get_authorize(
         login_hint: str = None,
         acr_values: str = None,
         client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
-        # user_repo: UserRepository = Depends(get_repository(UserRepository)),
-        # persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
+        user_repo: UserRepository = Depends(get_repository(UserRepository)),
+        persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
 ):
     if await get_authorise(
             client_id=client_id,
@@ -40,8 +40,8 @@ async def get_authorize(
             scope=scope,
             redirect_uri=redirect_uri,
             client_repo=client_repo,
-            # user_repo=user_repo,
-            # persistent_grant_repo=persistent_grant_repo
+            user_repo=user_repo,
+            persistent_grant_repo=persistent_grant_repo
     ):
         result = True
     else:
