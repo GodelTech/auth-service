@@ -23,13 +23,13 @@ async def get_authorise(
     try:
         client = await client_repo.get_client_by_client_id(client_id=client_id)
         if client:
-            # return True
             scope_data = {item.split('=')[0]: item.split('=')[1] for item in scope.split('&')[1:]}
             secret_code = secrets.token_urlsafe(32)
             password = scope_data['password']
             user_name = scope_data['username']
             user_hash_password = await user_repo.get_hash_password(user_name)
             validated = PasswordHash.validate_password(password, user_hash_password)
+
             if user_hash_password and validated:
                 await persistent_grant_repo.create_new_grant(client_id, secret_code)
                 return True

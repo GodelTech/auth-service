@@ -9,11 +9,11 @@ from src.data_access.postgresql.tables.client import Client
 LIFESPAN_OF_TOKEN = 999
 
 
-class PersistentGrant(BaseModel): 
+class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
 
     TYPES_OF_GRANTS = [
-        ('example', 'Example')
+        ('string', 'String')
     ]
 
     key = Column(String(512), unique=True, nullable=False)

@@ -8,7 +8,7 @@ from .base import BaseModel, Base
 
 user_roles = Table(
     "project_team",
-    Base.metadata,
+    BaseModel.metadata,
     Column("role", Integer, ForeignKey("roles.id")),
     Column("user", Integer, ForeignKey("users.id")),
 )
@@ -40,7 +40,7 @@ class User(BaseModel):
     lockout_enabled = Column(Boolean, default=True, nullable=True)
     access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
-    roles = relationship("Role", secondary=user_roles, back_populates='users')
+    roles = relationship("Role", secondary="project_team", back_populates='users')
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
@@ -50,7 +50,7 @@ class Role(BaseModel):
     __tablename__ = "roles"
 
     name = Column(String, nullable=False, unique=True)
-    users = relationship("User", secondary=user_roles, back_populates='roles')
+    users = relationship("User", secondary="project_team", back_populates='roles')
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"

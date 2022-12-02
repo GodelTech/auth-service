@@ -14,7 +14,7 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.get('/', response_model=bool)
+@auth_router.get('/', response_model=bool, status_code=302)
 async def get_authorize(
         client_id: str,
         response_type: str,
@@ -53,7 +53,7 @@ async def get_authorize(
 # response_model=ResponseAuthorizationModel
 
 
-@auth_router.post('/', response_model=bool)
+@auth_router.post('/', response_model=bool, status_code=302)
 async def post_authorize(
         request_body: PostRequestModel,
         client_repo: ClientRepository = Depends(get_repository(ClientRepository))

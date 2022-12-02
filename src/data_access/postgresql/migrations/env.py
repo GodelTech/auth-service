@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.data_access.postgresql.tables import Base
-from src.data_access.postgresql.tables import identity_resource, persistent_grant
+from src.data_access.postgresql.tables import identity_resource, persistent_grant, users, resources_related, client
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -69,8 +69,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata, include_schemas=True,
-
+            connection=connection, target_metadata=target_metadata, include_schemas=True
         )
 
         with context.begin_transaction():
