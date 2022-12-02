@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class PostRequestModel(BaseModel):
+class RequestModel(BaseModel):
     client_id: str
     response_type: str
     scope: str
