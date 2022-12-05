@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, Form
+from fastapi.responses import RedirectResponse
+
 from starlette import status
 
-from src.presentation.models.authorization import RequestModel, ResponseAuthorizationModel
+from src.presentation.models.authorization import RequestModel
 from src.business_logic.services.authorisation_services import get_authorise
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.user import UserRepository
@@ -9,13 +11,12 @@ from src.data_access.postgresql.repositories.persistent_grant import PersistentG
 
 from src.business_logic.dependencies.database import get_repository
 
-
 auth_router = APIRouter(
     prefix='/authorize',
 )
 
 
-@auth_router.get('/', response_model=ResponseAuthorizationModel, status_code=302, tags=['Authorization'])
+@auth_router.get('/', status_code=302, tags=['Authorization'])
 async def get_authorize(
         client_id: str,
         response_type: str,
@@ -55,19 +56,20 @@ async def get_authorize(
         persistent_grant_repo=persistent_grant_repo
     )
     try:
-        response = await get_authorise(
+        firmed_redirect_uri = await get_authorise(
             request=request,
             client_repo=client_repo,
             user_repo=user_repo,
             persistent_grant_repo=persistent_grant_repo
         )
+        response = RedirectResponse(firmed_redirect_uri)
         return response
     except:
         status_code = status.HTTP_403_FORBIDDEN
         return status_code
 
 
-@auth_router.post('/', response_model=ResponseAuthorizationModel, status_code=302, tags=['Authorization'])
+@auth_router.post('/', status_code=302, tags=['Authorization'])
 async def post_authorize(
         client_id: str = Form(),
         response_type: str = Form(),
@@ -107,12 +109,13 @@ async def post_authorize(
         persistent_grant_repo=persistent_grant_repo
     )
     try:
-        response = await get_authorise(
+        firmed_redirect_uri = await get_authorise(
             request=request,
             client_repo=client_repo,
             user_repo=user_repo,
             persistent_grant_repo=persistent_grant_repo
         )
+        response = RedirectResponse(firmed_redirect_uri)
         return response
     except:
         status_code = status.HTTP_403_FORBIDDEN

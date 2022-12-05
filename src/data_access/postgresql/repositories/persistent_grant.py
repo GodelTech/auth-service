@@ -13,7 +13,7 @@ class PersistentGrantRepository(BaseRepository):
             key=unique_key,
             client_id=client_id,
             data=secret_code,
-            expiration=(datetime.datetime.now()),
+            expiration=(datetime.datetime.now()+datetime.timedelta(seconds=3600)),
             subject_id=2323,
             type='example'
         )
