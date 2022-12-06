@@ -1,15 +1,9 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Form
 from fastapi.responses import RedirectResponse
-from starlette import status
 
 from src.presentation.models.authorization import RequestModel
-from src.business_logic.services.authorisation import get_authorise
-from src.data_access.postgresql.repositories.client import ClientRepository
-from src.data_access.postgresql.repositories.user import UserRepository
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-from src.data_access.postgresql.events import logger
+from src.business_logic.services import get_authorise, AuthorisationService
 
-from src.business_logic.dependencies.database import get_repository
 
 auth_router = APIRouter(
     prefix='/authorize',
@@ -50,9 +44,7 @@ async def get_authorize(
         acr_values=acr_values
     )
 
-    firmed_redirect_uri = await get_authorise(
-        request=request
-    )
+    firmed_redirect_uri = await AuthorisationService(request=request).get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
 
     return response
@@ -92,8 +84,6 @@ async def post_authorize(
         acr_values=acr_values
     )
 
-    firmed_redirect_uri = await get_authorise(
-        request=request
-    )
+    firmed_redirect_uri = await AuthorisationService(request=request).get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
     return response
