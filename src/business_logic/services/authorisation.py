@@ -43,7 +43,10 @@ async def get_authorise(
     except UserNotFoundError as exception:
         logger.exception(exception)
     except KeyError as exception:
-        message = f"KeyError: key {exception} does not exist"
+        message = f"KeyError: key {exception} does not exist is not in the scope"
+        logger.exception(message)
+    except IndexError as exception:
+        message = f"IndexError: {exception} - Impossible to parse the scope"
         logger.exception(message)
 
 
