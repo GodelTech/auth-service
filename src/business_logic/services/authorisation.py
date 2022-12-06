@@ -78,8 +78,8 @@ class AuthorisationService:
                 if user_hash_password and validated:
                     secret_code = secrets.token_urlsafe(32)
                     await self.persistent_grant_repo.create_new_grant(self.request.client_id, secret_code)
-                
-                return await self._update_redirect_url_with_params(secret_code=secret_code)
+                    
+                    return await self._update_redirect_url_with_params(secret_code=secret_code)
         except ClientNotFoundError as exception:
             logger.exception(exception)
         except UserNotFoundError as exception:
@@ -102,7 +102,7 @@ class AuthorisationService:
         """
         """
         return {item.split('=')[0]: item.split('=')[1] for item in self.scope.split('&')[1:]}
-    
+
     async def _update_redirect_url_with_params(self, secret_code: str) -> str:
         redirect_uri = f"{self.request.redirect_uri}?code={secret_code}"
         if self.request.state:
