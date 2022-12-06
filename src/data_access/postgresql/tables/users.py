@@ -17,7 +17,7 @@ user_roles = Table(
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    api_resources_id = Column("User", Integer,
+    user_id = Column("User", Integer,
                               ForeignKey('users.id'))
     login_provider = Column(String, primary_key=True, nullable=False, unique=True, )
     provider_key = Column(String, primary_key=True, nullable=False, unique=True, )
@@ -62,6 +62,8 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
+    user_id = Column("User", Integer,
+                              ForeignKey('users.id'))
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 
