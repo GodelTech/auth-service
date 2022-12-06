@@ -2,6 +2,7 @@ from sqlalchemy import select
 
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.users import User
+from src.data_access.postgresql.errors.user import UserNotFoundError
 
 
 class UserRepository(BaseRepository):
@@ -11,8 +12,14 @@ class UserRepository(BaseRepository):
         user = await self.session.execute(select(User).where(
             User.username == user_name
         ))
-        try:
-            user = user.first()[0]
-            return user.password_hash
-        except:
-            return False
+        user = user.first()
+
+        if user is None:
+            raise UserNotFoundError("User you are looking for does not exist")
+
+        user = user[0]
+        return user.password_hash
+
+    def __repr__(self) -> str:
+        return "User repository"
+

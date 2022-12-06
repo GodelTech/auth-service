@@ -4,6 +4,9 @@ from src.presentation.models.authorization import RequestModel
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.business_logic.services.password_service import PasswordHash
+from src.data_access.postgresql.events import logger
+from src.data_access.postgresql.errors.client import ClientNotFoundError
+from src.data_access.postgresql.errors.user import UserNotFoundError
 
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
@@ -21,6 +24,7 @@ async def get_authorise(
             secret_code = secrets.token_urlsafe(32)
             password = scope_data['password']
             user_name = scope_data['username']
+
             user_hash_password = await user_repo.get_hash_password(user_name)
 
             validated = PasswordHash.validate_password(password, user_hash_password)
@@ -32,7 +36,11 @@ async def get_authorise(
                     redirect_uri += f"&state={request.state}"
 
                 return redirect_uri
-        else:
-            raise Exception
-    except Exception:
-        raise 'Something wrong in get_authorisation_get'
+    except ClientNotFoundError as exception:
+        logger.exception(exception)
+    except UserNotFoundError as exception:
+        logger.exception(exception)
+    except KeyError as exception:
+        message = f"KeyError: key {exception} does not exist"
+        logger.exception(message)
+
