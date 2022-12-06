@@ -1,21 +1,23 @@
 import secrets
+from fastapi import Depends
 
 from src.presentation.models.authorization import RequestModel
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.user import UserRepository
-from src.business_logic.services.password_service import PasswordHash
+from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.events import logger
 from src.data_access.postgresql.errors.client import ClientNotFoundError
 from src.data_access.postgresql.errors.user import UserNotFoundError
+from src.business_logic.dependencies import get_repository
 
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 
 async def get_authorise(
         request: RequestModel,
-        client_repo: ClientRepository,
-        user_repo: UserRepository,
-        persistent_grant_repo: PersistentGrantRepository
+        client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
+        user_repo: UserRepository = Depends(get_repository(UserRepository)),
+        persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
 ):
     try:
         client = await client_repo.get_client_by_client_id(client_id=request.client_id)
@@ -44,3 +46,6 @@ async def get_authorise(
         message = f"KeyError: key {exception} does not exist"
         logger.exception(message)
 
+
+class AuthorisationService:
+    pass

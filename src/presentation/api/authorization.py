@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from starlette import status
 
 from src.presentation.models.authorization import RequestModel
-from src.business_logic.services.authorisation_services import get_authorise
+from src.business_logic.services.authorisation import get_authorise
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
@@ -31,10 +31,7 @@ async def get_authorize(
         ui_locales: str = None,
         id_token_hint: str = None,
         login_hint: str = None,
-        acr_values: str = None,
-        client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
-        user_repo: UserRepository = Depends(get_repository(UserRepository)),
-        persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
+        acr_values: str = None
 ):
     request = RequestModel(
         client_id=client_id,
@@ -50,17 +47,11 @@ async def get_authorize(
         ui_locales=ui_locales,
         id_token_hint=id_token_hint,
         login_hint=login_hint,
-        acr_values=acr_values,
-        client_repo=client_repo,
-        user_repo=user_repo,
-        persistent_grant_repo=persistent_grant_repo
+        acr_values=acr_values
     )
 
     firmed_redirect_uri = await get_authorise(
-        request=request,
-        client_repo=client_repo,
-        user_repo=user_repo,
-        persistent_grant_repo=persistent_grant_repo
+        request=request
     )
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
 
@@ -82,10 +73,7 @@ async def post_authorize(
         ui_locales: str = Form(None),
         id_token_hint: str = Form(None),
         login_hint: str = Form(None),
-        acr_values: str = Form(None),
-        client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
-        user_repo: UserRepository = Depends(get_repository(UserRepository)),
-        persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository))
+        acr_values: str = Form(None)
 ):
     request = RequestModel(
         client_id=client_id,
@@ -101,17 +89,11 @@ async def post_authorize(
         ui_locales=ui_locales,
         id_token_hint=id_token_hint,
         login_hint=login_hint,
-        acr_values=acr_values,
-        client_repo=client_repo,
-        user_repo=user_repo,
-        persistent_grant_repo=persistent_grant_repo
+        acr_values=acr_values
     )
 
     firmed_redirect_uri = await get_authorise(
-        request=request,
-        client_repo=client_repo,
-        user_repo=user_repo,
-        persistent_grant_repo=persistent_grant_repo
+        request=request
     )
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
     return response
