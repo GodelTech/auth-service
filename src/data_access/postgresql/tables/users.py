@@ -58,6 +58,25 @@ class Role(BaseModel):
 
 class UserClaim(BaseModel):
     USER_CLAIM_TYPE = [
+        ("name", "Name"),
+        ("given_name", "Given name"),
+        ("family_name", "Family name"),
+        ("middle_name", "Middle name"),
+        ("nickname", "Nickname"),
+        ("preferred_username", "Preferred username"),
+        ("profile", "Profile"),
+        ("picture", "Picture"),
+        ("website", "Website"),
+        ("email", "Email"),
+        ("email verified", "Email verified"),
+        ("gender", "Gender"),
+        ("birthdate", "Birthdate"),
+        ("zoneinfo", "Zoneinfo"),
+        ("locale", "Locale"),
+        ("phone_number", "Phone number"),
+        ("phone_number_verified", "Phone number verified"),
+        ("address", "Address"),
+        ("updated_at", "Updated at"),
         ('string', 'String')
     ]
     __tablename__ = "user_claims"
