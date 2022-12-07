@@ -1,7 +1,7 @@
 import secrets
 from fastapi import Depends
 
-from src.presentation.models.authorization import RequestModel
+from src.presentation.api.models import RequestModel
 from src.data_access.postgresql.repositories import ClientRepository, UserRepository, PersistentGrantRepository
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.events import logger
@@ -49,13 +49,12 @@ async def get_authorise(
 class AuthorisationService:
     def __init__(
         self, 
-        # request: RequestModel,
         client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
         persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository)),
         password_service: PasswordHash = Depends()
     ) -> None:
-        self.request = None
+        self._request = None
         self.client_repo = client_repo
         self.user_repo = user_repo
         self.persistent_grant_repo = persistent_grant_repo
@@ -108,6 +107,11 @@ class AuthorisationService:
 
         return redirect_uri
 
-    def set_request_model(self, request: RequestModel) -> None:
-        self.request = request
-        return
+    @property
+    def request(self) -> None:
+        return self._request
+
+    @request.setter
+    def request(self, request: RequestModel) -> None:
+        self._request = request
+
