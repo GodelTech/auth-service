@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Form, Depends
 from fastapi.responses import RedirectResponse
 
 from src.presentation.models.authorization import RequestModel
@@ -25,7 +25,8 @@ async def get_authorize(
         ui_locales: str = None,
         id_token_hint: str = None,
         login_hint: str = None,
-        acr_values: str = None
+        acr_values: str = None,
+        auth_class: AuthorisationService = Depends()
 ):
     request = RequestModel(
         client_id=client_id,
@@ -43,8 +44,9 @@ async def get_authorize(
         login_hint=login_hint,
         acr_values=acr_values
     )
-
-    firmed_redirect_uri = await AuthorisationService(request=request).get_redirect_url()
+    auth_class = auth_class
+    auth_class.set_request_model(request=request)
+    firmed_redirect_uri = await auth_class.get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
 
     return response
@@ -65,7 +67,8 @@ async def post_authorize(
         ui_locales: str = Form(None),
         id_token_hint: str = Form(None),
         login_hint: str = Form(None),
-        acr_values: str = Form(None)
+        acr_values: str = Form(None),
+        auth_class: AuthorisationService = Depends()
 ):
     request = RequestModel(
         client_id=client_id,
@@ -84,6 +87,9 @@ async def post_authorize(
         acr_values=acr_values
     )
 
-    firmed_redirect_uri = await AuthorisationService(request=request).get_redirect_url()
+    auth_class = auth_class
+    auth_class.set_request_model(request=request)
+    firmed_redirect_uri = await auth_class.get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
+
     return response

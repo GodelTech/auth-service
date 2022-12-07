@@ -13,7 +13,7 @@ class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
 
     TYPES_OF_GRANTS = [
-        ('string', 'String')
+        ('code', 'code')
     ]
 
     key = Column(String(512), unique=True, nullable=False)

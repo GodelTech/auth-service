@@ -2,15 +2,11 @@ import secrets
 from fastapi import Depends
 
 from src.presentation.models.authorization import RequestModel
-from src.data_access.postgresql.repositories.client import ClientRepository
-from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.repositories import ClientRepository, UserRepository, PersistentGrantRepository
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.events import logger
-from src.data_access.postgresql.errors.client import ClientNotFoundError
-from src.data_access.postgresql.errors.user import UserNotFoundError
+from src.data_access.postgresql.errors import ClientNotFoundError, UserNotFoundError, WrongPasswordError
 from src.business_logic.dependencies import get_repository
-
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 
 async def get_authorise(
@@ -53,13 +49,13 @@ async def get_authorise(
 class AuthorisationService:
     def __init__(
         self, 
-        request: RequestModel,
+        # request: RequestModel,
         client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
         persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository)),
-        password_service: PasswordHash = PasswordHash
+        password_service: PasswordHash = Depends()
     ) -> None:
-        self.request = request
+        self.request = None
         self.client_repo = client_repo
         self.user_repo = user_repo
         self.persistent_grant_repo = persistent_grant_repo
@@ -84,6 +80,8 @@ class AuthorisationService:
             logger.exception(exception)
         except UserNotFoundError as exception:
             logger.exception(exception)
+        except WrongPasswordError as exception:
+            logger.exception(exception)
         except KeyError as exception:
             message = f"KeyError: key {exception} does not exist is not in the scope"
             logger.exception(message)
@@ -91,7 +89,7 @@ class AuthorisationService:
             message = f"IndexError: {exception} - Impossible to parse the scope"
             logger.exception(message)
 
-    async def _validate_client(self, client_id: int) -> bool:
+    async def _validate_client(self, client_id: str) -> bool:
         """
         Checks if the client is in the database.
         """
@@ -101,7 +99,7 @@ class AuthorisationService:
     async def _parse_scope_data(self, scope: str) -> dict:
         """
         """
-        return {item.split('=')[0]: item.split('=')[1] for item in self.scope.split('&')[1:]}
+        return {item.split('=')[0]: item.split('=')[1] for item in scope.split('&')[1:]}
 
     async def _update_redirect_url_with_params(self, secret_code: str) -> str:
         redirect_uri = f"{self.request.redirect_uri}?code={secret_code}"
@@ -109,3 +107,7 @@ class AuthorisationService:
             redirect_uri += f"&state={self.request.state}"
 
         return redirect_uri
+
+    def set_request_model(self, request: RequestModel) -> None:
+        self.request = request
+        return

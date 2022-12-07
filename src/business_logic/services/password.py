@@ -1,5 +1,7 @@
 import bcrypt
 
+from src.data_access.postgresql.errors import WrongPasswordError
+
 
 class PasswordHash:
 
@@ -15,5 +17,7 @@ class PasswordHash:
     def validate_password(cls, str_password: str, hash_password: str) -> bool:
         str_password_bytes = str_password.encode('utf-8')
         hash_password_bytes = bytes(hash_password.encode())
-
-        return bcrypt.checkpw(str_password_bytes, hash_password_bytes)
+        is_valid = bcrypt.checkpw(str_password_bytes, hash_password_bytes)
+        if not is_valid:
+            raise WrongPasswordError("You are trying to pass the wrong password to the scope")
+        return is_valid

@@ -7,7 +7,7 @@ from src.data_access.postgresql.errors.user import UserNotFoundError
 
 class UserRepository(BaseRepository):
 
-    async def get_hash_password(self, user_name: str) -> str | bool:
+    async def get_hash_password(self, user_name: str) -> str:
 
         user = await self.session.execute(select(User).where(
             User.username == user_name
