@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.config import get_app_settings, LogConfig
 from src.config.events import create_start_app_handler, create_stop_app_handler
+from src.presentation.api import router
 
 
 
@@ -37,3 +38,4 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
+app.include_router(router)

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    container_name: postgres
+    container_name: postgres2
     image: postgres
     environment:
       POSTGRES_PASSWORD: postgres
@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
 
   redis:
-    container_name: redis
+    container_name: redis2
     image: redis
     ports:
       - 6379:6379
