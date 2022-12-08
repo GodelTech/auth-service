@@ -67,12 +67,16 @@ class AuthorisationService:
                 password = scope_data['password']
                 user_name = scope_data['username']
                 
-                user_hash_password = await self.user_repo.get_hash_password(user_name)
+                user_hash_password, user_id = await self.user_repo.get_hash_password(user_name)
                 validated = self.password_service.validate_password(password, user_hash_password)
                 
                 if user_hash_password and validated:
                     secret_code = secrets.token_urlsafe(32)
-                    await self.persistent_grant_repo.create_new_grant(self.request.client_id, secret_code)
+                    await self.persistent_grant_repo.create_new_grant(
+                        client_id=self.request.client_id,
+                        secret_code=secret_code,
+                        user_id=user_id
+                    )
                     
                     return await self._update_redirect_url_with_params(secret_code=secret_code)
         except ClientNotFoundError as exception:

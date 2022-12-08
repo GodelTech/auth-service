@@ -7,7 +7,7 @@ from src.data_access.postgresql.errors.user import UserNotFoundError
 
 class UserRepository(BaseRepository):
 
-    async def get_hash_password(self, user_name: str) -> str:
+    async def get_hash_password(self, user_name: str) -> tuple:
 
         user = await self.session.execute(select(User).where(
             User.username == user_name
@@ -18,7 +18,7 @@ class UserRepository(BaseRepository):
             raise UserNotFoundError("User you are looking for does not exist")
 
         user = user[0]
-        return user.password_hash
+        return user.password_hash, user.id
 
     def __repr__(self) -> str:
         return "User repository"
