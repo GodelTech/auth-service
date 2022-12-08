@@ -9,12 +9,12 @@ from src.data_access.postgresql.tables.client import Client
 
 class ClientRepository(BaseRepository):
 
-    async def get_client_by_client_id(self, client_id: str):
+    async def get_client_by_client_id(self, client_id: str) -> bool:
         client = await self.session.execute(select(Client).where(Client.client_id == client_id))
         client = client.first()
         if client is None:
             raise ClientNotFoundError("Client you are looking for does not exist")
-        return client[0]
+        return bool(client[0])
 
     def __repr__(self):
         return "Client Repository"
