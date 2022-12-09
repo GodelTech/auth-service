@@ -9,7 +9,7 @@ userinfo_router = APIRouter(
 )
 
 
-@userinfo_router.get('/', response_model=ResponseUserInfoModel,)
+@userinfo_router.get('/', response_model=ResponseUserInfoModel, tags=['UserInfo'])
 async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class
@@ -19,7 +19,7 @@ async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class
         raise HTTPException(status_code=403, detail="Incorrect Token")
 
 
-@userinfo_router.get('/jwt', response_model=str,)
+@userinfo_router.get('/jwt', response_model=str, tags=['UserInfo'])
 async def get_userinfo_jwt(request: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class
@@ -29,7 +29,7 @@ async def get_userinfo_jwt(request: RequestUserInfoModel = Depends(), userinfo_c
     except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
 
-@userinfo_router.get('/get_default_token', response_model=str,)
+@userinfo_router.get('/get_default_token', response_model=str, tags=['UserInfo'])
 async def get_default_token():
     try:
         uis = UserInfoServies()
