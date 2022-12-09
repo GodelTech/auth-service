@@ -8,7 +8,6 @@ from src.config.events import create_start_app_handler, create_stop_app_handler
 from src.presentation.api import router
 
 
-
 def get_application() -> FastAPI:
     # configure logging
     dictConfig(LogConfig().to_dict)
@@ -33,9 +32,8 @@ def get_application() -> FastAPI:
         "shutdown",
         create_stop_app_handler(application),
     )
-
+    application.include_router(router)
     return application
 
 
 app = get_application()
-app.include_router(router)
