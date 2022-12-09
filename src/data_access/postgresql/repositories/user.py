@@ -27,7 +27,6 @@ class UserRepository(BaseRepository):
 
         for claim in claims_of_user:
             result[dict(claim)["UserClaim"].claim_type.code] = dict(claim)["UserClaim"].claim_value
-            break   # delete before production
 
         return result
 

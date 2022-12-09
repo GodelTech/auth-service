@@ -33,7 +33,6 @@ class ResponseUserInfoModel(BaseModel):
     phone_number_verified: Optional[bool]
     address: Optional[dict]
     updated_at: Optional[int]
-    string: Optional[str] # delete before production
 
     class Config:
         orm_mode = True

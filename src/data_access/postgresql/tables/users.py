@@ -68,7 +68,7 @@ class UserClaim(BaseModel):
         ("picture", "Picture"),
         ("website", "Website"),
         ("email", "Email"),
-        ("email verified", "Email verified"),
+        ("email_verified", "Email verified"),
         ("gender", "Gender"),
         ("birthdate", "Birthdate"),
         ("zoneinfo", "Zoneinfo"),
@@ -77,7 +77,6 @@ class UserClaim(BaseModel):
         ("phone_number_verified", "Phone number verified"),
         ("address", "Address"),
         ("updated_at", "Updated at"),
-        ('string', 'String')
     ]
     __tablename__ = "user_claims"
 
