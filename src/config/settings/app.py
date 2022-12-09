@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Tuple
 
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, SecretStr
 
 from src.config.settings.base import BaseAppSettings
 
@@ -17,6 +17,8 @@ class AppSettings(BaseAppSettings):
 
     database_url: PostgresDsn
     max_connection_count: int = 10
+
+    secret_key: SecretStr
 
     allowed_hosts: List[str] = ["*"]
 
