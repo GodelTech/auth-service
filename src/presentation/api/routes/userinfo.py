@@ -11,11 +11,11 @@ userinfo_router = APIRouter(
 
 @userinfo_router.get('/', response_model=ResponseUserInfoModel,)
 async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
-    #try:
+    try:
         userinfo_class = userinfo_class
         userinfo_class.request = request
         return await userinfo_class.get_user_info()
-    #except:
+    except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
 
 
