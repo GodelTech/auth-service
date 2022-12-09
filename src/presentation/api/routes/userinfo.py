@@ -30,7 +30,7 @@ async def get_userinfo_jwt(request: RequestUserInfoModel = Depends(), userinfo_c
         raise HTTPException(status_code=500, detail="Incorrect Token")
 
 @userinfo_router.get('/get_default_token', response_model=str,)
-async def get_default_token(request: RequestUserInfoModel = Depends()):
+async def get_default_token():
     try:
         uis = UserInfoServies()
         return uis.jwt.encode_jwt()
