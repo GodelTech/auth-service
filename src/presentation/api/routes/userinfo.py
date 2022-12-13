@@ -1,8 +1,9 @@
-from fastapi import APIRouter, status, Depends, HTTPException
-from sqlalchemy_utils import ChoiceType
+from fastapi import APIRouter, Depends, HTTPException
 from src.business_logic.services.userinfo import UserInfoServies
 from src.presentation.api.models.userinfo import ResponseUserInfoModel, RequestUserInfoModel
+import logging
 
+logger = logging.getLogger('is_app')
 
 userinfo_router = APIRouter(
     prefix='/userinfo',
@@ -14,6 +15,7 @@ async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class
     try:
         userinfo_class = userinfo_class
         userinfo_class.request = request
+        logger.info('Collecting Claims from DataBase.')
         return await userinfo_class.get_user_info()
     except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
