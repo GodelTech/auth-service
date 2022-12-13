@@ -1,18 +1,20 @@
-import logging
+import os
 from logging.config import dictConfig
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src.config import get_app_settings, LogConfig
-from src.config.events import create_start_app_handler, create_stop_app_handler
+from src.config import LogConfig, get_app_settings
+from src.config.settings.development import DevAppSettings
 from src.presentation.api import router
+from src.di import Container
 
 
-def get_application() -> FastAPI:
+def get_application(test=False) -> FastAPI:
     # configure logging
     dictConfig(LogConfig().to_dict)
 
-    settings = get_app_settings()
+    container = Container()
+    settings = container.config()
 
     application = FastAPI(**settings.fastapi_kwargs)
 
@@ -24,14 +26,10 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    application.add_event_handler(
-        "startup",
-        create_start_app_handler(application, settings),
-    )
-    application.add_event_handler(
-        "shutdown",
-        create_stop_app_handler(application),
-    )
+    container.db()
+
+    application.container = container
+
     application.include_router(router)
     return application
 

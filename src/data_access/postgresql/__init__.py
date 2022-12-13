@@ -10,6 +10,7 @@ from .tables import (
     ClientRedirectUri,
     Base
 )
+from .database import Database
 
 
 __all__ = [

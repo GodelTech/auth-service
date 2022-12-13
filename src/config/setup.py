@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Dict, Type
 
@@ -18,5 +19,6 @@ environments: Dict[AppEnvTypes, Type[AppSettings]] = {
 @lru_cache
 def get_app_settings() -> AppSettings:
     app_env = BaseAppSettings().app_env
+
     config = environments[app_env]
     return config()

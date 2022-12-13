@@ -1,7 +1,5 @@
 import logging
 
-from pydantic import PostgresDsn
-
 from src.config.settings.app import AppSettings
 
 
@@ -10,7 +8,7 @@ class TestAppSettings(AppSettings):
 
     title: str = "Test IS POC application"
 
-    database_url: PostgresDsn
+    database_url: str
     max_connection_count: int = 5
     min_connection_count: int = 5
 
