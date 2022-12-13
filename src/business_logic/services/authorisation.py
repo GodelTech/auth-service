@@ -1,12 +1,15 @@
+import logging
 import secrets
 from fastapi import Depends
 
 from src.presentation.api.models import RequestModel
 from src.data_access.postgresql.repositories import ClientRepository, UserRepository, PersistentGrantRepository
 from src.business_logic.services.password import PasswordHash
-from src.data_access.postgresql.events import logger
 from src.data_access.postgresql.errors import ClientNotFoundError, UserNotFoundError, WrongPasswordError
 from src.business_logic.dependencies import get_repository
+
+
+logger = logging.getLogger('is_app')
 
 
 async def get_authorise(
