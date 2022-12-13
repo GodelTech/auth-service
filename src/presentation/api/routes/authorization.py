@@ -12,12 +12,12 @@ auth_router = APIRouter(
 
 @auth_router.get('/', status_code=302, tags=['Authorization'])
 async def get_authorize(
-        request: RequestModel = Depends(),
+        request_model: RequestModel = Depends(),
         auth_class: AuthorisationService = Depends(),
 ):
 
     auth_class = auth_class
-    auth_class.request = request
+    auth_class.request = request_model
     firmed_redirect_uri = await auth_class.get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
 

@@ -11,10 +11,10 @@ userinfo_router = APIRouter(
 
 
 @userinfo_router.get('/', response_model=ResponseUserInfoModel, tags=['UserInfo'])
-async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
+async def get_userinfo(request_model: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class
-        userinfo_class.request = request
+        userinfo_class.request = request_model
         logger.info('Collecting Claims from DataBase.')
         return await userinfo_class.get_user_info()
     except:
@@ -22,10 +22,10 @@ async def get_userinfo(request: RequestUserInfoModel = Depends(), userinfo_class
 
 
 @userinfo_router.get('/jwt', response_model=str, tags=['UserInfo'])
-async def get_userinfo_jwt(request: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
+async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class
-        userinfo_class.request = request
+        userinfo_class.request = request_model
         result = await userinfo_class.get_user_info_jwt()
         return result
     except:
