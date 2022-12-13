@@ -1,21 +1,16 @@
 import pytest_asyncio
 from fastapi import FastAPI
-from os import environ
 
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncIterator
 
 from src.main import get_application
-from src.data_access.postgresql import Base
-
-
-application = get_application(test=True)
 
 
 @pytest_asyncio.fixture
 async def app() -> FastAPI:
-    return application
+    return get_application()
 
 
 @pytest_asyncio.fixture

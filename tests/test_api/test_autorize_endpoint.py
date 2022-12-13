@@ -2,9 +2,6 @@ import pytest
 from httpx import AsyncClient
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert
-
-from src.data_access.postgresql.tables import Client
 
 
 scope = 'gcp-api%20IdentityServerApi&grant_type=' \
