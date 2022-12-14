@@ -30,9 +30,9 @@ async def post_authorize(
         auth_class: AuthorisationService = Depends()
 ):
 
-    request = RequestModel(**request_body.__dict__)
+    request_model = RequestModel(**request_body.__dict__)
     auth_class = auth_class
-    auth_class.request = request
+    auth_class.request = request_model
     firmed_redirect_uri = await auth_class.get_redirect_url()
     response = RedirectResponse(firmed_redirect_uri, status_code=302)
 

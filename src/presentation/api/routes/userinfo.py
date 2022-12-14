@@ -1,7 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from typing import Optional
 from src.business_logic.services.userinfo import UserInfoServies
 from src.presentation.api.models.userinfo import ResponseUserInfoModel, RequestUserInfoModel
-import logging
+from fastapi_cache.decorator import cache
+from fastapi_cache.coder import JsonCoder 
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from src.config.settings.cache_time import CacheTimeSettings
+from src.business_logic.cache.key_builders import builder_with_parametr
+import logging, time
+import json
 
 logger = logging.getLogger('is_app')
 
@@ -11,7 +19,8 @@ userinfo_router = APIRouter(
 
 
 @userinfo_router.get('/', response_model=ResponseUserInfoModel, tags=['UserInfo'])
-async def get_userinfo(request_model: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
+@cache(expire= CacheTimeSettings.USERINFO, coder= JsonCoder, key_builder=builder_with_parametr)
+async def get_userinfo(request: Request, request_model: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class
         userinfo_class.request = request_model
@@ -22,6 +31,7 @@ async def get_userinfo(request_model: RequestUserInfoModel = Depends(), userinfo
 
 
 @userinfo_router.get('/jwt', response_model=str, tags=['UserInfo'])
+@cache(expire= CacheTimeSettings.USERINFO_JWT, coder= JsonCoder, key_builder=builder_with_parametr)
 async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), userinfo_class: UserInfoServies = Depends()):
     try:
         userinfo_class = userinfo_class

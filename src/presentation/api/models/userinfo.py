@@ -10,7 +10,7 @@ class RequestUserInfoModel(BaseModel):
         orm_mode = True
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_id}"
+        return f"Model {self.__class__.__name__}"
 
 class ResponseUserInfoModel(BaseModel):
     sub: str
