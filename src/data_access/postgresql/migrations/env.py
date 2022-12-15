@@ -12,6 +12,9 @@ from src.data_access.postgresql.tables import identity_resource, persistent_gran
 # access to the values within the .ini file in use.
 config = context.config
 
+# get database path from
+config.set_section_option("alembic", "sqlalchemy.url", "postgresql://postgres:postgres@postgres:5432/is_db")
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
