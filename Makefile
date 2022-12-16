@@ -14,18 +14,12 @@ migrate:
 run:
 	uvicorn src.main:app --reload
 
-## Pytests
+## Pytest
 test:
 	pytest -ra
 
 ## Docker
 docker:
 	docker-compose -f ./docker-compose.dev.yml up
-
-build-docker:
-	docker build -t identity-server .
-
-run-docker:
-	docker run -it -p 8000:8000 identity-server
 
 
