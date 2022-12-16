@@ -2,8 +2,8 @@ from sqlalchemy import select
 
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.users import User, UserClaim
+from src.data_access.postgresql.errors.user import UserNotFoundError
 from src.data_access.postgresql.errors.user import UserNotFoundError, ClaimsNotFoundError
-
 
 class UserRepository(BaseRepository):
 
@@ -22,7 +22,7 @@ class UserRepository(BaseRepository):
 
     async def get_claims(self, id: int) -> dict:
 
-        claims_of_user = await self.session.execute(select(UserClaim).where(UserClaim.user_id == id))
+        claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
         for claim in claims_of_user:
@@ -33,5 +33,11 @@ class UserRepository(BaseRepository):
 
         return result
 
+    async def request_DB_for_claims(self, id):
+        return await self.session.execute(select(UserClaim).where(UserClaim.user_id == id))
+
+
     def __repr__(self) -> str:
         return "User repository"
+
+    
