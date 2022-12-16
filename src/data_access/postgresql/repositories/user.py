@@ -2,7 +2,7 @@ from sqlalchemy import select
 
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.users import User, UserClaim
-from src.data_access.postgresql.errors.user import UserNotFoundError
+from src.data_access.postgresql.errors.user import UserNotFoundError, ClaimsNotFoundError
 
 
 class UserRepository(BaseRepository):
@@ -27,6 +27,9 @@ class UserRepository(BaseRepository):
 
         for claim in claims_of_user:
             result[dict(claim)["UserClaim"].claim_type.code] = dict(claim)["UserClaim"].claim_value
+
+        if not result:
+            raise ClaimsNotFoundError("Claims for user you are looking for does not exist")
 
         return result
 

@@ -1,5 +1,3 @@
-import secrets
-
 from sqlalchemy import select
 
 from src.data_access.postgresql.errors.client import ClientNotFoundError
@@ -14,7 +12,7 @@ class ClientRepository(BaseRepository):
         client = client.first()
         if client is None:
             raise ClientNotFoundError("Client you are looking for does not exist")
-        return bool(client[0])
+        return bool(client)
 
     def __repr__(self):
         return "Client Repository"
