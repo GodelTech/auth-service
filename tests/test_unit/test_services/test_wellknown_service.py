@@ -1,81 +1,11 @@
 import pytest
 import mock
-from sqlalchemy import insert
-
-from src.main import app
-from src.business_logic.services.password import PasswordHash
-from src.business_logic.services.authorisation import AuthorisationService
-from src.data_access.postgresql.errors.password import WrongPasswordError
-from src.data_access.postgresql.errors.client import ClientNotFoundError
-from src.data_access.postgresql.repositories.client import ClientRepository, Client
-from src.business_logic.dependencies import get_repository
-from tests.api.test_routes.test_database import engine
-from src.business_logic.services.userinfo import UserInfoServies
-from src.data_access.postgresql.repositories.user import UserRepository
-from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.well_known import WellKnownServies
-
-from tests.api.fixtures import TEST_VALIDATE_PASSWORD, DEFAULT_CLIENT, authorization_request_model
 
 
 class RequestMock():
     authorization = 0
-
-
-@pytest.mark.asyncio
-class TestUserInfoServiece():
-
-    @classmethod
-    def setup_class(cls):
-        request = RequestMock()
-        request.authorization = 1
-        cls.uis = UserInfoServies()
-        cls.uis.request = request
-        cls.uis.user_repo = get_repository(UserRepository)
-        cls.uis.user_repo = cls.uis.user_repo()
-
-    async def test_get_user_info_and_get_user_info_jwt(self):
-
-        def new_decode_token(*args, **kwargs):
-            return {"sub": 1}
-
-        async def new_get_user_info_dict(*args, **kwargs):
-            return {'name': 'Danya',
-                    'given_name': 'Ibragim',
-                    'family_name': 'Krats',
-                    'middle_name': '-el-',
-                    'nickname': 'Nagibator2000',
-                    }
-
-        with mock.patch.object(UserRepository, "get_claims", new=new_get_user_info_dict):
-            with mock.patch.object(JWTService, "decode_token", new=new_decode_token):
-                expected_part_one = {"sub": str(new_decode_token()["sub"])}
-                expected_part_two = await new_get_user_info_dict()
-                expected = expected_part_one | expected_part_two
-                result = await self.uis.get_user_info()
-                result_jwt = await self.uis.get_user_info_jwt()
-
-                assert expected == result
-                assert self.uis.jwt.encode_jwt(expected) == result_jwt
-
-
-#@pytest.mark.asyncio
-class TestJWTServiece():
-
-    @classmethod
-    def setup_class(cls):
-        cls.jwt = JWTService()
-
-    def test_encode_and_decode(self):
-        token = self.jwt.encode_jwt(payload={"sub": 123, "name": "Danya"})
-        assert token.count('.') == 2
-
-        for tkn in (token, "Bearer " + token):
-            decoded_dict = self.jwt.decode_token(tkn)
-            assert type(decoded_dict) == dict
-            assert decoded_dict["sub"] == 123
-            assert decoded_dict["name"] == "Danya"
-
+    
 
 @pytest.mark.asyncio
 class TestWellKnownServies():
@@ -142,20 +72,3 @@ class TestWellKnownServies():
 
             for key in KEYS_REQUIRED:
                 assert key in result.keys() 
-
-    # async def test_validate_client(self):
-    #     await self.authorization_object.client_repo.session.execute(insert(Client).values(**DEFAULT_CLIENT))
-    #     client = await self.authorization_object._validate_client(client_id='test_client')
-    #     assert client is True
-    #
-    # async def test_validate_client_error(self):
-    #     with pytest.raises(ClientNotFoundError):
-    #         await self.authorization_object._validate_client(client_id='not_exists_client')
-    #
-    # async def test_get_redirect_url(self, authorization_request_model):
-    #     self.authorization_object.request = authorization_request_model
-    #     expected_url = 'https://www.google.com/'
-    #     redirect_url = await self.authorization_object.get_redirect_url()
-    #     redirect_url = redirect_url.split('?')[0]
-    #
-    #     assert expected_url == redirect_url

@@ -8,7 +8,6 @@ from src.data_access.postgresql.repositories.user import UserRepository
 from src.business_logic.services.userinfo import UserInfoServies
 from fastapi import status
 
-
 class ClaimTypeMock:
     def __init__(self, code) -> None:
         self.code = code
@@ -32,7 +31,7 @@ DB_ANSWER = (
     {"UserClaim": ClaimMock(
         claim_type="picture", claim_value="https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg")},
     {"UserClaim": ClaimMock(
-        claim_type="website", claim_value="https://www.youtube.com/watch?v=dQw4w9WgXcQ")},
+        claim_type="website", claim_value="https://www.instagram.com/daniilkrats/")},
     {"UserClaim": ClaimMock(
         claim_type="email", claim_value="danya.krats87@gmail.com")},
     {"UserClaim": ClaimMock(claim_type="email_verified", claim_value=True)},
@@ -59,7 +58,7 @@ ANSWER_USER_INFO = {'sub': '1',
                     'preferred_username': 'Graf',
                     'profile': 'werni_stenu',
                     'picture': 'https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg',
-                    'website': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                    'website': 'https://www.instagram.com/daniilkrats/',
                     'email': 'danya.krats87@gmail.com',
                     'email_verified': True,
                     'gender': 'Attack Helicopter',

@@ -3,8 +3,7 @@ import json
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import status
-#assert response.status_code == status.HTTP_202_ACCEPTED
-#assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
 
 @pytest.mark.asyncio
 async def test_successful_openid_config_request(connection: AsyncSession, client: AsyncClient):
