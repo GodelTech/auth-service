@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.business_logic.services.userinfo import UserInfoServies
+from fastapi import status
 
 
 class ClaimTypeMock:
@@ -85,7 +86,7 @@ async def test_successful_userinfo_request(connection: AsyncSession, client: Asy
         }
         response = await client.request('GET', '/userinfo/', params=params)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode('utf-8'))
         for key in ANSWER_USER_INFO:
             assert response_content[key] == ANSWER_USER_INFO[key]
@@ -106,7 +107,7 @@ async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncCl
         }
         response = await client.request('GET', '/userinfo/jwt', params=params)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode('utf-8'))
         sub = str(uis.jwt.decode_token(token)['sub'])
         assert response_content == uis.jwt.encode_jwt(
@@ -125,7 +126,7 @@ async def test_userinfo_and_userinfo_jwt__request_with_incorect_token(connection
         }
         response = await client.request('GET', url, params=params)
         response_content = json.loads(response.content.decode('utf-8'))
-        assert response.status_code == 403
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response_content == {"detail": "Incorrect Token"}
 
 
@@ -145,7 +146,7 @@ async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(connec
             }
             response = await client.request('GET', url, params=params)
 
-            assert response.status_code == 422
+            assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
             response_content = json.loads(response.content.decode('utf-8'))
             assert response_content == {"detail": "Claims for user you are looking for does not exist"}

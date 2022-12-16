@@ -2,10 +2,12 @@ import pytest
 import json
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from fastapi import status
+#assert response.status_code == status.HTTP_202_ACCEPTED
+#assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 @pytest.mark.asyncio
-async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
+async def test_successful_openid_config_request(connection: AsyncSession, client: AsyncClient):
 
     KEYS_REQUIRED = ('issuer', 'jwks_uri', 'authorization_endpoint', 'token_endpoint',
                      'id_token_signing_alg_values_supported', 'subject_types_supported', 'response_types_supported')
@@ -20,7 +22,7 @@ async def test_successful_userinfo_request(connection: AsyncSession, client: Asy
                      'acr_values_supported', 'grant_types_supported', 'response_modes_supported')
     
     response = await client.request('GET', '/.well-known/openid-configuration')
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
 
     response_content = json.loads(response.content.decode('utf-8'))
     for key in KEYS_REQUIRED:
