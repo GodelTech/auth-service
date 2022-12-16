@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
-async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient, mocker):
+async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
 
     KEYS_REQUIRED = ('issuer', 'jwks_uri', 'authorization_endpoint', 'token_endpoint',
                      'id_token_signing_alg_values_supported', 'subject_types_supported', 'response_types_supported')

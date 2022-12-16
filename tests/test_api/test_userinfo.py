@@ -73,7 +73,7 @@ ANSWER_USER_INFO = {'sub': '1',
 
 
 @pytest.mark.asyncio
-async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient, mocker):
+async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
 
     async def new_execute_dict(*args, **kwargs):
         return DB_ANSWER
