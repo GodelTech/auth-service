@@ -1,9 +1,5 @@
-# colors
-RED=$(if $(filter $(OS),Windows_NT),,$(shell    echo "\033[31m"))
+## colors
 GREEN=$(if $(filter $(OS),Windows_NT),,$(shell  echo "\033[32m"))
-YELLOW=$(if $(filter $(OS),Windows_NT),,$(shell echo "\033[33m"))
-BOLD=$(if $(filter $(OS),Windows_NT),,$(shell   echo "\033[1m"))
-GRAY=$(if $(filter $(OS),Windows_NT),,$(shell    echo "\033[37m"))
 RESET=$(if $(filter $(OS),Windows_NT),,$(shell    echo "\033[0m"))
 
 
