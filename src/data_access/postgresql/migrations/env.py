@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
+from src.di import Container
 from src.data_access.postgresql.tables import Base
 from src.data_access.postgresql.tables import identity_resource, persistent_grant, users, resources_related, client
 
@@ -12,8 +12,11 @@ from src.data_access.postgresql.tables import identity_resource, persistent_gran
 # access to the values within the .ini file in use.
 config = context.config
 
-# get database path from
-config.set_section_option("alembic", "sqlalchemy.url", "postgresql://postgres:postgres@postgres:5432/is_db")
+# get database path from Container and replace 'asyncpg' to 'psycopg2'
+# migrations are not running in async way, that's why we need to change db_uri
+DB_URI = Container.config().database_url.replace('asyncpg', 'psycopg2')
+config.set_section_option("alembic", "sqlalchemy.url", DB_URI)
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
