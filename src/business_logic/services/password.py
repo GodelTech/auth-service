@@ -1,12 +1,14 @@
 import bcrypt
 
-from src.data_access.postgresql.errors import WrongPasswordError
+from src.data_access.postgresql.errors import WrongPasswordError, WrongPasswordFormatError
 
 
 class PasswordHash:
 
     @classmethod
     def hash_password(cls, password: str) -> str:
+        if not isinstance(password, str):
+            raise WrongPasswordFormatError("The password should be a string")
         bts = password.encode('utf-8')
         salt = bcrypt.gensalt()
         hash_password = bcrypt.hashpw(bts, salt)

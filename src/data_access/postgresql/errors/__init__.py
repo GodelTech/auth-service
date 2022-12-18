@@ -1,3 +1,3 @@
 from .client import ClientNotFoundError
-from .user import UserNotFoundError
-from .password import WrongPasswordError
+from .user import UserNotFoundError, ClaimsNotFoundError
+from .password import WrongPasswordError, WrongPasswordFormatError

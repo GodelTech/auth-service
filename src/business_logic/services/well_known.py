@@ -9,6 +9,10 @@ class WellKnownServies():
     def get_list_of_types(self, list_of_types: list = [('Not ready yet', '')]) -> list:
         return [claim[0] for claim in list_of_types]
 
+    def get_all_urls(self, result):
+        return {route.name: result["issuer"]+route.path for route in self.request.app.routes} | {"false": "/ Not ready yet"}
+
+
     async def get_openid_configuration(self,) -> dict:
 
         # For key description: https://ldapwiki.com/wiki/Openid-configuration
@@ -16,8 +20,7 @@ class WellKnownServies():
         result = {"issuer": str(self.request.url).replace(
             '/.well-known/openid-configuration', '')}
 
-        urls_dict = {
-            route.name: result["issuer"]+route.path for route in self.request.app.routes} | {"false": "/ Not ready yet"}
+        urls_dict = self.get_all_urls(result)
 
         result['jwks_uri'] = urls_dict['false']
         result["authorization_endpoint"] = urls_dict['get_authorize']
@@ -51,7 +54,7 @@ class WellKnownServies():
         result["service_documentation"] = self.get_list_of_types()
         result["claim_types_supported"] = self.get_list_of_types()
         result["display_values_supported"] = self.get_list_of_types()
-        result["token_endpoint_auth_signing_alg_values_supported "] = self.get_list_of_types()
+        result["token_endpoint_auth_signing_alg_values_supported"] = self.get_list_of_types()
         result["token_endpoint_auth_methods_supported"] = self.get_list_of_types()
         result["request_object_encryption_enc_values_supported"] = self.get_list_of_types()
         result["request_object_encryption_alg_values_supported"] = self.get_list_of_types()
