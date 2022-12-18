@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.business_logic.services.userinfo import UserInfoServies
 from src.presentation.api.models.userinfo import ResponseUserInfoModel, RequestUserInfoModel
+from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 import logging
 
 logger = logging.getLogger('is_app')
@@ -17,6 +18,10 @@ async def get_userinfo(request_model: RequestUserInfoModel = Depends(), userinfo
         userinfo_class.request = request_model
         logger.info('Collecting Claims from DataBase.')
         return await userinfo_class.get_user_info()
+
+    except ClaimsNotFoundError:
+        raise HTTPException(status_code=422, detail="Claims for user you are looking for does not exist")
+        
     except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
 
@@ -28,6 +33,10 @@ async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), user
         userinfo_class.request = request_model
         result = await userinfo_class.get_user_info_jwt()
         return result
+
+    except ClaimsNotFoundError:
+        raise HTTPException(status_code=422, detail="Claims for user you are looking for does not exist")
+
     except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
 

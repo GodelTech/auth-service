@@ -2,6 +2,7 @@ import logging
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import NullPool
 
 from src.config.settings.app import AppSettings
 
@@ -34,7 +35,7 @@ class Database:
 
         connection_pool = create_async_engine(
             db_url,
-            pool_size=max_connection_count
+            poolclass=NullPool
         )
 
         logger.info('Connection pool created.')
