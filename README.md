@@ -6,8 +6,13 @@
 - *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
 
 ##### Running docker:
+First you need to switch to DockerAppSettings
+In src/config/setup.py make: app_env = DockerAppSettings().app_env
+And run the following command
+- *docker-compose -f ./docker-compose.dev.yml up*
 
-- *sudo docker compose -f ./docker-compose.dev.yml up*
+You may run another command in a second terminal to execute tests with the following command
+- *docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"
 
 ##### Starting poetry:
 
