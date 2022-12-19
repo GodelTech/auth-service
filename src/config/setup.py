@@ -7,12 +7,14 @@ from src.config.settings.base import AppEnvTypes, BaseAppSettings
 from src.config.settings.development import DevAppSettings
 from src.config.settings.production import ProdAppSettings
 from src.config.settings.test import TestAppSettings
+from src.config.settings.docker import DockerAppSettings
 
 
 environments: Dict[AppEnvTypes, Type[AppSettings]] = {
     AppEnvTypes.dev: DevAppSettings,
     AppEnvTypes.prod: ProdAppSettings,
     AppEnvTypes.test: TestAppSettings,
+    AppEnvTypes.docker:  DockerAppSettings,
 }
 
 
