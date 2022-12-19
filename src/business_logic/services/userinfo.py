@@ -23,4 +23,4 @@ class UserInfoServies():
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        return  self.jwt.encode_jwt(result)
+        return  self.jwt.encode_jwt(payload = result, include_expire = False)

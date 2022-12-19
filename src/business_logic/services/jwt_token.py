@@ -26,15 +26,26 @@ class JWTService():
         if sum((expire_days, expire_hours, expire_minutes, expire_seconds)) == 0:
             raise ValueError
 
-        date_expire = datetime.datetime.now().replace(microsecond=0)
+        date_expire = self.get_datetime_now()
         time_delt = datetime.timedelta(
-            days=expire_days, minutes=expire_minutes, seconds=expire_seconds)
+            days=expire_days,hours=expire_hours, minutes=expire_minutes, seconds=expire_seconds)
         self.expire = date_expire+time_delt
+    
+    def get_datetime_now(self):
+        return datetime.datetime.now().replace(microsecond=0)
 
-    def encode_jwt(self, payload: dict = {"sub": "1", "name": "Danya"}) -> str:
-        token = jwt.encode(payload | {"expire": str(
-            self.expire)}, self.secret, self.algorithm)
-        logger.info(f"Created token. Expires at{self.expire}")
+    def encode_jwt(self, payload: dict = {"sub": "1", "name": "Danya"}, include_expire = True) -> str:
+        
+        if include_expire:
+            payload = payload | {"expire": str(self.expire)}
+        
+        token = jwt.encode(payload, self.secret, self.algorithm)
+        
+        if include_expire:
+            logger.info(f"Created token. Expires at{self.expire}")
+        else:
+            logger.info(f"Created token. Will not expire")
+
         return token
 
     def decode_token(self, token: str,) -> dict:
