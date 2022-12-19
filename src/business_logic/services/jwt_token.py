@@ -8,7 +8,7 @@ SECRET = "123"
 
 
 class JWTService():
-    """ Service for: encoding dictionaries into  JWT; decoding JWT; setting and checking time boarders of token"""
+    """ Service for: encoding dictionaries into JWT; decoding JWT; setting and checking time boarders of token"""
     """
     to decode: 
         JWTService.decode_token(token = "your JWT")
@@ -21,11 +21,11 @@ class JWTService():
 
         OR
 
-        JWTService.set_expire_time( expire_days: int , expire_hours: int , expire_minutes: int , expire_seconds: int )
+        JWTService.set_expire_time(expire_days: int , expire_hours: int , expire_minutes: int , expire_seconds: int )
 
-        !!! Defoultly all paramets are 0. At least one parametr has to be > 0, and all parametrs have to be positive !!!
+        !!! Defoultly all parameters are 0. At least one parameter has to be > 0, and all parameters have to be positive !!!
 
-    to check if token spoiled:
+    to check if token is spoiled:
         JWTService.check_spoiled_token(token =your_token)
 
         Function returns "True" if token is expired
@@ -58,7 +58,7 @@ class JWTService():
     def get_datetime_now(self):
         return datetime.datetime.now().replace(microsecond=0)
 
-    def encode_jwt(self, payload: dict = {"sub": "1", "name": "Danya"}, include_expire: bool = True) -> str:
+    def encode_jwt(self, payload: dict = {}, include_expire: bool = True) -> str:
 
         if include_expire:
             payload = payload | {"expire": str(self.expire)}

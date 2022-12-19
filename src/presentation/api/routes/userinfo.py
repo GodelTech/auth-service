@@ -44,7 +44,7 @@ async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), user
 async def get_default_token():
     #try:
         uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_minutes = 10)
-        return uis.jwt.encode_jwt()
+        uis.jwt.set_expire_time(expire_hours= 1)
+        return uis.jwt.encode_jwt(payload = {"sub":"1"})
     #except:
         raise HTTPException(status_code=500)

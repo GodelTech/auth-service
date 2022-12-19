@@ -82,7 +82,7 @@ async def test_successful_userinfo_request(connection: AsyncSession, client: Asy
     uis.jwt.set_expire_time(expire_hours=1)
     with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_dict):
         params = {
-            'authorization': uis.jwt.encode_jwt(),
+            'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
         }
         response = await client.request('GET', '/userinfo/', params=params)
 
@@ -100,7 +100,7 @@ async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncCl
 
     uis = UserInfoServies()
     uis.jwt.set_expire_time(expire_hours=1)
-    token = uis.jwt.encode_jwt()
+    token = uis.jwt.encode_jwt(payload = {"sub":"1"})
 
     with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_dict):
         params = {
@@ -145,7 +145,7 @@ async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(connec
 
         with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
             params = {
-                'authorization': uis.jwt.encode_jwt(),
+                'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
             }
             response = await client.request('GET', url, params=params)
 
