@@ -79,9 +79,10 @@ async def test_successful_userinfo_request(connection: AsyncSession, client: Asy
         return DB_ANSWER
 
     uis = UserInfoServies()
+    uis.jwt.set_expire_time(expire_hours=1)
     with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_dict):
         params = {
-            'authorization': uis.jwt.encode_jwt(),
+            'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
         }
         response = await client.request('GET', '/userinfo/', params=params)
 
@@ -98,7 +99,8 @@ async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncCl
         return DB_ANSWER
 
     uis = UserInfoServies()
-    token = uis.jwt.encode_jwt()
+    uis.jwt.set_expire_time(expire_hours=1)
+    token = uis.jwt.encode_jwt(payload = {"sub":"1"})
 
     with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_dict):
         params = {
@@ -110,13 +112,14 @@ async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncCl
         response_content = json.loads(response.content.decode('utf-8'))
         sub = str(uis.jwt.decode_token(token)['sub'])
         assert response_content == uis.jwt.encode_jwt(
-            payload={'sub': sub} | ANSWER_USER_INFO)
+            payload={'sub': sub} | ANSWER_USER_INFO, include_expire= False)
 
 
 @pytest.mark.asyncio
-async def test_userinfo_and_userinfo_jwt__request_with_incorect_token(connection: AsyncSession, client: AsyncClient):
+async def test_userinfo_and_userinfo_jwt_request_with_incorect_token(connection: AsyncSession, client: AsyncClient):
 
     uis = UserInfoServies()
+    uis.jwt.set_expire_time(expire_hours=1)
 
     for url in ('/userinfo/', '/userinfo/jwt'):
         token = uis.jwt.encode_jwt(payload={"blablabla": "blablabla"})
@@ -136,12 +139,13 @@ async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(connec
         return ()
 
     uis = UserInfoServies()
+    uis.jwt.set_expire_time(expire_hours=1)
 
     for url in ('/userinfo/', '/userinfo/jwt'):
 
         with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
             params = {
-                'authorization': uis.jwt.encode_jwt(),
+                'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
             }
             response = await client.request('GET', url, params=params)
 
