@@ -8,7 +8,7 @@ SECRET = "123"
 
 
 class JWTService():
-    def __init__(self, algorithm: str = "HS256", algorithms: list = ["HS256"], expire_days: int = 0, expire_hours: int = 0, expire_minutes: int = 0, expire_seconds: int = 0) -> None:
+    def __init__(self, algorithm: str = "HS256", algorithms: list = ["HS256"]) -> None:
         self.secret = SECRET
         self.algorithm = algorithm
         self.algorithms = algorithms
@@ -16,7 +16,7 @@ class JWTService():
 
     def check_spoiled_token(self, token):
         token_date = datetime.datetime.strptime(self.decode_token(token)["expire"], '%Y-%m-%d %H:%M:%S')
-        return datetime.datetime.now() >= token_date
+        return datetime.datetime.now() > token_date
 
     def set_expire_time(self, expire_days: int = 0, expire_hours: int = 0, expire_minutes: int = 0, expire_seconds: int = 0) -> datetime.datetime:
 
@@ -34,7 +34,7 @@ class JWTService():
     def get_datetime_now(self):
         return datetime.datetime.now().replace(microsecond=0)
 
-    def encode_jwt(self, payload: dict = {"sub": "1", "name": "Danya"}, include_expire = True) -> str:
+    def encode_jwt(self, payload: dict = {"sub": "1", "name": "Danya"}, include_expire: bool = True) -> str:
         
         if include_expire:
             payload = payload | {"expire": str(self.expire)}
