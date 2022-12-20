@@ -15,15 +15,14 @@ run:
 
 ## Install all packages using poetry
 install:
-    poetry install
-    $(MAKE) install-hooks
-
+	poetry install
+	$(MAKE) install-hooks
 
 ## Install pre-commit hooks.
 install-hooks:
-    pre-commit install --hook-type pre-commit
-    pre-commit install --hook-type commit-msg
-    pre-commit install --install-hooks
+	pre-commit install --hook-type pre-commit
+	pre-commit install --hook-type commit-msg
+	pre-commit install --install-hooks
 
 
 ## Makes migration.
