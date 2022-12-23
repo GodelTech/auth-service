@@ -19,7 +19,7 @@ class TestUserRepository:
         expected_hash_password = '$2b$12$RAC7jWdNn8Fudxc4OhudkOPK0eeBBWjGd5Iyfzma5F8uv9xD.jx/6'
         self.user_repo = UserRepository(connection)
         await self.user_repo.session.execute(insert(User).values(**DEFAULT_USER))
-        # await self.user_repo.session.commit()
+
         user_hash_password, user_id = await self.user_repo.get_hash_password(user_name='DefaultTestClient')
 
         assert user_hash_password == expected_hash_password
