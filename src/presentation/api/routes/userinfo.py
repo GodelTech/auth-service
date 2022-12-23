@@ -4,12 +4,10 @@ from src.business_logic.services.userinfo import UserInfoServies
 from src.presentation.api.models.userinfo import ResponseUserInfoModel, RequestUserInfoModel
 from fastapi_cache.decorator import cache
 from fastapi_cache.coder import JsonCoder 
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
+from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.config.settings.cache_time import CacheTimeSettings
 from src.business_logic.cache.key_builders import builder_with_parametr
-import logging, time
-import json
+import logging
 
 logger = logging.getLogger('is_app')
 
