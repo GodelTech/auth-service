@@ -27,7 +27,7 @@ class TestPersistentGrantRepository:
         with pytest.raises(TypeError):
             await self.persistent_grant_repo.create_new_grant(
                 secret_code='not_secret_code',
-                user_id=777
+                user_id=77777
             )
 
 
