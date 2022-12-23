@@ -10,8 +10,12 @@ class UserInfoServies():
         self.user_repo = user_repo
 
     async def get_user_info(self,) -> dict:
+        token=self.request.authorization
         
-        sub = int(self.jwt.decode_token(token=self.request.authorization)['sub'])
+        if self.jwt.check_spoiled_token(token = token):
+            raise ValueError
+
+        sub = int(self.jwt.decode_token(token = token)['sub'])
         claims_dict = await self.user_repo.get_claims(id=sub)
         response = {"sub": str(sub)} | claims_dict
 
@@ -19,4 +23,4 @@ class UserInfoServies():
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        return  self.jwt.encode_jwt(result)
+        return  self.jwt.encode_jwt(payload = result, include_expire = False)

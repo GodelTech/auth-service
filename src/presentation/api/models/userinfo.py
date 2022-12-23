@@ -31,7 +31,7 @@ class ResponseUserInfoModel(BaseModel):
     locale: Optional[str]
     phone_number: Optional[str]
     phone_number_verified: Optional[bool]
-    address: Optional[dict]
+    address: Optional[str]
     updated_at: Optional[int]
 
     class Config:

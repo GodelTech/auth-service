@@ -1,21 +1,19 @@
 import pytest_asyncio
 from fastapi import FastAPI
-from os import environ
 
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncIterator
 
 from src.main import get_application
-from src.data_access.postgresql import Base
-
-
-application = get_application(test=True)
+from src.business_logic.services.authorisation import AuthorisationService
+from src.data_access.postgresql.repositories import ClientRepository, UserRepository, PersistentGrantRepository
+from src.business_logic.services.password import PasswordHash
 
 
 @pytest_asyncio.fixture
 async def app() -> FastAPI:
-    return application
+    return get_application()
 
 
 @pytest_asyncio.fixture
@@ -32,3 +30,16 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
+
+
+@pytest_asyncio.fixture
+async def authorisation_service(connection: AsyncIterator[AsyncSession]) -> AuthorisationService:
+    auth_service = AuthorisationService(
+        client_repo=ClientRepository(connection),
+        user_repo=UserRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        password_service=PasswordHash()
+    )
+
+    return auth_service
+
