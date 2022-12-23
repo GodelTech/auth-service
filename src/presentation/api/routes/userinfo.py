@@ -42,9 +42,17 @@ async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), user
 
 @userinfo_router.get('/get_default_token', response_model=str, tags=['UserInfo'])
 async def get_default_token():
-    #try:
+    try:
         uis = UserInfoServies()
         uis.jwt.set_expire_time(expire_hours= 1)
         return uis.jwt.encode_jwt(payload = {"sub":"1"})
-    #except:
+    except:
+        raise HTTPException(status_code=500)
+
+@userinfo_router.get('/decode_token', response_model=dict, tags=['UserInfo'])
+async def get_decode_token(token:str):
+    try:
+        uis = UserInfoServies()
+        return uis.jwt.decode_token(token)
+    except:
         raise HTTPException(status_code=500)
