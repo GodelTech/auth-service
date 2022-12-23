@@ -83,7 +83,7 @@ def authorization_request_model():
         client_id='test_client',
         response_type='code',
         scope='gcp-api%20IdentityServerApi&grant_type=password&client_id=test_client&client_secret'
-              '=65015c5e-c865-d3d4-3ba1-3abcb4e65500&password=test_test&username=TestClient',
+              '=65015c5e-c865-d3d4-3ba1-3abcb4e65500&password=test_password&username=TestClient',
         redirect_uri='https://www.google.com/',
         state='state',
         response_mode='mode',

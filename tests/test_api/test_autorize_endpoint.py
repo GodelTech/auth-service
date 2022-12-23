@@ -6,7 +6,7 @@ from httpx import AsyncClient
 scope = 'gcp-api%20IdentityServerApi&grant_type=' \
         'password&client_id=test_client&client_secret=' \
         '65015c5e-c865-d3d4-3ba1-3abcb4e65500&password=' \
-        'test_test&username=TestClient'
+        'test_password&username=TestClient'
 
 
 @pytest.mark.asyncio
