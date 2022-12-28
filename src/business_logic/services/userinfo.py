@@ -3,7 +3,8 @@ from src.data_access.postgresql.repositories.user import UserRepository
 from fastapi import Depends
 from src.business_logic.dependencies.database import get_repository
 
-class UserInfoServies():
+
+class UserInfoServies:
     def __init__(self, user_repo:UserRepository = Depends(get_repository(UserRepository))) -> None:
         self.jwt = JWTService()
         self.request = ...

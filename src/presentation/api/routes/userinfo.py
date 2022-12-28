@@ -47,6 +47,7 @@ async def get_userinfo_jwt(request_model: RequestUserInfoModel = Depends(), user
     except:
         raise HTTPException(status_code=403, detail="Incorrect Token")
 
+
 @userinfo_router.get('/get_default_token', response_model=str, tags=['UserInfo'])
 async def get_default_token():
     try:
@@ -55,6 +56,7 @@ async def get_default_token():
         return uis.jwt.encode_jwt(payload = {"sub":"1"})
     except:
         raise HTTPException(status_code=500)
+
 
 @userinfo_router.get('/decode_token', response_model=dict, tags=['UserInfo'])
 async def get_decode_token(token:str):

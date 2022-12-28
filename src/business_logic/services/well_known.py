@@ -2,16 +2,12 @@ from src.data_access.postgresql.tables.users import UserClaim
 from src.data_access.postgresql.tables.client import Client
 
 
-class WellKnownServies():
-    def __init__(self,) -> None:
-        pass
-
+class WellKnownServies:
     def get_list_of_types(self, list_of_types: list = [('Not ready yet', '')]) -> list:
         return [claim[0] for claim in list_of_types]
 
     def get_all_urls(self, result):
         return {route.name: result["issuer"]+route.path for route in self.request.app.routes} | {"false": "/ Not ready yet"}
-
 
     async def get_openid_configuration(self,) -> dict:
 
