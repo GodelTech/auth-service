@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import Column, Integer, JSON, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy_utils import ChoiceType
 
 from .base import BaseModel
@@ -18,8 +18,8 @@ class PersistentGrant(BaseModel):
 
     key = Column(String(512), unique=True, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id"))
-    data = Column(JSON, nullable=False)
-    expiration = Column(DateTime, nullable=False)
+    data = Column(String(2048), nullable=False)
+    expiration = Column(Integer, nullable=False)
     subject_id = Column(Integer, ForeignKey("users.id"))
     type = Column(ChoiceType(TYPES_OF_GRANTS), nullable=False)
 

@@ -18,6 +18,11 @@ migrate:
 	alembic upgrade heads
 
 
+## Populate database
+populate-db:
+	python -m factories.commands
+
+
 ## Run pytests
 test:
 	@echo '${GREEN}Running tests:${RESET}'

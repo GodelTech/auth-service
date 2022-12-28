@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from src.data_access.postgresql.repositories.base import BaseRepository
+
 from src.di import Container
 
 
@@ -16,3 +17,4 @@ def get_repository(
         return repo_type(session)
 
     return _get_repo
+
