@@ -35,20 +35,20 @@ services:
     networks:
       - identity-network
 
-  app:
-    build: .
-    ports:
-      - 8000:8000
-    networks:
-      - identity-network
-    environment:
-      - WAIT_HOSTS=postgres:5432
-    volumes:
-      - .:/identity-server-poc
-    depends_on:
-      - postgres
-      - pgadmin
-      - redis
+  # app:
+  #   build: .
+  #   ports:
+  #     - 8000:8000
+  #   networks:
+  #     - identity-network
+  #   environment:
+  #     - WAIT_HOSTS=postgres:5432
+  #   volumes:
+  #     - .:/identity-server-poc
+  #   depends_on:
+  #     - postgres
+  #     - pgadmin
+  #     - redis
 
 
 networks:

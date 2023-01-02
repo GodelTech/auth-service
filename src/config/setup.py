@@ -20,7 +20,7 @@ environments: Dict[AppEnvTypes, Type[AppSettings]] = {
 
 @lru_cache
 def get_app_settings() -> AppSettings:
-    app_env = BaseAppSettings().app_env
+    app_env = DockerAppSettings().app_env
 
     config = environments[app_env]
     return config()
