@@ -9,9 +9,9 @@ class TestPersistentGrantRepository:
 
     async def test_create_new_grant(self, connection):
         self.persistent_grant_repo = PersistentGrantRepository(connection)
-        await self.persistent_grant_repo.create_new_grant(
+        await self.persistent_grant_repo.create(
             client_id='double_test',
-            secret_code='secret_code',
+            data='secret_code',
             user_id=2
         )
 
@@ -25,9 +25,7 @@ class TestPersistentGrantRepository:
     async def test_create_new_grant_not_full_data(self, connection):
         self.persistent_grant_repo = PersistentGrantRepository(connection)
         with pytest.raises(TypeError):
-            await self.persistent_grant_repo.create_new_grant(
-                secret_code='not_secret_code',
-                user_id=777
+            await self.persistent_grant_repo.create(
+                data='not_secret_code',
+                user_id=77777
             )
-
-

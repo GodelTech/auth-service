@@ -34,9 +34,9 @@ class AuthorisationService:
                 
             if user_hash_password and validated:
                 secret_code = secrets.token_urlsafe(32)
-                await self.persistent_grant_repo.create_new_grant(
+                await self.persistent_grant_repo.create(
                     client_id=self.request_model.client_id,
-                    secret_code=secret_code,
+                    data=secret_code,
                     user_id=user_id
                 )
                     

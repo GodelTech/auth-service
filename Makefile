@@ -36,6 +36,11 @@ check:
 	pre-commit run --all-files
 
 
+## Populate database
+populate-db:
+	python -m factories.commands
+
+
 ## Run pytests
 test:
 	@echo '${GREEN}Running tests:${RESET}'

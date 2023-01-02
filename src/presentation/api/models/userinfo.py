@@ -3,6 +3,7 @@ from sqlalchemy import JSON, DateTime
 from sqlalchemy_utils import ChoiceType
 from pydantic import BaseModel
 
+
 class RequestUserInfoModel(BaseModel):
     authorization: str
 
@@ -10,7 +11,8 @@ class RequestUserInfoModel(BaseModel):
         orm_mode = True
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_id}"
+        return f"Model {self.__class__.__name__}"
+
 
 class ResponseUserInfoModel(BaseModel):
     sub: str
