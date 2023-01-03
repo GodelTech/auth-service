@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import String, Integer, Column, DateTime, Boolean, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
 
@@ -9,33 +9,31 @@ from .base import BaseModel
 
 class Client(BaseModel):
 
-    ACCESS_TOKEN_TYPES = [
-        ('jwt', 'Jwt'),
-        ('reference', 'Reference')
-    ]
-    PROTOCOL_TYPES = [
-        ('open_id_connect', 'OpenID Connect')
-    ]
+    ACCESS_TOKEN_TYPES = [("jwt", "Jwt"), ("reference", "Reference")]
+    PROTOCOL_TYPES = [("open_id_connect", "OpenID Connect")]
     REFRESH_TOKEN_EXPIRATION = [
-        ('absolute', 'Absolute'),
-        ('sliding', 'Sliding')
+        ("absolute", "Absolute"),
+        ("sliding", "Sliding"),
     ]
-    REFRESH_TOKEN_USAGE = [
-        ('one_time_only', 'OneTimeOnly'),
-        ('reuse', 'ReUse')
-    ]
+    REFRESH_TOKEN_USAGE = [("one_time_only", "OneTimeOnly"), ("reuse", "ReUse")]
 
     __tablename__ = "clients"
 
     client_id = Column(String(80), nullable=False, unique=True)
-    absolute_refresh_token_lifetime = Column(Integer, default=2592000, nullable=False)
+    absolute_refresh_token_lifetime = Column(
+        Integer, default=2592000, nullable=False
+    )
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
     access_token_type = Column(ChoiceType(ACCESS_TOKEN_TYPES))
-    allow_access_token_via_browser = Column(Boolean, default=False, nullable=False)
+    allow_access_token_via_browser = Column(
+        Boolean, default=False, nullable=False
+    )
     allow_offline_access = Column(Boolean, default=False, nullable=False)
     allow_plain_text_pkce = Column(Boolean, default=False, nullable=False)
     allow_remember_consent = Column(Boolean, default=True, nullable=False)
-    always_include_user_claims_id_token = Column(Boolean, default=False, nullable=False)
+    always_include_user_claims_id_token = Column(
+        Boolean, default=False, nullable=False
+    )
     always_send_client_claims = Column(Boolean, default=False, nullable=False)
     authorisation_code_lifetime = Column(Integer, default=300, nullable=False)
     client_name = Column(String(50), nullable=False)
@@ -54,8 +52,12 @@ class Client(BaseModel):
     require_client_secret = Column(Boolean, default=True, nullable=False)
     require_consent = Column(Boolean, default=True, nullable=False)
     require_pkce = Column(Boolean, default=False, nullable=False)
-    sliding_refresh_token_lifetime = Column(Integer, default=1296000, nullable=False)
-    update_access_token_claims_on_refresh = Column(Boolean, default=False, nullable=False)
+    sliding_refresh_token_lifetime = Column(
+        Integer, default=1296000, nullable=False
+    )
+    update_access_token_claims_on_refresh = Column(
+        Boolean, default=False, nullable=False
+    )
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.client_name}"

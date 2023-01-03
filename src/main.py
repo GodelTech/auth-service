@@ -1,17 +1,18 @@
+import logging
 from logging.config import dictConfig
+
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
-from src.config import LogConfig, get_app_settings
-from src.config.settings.development import DevAppSettings
-from src.presentation.api import router
-from src.di import Container
-from redis import asyncio as aioredis
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-import logging
+from redis import asyncio as aioredis
+from starlette.middleware.cors import CORSMiddleware
 
+from src.config import LogConfig, get_app_settings
+from src.config.settings.development import DevAppSettings
+from src.di import Container
+from src.presentation.api import router
 
-logger = logging.getLogger('is_app')
+logger = logging.getLogger("is_app")
 
 
 def get_application(test=False) -> FastAPI:
@@ -46,8 +47,9 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 # Redis activation
 @app.on_event("startup")
 async def startup():
-    logger.info('Creating Redis connection with DataBase.')
+    logger.info("Creating Redis connection with DataBase.")
     redis = aioredis.from_url(
-        LOCAL_REDIS_URL, encoding="utf8", decode_responses=True)
+        LOCAL_REDIS_URL, encoding="utf8", decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    logger.info('Created Redis connection with DataBase.')
+    logger.info("Created Redis connection with DataBase.")

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from fastapi import Form
 from typing import List, Optional
 
+from fastapi import Form
 from pydantic import BaseModel
 
 
@@ -52,4 +52,3 @@ class DataRequestModel:
     id_token_hint: str = Form(None)
     login_hint: str = Form(None)
     acr_values: str = Form(None)
-

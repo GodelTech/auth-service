@@ -10,13 +10,13 @@ class IdentityResourceFactory(SQLAlchemyModelFactory):
         model = resource.IdentityResource
         sqlalchemy_session = sess.session
 
-    description = factory.Faker('text', max_nb_chars=456)
-    display_name = factory.Faker('word')
-    emphasize = factory.Faker('pybool')
-    enabled = factory.Faker('pybool')
-    name = factory.Faker('word')
-    required = factory.Faker('pybool')
-    show_in_discovery_document = factory.Faker('pybool')
+    description = factory.Faker("text", max_nb_chars=456)
+    display_name = factory.Faker("word")
+    emphasize = factory.Faker("pybool")
+    enabled = factory.Faker("pybool")
+    name = factory.Faker("word")
+    required = factory.Faker("pybool")
+    show_in_discovery_document = factory.Faker("pybool")
 
 
 class IdentityClaimFactory(SQLAlchemyModelFactory):
@@ -25,5 +25,4 @@ class IdentityClaimFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
 
     identity_resource_id = factory.SubFactory(IdentityResourceFactory)
-    type = factory.Faker('word')
-
+    type = factory.Faker("word")

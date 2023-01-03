@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
+from typing import AsyncIterator
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import AsyncIterator
+from sqlalchemy.orm import Session
 
 
 class BaseRepository:
