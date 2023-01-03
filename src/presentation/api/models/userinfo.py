@@ -1,7 +1,8 @@
 from typing import Optional
+
+from pydantic import BaseModel
 from sqlalchemy import JSON, DateTime
 from sqlalchemy_utils import ChoiceType
-from pydantic import BaseModel
 
 
 class RequestUserInfoModel(BaseModel):

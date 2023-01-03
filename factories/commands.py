@@ -1,15 +1,13 @@
 import factory
 
+import factories.data.data_for_factories as data
 import factories.factory_models.client_factory as cl_factory
 import factories.factory_models.user_factory as user_factory
-
-import factories.data.data_for_factories as data
 
 factory.random.reseed_random(0)
 
 
 class DataBasePopulation:
-
     @classmethod
     def populate_database(cls):
         cls.populate_client_table()
@@ -33,11 +31,12 @@ class DataBasePopulation:
     @classmethod
     def populate_claims_table(cls):
         for key, val in data.DEFAULT_USER_CLAIMS.items():
-            claim = user_factory.UserClaimFactory(user_id=1, claim_type=key, claim_value=val)
+            claim = user_factory.UserClaimFactory(
+                user_id=1, claim_type=key, claim_value=val
+            )
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DataBasePopulation.populate_database()
-

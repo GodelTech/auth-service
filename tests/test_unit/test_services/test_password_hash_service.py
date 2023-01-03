@@ -3,15 +3,14 @@ import pytest
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.errors import (
     WrongPasswordError,
-    WrongPasswordFormatError
+    WrongPasswordFormatError,
 )
 from tests.test_unit.fixtures import TEST_VALIDATE_PASSWORD
 
 
 class TestPasswordHash:
-
     def test_hash_password(self):
-        password = PasswordHash.hash_password('some_password')
+        password = PasswordHash.hash_password("some_password")
         assert type(password) == str
 
     def test_hash_password_wrong_format(self):

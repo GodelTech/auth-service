@@ -4,7 +4,11 @@ from factory.fuzzy import FuzzyChoice
 
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.resources_related as resource
-from factories.data.data_for_factories import API_SECRET_TYPE, API_CLAIM_TYPE, API_SCOPE_CLAIM_TYPE
+from factories.data.data_for_factories import (
+    API_CLAIM_TYPE,
+    API_SCOPE_CLAIM_TYPE,
+    API_SECRET_TYPE,
+)
 
 
 class ApiResourceFactory(SQLAlchemyModelFactory):
@@ -12,10 +16,10 @@ class ApiResourceFactory(SQLAlchemyModelFactory):
         model = resource.ApiResource
         sqlalchemy_session = sess.session
 
-    description = factory.Faker('sentence')
-    display_name = factory.Faker('word')
-    enabled = factory.Faker('pybool')
-    name = factory.Faker('word')
+    description = factory.Faker("sentence")
+    display_name = factory.Faker("word")
+    enabled = factory.Faker("pybool")
+    name = factory.Faker("word")
 
 
 class ApiSecretFactory(SQLAlchemyModelFactory):
@@ -24,10 +28,10 @@ class ApiSecretFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
 
     api_resources_id = factory.SubFactory(ApiResourceFactory)
-    description = factory.Faker('sentence')
-    expiration = factory.Faker('date_time')
+    description = factory.Faker("sentence")
+    expiration = factory.Faker("date_time")
     type = FuzzyChoice(API_SECRET_TYPE)
-    value = factory.Faker('word')
+    value = factory.Faker("word")
 
 
 class ApiClaimFactory(SQLAlchemyModelFactory):
@@ -45,12 +49,12 @@ class ApiScopeFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
 
     api_resources_id = factory.SubFactory(ApiResourceFactory)
-    description = factory.Faker('sentence')
-    name = factory.Faker('word')
-    display_name = factory.Faker('word')
-    emphasize = factory.Faker('pybool')
-    required = factory.Faker('pybool')
-    show_in_discovery_document = factory.Faker('pybool')
+    description = factory.Faker("sentence")
+    name = factory.Faker("word")
+    display_name = factory.Faker("word")
+    emphasize = factory.Faker("pybool")
+    required = factory.Faker("pybool")
+    show_in_discovery_document = factory.Faker("pybool")
 
 
 class ApiScopeClaimFactory(SQLAlchemyModelFactory):

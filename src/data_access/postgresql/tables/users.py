@@ -1,10 +1,19 @@
 import datetime
 
-from sqlalchemy import Table, Date, String, Integer, Column, DateTime, Boolean, ForeignKey
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
 
-from .base import BaseModel, Base
+from .base import Base, BaseModel
 
 user_roles = Table(
     "project_team",
@@ -17,10 +26,19 @@ user_roles = Table(
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer,
-                              ForeignKey('users.id'))
-    login_provider = Column(String, primary_key=True, nullable=False, unique=True, )
-    provider_key = Column(String, primary_key=True, nullable=False, unique=True, )
+    user_id = Column("User", Integer, ForeignKey("users.id"))
+    login_provider = Column(
+        String,
+        primary_key=True,
+        nullable=False,
+        unique=True,
+    )
+    provider_key = Column(
+        String,
+        primary_key=True,
+        nullable=False,
+        unique=True,
+    )
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.client_name}"
@@ -40,7 +58,9 @@ class User(BaseModel):
     lockout_enabled = Column(Boolean, default=True, nullable=True)
     access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
-    roles = relationship("Role", secondary="project_team", back_populates='users')
+    roles = relationship(
+        "Role", secondary="project_team", back_populates="users"
+    )
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
@@ -50,7 +70,9 @@ class Role(BaseModel):
     __tablename__ = "roles"
 
     name = Column(String, nullable=False, unique=True)
-    users = relationship("User", secondary="project_team", back_populates='roles')
+    users = relationship(
+        "User", secondary="project_team", back_populates="roles"
+    )
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
@@ -80,8 +102,7 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer,
-                              ForeignKey('users.id'))
+    user_id = Column("User", Integer, ForeignKey("users.id"))
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 

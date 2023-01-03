@@ -1,12 +1,14 @@
-import pytest
-import mock
 import json
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert
-from src.data_access.postgresql.repositories.user import UserRepository
-from src.business_logic.services.userinfo import UserInfoServies
+
+import mock
+import pytest
 from fastapi import status
+from httpx import AsyncClient
+from sqlalchemy import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.business_logic.services.userinfo import UserInfoServies
+from src.data_access.postgresql.repositories.user import UserRepository
 
 # class ClaimTypeMock:
 #     def __init__(self, code) -> None:

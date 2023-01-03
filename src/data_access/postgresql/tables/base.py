@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 
@@ -12,4 +12,6 @@ class BaseModel(Base):
 
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=datetime.datetime.now)
+    updated_at = Column(
+        DateTime, server_default=func.now(), onupdate=datetime.datetime.now
+    )

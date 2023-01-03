@@ -1,2 +1,2 @@
-from .authorization import RequestModel, DataRequestModel
+from .authorization import DataRequestModel, RequestModel
 from .tokens import BodyRequestTokenModel, ResponseTokenModel
