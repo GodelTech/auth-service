@@ -1,5 +1,6 @@
-from src.business_logic.services.password import PasswordHash
 from src.main import app
+from src.business_logic.services.password import PasswordHash
+
 
 CLIENT_IDS = [
     "test_client",

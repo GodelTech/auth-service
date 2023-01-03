@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.main import get_application
+
 from src.business_logic.services.authorisation import AuthorisationService
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import (
@@ -12,7 +14,6 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
-from src.main import get_application
 
 
 @pytest_asyncio.fixture
