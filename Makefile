@@ -48,8 +48,11 @@ test:
 
 
 ## Docker
-docker:
+docker-dev:
 	docker-compose -f ./docker-compose.dev.yml up
+
+docker:
+	docker-compose -f ./docker-compose.yml up
 
 docker-test:
 	docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"
