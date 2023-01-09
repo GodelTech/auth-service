@@ -186,3 +186,12 @@ class TokenService:
                             )
 
                             return {"access_token": access_token}
+    
+    async def revoke_token(self, token):
+            decoded_token = self.jwt_service.decode_token(token)
+            if await self.persistent_grant_repo.exists(grant_type=decoded_token["grant_type"], data=decoded_token["data"]):
+                self.persistent_grant_repo.delete(
+                    grant_type=decoded_token["grant_type"], data=decoded_token["data"], client_id=decoded_token["client_id"])
+
+            else:
+                raise ValueError
