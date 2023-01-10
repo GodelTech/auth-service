@@ -11,13 +11,13 @@ class UserInfoServies:
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
     ) -> None:
         self.jwt = JWTService()
-        self.request = ...
+        self.authorization = ...
         self.user_repo = user_repo
 
     async def get_user_info(
         self,
     ) -> dict:
-        token = self.request.authorization
+        token = self.authorization
 
         if self.jwt.check_spoiled_token(token=token):
             raise ValueError
