@@ -1,7 +1,5 @@
 import json
 import mock
-#mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
-
 import pytest
 from fastapi import status
 from httpx import AsyncClient
@@ -10,47 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.userinfo import UserInfoServies
 from src.data_access.postgresql.repositories.user import UserRepository
-
-class ClaimTypeMock:
-    def __init__(self, code) -> None:
-        self.code = code
-
-class ClaimMock:
-    def __init__(self, claim_value, claim_type) -> None:
-        self.claim_value = claim_value
-        self.claim_type = ClaimTypeMock(code=claim_type)
-
-
-DB_ANSWER = (
-    {"UserClaim": ClaimMock(claim_type="name", claim_value="Daniil")},
-    {"UserClaim": ClaimMock(claim_type="given_name", claim_value="Ibragim")},
-    {"UserClaim": ClaimMock(claim_type="family_name", claim_value="Krats")},
-    {"UserClaim": ClaimMock(claim_type="middle_name", claim_value="-el-")},
-    {"UserClaim": ClaimMock(claim_type="nickname",
-                            claim_value="Nagibator2000")},
-    {"UserClaim": ClaimMock(
-        claim_type="preferred_username", claim_value="Graf")},
-    {"UserClaim": ClaimMock(claim_type="profile", claim_value="werni_stenu")},
-    {"UserClaim": ClaimMock(
-        claim_type="picture", claim_value="https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg")},
-    {"UserClaim": ClaimMock(
-        claim_type="website", claim_value="https://www.instagram.com/daniilkrats/")},
-    {"UserClaim": ClaimMock(
-        claim_type="email", claim_value="danya.krats87@gmail.com")},
-    {"UserClaim": ClaimMock(claim_type="email_verified", claim_value=True)},
-    {"UserClaim": ClaimMock(claim_type="gender",
-                            claim_value="Attack Helicopter")},
-    {"UserClaim": ClaimMock(claim_type="birthdate", claim_value="02/01/2000")},
-    {"UserClaim": ClaimMock(claim_type="zoneinfo", claim_value="GMT+1")},
-    {"UserClaim": ClaimMock(claim_type="locale", claim_value="Warsaw")},
-    {"UserClaim": ClaimMock(claim_type="phone_number",
-                            claim_value="+48510143314")},
-    {"UserClaim": ClaimMock(
-        claim_type="phone_number_verified", claim_value=False)},
-    {"UserClaim": ClaimMock(
-        claim_type="address", claim_value="5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania")},
-    {"UserClaim": ClaimMock(claim_type="updated_at", claim_value=1234567890)}
-)
 
 ANSWER_USER_INFO = {'sub': '1',
                     'name': 'Daniil',
