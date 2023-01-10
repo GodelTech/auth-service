@@ -1,18 +1,19 @@
 import logging
-from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
-
 from src.business_logic.cache.key_builders import builder_with_parametr
-from src.business_logic.services.userinfo import UserInfoServies
+from fastapi_cache.coder import JsonCoder
 from src.config.settings.cache_time import CacheTimeSettings
+
+from src.business_logic.services.userinfo import UserInfoServies
+
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
-from src.presentation.api.models.userinfo import (
-    RequestUserInfoModel,
-    ResponseUserInfoModel,
-)
+from src.presentation.api.models.userinfo import ResponseUserInfoModel
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
 
 logger = logging.getLogger("is_app")
 
@@ -31,12 +32,20 @@ userinfo_router = APIRouter(
 )
 async def get_userinfo(
     request: Request,
-    request_model: RequestUserInfoModel = Depends(),
+    auth_swagger: str | None = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServies = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
-        userinfo_class.request = request_model
+        token = request.headers.get('authorization')
+
+        if token != None:
+            userinfo_class.authorization = token
+        elif auth_swagger != None:
+            userinfo_class.authorization = auth_swagger
+        else:
+            raise Exception
+
         logger.info("Collecting Claims from DataBase.")
         return await userinfo_class.get_user_info()
 
@@ -57,12 +66,21 @@ async def get_userinfo(
     key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
-    request_model: RequestUserInfoModel = Depends(),
+    request: Request,
+    auth_swagger: str | None = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServies = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
-        userinfo_class.request = request_model
+        token = request.headers.get('authorization')
+
+        if token != None:
+            userinfo_class.authorization = token
+        elif auth_swagger != None:
+            userinfo_class.authorization = auth_swagger
+        else:
+            raise Exception
+            
         result = await userinfo_class.get_user_info_jwt()
         return result
 

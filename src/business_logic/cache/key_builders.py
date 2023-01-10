@@ -1,22 +1,26 @@
 from typing import Optional
-
+import hashlib
 from fastapi import Request, Response
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
 
-from src.config.settings.cache_time import CacheTimeSettings
-
+import logging
 
 def builder_with_parametr(
     func,
     namespace: Optional[str] = "",
-    request: Request = None,
-    response: Response = None,
-    *args,
-    **kwargs,
+    request: Optional[Request] = None,
+    response: Optional[Response] = None,
+    args: Optional[tuple] = None,
+    kwargs: Optional[dict] = None,
 ):
+    logger = logging.getLogger("is_app")
     prefix = f"client-{request.client.host}"
+    dict_to_encode = {k: kwargs[k] for k in kwargs.keys() if type(kwargs[k]) in (str, int, float, bool, dict, str, list)}
+
     cache_key = (
-        f"{prefix}:{func.__module__}:{func.__name__}:{request.query_params}"
+        prefix
+        + hashlib.md5(  # nosec:B303
+            f"{prefix}:{func.__module__}:{func.__name__}:{args}:{dict_to_encode}".encode()
+        ).hexdigest()
     )
+    logger.info(f"Redis key: {cache_key}")
     return cache_key

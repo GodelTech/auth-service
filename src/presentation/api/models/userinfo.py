@@ -1,19 +1,6 @@
 from typing import Optional
-
+from fastapi import Header
 from pydantic import BaseModel
-from sqlalchemy import JSON, DateTime
-from sqlalchemy_utils import ChoiceType
-
-
-class RequestUserInfoModel(BaseModel):
-    authorization: str
-
-    class Config:
-        orm_mode = True
-
-    def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}"
-
 
 class ResponseUserInfoModel(BaseModel):
     sub: str
