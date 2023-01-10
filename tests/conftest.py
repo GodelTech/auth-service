@@ -1,3 +1,6 @@
+import mock
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+
 from typing import AsyncIterator
 
 import pytest_asyncio
