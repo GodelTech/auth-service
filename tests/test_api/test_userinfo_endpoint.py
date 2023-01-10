@@ -36,9 +36,6 @@ class TestUserInfoEndpoint:
     @pytest.mark.asyncio
     async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
 
-        async def new_execute_dict(*args, **kwargs):
-            return DB_ANSWER
-
         uis = UserInfoServies()
         uis.jwt.set_expire_time(expire_hours=1)
         
@@ -55,9 +52,6 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncClient):
-
-        async def new_execute_dict(*args, **kwargs):
-            return DB_ANSWER
 
         uis = UserInfoServies()
         uis.jwt.set_expire_time(expire_hours=1)
