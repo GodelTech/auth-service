@@ -5,14 +5,11 @@ from fastapi_cache.decorator import cache
 from src.business_logic.cache.key_builders import builder_with_parametr
 from fastapi_cache.coder import JsonCoder
 from src.config.settings.cache_time import CacheTimeSettings
-from fastapi_cache.key_builder import default_key_builder
 
 from src.business_logic.services.userinfo import UserInfoServies
 
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-import time
-from fastapi.security.api_key import APIKeyHeader
 from fastapi.security import HTTPBearer
 
 security = HTTPBearer()
@@ -39,7 +36,6 @@ async def get_userinfo(
     userinfo_class: UserInfoServies = Depends(),
 ):
     try:
-        time.sleep(3)
         userinfo_class = userinfo_class
         token = request.headers.get('authorization')
 
@@ -70,12 +66,21 @@ async def get_userinfo(
     key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
-    auth: str = Header(default=..., description="Authorization"),
+    request: Request,
+    auth_swagger: str | None = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServies = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
-        userinfo_class.authorization = auth
+        token = request.headers.get('authorization')
+
+        if token != None:
+            userinfo_class.authorization = token
+        elif auth_swagger != None:
+            userinfo_class.authorization = auth_swagger
+        else:
+            raise Exception
+            
         result = await userinfo_class.get_user_info_jwt()
         return result
 
