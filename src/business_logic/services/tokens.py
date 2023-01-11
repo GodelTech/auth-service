@@ -193,7 +193,7 @@ class TokenService:
 
     async def revoke_token(self):
 
-        self.check_authorisation_token(token = self.authorization)
+        await self.check_authorisation_token(token = self.authorization)
     
         if self.request_body.token_type_hint != None:
             type_list = {self.request_body.token_type_hint, }
