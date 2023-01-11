@@ -11,6 +11,9 @@ build-job:       # This job runs in the build stage, which runs first.
     - echo "Buy Bye."
     - mkdir build/
     - echo "My app binary file" > build/executable-binary-file-v1
+  artifacts:
+    paths:
+      - build/executable-binary-file-v1
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
