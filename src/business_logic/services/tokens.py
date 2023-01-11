@@ -215,8 +215,8 @@ class TokenService:
         token_type_hint default value is 'access_token'.
         """
         if self.jwt_service.check_spoiled_token(token):
-            raise ValueError
+            raise PermissionError
         elif not self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
-            raise ValueError
+            raise PermissionError
         else:
             return True
