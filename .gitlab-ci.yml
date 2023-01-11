@@ -37,7 +37,8 @@ build-and-test:
     - echo "***********************"
     - ls -l
     - echo "***********************"
-    - pip install --no-cache-dir --upgrade -r requirements.tx
+    - cat requirements.tx
+    - pip install --no-cache-dir --upgrade -r requirements.txt
     - echo "Build has been completed"
 
 unit-test-job:   # This job runs in the test stage.
