@@ -33,7 +33,9 @@ build-and-test:
     - poetry export -f requirements.txt --output requirements.txt --without-hashes
     - python -m venv .venv
     - source .venv/bin/activate
-    - echo pwd
+    - pwd
+    - echo "***********************"
+    - ls -l
     - echo "***********************"
     - pip install --no-cache-dir --upgrade -r requirements.tx
     - echo "Build has been completed"
