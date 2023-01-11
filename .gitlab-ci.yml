@@ -22,7 +22,7 @@ cache:
     - .cache/pip
     - .venv/
 
-build-and-test:
+build-job:
   stage: build
   image: ${IMAGE}
   variables:
@@ -33,13 +33,7 @@ build-and-test:
     - poetry export -f requirements.txt --output requirements.txt --without-hashes
     - python -m venv .venv
     - source .venv/bin/activate
-    - pwd
-    - echo "***********************"
-    - ls -l
-    - echo "***********************"
-    - cat requirements.txt
     - pip install --no-cache-dir --upgrade -r requirements.txt
-    - echo "Build has been completed"
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
