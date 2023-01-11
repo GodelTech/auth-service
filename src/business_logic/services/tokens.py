@@ -5,11 +5,14 @@ from fastapi import Depends
 from src.business_logic.dependencies.database import get_repository
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import WrongGrantsError
+from src.data_access.postgresql.errors import GrantNotFoundError
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
 )
 from src.presentation.api.models import BodyRequestTokenModel
+
+
 
 logger = logging.getLogger("is_app")
 
@@ -26,6 +29,7 @@ class TokenService:
         ),
     ) -> None:
         self.request_model = ...
+        self.authorization = ...
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = JWTService()
@@ -186,12 +190,33 @@ class TokenService:
                             )
 
                             return {"access_token": access_token}
-    
-    async def revoke_token(self, token):
-            decoded_token = self.jwt_service.decode_token(token)
-            if await self.persistent_grant_repo.exists(grant_type=decoded_token["grant_type"], data=decoded_token["data"]):
-                self.persistent_grant_repo.delete(
-                    grant_type=decoded_token["grant_type"], data=decoded_token["data"], client_id=decoded_token["client_id"])
 
-            else:
-                raise ValueError
+    async def revoke_token(self):
+
+        self.check_authorisation_token(token = self.authorization)
+    
+        if self.request_body.token_type_hint != None:
+            type_list = {self.request_body.token_type_hint, }
+        else:
+            type_list = {"access_token", "refresh_token"}
+
+        for token_type in type_list:
+            if await self.persistent_grant_repo.exists(grant_type=token_type, data=self.request_body.token):
+                self.persistent_grant_repo.delete(
+                    grant_type=token_type, data=self.request_body.token)
+                break
+        else:
+            raise GrantNotFoundError
+
+    async def check_authorisation_token(self, token: str, token_type_hint: str = "access_token") -> Exception | bool:
+        """ 
+        Returns True if authorisation token is correct.
+        Else rises ValueError.
+        token_type_hint default value is 'access_token'.
+        """
+        if self.jwt_service.check_spoiled_token(token):
+            raise ValueError
+        elif not self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
+            raise ValueError
+        else:
+            return True
