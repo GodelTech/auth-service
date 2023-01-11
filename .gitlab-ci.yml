@@ -4,30 +4,44 @@ stages:          # List of stages for jobs, and their order of execution
   - deploy
 
 
-build-job:       # This job runs in the build stage, which runs first.
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  SERVICE_NAME: identity-server-poc
+  IMAGE: repository.godeltech.com:18443/python:3.9.9-slim-buster
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+
+# Pip's cache doesn't store the python packages
+# https://pip.pypa.io/en/stable/reference/pip_install/#caching
+#
+# If you want to also cache the installed packages, you have to install
+# them in a virtualenv and cache it as well.
+cache:
+  paths:
+    - .cache/pip
+    - .venv/
+
+build-and-test:
   stage: build
+  image: ${IMAGE}
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    ENV_FOR_DYNACONF: development
   script:
-    - echo "Hello from build job!!!"
-    - echo "Buy Bye."
-    - mkdir build/
-    - echo "My app binary file" > build/executable-binary-file-v1
-  artifacts:
-    paths:
-      - build/executable-binary-file-v1
+    - apt-get update && pip install poetry
+    - apt-get install -y build-essential libpq-dev gettext make
+    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --no-cache-dir --upgrade -r requirements.tx
+    - echo "Build has been completed"
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
     - echo "Running unit tests... This will take about 60 seconds."
     - echo "Code coverage is 90%"
-    - cat $CI_PROJECT_DIR/build/executable-binary-file-v1
-
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 3
-    - echo "No lint issues found."
 
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
