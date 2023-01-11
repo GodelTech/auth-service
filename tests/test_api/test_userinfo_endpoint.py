@@ -84,8 +84,8 @@ class TestUserInfoEndpoint:
             }
             response = await client.request('GET', url, params=params)
             response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_403_FORBIDDEN
-            assert response_content == {"detail": "Incorrect Token"}
+            assert response.status_code == status.HTTP_401_UNAUTHORIZED
+            assert response_content == {'detail': 'Incorrect Authorization Token'} 
 
 
     @pytest.mark.asyncio

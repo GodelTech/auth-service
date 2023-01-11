@@ -2,6 +2,7 @@ from fastapi import Depends
 
 from src.business_logic.dependencies.database import get_repository
 from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
 
 
@@ -11,6 +12,7 @@ class UserInfoServies:
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
     ) -> None:
         self.jwt = JWTService()
+        #self.token_service = TokenService()
         self.authorization = ...
         self.user_repo = user_repo
 
@@ -19,10 +21,12 @@ class UserInfoServies:
     ) -> dict:
         token = self.authorization
 
-        if self.jwt.check_spoiled_token(token=token):
+        #await self.token_service.checheck_authorisation_token(token = token)
+        try:
+            sub = int(self.jwt.decode_token(token=token)["sub"])
+        except:
             raise ValueError
 
-        sub = int(self.jwt.decode_token(token=token)["sub"])
         claims_dict = await self.user_repo.get_claims(id=sub)
         response = {"sub": str(sub)} | claims_dict
 
