@@ -27,13 +27,14 @@ build-and-test:
   image: ${IMAGE}
   variables:
     SERVICE: "${SERVICE_NAME}"
-    ENV_FOR_DYNACONF: development
   script:
     - apt-get update && pip install poetry
     - apt-get install -y build-essential libpq-dev gettext make
-    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
+    - poetry export -f requirements.txt --output requirements.txt --without-hashes
     - python -m venv .venv
     - source .venv/bin/activate
+    - echo pwd
+    - echo "***********************"
     - pip install --no-cache-dir --upgrade -r requirements.tx
     - echo "Build has been completed"
 
