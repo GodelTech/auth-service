@@ -1,4 +1,5 @@
 from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
@@ -19,19 +20,18 @@ class IntrospectionServies():
                  ) -> None:
         self.jwt = JWTService()
         self.request = ...
-        self.request_headers = ...
+        self.authorization = ...
         self.request_body = ...
+        self.token_service = TokenService()
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = grant_repo
 
     async def analyze_token(self) -> dict:
 
-        if not await self.authorization_check():
-            raise ValueError
+        await self.token_service.checheck_authorisation_token(token = self.authorization)
 
         decoded_token = self.jwt.decode_token(token=self.request_body.token)
-        
         response = {}
 
         if self.request_body.token_type_hint == None:
@@ -51,7 +51,9 @@ class IntrospectionServies():
         
         if response["active"]:
             response["sub"] = decoded_token["sub"]
-
+            response["iss"] = self.slice_url()
+            response["token_type"] = self.get_token_type()
+            
             try:
                 response["username"] = await self.user_repo.get_username_by_id(id=int(decoded_token["sub"]))
             except:
@@ -67,16 +69,6 @@ class IntrospectionServies():
             except:
                 pass
 
-            try:
-                response["iss"] = self.slice_url()
-            except:
-                pass
-
-            try:
-                response["token_type"] = self.get_token_type()
-            except:
-                pass
-
             for claim in ('jti', 'aud', 'nbf', 'scope', 'client_id'):
                 if claim in decoded_token.keys():
                     response[claim] = decoded_token[claim]
@@ -89,14 +81,6 @@ class IntrospectionServies():
     def slice_url(self) -> str:
         result = str(self.request.url).rsplit('/', 2)
         return result[0]
-
-    async def authorization_check(self) -> bool:
-        decoded_token = self.jwt.decode_token(
-            token=self.request_headers.authorization)
-        exists = await self.persistent_grant_repo.exists(grant_type="access_token", data=decoded_token["data"])
-        spoiled = self.jwt.check_spoiled_token(
-            token=self.request_headers.authorization)
-        return exists and not spoiled
 
     def time_diff_in_seconds(self, finish: datetime.datetime = datetime.datetime.now(), start: datetime.datetime = datetime.datetime(1970, 1, 1)) -> int:
         return int((finish - start).total_seconds())
