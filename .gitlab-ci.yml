@@ -37,7 +37,7 @@ build-and-test:
     - echo "***********************"
     - ls -l
     - echo "***********************"
-    - cat requirements.tx
+    - cat requirements.txt
     - pip install --no-cache-dir --upgrade -r requirements.txt
     - echo "Build has been completed"
 
