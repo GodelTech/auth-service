@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
 from src.business_logic.services.introspection import IntrospectionServies 
-from src.presentation.api.models.introspection import ResponceIntrospectionModel, RequestIntrospectionModel, BodyRequestIntrospectionModel
+from src.presentation.api.models.introspection import ResponceIntrospectionModel, BodyRequestIntrospectionModel
 import logging
 
 logger = logging.getLogger('is_app')
@@ -28,10 +28,17 @@ async def post_introspection(
         else:
             raise ValueError
 
+
         introspection_class.request_body= request_body
         
         logger.info(f'Introspection for token {request_body.token} started')
         return await introspection_class.analyze_token()
 
+     except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
+
+     except PermissionError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Authorization Token")
+
      except:
-        raise HTTPException(status_code=403, detail="Incorrect Authorization Token")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
