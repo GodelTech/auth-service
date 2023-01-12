@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Header, Request
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 
 from fastapi_cache.decorator import cache
 from src.business_logic.cache.key_builders import builder_with_parametr
@@ -10,9 +10,6 @@ from src.business_logic.services.userinfo import UserInfoServies
 
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-from fastapi.security import HTTPBearer
-
-security = HTTPBearer()
 
 
 logger = logging.getLogger("is_app")
@@ -44,19 +41,85 @@ async def get_userinfo(
         elif auth_swagger != None:
             userinfo_class.authorization = auth_swagger
         else:
-            raise Exception
+            raise PermissionError
 
         logger.info("Collecting Claims from DataBase.")
         return await userinfo_class.get_user_info()
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=422,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Claims for user you are looking for does not exist",
         )
 
+    except PermissionError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Incorrect Authorization Token"
+        )
+    
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Incorrect Token"
+        )
+
     except:
-        raise HTTPException(status_code=403, detail="Incorrect Token")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@userinfo_router.post(
+    "/", response_model=ResponseUserInfoModel, tags=["UserInfo"]
+)
+@cache(
+    expire=CacheTimeSettings.USERINFO,
+    coder=JsonCoder,
+    key_builder=builder_with_parametr,
+)
+async def post_userinfo(
+    request: Request,
+    auth_swagger: str | None = Header(default=None, description="Authorization"),
+    userinfo_class: UserInfoServies = Depends(),
+):
+    try:
+        userinfo_class = userinfo_class
+        token = request.headers.get('authorization')
+
+        if token != None:
+            userinfo_class.authorization = token
+        elif auth_swagger != None:
+            userinfo_class.authorization = auth_swagger
+        else:
+            raise PermissionError
+
+        logger.info("Collecting Claims from DataBase.")
+        return await userinfo_class.get_user_info()
+
+    except ClaimsNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Claims for user you are looking for does not exist",
+        )
+
+    except PermissionError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Incorrect Authorization Token"
+        )
+    
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Incorrect Token"
+        )
+
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 
 
 @userinfo_router.get("/jwt", response_model=str, tags=["UserInfo"])
@@ -79,19 +142,33 @@ async def get_userinfo_jwt(
         elif auth_swagger != None:
             userinfo_class.authorization = auth_swagger
         else:
-            raise Exception
+            raise PermissionError
             
         result = await userinfo_class.get_user_info_jwt()
         return result
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=422,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Claims for user you are looking for does not exist",
         )
 
+    except PermissionError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Incorrect Authorization Token"
+        )
+    
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Incorrect Token"
+        )
+
     except:
-        raise HTTPException(status_code=403, detail="Incorrect Token")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @userinfo_router.get(

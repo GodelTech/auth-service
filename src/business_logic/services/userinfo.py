@@ -20,9 +20,13 @@ class UserInfoServies:
         self,
     ) -> dict:
         token = self.authorization
-        self.token_service.check_authorisation_token(token=token, token_type_hint="access_token")
 
-        sub = int(self.jwt.decode_token(token=token)["sub"])
+        #await self.token_service.checheck_authorisation_token(token = token)
+        try:
+            sub = int(self.jwt.decode_token(token=token)["sub"])
+        except:
+            raise ValueError
+
         claims_dict = await self.user_repo.get_claims(id=sub)
         response = {"sub": str(sub)} | claims_dict
 
