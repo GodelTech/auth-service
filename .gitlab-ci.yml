@@ -1,5 +1,5 @@
 include:
-  - 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
+  - remote: 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -57,8 +57,6 @@ Create Badge:
   stage: badges
   script:
     - anybadge -l version -v $version -f version.svg -c green
-  only:
-    - master
 
 
 unit-test-job:   # This job runs in the test stage.
