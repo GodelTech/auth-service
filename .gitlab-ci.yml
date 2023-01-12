@@ -33,6 +33,7 @@ build-and-test:
     SERVICE: "${SERVICE_NAME}"
   script:
     - apt-get update && pip install poetry
+    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
     - apt-get install dialog apt-utils -y
     - apt-get install postgresql -y
     - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
@@ -44,6 +45,8 @@ build-and-test:
     - pip install --no-cache-dir --upgrade -r requirements.txt
     - make migrage
     - make test
+  rules:
+    - when: always
 
 
 # ##################
