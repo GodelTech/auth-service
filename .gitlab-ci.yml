@@ -1,16 +1,4 @@
 include:
-  - project: 'gte-internal/ci-cd/essential'
-    ref: "0.1.8"
-    file: '/ci-templates/.deployment.yml'
-  - project: 'gte-internal/ci-cd/essential'
-    ref: "0.1.8"
-    file: '/ci-templates/.container.yml'
-  - project: 'gte-internal/ci-cd/e2e-testing'
-    ref: "0.1"
-    file: '/ci-templates/.e2e-tests.yml'
-  - project: 'gte-internal/ci-cd/deployment-with-pact'
-    ref: "0.1"
-    file: '/ci-templates/.deployment-with-pact.yml'
   - remote: 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
 
 
