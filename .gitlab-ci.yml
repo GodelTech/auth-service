@@ -43,7 +43,7 @@ build-and-test:
     - python -m venv .venv
     - source .venv/bin/activate
     - pip install --no-cache-dir --upgrade -r requirements.txt
-    - make migrage
+    - make migrate
     - make test
   rules:
     - when: always
