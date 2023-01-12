@@ -19,6 +19,9 @@ config = context.config
 
 # get database path from Container
 DB_URI = Container.config().database_url
+print('*****************')
+print(DB_URI)
+print("*****************")
 config.set_section_option("alembic", "sqlalchemy.url", DB_URI)
 
 # Interpret the config file for Python logging.
