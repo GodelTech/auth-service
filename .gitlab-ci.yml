@@ -1,5 +1,18 @@
 include:
+  - project: 'gte-internal/ci-cd/essential'
+    ref: "0.1.8"
+    file: '/ci-templates/.deployment.yml'
+  - project: 'gte-internal/ci-cd/essential'
+    ref: "0.1.8"
+    file: '/ci-templates/.container.yml'
+  - project: 'gte-internal/ci-cd/e2e-testing'
+    ref: "0.1"
+    file: '/ci-templates/.e2e-tests.yml'
+  - project: 'gte-internal/ci-cd/deployment-with-pact'
+    ref: "0.1"
+    file: '/ci-templates/.deployment-with-pact.yml'
   - remote: 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
+
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -26,27 +39,27 @@ cache:
     - .cache/pip
     - .venv/
 
-build-and-test:
-  stage: build
-  image: ${IMAGE}
-  variables:
-    SERVICE: "${SERVICE_NAME}"
-  script:
-    - apt-get update && pip install poetry
-    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
-    - apt-get install dialog apt-utils -y
-    - apt-get install postgresql -y
-    - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
-    - runuser -l postgres -c "psql -c \"CREATE DATABASE is_db;\""
-    - apt-get install -y build-essential libpq-dev gettext make
-    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
-    - python -m venv .venv
-    - source .venv/bin/activate
-    - pip install --no-cache-dir --upgrade -r requirements.txt
-    - make migrate
-    - make test
-  rules:
-    - when: always
+#build-and-test:
+#  stage: build
+#  image: ${IMAGE}
+#  variables:
+#    SERVICE: "${SERVICE_NAME}"
+#  script:
+#    - apt-get update && pip install poetry
+#    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
+#    - apt-get install dialog apt-utils -y
+#    - apt-get install postgresql -y
+#    - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
+#    - runuser -l postgres -c "psql -c \"CREATE DATABASE is_db;\""
+#    - apt-get install -y build-essential libpq-dev gettext make
+#    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
+#    - python -m venv .venv
+#    - source .venv/bin/activate
+#    - pip install --no-cache-dir --upgrade -r requirements.txt
+#    - make migrate
+#    - make test
+#  rules:
+#    - when: always
 
 
 # ##################
