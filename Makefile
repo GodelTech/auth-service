@@ -43,6 +43,8 @@ populate-db:
 
 ## Run pytests
 test:
+	@echo '${GREEN}Populating database:${RESET}'
+	python -m factories.commands
 	@echo '${GREEN}Running tests:${RESET}'
 	pytest -ra
 
