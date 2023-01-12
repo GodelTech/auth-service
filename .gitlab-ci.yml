@@ -1,5 +1,9 @@
+include:
+  - 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
+
 stages:          # List of stages for jobs, and their order of execution
   - build
+  - badges
   - test
   - deploy
 
@@ -34,6 +38,19 @@ build-job:
     - python -m venv .venv
     - source .venv/bin/activate
     - pip install --no-cache-dir --upgrade -r requirements.txt
+
+
+# ##################
+# ## Create custom badges
+# ##################
+
+Create Badge:
+  stage: badges
+  script:
+    - anybadge -l version -v $version -f version.svg -c green
+  only:
+    - master
+
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
