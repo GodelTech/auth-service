@@ -1,14 +1,6 @@
 hosts:
-    host: ${HOST}
+    host: "https://rnd-identityserver-dev.godeltech.com"
 
-db:
-    uri: ${DATABASE_URL}
-
-redis:
-    nameOverride: ${REDIS_HOST}
-    password: ${REDIS_PASSWORD}
-    master:
-        port: ${REDIS_PORT}
 
 image:
     registry: ${CI_REGISTRY}
