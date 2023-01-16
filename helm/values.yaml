@@ -83,7 +83,7 @@ redis:
   nameOverride:
   master:
 # enabled = true/false > It is a redis service port
-    port: 6379
+    port: 6380
     cache_db: 0
     persistence:
       size: 1Gi

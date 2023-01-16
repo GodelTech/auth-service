@@ -1,5 +1,23 @@
+hosts:
+    backend_scope: ${BACKEND_SCOPE}
+    host: ${HOST}
+
+security:
+    secret_key: ${SECRET_KEY}
+
+db:
+    uri: ${DB_URI}
+
+redis:
+    nameOverride: ${REDIS_HOST}
+    password: ${REDIS_PASSWORD}
+    master:
+        port: ${REDIS_PORT}
+
 image:
     registry: ${CI_REGISTRY}
     username: ${CI_DEPLOY_USER}
     password: ${CI_DEPLOY_PASSWORD}
     location: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+
+environment_name: ${CI_ENVIRONMENT_NAME}
