@@ -1,11 +1,22 @@
 include:
-  - remote: 'https://git.spooner.io/spooner-web/gitlab-anybadge-creator/-/raw/main/anybadges.yml'
+  - project: 'gte-internal/ci-cd/essential'
+    ref: "0.1.4"
+    file: '/ci-templates/.deployment.yml'
+  - project: 'gte-internal/ci-cd/essential'
+    ref: "0.1.2"
+    file: '/ci-templates/.container.yml'
+  - project: 'gte-internal/ci-cd/e2e-testing'
+    ref: "0.1"
+    file: '/ci-templates/.e2e-tests.yml'
+  - project: 'gte-internal/ci-cd/deployment-with-pact'
+    ref: "0.1"
+    file: '/ci-templates/.deployment-with-pact.yml'
 
 
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
-  - deploy
+  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
@@ -49,15 +60,11 @@ build-and-test:
     - when: always
 
 
+
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
-    - echo "Running unit tests... This will take about 60 seconds!"
-    - echo "Code coverage is 90%"
+    - echo "Testing only rule...........*********"
+  only:
+    - Configure-CI-CD-pipeline
 
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-  environment: production
-  script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
