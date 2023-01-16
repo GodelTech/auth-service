@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "identity-server-poc.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "identity-server-poc.name" . }}
+    app.kubernetes.io/version: {{ .Values.image.tag | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: gcp
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    helm.sh/chart: {{ template "identity-server-poc.chart" . }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ template "identity-server-poc.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/component: backend
+  ports:
+  - protocol: TCP
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+  type: {{ .Values.service.type }}

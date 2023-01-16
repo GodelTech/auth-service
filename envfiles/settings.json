@@ -1,0 +1,7 @@
+{
+  "development": {
+    "hosts": {
+      "host": "https://rnd-identityserver-dev.godeltech.com"
+    }
+  }
+}

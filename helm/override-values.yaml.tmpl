@@ -1,12 +1,8 @@
 hosts:
-    backend_scope: ${BACKEND_SCOPE}
     host: ${HOST}
 
-security:
-    secret_key: ${SECRET_KEY}
-
 db:
-    uri: ${DB_URI}
+    uri: ${DATABASE_URL}
 
 redis:
     nameOverride: ${REDIS_HOST}

@@ -26,6 +26,7 @@ repos:
       - id: trailing-whitespace
       - id: check-json
       - id: check-yaml
+        exclude: ^helm/
       - id: check-docstring-first
       - id: end-of-file-fixer
       - id: debug-statements

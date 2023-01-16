@@ -23,6 +23,11 @@ stages:          # List of stages for jobs, and their order of execution
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
+  HOST: "https://rnd-identityserver-dev.godeltech.com"
+  REDIS_HOST: "localhost"
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: ""
+  DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
   IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
@@ -91,10 +96,14 @@ deploy-to-dev:
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${REDIS_HOST}
+    - echo ${REDIS_PORT}
+    - echo ${REDIS_PASSWORD}
+    - echo ${DATABASE_URL}
+    - echo ${HOST}
     - echo "***********************************#############!!!!!!!!!!!!!!"
   variables:
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./helm
   only:
     - Configure-CI-CD-pipeline
-
