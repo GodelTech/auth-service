@@ -14,7 +14,7 @@ include:
 
 
 stages:          # List of stages for jobs, and their order of execution
-  - build
+#  - build
   - container
   - deploy-to-dev
 
@@ -42,10 +42,10 @@ cache:
 ## BUILD AND TEST
 ##################
 
-build-and-test:
-  stage: build
-  script:
-    - echo "Build and Test job is executed..."
+#build-and-test:
+#  stage: build
+#  script:
+#    - echo "Build and Test job is executed..."
 #  image: ${IMAGE}
 #  variables:
 #    SERVICE: "${SERVICE_NAME}"
@@ -63,8 +63,8 @@ build-and-test:
 #    - pip install --no-cache-dir --upgrade -r requirements.txt
 #    - make migrate
 #    - make test
-  rules:
-    - when: always
+#  rules:
+#    - when: always
 
 
 ##################
