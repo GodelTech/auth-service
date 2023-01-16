@@ -44,5 +44,13 @@ class UserRepository(BaseRepository):
             select(UserClaim).where(UserClaim.user_id == id)
         )
 
+    async def get_username_by_id(self, id:int) -> str:
+        users = await self.session.execute(select(User).where(User.id == id))
+        result = []
+        result = dict(next(users))["User"].username
+
+        return result
+
+    
     def __repr__(self) -> str:
-        return "User repository"
+        return "User repository"    
