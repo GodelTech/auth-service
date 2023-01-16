@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster as requirements-stage
+FROM python:3.10-slim-buster as requirements-stage
 
 WORKDIR /tmp
 
@@ -8,7 +8,7 @@ COPY ./pyproject.toml ./poetry.lock* /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /
 
@@ -32,7 +32,4 @@ RUN chmod +x /start.sh
 
 EXPOSE 8000
 
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
-RUN chmod +x /wait
-
-CMD /wait && /start.sh
+CMD /start.sh
