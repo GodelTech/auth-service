@@ -12,7 +12,7 @@ class UserInfoServies:
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
     ) -> None:
         self.jwt = JWTService()
-        #self.token_service = TokenService()
+        self.token_service = TokenService()
         self.authorization = ...
         self.user_repo = user_repo
 

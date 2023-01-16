@@ -41,7 +41,16 @@ class JWTService:
         self.algorithm = algorithm
         self.algorithms = algorithms
 
-    def check_spoiled_token(self, token: str):
+    def check_spoiled_token(self, token: str)-> bool:
+        """ 
+        Returns False if token is NOT expired.
+        If token spoiled -- returns True.
+        If token doesn't have "expire" key returns False.
+        """
+
+        if "expire" not in  self.decode_token(token).keys():
+            return False
+        
         token_date = datetime.datetime.strptime(
             self.decode_token(token)["expire"], "%Y-%m-%d %H:%M:%S"
         )
