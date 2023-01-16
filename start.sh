@@ -6,5 +6,5 @@ set -e
 echo "Migrations"
 alembic upgrade heads
 
-echo "Uvicorn running src.main:app --reload --host 0.0.0.0 --port 8000"
-uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+echo "Uvicorn running src.main:app --reload --host 192.168.8.104 --port 8000"
+uvicorn src.main:app --reload --host 192.168.8.104 --port 8000
