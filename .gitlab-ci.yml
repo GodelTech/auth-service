@@ -69,4 +69,5 @@ test-job:   # This job runs in the test stage.
     - echo "Testing only rule...........*********"
   only:
     - development
+    - Configure-CI-CD-pipeline
 
