@@ -48,9 +48,9 @@ cache:
 ##################
 
 #build-and-test:
-  stage: build
-  script:
-    - echo "Build and Test job is executed..."
+#  stage: build
+#  script:
+#    - echo "Build and Test job is executed..."
 #  image: ${IMAGE}
 #  variables:
 #    SERVICE: "${SERVICE_NAME}"
@@ -96,12 +96,6 @@ deploy-to-dev:
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CI_ENVIRONMENT_NAME}
-    - echo ${REDIS_HOST}
-    - echo ${REDIS_PORT}
-    - echo ${REDIS_PASSWORD}
-    - echo ${DATABASE_URL}
-    - echo ${HOST}
     - echo ${DOCKER_IMAGES_PATH}
     - echo "***********************************#############!!!!!!!!!!!!!!"
   variables:
