@@ -33,10 +33,15 @@ variables:
 #
 # If you want to also cache the installed packages, you have to install
 # them in a virtualenv and cache it as well.
-#cache:
-#  paths:
-#    - .cache/pip
-#    - .venv/
+cache:
+  paths:
+    - .cache/pip
+    - .venv/
+
+
+##################
+## BUILD AND TEST
+##################
 
 build-and-test:
   stage: build
@@ -63,14 +68,6 @@ build-and-test:
 #    - when: always
 
 
-
-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  script:
-    - echo "Testing only rule...........*********"
-  only:
-    - Configure-CI-CD-pipeline
-
 ##################
 ## CONTAINER
 ##################
@@ -79,3 +76,18 @@ container:docker-build:
   extends: .docker-build-artifact
   only:
     - Configure-CI-CD-pipeline
+
+
+##################
+## DEPLOY TO DEV
+##################
+
+deploy-to-dev:
+  extends: .deploy-to-dev-ext
+  stage: deploy-to-dev
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    HELM_PATH: ./helm
+  only:
+    - Configure-CI-CD-pipeline
+

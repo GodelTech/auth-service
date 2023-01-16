@@ -1,0 +1,16 @@
+apiVersion: "v1"
+name: identity-server-poc
+version: 1.0.0
+appVersion: ${CI_COMMIT_HASH}
+kubeVersion: ">=1.9.0"
+description: "Engagement Health Check API"
+keywords:
+  - gcp
+  - identity-server-poc
+  - backend
+  - python
+#home: The URL of this project's home page (optional)
+maintainers:
+  - name: GodelTech LTD
+engine: gotpl # The name of the template engine (optional, defaults to gotpl)
+tillerVersion: ">2.0.0"
