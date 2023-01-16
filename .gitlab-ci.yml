@@ -16,6 +16,7 @@ include:
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
+  - container
   - deploy-to-dev
 
 
@@ -68,6 +69,13 @@ test-job:   # This job runs in the test stage.
   script:
     - echo "Testing only rule...........*********"
   only:
-    - development
     - Configure-CI-CD-pipeline
 
+##################
+## CONTAINER
+##################
+
+container:docker-build:
+  extends: .docker-build-artifact
+  only:
+    - Configure-CI-CD-pipeline
