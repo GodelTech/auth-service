@@ -36,6 +36,7 @@ class PersistentGrantRepository(BaseRepository):
         await self.session.commit()
 
     async def exists(self, grant_type: str, data: str) -> bool:
+
         result = await self.session.execute(
             select(
                 [
@@ -61,3 +62,15 @@ class PersistentGrantRepository(BaseRepository):
         grant_to_delete = await self.get(grant_type=grant_type, data=data)
         await self.session.delete(grant_to_delete)
         await self.session.flush()
+
+    async def get_client_id_by_data(self, data):
+        client_id = await self.session.execute(
+            select(PersistentGrant.client_id).where(PersistentGrant.data == data)
+        )
+        client_id = client_id.first()
+
+        if client_id is None:
+            raise Exception( # add persistent grant error
+                "Persistent grant you are looking for does not exist"
+            )
+        return client_id[0]

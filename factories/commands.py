@@ -13,6 +13,7 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_table()
         cls.populate_claims_table()
+        cls.populate_client_secrets()
 
     @classmethod
     def populate_client_table(cls):
@@ -36,6 +37,13 @@ class DataBasePopulation:
             )
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
+
+    @classmethod
+    def populate_client_secrets(cls):
+        for item in data.CLIENT_IDS:
+            secret = cl_factory.ClientSecretFactory(client_id=item)
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
 
 
 if __name__ == "__main__":

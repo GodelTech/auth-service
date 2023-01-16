@@ -12,6 +12,10 @@ from src.main import get_application
 
 from src.business_logic.services.authorisation import AuthorisationService
 from src.business_logic.services.password import PasswordHash
+from src.business_logic.services.userinfo import UserInfoServices
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.tokens import TokenService
+
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
@@ -52,3 +56,16 @@ async def authorisation_service(
     )
 
     return auth_service
+
+
+@pytest_asyncio.fixture
+async def user_info_service(connection: AsyncSession) -> UserInfoServices:
+    user_info_service = UserInfoServices(
+        user_repo=UserRepository(connection),
+        client_repo=ClientRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        jwt_service=JWTService(),
+        token_service=TokenService()
+    )
+
+    return user_info_service

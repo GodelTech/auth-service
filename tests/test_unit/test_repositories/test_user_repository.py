@@ -36,13 +36,10 @@ class TestUserRepository:
         assert user_hash_password == expected_hash_password
 
     async def test_get_claims(self, connection):
-        expected_given_name = "Tony"
-        expected_nickname = "IronMan"
+        expected_given_name = "Ibragim"
+        expected_nickname = "Nagibator2000"
 
         self.user_repo = UserRepository(connection)
-        await self.user_repo.session.execute(
-            insert(UserClaim).values(DEFAULT_USER_CLAIMS)
-        )
         result = await self.user_repo.get_claims(id=1)
 
         assert result["given_name"] == expected_given_name
