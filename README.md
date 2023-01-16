@@ -1,7 +1,7 @@
 # Project installation
 
-**development**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/development/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
-**development**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/development/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
+**development**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/development/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/Configure-CI-CD-pipeline)
+**development**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/development/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/Configure-CI-CD-pipeline)
 
 
 ##### Link to the GIT repository:
