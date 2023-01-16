@@ -211,7 +211,7 @@ class TokenService:
     async def check_authorisation_token(self, token: str, token_type_hint: str = "access_token") -> Exception | bool:
         """ 
         Returns True if authorisation token is correct.
-        Else rises ValueError.
+        Else rises PermissionError.
         token_type_hint default value is 'access_token'.
         """
         if self.jwt_service.check_spoiled_token(token):

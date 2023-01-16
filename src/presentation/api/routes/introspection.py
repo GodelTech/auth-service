@@ -13,9 +13,11 @@ introspection_router = APIRouter(
 @introspection_router.post('/', response_model = ResponceIntrospectionModel, tags=['Introspection'])
 async def post_introspection(
      request:Request , 
-     auth_swagger: str | None = Header(default=None, description="Authorization"), 
+     auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
      request_body : BodyRequestIntrospectionModel= Depends(), 
      introspection_class: IntrospectionServies = Depends()):
+     
+     
      try:
         introspection_class = introspection_class
         introspection_class.request = request

@@ -7,6 +7,7 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.userinfo import UserInfoServies
+from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
 
 ANSWER_USER_INFO = {'sub': '1',
@@ -31,45 +32,53 @@ ANSWER_USER_INFO = {'sub': '1',
                     'updated_at': 1234567890,
                     }
 
+async def new_check_authorisation_token(*args, **kwargs):
+    return True
+
 class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
 
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
-        
-        headers = {
-            'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
-        }
-        response = await client.request('GET', '/userinfo/', headers=headers)
+        with mock.patch.object(
+            TokenService, "check_authorisation_token", new=new_check_authorisation_token
+        ):
+            uis = UserInfoServies()
+            uis.jwt.set_expire_time(expire_hours=1)
+            
+            headers = {
+                'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
+            }
+            response = await client.request('GET', '/userinfo/', headers=headers)
 
-        assert response.status_code == status.HTTP_200_OK
-        response_content = json.loads(response.content.decode('utf-8'))
-        for key in ANSWER_USER_INFO:
-            assert response_content[key] == ANSWER_USER_INFO[key]
+            assert response.status_code == status.HTTP_200_OK
+            response_content = json.loads(response.content.decode('utf-8'))
+            for key in ANSWER_USER_INFO:
+                assert response_content[key] == ANSWER_USER_INFO[key]
 
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncClient):
+        with mock.patch.object(
+            TokenService, "check_authorisation_token", new=new_check_authorisation_token
+        ):
+            uis = UserInfoServies()
+            uis.jwt.set_expire_time(expire_hours=1)
+            token = uis.jwt.encode_jwt(payload = {"sub":"1"})
 
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
-        token = uis.jwt.encode_jwt(payload = {"sub":"1"})
+            headers = {
+                'authorization': token,
+            }
+            response = await client.request('GET', '/userinfo/jwt', headers=headers)
 
-        headers = {
-            'authorization': token,
-        }
-        response = await client.request('GET', '/userinfo/jwt', headers=headers)
-
-        assert response.status_code == status.HTTP_200_OK
-        response_content = json.loads(response.content.decode('utf-8'))
-        response_content = uis.jwt.decode_token(response_content)
-        answer = {k : ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
-        answer["email_verified"] = 'true'
-        answer["phone_number_verified"] = 'false'
-        answer["updated_at"] = str(answer["updated_at"])
-        assert response_content == answer
+            assert response.status_code == status.HTTP_200_OK
+            response_content = json.loads(response.content.decode('utf-8'))
+            response_content = uis.jwt.decode_token(response_content)
+            answer = {k : ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
+            answer["email_verified"] = 'true'
+            answer["phone_number_verified"] = 'false'
+            answer["updated_at"] = str(answer["updated_at"])
+            assert response_content == answer
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_request_with_incorect_token(connection: AsyncSession, client: AsyncClient):
@@ -93,19 +102,21 @@ class TestUserInfoEndpoint:
 
         async def new_execute_empty(*args, **kwargs):
             return ()
+        with mock.patch.object(
+            TokenService, "check_authorisation_token", new=new_check_authorisation_token
+        ):
+            uis = UserInfoServies()
+            uis.jwt.set_expire_time(expire_hours=1)
 
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
+            for url in ('/userinfo/', '/userinfo/jwt'):
 
-        for url in ('/userinfo/', '/userinfo/jwt'):
+                with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
+                    headers = {
+                        'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
+                    }
+                    response = await client.request('GET', url, headers=headers)
 
-            with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
-                headers = {
-                    'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
-                }
-                response = await client.request('GET', url, headers=headers)
+                    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-                assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-                response_content = json.loads(response.content.decode('utf-8'))
-                assert response_content == {"detail": "Claims for user you are looking for does not exist"}
+                    response_content = json.loads(response.content.decode('utf-8'))
+                    assert response_content == {"detail": "Claims for user you are looking for does not exist"}

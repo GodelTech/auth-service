@@ -7,7 +7,7 @@ from src.business_logic.dependencies import get_repository
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServies
 from src.data_access.postgresql.repositories.user import UserRepository
-
+from src.business_logic.services.tokens import TokenService
 
 class RequestMock:
     authorization = 0
@@ -37,21 +37,27 @@ class TestUserInfoServiece:
                 "middle_name": "-el-",
                 "nickname": "Nagibator2000",
             }
+        
+        async def new_check_authorisation_token(*args, **kwargs):
+            return True
 
         with mock.patch.object(
-            UserRepository, "get_claims", new=new_get_user_info_dict
+            TokenService, "check_authorisation_token", new=new_check_authorisation_token
         ):
             with mock.patch.object(
-                JWTService, "decode_token", new=new_decode_token
+                UserRepository, "get_claims", new=new_get_user_info_dict
             ):
-                expected_part_one = {"sub": str(new_decode_token()["sub"])}
-                expected_part_two = await new_get_user_info_dict()
-                expected = expected_part_one | expected_part_two
-                result = await self.uis.get_user_info()
-                result_jwt = await self.uis.get_user_info_jwt()
+                with mock.patch.object(
+                    JWTService, "decode_token", new=new_decode_token
+                ):
+                    expected_part_one = {"sub": str(new_decode_token()["sub"])}
+                    expected_part_two = await new_get_user_info_dict()
+                    expected = expected_part_one | expected_part_two
+                    result = await self.uis.get_user_info()
+                    result_jwt = await self.uis.get_user_info_jwt()
 
-                assert expected == result
-                assert (
-                    self.uis.jwt.encode_jwt(expected, include_expire=False)
-                    == result_jwt
-                )
+                    assert expected == result
+                    assert (
+                        self.uis.jwt.encode_jwt(expected, include_expire=False)
+                        == result_jwt
+                    )

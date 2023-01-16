@@ -29,7 +29,7 @@ userinfo_router = APIRouter(
 )
 async def get_userinfo(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
+    auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
     userinfo_class: UserInfoServies = Depends(),
 ):
     try:

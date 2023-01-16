@@ -21,7 +21,7 @@ class UserInfoServies:
     ) -> dict:
         token = self.authorization
 
-        #await self.token_service.checheck_authorisation_token(token = token)
+        await self.token_service.check_authorisation_token(token = token)
         try:
             sub = int(self.jwt.decode_token(token=token)["sub"])
         except:
