@@ -22,8 +22,6 @@ class AppSettings(BaseAppSettings):
 
     allowed_hosts: List[str] = ["*"]
 
-    redis_url: str
-
     class Config:
         validate_assignment = True
 
