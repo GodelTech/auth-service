@@ -4,7 +4,6 @@ include:
 
 stages:          # List of stages for jobs, and their order of execution
   - build
-  - badges
   - test
   - deploy
 
@@ -48,16 +47,6 @@ build-and-test:
     - make test
   rules:
     - when: always
-
-
-# ##################
-# ## Create custom badges
-# ##################
-
-Create Badge:
-  stage: badges
-  script:
-    - anybadge -l version -v $version -f version.svg -c green
 
 
 unit-test-job:   # This job runs in the test stage.
