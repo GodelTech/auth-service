@@ -48,9 +48,9 @@ cache:
 ##################
 
 #build-and-test:
-#  stage: build
-#  script:
-#    - echo "Build and Test job is executed..."
+  stage: build
+  script:
+    - echo "Build and Test job is executed..."
 #  image: ${IMAGE}
 #  variables:
 #    SERVICE: "${SERVICE_NAME}"
@@ -66,6 +66,7 @@ cache:
 #    - python -m venv .venv
 #    - source .venv/bin/activate
 #    - pip install --no-cache-dir --upgrade -r requirements.txt
+#    - echo '{"development":{"hosts":{"host":"'$HOST'"},"db":{"uri":"postgresql://postgres:postgres@localhost:5432/ehc_api"},"redis":{"host":"'$REDIS_HOST'","port":"'$REDIS_PORT'","password":"'$REDIS_PASSWORD'"}}}' > ./envfiles/settings.json
 #    - make migrate
 #    - make test
 #  rules:
@@ -90,7 +91,7 @@ deploy-to-dev:
   extends: .deploy-to-dev-ext
   stage: deploy-to-dev
   script:
-    - echo ${STAGE_IMAGE_PATH}x
+    - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
@@ -101,6 +102,7 @@ deploy-to-dev:
     - echo ${REDIS_PASSWORD}
     - echo ${DATABASE_URL}
     - echo ${HOST}
+    - echo ${DOCKER_IMAGES_PATH}
     - echo "***********************************#############!!!!!!!!!!!!!!"
   variables:
     SERVICE: "${SERVICE_NAME}"
