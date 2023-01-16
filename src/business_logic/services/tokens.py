@@ -13,7 +13,6 @@ from src.data_access.postgresql.repositories import (
 from src.presentation.api.models import BodyRequestTokenModel
 
 
-
 logger = logging.getLogger("is_app")
 
 
@@ -208,15 +207,16 @@ class TokenService:
         else:
             raise GrantNotFoundError
 
-    async def check_authorisation_token(self, token: str, token_type_hint: str = "access_token") -> Exception | bool:
+    async def check_authorisation_token(self, secret: str, token: str, token_type_hint: str = "access_token") -> Exception | bool:
         """ 
         Returns True if authorisation token is correct.
         Else rises PermissionError.
         token_type_hint default value is 'access_token'.
         """
-        if self.jwt_service.check_spoiled_token(token):
+
+        if await self.jwt_service.check_spoiled_token(secret=secret, token=token):
             raise PermissionError
-        elif not self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
+        elif not await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
             raise PermissionError
         else:
             return True

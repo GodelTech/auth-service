@@ -23,7 +23,6 @@ class UserRepository(BaseRepository):
         return user.password_hash, user.id
 
     async def get_claims(self, id: int) -> dict:
-
         claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
@@ -51,6 +50,5 @@ class UserRepository(BaseRepository):
 
         return result
 
-    
     def __repr__(self) -> str:
-        return "User repository"    
+        return "User repository"

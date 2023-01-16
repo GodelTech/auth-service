@@ -2,36 +2,45 @@ import datetime
 
 import mock
 import pytest
+from sqlalchemy import delete
 
 from src.business_logic.services.jwt_token import JWTService
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 
 
 @pytest.mark.asyncio
-class TestJWTServiece:
-    @classmethod
-    def setup_class(cls):
-        cls.jwt = JWTService()
-        cls.jwt.set_expire_time(expire_days=1)
+class TestJWTService:
 
-    def test_encode_and_decode(self):
-        token = self.jwt.encode_jwt(payload={"sub": 123, "name": "Danya"})
+    async def test_encode_and_decode(self, connection):
+        service = JWTService()
+        token = await service.encode_jwt(secret="play", payload={"sub": 123, "name": "Danya"}, include_expire=False)
         assert token.count(".") == 2
-
+        persistent_repo = PersistentGrantRepository(connection)
+        await persistent_repo.create(
+            client_id="double_test", data=token, user_id=2
+        )
         for tkn in (token, "Bearer " + token):
-            decoded_dict = self.jwt.decode_token(tkn)
+            decoded_dict = await service.decode_token(secret="play", token=tkn)
             assert type(decoded_dict) == dict
             assert decoded_dict["sub"] == 123
             assert decoded_dict["name"] == "Danya"
 
-    def test_set_expire_time(self):
+        await persistent_repo.session.execute(
+                delete(PersistentGrant).
+                where(PersistentGrant.client_id == "double_test")
+            )
+        await persistent_repo.session.commit()
 
+    async def test_set_expire_time(self):
+        service = JWTService()
         expire_days = 0
         expire_hours = 0
         expire_minutes = 0
         expire_seconds = 0
 
         with pytest.raises(ValueError):
-            self.jwt.set_expire_time(
+            service.set_expire_time(
                 expire_days, expire_hours, expire_minutes, expire_seconds
             )
 
@@ -41,7 +50,7 @@ class TestJWTServiece:
         expire_seconds = 2340
 
         with pytest.raises(ValueError):
-            self.jwt.set_expire_time(
+            service.set_expire_time(
                 expire_days, expire_hours, expire_minutes, expire_seconds
             )
 
@@ -58,9 +67,9 @@ class TestJWTServiece:
         with mock.patch.object(
             JWTService, "get_datetime_now", new=str_to_datetime
         ):
-            self.jwt.set_expire_time(
+            service.set_expire_time(
                 expire_days, expire_hours, expire_minutes, expire_seconds
             )
-            assert self.jwt.expire == datetime.datetime.strptime(
+            assert service.expire == datetime.datetime.strptime(
                 "2022-12-29 19:34:24", "%Y-%m-%d %H:%M:%S"
             )

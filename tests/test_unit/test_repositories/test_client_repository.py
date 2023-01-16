@@ -19,3 +19,18 @@ class TestClientRepository:
             await client_repo_error.get_client_by_client_id(
                 client_id="test_client_not_exist"
             )
+
+    async def test_get_client_secret_by_client_id(self, connection):
+        client_repo = ClientRepository(connection)
+        expected = "past"
+        secret = await client_repo.get_client_secrete_by_client_id(
+            client_id="test_client"
+        )
+        assert secret == expected
+
+    async def test_get_client_secret_by_client_id_not_exists(self, connection):
+        client_repo_error = ClientRepository(connection)
+        with pytest.raises(ClientNotFoundError):
+            await client_repo_error.get_client_secrete_by_client_id(
+                client_id="test_client_not_exist"
+            )

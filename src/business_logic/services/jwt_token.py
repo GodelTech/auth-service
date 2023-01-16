@@ -34,25 +34,23 @@ class JWTService:
         !!! Time has to be in format '%Y-%m-%d %H:%M:%S' !!!
     """
 
-    def __init__(
-        self, algorithm: str = "HS256", algorithms: list = ["HS256"]
-    ) -> None:
-        self.secret = SECRET
-        self.algorithm = algorithm
-        self.algorithms = algorithms
+    def __init__(self) -> None:
+        self.algorithm = "HS256"
+        self.algorithms = ["HS256"]
 
-    def check_spoiled_token(self, token: str)-> bool:
-        """ 
+    async def check_spoiled_token(self, secret: str, token: str) -> bool:
+        """
         Returns False if token is NOT expired.
         If token spoiled -- returns True.
         If token doesn't have "expire" key returns False.
         """
 
-        if "expire" not in  self.decode_token(token).keys():
+        decoded_token = await self.decode_token(secret=secret, token=token)
+        if "expire" not in decoded_token.keys():
             return False
-        
+
         token_date = datetime.datetime.strptime(
-            self.decode_token(token)["expire"], "%Y-%m-%d %H:%M:%S"
+            decoded_token["expire"], "%Y-%m-%d %H:%M:%S"
         )
         return self.get_datetime_now() > token_date
 
@@ -85,14 +83,14 @@ class JWTService:
     def get_datetime_now(self):
         return datetime.datetime.now().replace(microsecond=0)
 
-    def encode_jwt(
-        self, payload: dict = {}, include_expire: bool = True
+    async def encode_jwt(
+        self, secret: str, payload: dict = {}, include_expire: bool = True
     ) -> str:
 
         if include_expire:
             payload = payload | {"expire": str(self.expire)}
 
-        token = jwt.encode(payload, self.secret, self.algorithm)
+        token = jwt.encode(payload, secret, self.algorithm)
 
         if include_expire:
             logger.info(f"Created token. Expires at{self.expire}")
@@ -101,10 +99,11 @@ class JWTService:
 
         return token
 
-    def decode_token(
+    async def decode_token(
         self,
         token: str,
+        secret: str,
     ) -> dict:
         token = token.replace("Bearer ", "")
-        decoded = jwt.decode(token, self.secret, self.algorithms)
+        decoded = jwt.decode(token, secret, self.algorithms)
         return decoded

@@ -1,14 +1,11 @@
+import datetime
 import json
-import mock
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import insert, delete
 
-from src.business_logic.services.userinfo import UserInfoServies
-from src.business_logic.services.tokens import TokenService
-from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 
 ANSWER_USER_INFO = {'sub': '1',
                     'name': 'Daniil',
@@ -32,91 +29,146 @@ ANSWER_USER_INFO = {'sub': '1',
                     'updated_at': 1234567890,
                     }
 
-async def new_check_authorisation_token(*args, **kwargs):
-    return True
+
+async def create_persistent_grant_instance(service, token, subject_id):
+    uis = service
+    persistent_grant = {
+        "key": "unique_key",
+        "client_id": uis.client_id,
+        "data": token,
+        "subject_id": subject_id,
+        "type": "access_token",
+    }
+    await uis.persistent_grant_repo.session.execute(
+        insert(PersistentGrant).values(**persistent_grant)
+    )
+    await uis.persistent_grant_repo.session.commit()
+
+
+async def clean_persistent_grant(service, client_id):
+    uis = service
+    await uis.persistent_grant_repo.session.execute(
+        delete(PersistentGrant).
+        where(PersistentGrant.client_id == client_id)
+    )
+    await uis.persistent_grant_repo.session.commit()
+
 
 class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
-    async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
+    async def test_successful_userinfo_request(self, user_info_service, client: AsyncClient):
 
-        with mock.patch.object(
-            TokenService, "check_authorisation_token", new=new_check_authorisation_token
-        ):
-            uis = UserInfoServies()
-            uis.jwt.set_expire_time(expire_hours=1)
-            
-            headers = {
-                'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
-            }
-            response = await client.request('GET', '/userinfo/', headers=headers)
-
-            assert response.status_code == status.HTTP_200_OK
-            response_content = json.loads(response.content.decode('utf-8'))
-            for key in ANSWER_USER_INFO:
-                assert response_content[key] == ANSWER_USER_INFO[key]
-
-
-    @pytest.mark.asyncio
-    async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncClient):
-        with mock.patch.object(
-            TokenService, "check_authorisation_token", new=new_check_authorisation_token
-        ):
-            uis = UserInfoServies()
-            uis.jwt.set_expire_time(expire_hours=1)
-            token = uis.jwt.encode_jwt(payload = {"sub":"1"})
-
-            headers = {
-                'authorization': token,
-            }
-            response = await client.request('GET', '/userinfo/jwt', headers=headers)
-
-            assert response.status_code == status.HTTP_200_OK
-            response_content = json.loads(response.content.decode('utf-8'))
-            response_content = uis.jwt.decode_token(response_content)
-            answer = {k : ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
-            answer["email_verified"] = 'true'
-            answer["phone_number_verified"] = 'false'
-            answer["updated_at"] = str(answer["updated_at"])
-            assert response_content == answer
-
-    @pytest.mark.asyncio
-    async def test_userinfo_and_userinfo_jwt_request_with_incorect_token(connection: AsyncSession, client: AsyncClient):
-
-        uis = UserInfoServies()
+        uis = user_info_service
         uis.jwt.set_expire_time(expire_hours=1)
+        uis.client_id = "santa"
+        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+        token = await uis.jwt.encode_jwt(secret=secret, payload=ANSWER_USER_INFO)
+
+        await create_persistent_grant_instance(service=uis, token=token, subject_id=3)
+
+        headers = {
+            'authorization': token,
+        }
+        response = await client.request('GET', '/userinfo/', headers=headers)
+
+        assert response.status_code == status.HTTP_200_OK
+        response_content = json.loads(response.content.decode('utf-8'))
+        for key in ANSWER_USER_INFO:
+            assert response_content[key] == ANSWER_USER_INFO[key]
+
+        await clean_persistent_grant(service=uis, client_id=uis.client_id)
+
+    @pytest.mark.asyncio
+    async def test_successful_userinfo_jwt(self, user_info_service, client: AsyncClient):
+
+        uis = user_info_service
+        uis.jwt.set_expire_time(expire_hours=1)
+        uis.client_id = "krampus"
+        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+
+        token = await uis.jwt.encode_jwt(secret=secret, payload=ANSWER_USER_INFO)
+
+        persistent_grant = {
+            "key": "unique_key",
+            "client_id": uis.client_id,
+            "data": token,
+            "subject_id": 4,
+            "type": "access_token",
+        }
+        await uis.persistent_grant_repo.session.execute(
+            insert(PersistentGrant).values(**persistent_grant)
+        )
+        await uis.persistent_grant_repo.session.commit()
+
+        headers = {
+            'authorization': token,
+        }
+        uis.authorization = token
+
+        response = await client.request('GET', '/userinfo/jwt', headers=headers)
+
+        assert response.status_code == status.HTTP_200_OK
+        response_content = json.loads(response.content.decode('utf-8'))
+        response_content = await uis.jwt.decode_token(secret=secret, token=response_content)
+        answer = {k: ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
+        answer["email_verified"] = 'true'
+        answer["phone_number_verified"] = 'false'
+        answer["updated_at"] = str(answer["updated_at"])
+
+        assert response_content == answer
+        await uis.persistent_grant_repo.session.execute(
+                delete(PersistentGrant).
+                where(PersistentGrant.client_id == "krampus")
+            )
+
+        await uis.persistent_grant_repo.session.commit()
+
+    @pytest.mark.asyncio
+    async def test_userinfo_and_userinfo_jwt_request_with_incorrect_token(self, user_info_service, client: AsyncClient):
+        uis = user_info_service
+        uis.jwt.set_expire_time(expire_hours=1)
+        uis.client_id = "santa"
+        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+        token = await uis.jwt.encode_jwt(secret=secret, payload={"blablabla": "blablabla"})
+
+        await create_persistent_grant_instance(service=uis, token=token, subject_id=3)
 
         for url in ('/userinfo/', '/userinfo/jwt'):
-            token = uis.jwt.encode_jwt(payload={"blablabla": "blablabla"})
             params = {
                 'authorization': token,
             }
-            response = await client.request('GET', url, params=params)
+            response = await client.request('GET', url, headers=params)
             response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_401_UNAUTHORIZED
-            assert response_content == {'detail': 'Incorrect Authorization Token'} 
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
+            assert response_content == {'detail': "Incorrect Token"}
 
+        await clean_persistent_grant(service=uis, client_id=uis.client_id)
 
     @pytest.mark.asyncio
-    async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(connection: AsyncSession, client: AsyncClient):
+    async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(self, user_info_service, client: AsyncClient):
+        uis = user_info_service
+        uis.jwt.set_expire_time(expire_hours=1)
+        uis.client_id = "santa"
+        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+        token = await uis.jwt.encode_jwt(secret=secret, payload={"sub": "3"})
 
-        async def new_execute_empty(*args, **kwargs):
-            return ()
-        with mock.patch.object(
-            TokenService, "check_authorisation_token", new=new_check_authorisation_token
-        ):
-            uis = UserInfoServies()
-            uis.jwt.set_expire_time(expire_hours=1)
+        await create_persistent_grant_instance(service=uis, token=token, subject_id=3)
 
-            for url in ('/userinfo/', '/userinfo/jwt'):
+        for url in ('/userinfo/', '/userinfo/jwt'):
+            headers = {
+                'authorization': token,
+            }
 
-                with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
-                    headers = {
-                        'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
-                    }
-                    response = await client.request('GET', url, headers=headers)
+            await uis.persistent_grant_repo.create(
+                client_id="santa", data=token, user_id=3
+            )
 
-                    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+            response = await client.request('GET', url, headers=headers)
 
-                    response_content = json.loads(response.content.decode('utf-8'))
-                    assert response_content == {"detail": "Claims for user you are looking for does not exist"}
+            assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+            response_content = json.loads(response.content.decode('utf-8'))
+            assert response_content == {"detail": "Claims for user you are looking for does not exist"}
+
+        await clean_persistent_grant(service=uis, client_id=uis.client_id)

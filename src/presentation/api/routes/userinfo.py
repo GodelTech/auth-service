@@ -6,7 +6,7 @@ from src.business_logic.cache.key_builders import builder_with_parametr
 from fastapi_cache.coder import JsonCoder
 from src.config.settings.cache_time import CacheTimeSettings
 
-from src.business_logic.services.userinfo import UserInfoServies
+from src.business_logic.services.userinfo import UserInfoServices
 
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
@@ -30,7 +30,7 @@ userinfo_router = APIRouter(
 async def get_userinfo(
     request: Request,
     auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
-    userinfo_class: UserInfoServies = Depends(),
+    userinfo_class: UserInfoServices = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
@@ -81,7 +81,7 @@ async def get_userinfo(
 async def post_userinfo(
     request: Request,
     auth_swagger: str | None = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServies = Depends(),
+    userinfo_class: UserInfoServices = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
@@ -131,7 +131,7 @@ async def post_userinfo(
 async def get_userinfo_jwt(
     request: Request,
     auth_swagger: str | None = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServies = Depends(),
+    userinfo_class: UserInfoServices = Depends(),
 ):
     try:
         userinfo_class = userinfo_class
@@ -176,7 +176,7 @@ async def get_userinfo_jwt(
 )
 async def get_default_token():
     try:
-        uis = UserInfoServies()
+        uis = UserInfoServices()
         uis.jwt.set_expire_time(expire_hours=1)
         return uis.jwt.encode_jwt(payload={"sub": "1"})
     except:
@@ -186,7 +186,7 @@ async def get_default_token():
 @userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
 async def get_decode_token(token: str):
     try:
-        uis = UserInfoServies()
+        uis = UserInfoServices()
         return uis.jwt.decode_token(token)
     except:
         raise HTTPException(status_code=500)
