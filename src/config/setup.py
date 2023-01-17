@@ -20,6 +20,10 @@ environments: Dict[AppEnvTypes, Type[AppSettings]] = {
 @lru_cache
 def get_app_settings() -> AppSettings:
     app_env = DevAppSettings().app_env
+    print(app_env, " ::::::::::::::::::::")
 
     config = environments[app_env]
+    print("********************")
+    print(config())
+    print("========================")
     return config()

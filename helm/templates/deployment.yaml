@@ -7,7 +7,6 @@ metadata:
     app.kubernetes.io/version: {{ .Values.image.tag | quote }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/component: backend
-    app.kubernetes.io/part-of: gcp
     app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
     helm.sh/chart: {{ template "identity-server-poc.chart" . }}
 spec:
@@ -28,7 +27,6 @@ spec:
         app.kubernetes.io/version: {{ .Values.image.tag | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         app.kubernetes.io/component: backend
-        app.kubernetes.io/part-of: gcp
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         helm.sh/chart: {{ template "identity-server-poc.chart" . }}
       annotations:
@@ -40,13 +38,6 @@ spec:
         - name: wait-for-dependency
           image: {{ .Values.init.image }}
           imagePullPolicy: {{ .Values.init.imagePullPolicy }}
-          command:
-          - 'sh'
-          - '-c'
-          - >
-            until nc -z -w 2 {{ template "identity-server-poc.redis.fullname" . }} {{ .Values.redis.master.port }} && echo redis ok; do
-              sleep 2;
-            done;
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.image.location }}

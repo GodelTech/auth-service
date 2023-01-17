@@ -5,7 +5,6 @@ appVersion: ${CI_COMMIT_HASH}
 kubeVersion: ">=1.9.0"
 description: "Identity Server Provider"
 keywords:
-  - gcp
   - identity-server-poc
   - backend
   - python

@@ -11,5 +11,5 @@ class DevAppSettings(AppSettings):
 
     logging_level: int = logging.DEBUG
 
-    class Config(AppSettings.Config):
-        env_file = os.path.join(os.getcwd(), "envfiles/.env.development")
+    # class Config(AppSettings.Config):
+    #     env_file = os.path.join(os.getcwd(), "envfiles/.env.development")

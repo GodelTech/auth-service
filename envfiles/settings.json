@@ -2,14 +2,6 @@
   "development": {
     "hosts": {
       "host": "https://rnd-identityserver-dev.godeltech.com"
-    },
-   "db":{
-      "uri":"postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
-   },
-   "redis":{
-      "host":"localhost",
-      "port":6379,
-      "cache_db":0
-   }
+    }
   }
 }

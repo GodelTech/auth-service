@@ -45,40 +45,12 @@ Create chart name and version as used by the chart label.
 {{- printf "%s" $name | trunc 63 | trimSuffix "-" -}}
 {{- end }}
 
-{{- define "identity-server-poc.redis.fullname" -}}
-{{- if .Values.redis.enabled -}}
-{{- $name := default "redis" .Values.redis.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "master"| trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- .Values.redis.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-
-{{/* Generate configuration for application */}}
-{{- define "identity-server-poc.secretData" }}
-  redis:
-    password: {{ required "A valid .Values.redis.password entry required!" .Values.redis.password }}
-{{- end -}}
-
 {{/* Generate configuration for application */}}
 {{- define "identity-server-poc.configData" }}
 {
   "{{ .Values.environment_name }}": {
     "hosts": {
         "host": "{{ .Values.hosts.host }}",
-    },
-    "security": {
-        "secret_key": "{{ .Values.security.secret_key }}"
-    },
-    "db": {
-        "uri" : "{{ .Values.db.uri }}"
-    },
-    "redis": {
-        "user": "default",
-        "host": "{{ template "identity-server-poc.redis.fullname" . }}",
-        "port": "{{ .Values.redis.master.port }}",
-        "password": "{{ .Values.redis.password }}",
-        "cache_db": 0
     },
   }
 }
