@@ -6,7 +6,7 @@ init:
 # APP
 # -----------------------------------------------------------------------------
 name: identity-server-poc
-namespace: innovation
+#namespace: innovation
 domain: rnd-identityserver-dev.godeltech.com
 ## How many instances to run
 replicaCount: 1
@@ -48,9 +48,9 @@ image:
   enabled: false
   name: gte-internal-registry-key
   ## image registry username
-  username: xxx
+  username: a.shyrokau
   ## image registry password
-  password: "xxx"
+  password: g6aW27ZneDEwgNSWrxps
   email: "noreply@godeltech.com"
   ## pullPolicy is the Docker image pull policy
   ## It's recommended to change this to 'Always' if the image tag is 'latest'
