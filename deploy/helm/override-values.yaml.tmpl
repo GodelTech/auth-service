@@ -2,5 +2,6 @@ application:
     image: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
 
 imagePullSecret:
+    server: ${CI_REGISTRY}
     username: ${CI_DEPLOY_USER}
     password: ${CI_DEPLOY_PASSWORD}
