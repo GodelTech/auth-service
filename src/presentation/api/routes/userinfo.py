@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 
 from fastapi_cache.decorator import cache
@@ -29,7 +30,7 @@ userinfo_router = APIRouter(
 )
 async def get_userinfo(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
     userinfo_class: UserInfoServices = Depends(),
 ):
     try:
@@ -80,7 +81,7 @@ async def get_userinfo(
 )
 async def post_userinfo(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServices = Depends(),
 ):
     try:
@@ -130,7 +131,7 @@ async def post_userinfo(
 )
 async def get_userinfo_jwt(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServices = Depends(),
 ):
     try:

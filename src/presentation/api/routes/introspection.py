@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
 from src.business_logic.services.introspection import IntrospectionServies 
 from src.presentation.api.models.introspection import ResponceIntrospectionModel, BodyRequestIntrospectionModel
 import logging
+from typing import Union
 
 logger = logging.getLogger('is_app')
 
@@ -13,7 +14,7 @@ introspection_router = APIRouter(
 @introspection_router.post('/', response_model = ResponceIntrospectionModel, tags=['Introspection'])
 async def post_introspection(
      request:Request , 
-     auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
+     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
      request_body : BodyRequestIntrospectionModel= Depends(), 
      introspection_class: IntrospectionServies = Depends()):
      

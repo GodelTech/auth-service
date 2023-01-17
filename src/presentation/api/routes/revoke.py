@@ -3,6 +3,7 @@ from src.business_logic.services.tokens import TokenService
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.data_access.postgresql.errors import GrantNotFoundError
 import logging
+from typing import Union
 
 logger = logging.getLogger('is_app')
 
@@ -13,8 +14,8 @@ revoke_router = APIRouter(
 
 @revoke_router.post('/', status_code= 200, tags=['Revoke'])
 async def post_revoke_token(
-    request:Request, 
-    auth_swagger: str | None = Header(default=None, description="Authorization"),  #crutch for swagger
+    request: Request, 
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
     request_body : BodyRequestRevokeModel= Depends(), 
     token_class: TokenService = Depends()
     ):
