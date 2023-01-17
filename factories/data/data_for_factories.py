@@ -125,3 +125,17 @@ DEFAULT_USER_CLAIMS = {
     "address": "5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania",
     "updated_at": 1234567890,
 }
+
+CLIENT_SECRETS = {
+    "test_client": "past",
+    "double_test": "play",
+    "santa": "health",
+    "krampus": "address",
+    "frodo": "their",
+    "aragorn": "line",
+    "iron_man": "film",
+    "spider_man": "light",
+    "thor": "position",
+    "samuel": "themselves",
+}
+

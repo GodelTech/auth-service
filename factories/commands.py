@@ -40,8 +40,8 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_secrets(cls):
-        for item in data.CLIENT_IDS:
-            secret = cl_factory.ClientSecretFactory(client_id=item)
+        for client_id, secret in data.CLIENT_SECRETS.items():
+            sec = cl_factory.ClientSecretFactory(client_id=client_id, value=secret)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
