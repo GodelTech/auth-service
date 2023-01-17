@@ -95,7 +95,7 @@ deploy-to-dev-manual:
 #    - kubernetes
   image:
     name: alpine/helm:3.10.2
-    entrypoint: [""]
+#    entrypoint: [""]
   environment:
     name: dev
   script:
