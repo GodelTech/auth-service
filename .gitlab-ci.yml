@@ -23,10 +23,10 @@ stages:          # List of stages for jobs, and their order of execution
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
-  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-  PROJECT_NAME: innovation
-  APP_NAME: identity-server-poc
+#  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
+#  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+#  PROJECT_NAME: innovation
+#  APP_NAME: identity-server-poc
   CI_DEPLOY_USER: "a.shyrokau"
   CI_DEPLOY_PASSWORD: g6aW27ZneDEwgNSWrxps
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"

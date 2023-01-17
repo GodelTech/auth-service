@@ -45,7 +45,7 @@ image:
   # If enabled will be created secret with data.dockerconfigjson
   # In this case password and username required
   # Otherwise the secret with name must be exists
-  enabled: false
+  enabled: true
   name: gte-internal-registry-key
   ## image registry username
   username: a.shyrokau
