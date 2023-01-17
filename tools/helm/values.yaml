@@ -6,7 +6,7 @@ init:
 # APP
 # -----------------------------------------------------------------------------
 name: identity-server-poc
-#namespace: innovation
+namespace: innovation
 domain: rnd-identityserver-dev.godeltech.com
 ## How many instances to run
 replicaCount: 1
