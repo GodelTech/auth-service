@@ -2,6 +2,7 @@ replicaCount: 1
 
 application:
   name: identity-server-poc
+  domain: rnd-identityserver-dev.godeltech.com
   port: 80
 
 resources:

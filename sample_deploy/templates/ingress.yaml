@@ -10,7 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
 spec:
   rules:
-    - host: rnd-identityserver-dev.godeltech.com
+    - host: {{ .Values.application.domain }}
       http:
         paths:
           - path: /*
