@@ -51,6 +51,7 @@ image:
   username: xxx
   ## image registry password
   password: "xxx"
+  email: "noreply@godeltech.com"
   ## pullPolicy is the Docker image pull policy
   ## It's recommended to change this to 'Always' if the image tag is 'latest'
   ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
