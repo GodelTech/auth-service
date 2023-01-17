@@ -112,11 +112,11 @@ deploy-to-dev-manual:
     - pwd
     - ls -l
     - ls -la /
-    - ls /etc -l
+    - ls -l /root
+    - ls -l /etc
     - ls /apps
     - find / -type d -name "rancher"
     - which helm
-    - which kebectl
     - export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
     - helm list
     - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
