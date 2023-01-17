@@ -113,6 +113,8 @@ deploy-to-dev-manual:
     - ls -l
     - ls -l /
     - ls /etc -l
+    - ls /apps
+    - find / -type d -name "rancher"
     - which helm
     - export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
     - helm list
