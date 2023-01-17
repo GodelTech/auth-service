@@ -111,7 +111,7 @@ container:docker-build:
 #    - echo 'testing deploy-to-dev'
 #    - helm1 version
 #    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
-#    - helm1 upgrade ${APP_NAME} ./tools/helm1 --install --values=./tools/helm1/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
+#    - helm1 upgrade ${APP_NAME} ./deploy/helm1 --install --values=./deploy/helm1/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
 #  only:
 #    - Configure-CI-CD-pipeline
 
@@ -132,6 +132,6 @@ deploy-to-dev:
     - echo ${CI_PROJECT_PATH}
   variables:
     SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./tools/helm
+    HELM_PATH: ./sample_deploy
   only:
     - Configure-CI-CD-pipeline
