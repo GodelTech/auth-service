@@ -83,11 +83,3 @@ spec:
           successThreshold: {{ $readinessProbe.successThreshold }}
           failureThreshold: {{ $readinessProbe.failureThreshold }}
         {{- end }}
-        volumeMounts:
-        - name: {{ template "identity-server-poc.fullname" . }}-config-volume
-          mountPath: /envfiles/settings.json
-          subPath: settings.json
-      volumes:
-      - name: {{ template "identity-server-poc.fullname" . }}-config-volume
-        configMap:
-          name: {{ template "identity-server-poc.fullname" . }}
