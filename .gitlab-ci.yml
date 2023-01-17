@@ -108,6 +108,8 @@ deploy-to-dev-manual:
     - echo ${CI_ENVIRONMENT_NAME}
     - echo 'testing deploy-to-dev'y
     - pwd
+    - ls -l /builds/gte-internal/python/identity-server-poc
+    - ls -la /builds/gte-internal/python/identity-server-poc/helm
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
     - helm list
