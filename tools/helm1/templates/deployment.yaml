@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.applicationName }}
+  namespace: {{ .Values.applicationNamespace  }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ .Values.applicationName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.applicationName  }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.applicationName | lower }}-cr
+      containers:
+        - name: {{ .Values.applicationName }}
+          imagePullPolicy: Always
+          image: {{ .Values.applicationImage }}
+          ports:
+            - containerPort: {{ .Values.container.port }}

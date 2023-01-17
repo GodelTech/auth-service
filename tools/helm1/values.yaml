@@ -1,0 +1,31 @@
+# ------------------------------------------------------------------------------
+# APP
+# -----------------------------------------------------------------------------
+applicationName: identity-server-poc
+applicationNamespace: innovation
+applicationImage: innovation/techradar-x:last
+applicationDomain: rnd-identityserver-dev.godeltech.com
+
+
+# Sets the parameters for the secret containing ContainerRegistry's credentials
+imagePullSecret:
+  dockerServer: registry.gitlab.com
+  dockerUsername: xxx
+  dockerPassword: "xxx"
+  dockerEmail: "noreply@godeltech.com"
+
+
+## Container configuration
+container:
+  port: 8000
+
+
+# ------------------------------------------------------------------------------
+# Application Service properties
+# -----------------------------------------------------------------------------
+service:
+  ## port is the Kubernetes service port
+  port: 8000
+  targetPort: 8000
+  ## type defines the Kubernetes service type ('ClusterIP', 'LoadBalancer', or 'NodePort')
+  type: ClusterIP

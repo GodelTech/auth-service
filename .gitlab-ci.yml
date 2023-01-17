@@ -94,7 +94,7 @@ container:docker-build:
 ##    - innovation
 ##    - kubernetes
 #  image:
-#    name: alpine/helm:3.10.2
+#    name: alpine/helm1:3.10.2
 #    entrypoint: [""]
 #  environment:
 #    name: dev
@@ -107,9 +107,9 @@ container:docker-build:
 #    - echo ${CONTAINER_IMAGE}
 #    - echo ${CI_ENVIRONMENT_NAME}
 #    - echo 'testing deploy-to-dev'
-#    - helm version
+#    - helm1 version
 #    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
-#    - helm upgrade ${APP_NAME} ./tools/helm --install --values=./tools/helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
+#    - helm1 upgrade ${APP_NAME} ./tools/helm1 --install --values=./tools/helm1/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
 #  only:
 #    - Configure-CI-CD-pipeline
 
