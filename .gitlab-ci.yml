@@ -93,7 +93,9 @@ deploy-to-dev-manual:
 #  tags:
 #    - innovation
 #    - kubernetes
-  image: alpine/helm:3.5.4
+  image:
+    name: alpine/helm:3.5.4
+    entrypoint: [""]
   environment:
     name: dev
   script:
