@@ -7,7 +7,7 @@ init:
 # -----------------------------------------------------------------------------
 name: identity-server-poc
 namespace: innovation
-domain: https://rnd-identityserver-dev.godeltech.com
+domain: rnd-identityserver-dev.godeltech.com
 ## How many instances to run
 replicaCount: 1
 ## Specifies the number of old replicas to retain to allow rollback

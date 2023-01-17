@@ -44,14 +44,3 @@ Create chart name and version as used by the chart label.
 {{- $name := required "A valid .Values.image.pullSecret.name entry required!" .Values.image.pullSecret.name -}}
 {{- printf "%s" $name | trunc 63 | trimSuffix "-" -}}
 {{- end }}
-
-{{/* Generate configuration for application */}}
-{{- define "identity-server-poc.configData" }}
-{
-  "{{ .Values.environment_name }}": {
-    "hosts": {
-        "host": "{{ .Values.hosts.host }}",
-    },
-  }
-}
-{{- end -}}
