@@ -96,7 +96,6 @@ deploy-to-dev:
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CI_ENVIRONMENT_NAME}
   variables:
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./helm

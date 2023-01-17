@@ -48,9 +48,9 @@ image:
   enabled: false
   name: gte-internal-registry-key
   ## image registry username
-  username:
+  username: xxx
   ## image registry password
-  password:
+  password: "xxx"
   ## pullPolicy is the Docker image pull policy
   ## It's recommended to change this to 'Always' if the image tag is 'latest'
   ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
