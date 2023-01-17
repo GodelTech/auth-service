@@ -109,6 +109,7 @@ deploy-to-dev-manual:
     - echo 'testing deploy-to-dev'
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
+    - export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
     - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
   only:
     - Configure-CI-CD-pipeline
