@@ -38,20 +38,20 @@ spec:
         - name: wait-for-dependency
           image: {{ .Values.init.image }}
           imagePullPolicy: {{ .Values.init.imagePullPolicy }}
-          command:
-            - 'sh'
-            - '-c'
-            - >
-              until nc -z -w 2 {{ template "identity-server-poc.redis.fullname" . }} {{ .Values.redis.master.port }} && echo redis ok; do
-                sleep 2;
-              done;
+#          command:
+#            - 'sh'
+#            - '-c'
+#            - >
+#              until nc -z -w 2 {{ template "identity-server-poc.redis.fullname" . }} {{ .Values.redis.master.port }} && echo redis ok; do
+#                sleep 2;
+#              done;
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.image.location }}
         imagePullPolicy: IfNotPresent
-        env:
-        - name: ENVIRONMENT_NAME
-          value: {{ .Values.environment_name }}
+#        env:
+#        - name: ENVIRONMENT_NAME
+#          value: {{ .Values.environment_name }}
 
         resources:
 {{ toYaml .Values.resources | indent 10 }}
