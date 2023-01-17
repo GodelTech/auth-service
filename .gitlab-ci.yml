@@ -125,6 +125,7 @@ deploy-to-dev:
     - echo ${CI_REGISTRY}
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
+    - echo ${CI_JOB_TOKEN}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CI_PIPELINE_ID}
     - echo ${SERVICE_NAME}
