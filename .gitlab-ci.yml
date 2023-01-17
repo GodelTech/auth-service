@@ -93,14 +93,14 @@ container:docker-build:
 deploy-to-dev-manual:
   stage: deploy-to-dev
   variables:
-    ENV_NAME: development
+    ENV_NAME: dev
     APP_DOMAIN: rnd-identityserver-dev.godeltech.com
-  tags:
-    - innovation
-    - kubernetes
+#  tags:
+#    - innovation
+#    - kubernetes
   image: alpine/helm:3.5.4
   environment:
-    name: development
+    name: dev
   script:
     - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
@@ -111,7 +111,7 @@ deploy-to-dev-manual:
     - echo 'test deploy-to-dev'
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
-    - helm upgrade ${APP_NAME} ./chart --install --values=./chart/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
+    - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
   only:
     - Configure-CI-CD-pipeline
 
