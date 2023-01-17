@@ -122,6 +122,10 @@ deploy-to-dev:
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+    - echo ${CI_PIPELINE_ID}
+    - echo ${SERVICE_NAME}
+    - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${CI_PROJECT_PATH}
   variables:
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./tools/helm
