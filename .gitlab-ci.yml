@@ -90,9 +90,9 @@ deploy-to-dev-manual:
   variables:
     ENV_NAME: dev
     APP_DOMAIN: rnd-identityserver-dev.godeltech.com
-  tags:
-    - innovation
-    - kubernetes
+#  tags:
+#    - innovation
+#    - kubernetes
   image: alpine/helm:3.5.4
   environment:
     name: dev
