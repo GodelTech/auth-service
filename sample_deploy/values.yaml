@@ -12,3 +12,11 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
+
+
+imagePullSecret:
+  server: gitlab.godeltech.com:4567
+  username: xxx
+  password: "xxx"
+  email: "noreply@godeltech.com"

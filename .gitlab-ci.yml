@@ -132,6 +132,6 @@ deploy-to-dev:
     - echo ${CI_PROJECT_PATH}
   variables:
     SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./sample_deploy
+    HELM_PATH: ./deploy
   only:
     - Configure-CI-CD-pipeline
