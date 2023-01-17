@@ -107,8 +107,6 @@ deploy-to-dev-manual:
     - echo ${CONTAINER_IMAGE}
     - echo ${CI_ENVIRONMENT_NAME}
     - echo 'testing deploy-to-dev'
-    - docker ps
-    - dokcer images
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
     - helm list
