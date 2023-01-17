@@ -1,5 +1,6 @@
-image:
-    registry: ${CI_REGISTRY}
-    location: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+imagePullSecret:
+    dockerServer: ${CI_REGISTRY}
+
+applicationImage: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
 
 environment_name: ${CI_ENVIRONMENT_NAME}

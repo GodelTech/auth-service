@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.applicationName }}-configmap
+  namespace: {{ .Values.applicationNamespace }}
+data:
+  index.html: |
+    <html>
+    <head>
+      <h1>Hi</h1>
+    </head>
+    <body>
+      <p>Checking {{ .Values.applicationName }} deployment.</p>
+    </body>
+    </html>

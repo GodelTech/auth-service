@@ -5,9 +5,9 @@ init:
 # ------------------------------------------------------------------------------
 # APP
 # -----------------------------------------------------------------------------
-name: identity-server-poc
-namespace: innovation
-domain: rnd-identityserver-dev.godeltech.com
+applicationName: identity-server-poc
+applicationNamespace: innovation
+applicationDomain: rnd-identityserver-dev.godeltech.com
 ## How many instances to run
 replicaCount: 1
 ## Specifies the number of old replicas to retain to allow rollback
@@ -35,7 +35,7 @@ resources:
 # ------------------------------------------------------------------------------
 # Application image version
 # -----------------------------------------------------------------------------
-image:
+applicationImage:
   registry: registry.gitlab.com
   ## image name
   repository:
