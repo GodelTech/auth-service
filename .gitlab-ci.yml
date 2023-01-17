@@ -118,6 +118,8 @@ deploy-to-dev-manual:
     - find / -type d -name "rancher"
     - which helm
     - helm --help
+    - echo $HOME
+    - ls -la $HOME
     - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
   only:
     - Configure-CI-CD-pipeline
