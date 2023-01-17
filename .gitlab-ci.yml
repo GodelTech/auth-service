@@ -30,6 +30,10 @@ variables:
 #  DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
   IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+  PROJECT_NAME: innovation
+  APP_NAME: identity-server-poc
+
 
 
 # Pip's cache doesn't store the python packages
@@ -66,7 +70,6 @@ cache:
 #    - python -m venv .venv
 #    - source .venv/bin/activate
 #    - pip install --no-cache-dir --upgrade -r requirements.txt
-#    - echo '{"development":{"hosts":{"host":"'$HOST'"},"db":{"uri":"postgresql://postgres:postgres@localhost:5432/ehc_api"},"redis":{"host":"'$REDIS_HOST'","port":"'$REDIS_PORT'","password":"'$REDIS_PASSWORD'"}}}' > ./envfiles/settings.json
 #    - make migrate
 #    - make test
 #  rules:
@@ -87,17 +90,42 @@ container:docker-build:
 ## DEPLOY TO DEV
 ##################
 
-deploy-to-dev:
-  extends: .deploy-to-dev-ext
+deploy-to-dev-manual:
   stage: deploy-to-dev
+  variables:
+    ENV_NAME: development
+    APP_DOMAIN: rnd-identityserver-dev.godeltech.com
+  tags:
+    - innovation
+    - kubernetes
+  image: alpine/helm:3.5.4
+  environment:
+    name: development
   script:
     - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
     - echo ${CI_DEPLOY_USER}
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-  variables:
-    SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./helm
+    - echo ${CONTAINER_IMAGE}
+    - echo 'test deploy-to-dev'
+    - helm version
+    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
+    - helm upgrade ${APP_NAME} ./chart --install --values=./chart/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
   only:
     - Configure-CI-CD-pipeline
+
+#deploy-to-dev:
+#  extends: .deploy-to-dev-ext
+#  stage: deploy-to-dev
+#  script:
+#    - echo ${STAGE_IMAGE_PATH}
+#    - echo ${CI_REGISTRY}
+#    - echo ${CI_DEPLOY_USER}
+#    - echo ${CI_DEPLOY_PASSWORD}
+#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+#  variables:
+#    SERVICE: "${SERVICE_NAME}"
+#    HELM_PATH: ./helm
+#  only:
+#    - Configure-CI-CD-pipeline
