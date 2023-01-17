@@ -22,7 +22,7 @@ stages:          # List of stages for jobs, and their order of execution
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
-  SERVICE_NAME: identity-server-poc
+  SERVICE_NAME: sample-helm-cicd-demo
 #  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
 #  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
 #  PROJECT_NAME: innovation
@@ -133,6 +133,6 @@ deploy-to-dev:
     - echo ${CI_PROJECT_PATH}
   variables:
     SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./deploy/helm
+    HELM_PATH: ./sample_deploy
   only:
     - Configure-CI-CD-pipeline
