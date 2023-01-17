@@ -107,9 +107,12 @@ deploy-to-dev-manual:
     - echo ${CONTAINER_IMAGE}
     - echo ${CI_ENVIRONMENT_NAME}
     - echo 'testing deploy-to-dev'
+    - ls -l /
+    - ls -l /helm
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
     - helm list
+    - docker images
     - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
   only:
     - Configure-CI-CD-pipeline
