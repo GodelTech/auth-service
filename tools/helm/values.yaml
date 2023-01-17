@@ -2,28 +2,36 @@ init:
   image: "alpine:3.8"
   imagePullPolicy: IfNotPresent
 
+
 # ------------------------------------------------------------------------------
 # APP
 # -----------------------------------------------------------------------------
-name: identity-server-poc
-namespace: innovation
-domain: rnd-identityserver-dev.godeltech.com
+application:
+  name: identity-server-poc
+  namespace: innovation
+  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139085
+  domain: rnd-identityserver-dev.godeltech.com
+  port: 8000
+
+
+# ------------------------------------------------------------------------------
+# Application image version
+# -----------------------------------------------------------------------------
+imagePullSecret:
+  server: gitlab.godeltech.com:4567
+  name: gte-internal-registry-key
+  username: a.shyrokau
+  password: g6aW27ZneDEwgNSWrxps
+  email: "noreply@godeltech.com"
+
+
 ## How many instances to run
 replicaCount: 1
-## Specifies the number of old replicas to retain to allow rollback
-revisionHistoryLimit: 3
-## Restart policy of the deployment
-restartPolicy: Never
-## Container configuration
-container:
-  port: 8000
+
 
 # ------------------------------------------------------------------------------
 # Application resources for the deployment
 # -----------------------------------------------------------------------------
-## Configure resource requests and limits
-## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-##
 resources:
   requests:
     memory: "128Mi"
@@ -31,32 +39,6 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "200m"
-
-# ------------------------------------------------------------------------------
-# Application image version
-# -----------------------------------------------------------------------------
-image:
-  registry: registry.gitlab.com
-  ## image name
-  repository:
-  ## tag is the Application image tag
-  tag: 0.0.1
-  pullSecret:
-  # If enabled will be created secret with data.dockerconfigjson
-  # In this case password and username required
-  # Otherwise the secret with name must be exists
-  enabled: true
-  name: gte-internal-registry-key
-  ## image registry username
-  username: a.shyrokau
-  ## image registry password
-  password: g6aW27ZneDEwgNSWrxps
-  email: "noreply@godeltech.com"
-  ## pullPolicy is the Docker image pull policy
-  ## It's recommended to change this to 'Always' if the image tag is 'latest'
-  ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
-  ##
-  pullPolicy: Always
 
 
 # ------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .Values.application.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
@@ -9,16 +9,16 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: { .Values.name }}
+      app: { .Values.application.name }}
   template:
     metadata:
       labels:
-        app: { .Values.name }}
+        app: { .Values.application.name }}
     spec:
       containers:
       - name: {{ .Release.Name }}
-        image: {{ .Values.image.location }}
+        image: {{ .Values.application.image }}
         imagePullPolicy: IfNotPresent
         resources: {{ toYaml .Values.resources | indent 10 }}
         ports:
-        - containerPort: {{ .Values.container.port }}
+        - containerPort: {{ .Values.application.port }}
