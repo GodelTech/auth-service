@@ -84,46 +84,46 @@ container:docker-build:
 ##################
 ## DEPLOY TO DEV
 ##################
-
-deploy-to-dev-manual:
-  stage: deploy-to-dev
-  variables:
-    ENV_NAME: dev
-    APP_DOMAIN: rnd-identityserver-dev.godeltech.com
-#  tags:
-#    - innovation
-#    - kubernetes
-  image:
-    name: alpine/helm:3.10.2
-#    entrypoint: [""]
-  environment:
-    name: dev
-  script:
-    - echo ${STAGE_IMAGE_PATH}
-    - echo ${CI_REGISTRY}
-    - echo ${CI_DEPLOY_USER}
-    - echo ${CI_DEPLOY_PASSWORD}
-    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CONTAINER_IMAGE}
-    - echo ${CI_ENVIRONMENT_NAME}
-    - echo 'testing deploy-to-dev'
-    - helm version
-    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
-    - helm upgrade ${APP_NAME} ./tools/helm --install --values=./tools/helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
-  only:
-    - Configure-CI-CD-pipeline
-
-#deploy-to-dev:
-#  extends: .deploy-to-dev-ext
+#
+#deploy-to-dev-manual:
 #  stage: deploy-to-dev
+#  variables:
+#    ENV_NAME: dev
+#    APP_DOMAIN: rnd-identityserver-dev.godeltech.com
+##  tags:
+##    - innovation
+##    - kubernetes
+#  image:
+#    name: alpine/helm:3.10.2
+#    entrypoint: [""]
+#  environment:
+#    name: dev
 #  script:
 #    - echo ${STAGE_IMAGE_PATH}
 #    - echo ${CI_REGISTRY}
 #    - echo ${CI_DEPLOY_USER}
 #    - echo ${CI_DEPLOY_PASSWORD}
 #    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#  variables:
-#    SERVICE: "${SERVICE_NAME}"
-#    HELM_PATH: ./helm
+#    - echo ${CONTAINER_IMAGE}
+#    - echo ${CI_ENVIRONMENT_NAME}
+#    - echo 'testing deploy-to-dev'
+#    - helm version
+#    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
+#    - helm upgrade ${APP_NAME} ./tools/helm --install --values=./tools/helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
 #  only:
 #    - Configure-CI-CD-pipeline
+
+deploy-to-dev:
+  extends: .deploy-to-dev-ext
+  stage: deploy-to-dev
+  script:
+    - echo ${STAGE_IMAGE_PATH}
+    - echo ${CI_REGISTRY}
+    - echo ${CI_DEPLOY_USER}
+    - echo ${CI_DEPLOY_PASSWORD}
+    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    HELM_PATH: ./tools/helm
+  only:
+    - Configure-CI-CD-pipeline
