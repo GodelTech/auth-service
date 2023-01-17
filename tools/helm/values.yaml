@@ -1,6 +1,5 @@
 init:
   image: "alpine:3.8"
-  imagePullPolicy: IfNotPresent
 
 
 # ------------------------------------------------------------------------------
@@ -9,7 +8,7 @@ init:
 application:
   name: identity-server-poc
   namespace: innovation
-  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139085
+  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
   domain: rnd-identityserver-dev.godeltech.com
   port: 8000
 
@@ -19,9 +18,8 @@ application:
 # -----------------------------------------------------------------------------
 imagePullSecret:
   server: gitlab.godeltech.com:4567
-  name: gte-internal-registry-key
-  username: a.shyrokau
-  password: g6aW27ZneDEwgNSWrxps
+  username: xxx
+  password: "xxx"
   email: "noreply@godeltech.com"
 
 
@@ -45,33 +43,10 @@ resources:
 # Application Service properties
 # -----------------------------------------------------------------------------
 service:
-  ## port is the Kubernetes service port
   port: 8000
   targetPort: 8000
-  ## type defines the Kubernetes service type ('ClusterIP', 'LoadBalancer', or 'NodePort')
   type: ClusterIP
 
-
-# ------------------------------------------------------------------------------
-# REDIS:
-# values to override: https://github.com/helm/charts/tree/master/stable/redis
-# ------------------------------------------------------------------------------
-redis:
-  ## If true, install the Redis chart alongside application
-  enabled: false
-  usePassword: false
-  ## Use master-slave topology. If true 1 slave is by default
-  cluster:
-    enabled: false
-# enabled = true > It is a part of redis service full name: Release.Name + nameOverride + master
-# enabled = false > It is a redis service full name
-  nameOverride:
-  master:
-# enabled = true/false > It is a redis service port
-    port: 6379
-    cache_db: 0
-    persistence:
-      size: 1Gi
 
 # ------------------------------------------------------------------------------
 # Application Liveness probe

@@ -4,9 +4,6 @@ metadata:
   name: {{ .Values.application.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  strategy:
-    type: RollingUpdate
   selector:
     matchLabels:
       app: { .Values.application.name }}
