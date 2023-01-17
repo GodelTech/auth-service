@@ -1,6 +1,6 @@
 from src.data_access.postgresql.tables.client import Client
 from src.data_access.postgresql.tables.users import UserClaim
-
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 
 class WellKnownServies:
     def get_list_of_types(
@@ -37,7 +37,7 @@ class WellKnownServies:
         result["response_types_supported"] = self.get_list_of_types()
 
         # may be REQUIRED
-        result["token_endpoint"] = urls_dict["false"]
+        result["token_endpoint"] = urls_dict['get_tokens']
         result["end_session_endpoint"] = urls_dict["false"]
         result["check_session_iframe"] = urls_dict["false"]
 
@@ -94,7 +94,7 @@ class WellKnownServies:
             "id_token_encryption_alg_values_supported"
         ] = self.get_list_of_types()
         result["acr_values_supported"] = self.get_list_of_types()
-        result["grant_types_supported"] = self.get_list_of_types()
+        result["grant_types_supported"] = self.get_list_of_types(PersistentGrant.TYPES_OF_GRANTS)
         result["response_modes_supported"] = self.get_list_of_types()
         # result[""] = urls_dict['false']
 
