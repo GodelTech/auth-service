@@ -28,7 +28,7 @@ variables:
   PROJECT_NAME: innovation
   APP_NAME: identity-server-poc
   CI_DEPLOY_USER: "a.shyrokau"
-  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
+  CI_DEPLOY_PASSWORD: g6aW27ZneDEwgNSWrxps
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 
