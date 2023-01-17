@@ -103,7 +103,7 @@ deploy-to-dev-manual:
     - echo ${CI_DEPLOY_PASSWORD}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CONTAINER_IMAGE}
-    - echo 'test deploy-to-dev'
+    - echo 'testing deploy-to-dev'
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
     - helm upgrade ${APP_NAME} ./helm --install --values=./helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
