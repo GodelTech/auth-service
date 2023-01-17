@@ -7,10 +7,10 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
-from src.config import LogConfig, get_app_settings
-from src.config.settings.development import DevAppSettings
+from src.config import LogConfig
 from src.di import Container
 from src.presentation.api import router
+
 
 logger = logging.getLogger("is_app")
 
@@ -23,7 +23,6 @@ def get_application(test=False) -> FastAPI:
     settings = container.config()
 
     application = FastAPI(**settings.fastapi_kwargs)
-
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_hosts,
@@ -33,7 +32,6 @@ def get_application(test=False) -> FastAPI:
     )
 
     container.db()
-
     application.container = container
 
     application.include_router(router)
@@ -42,7 +40,9 @@ def get_application(test=False) -> FastAPI:
 
 app = get_application()
 
+
 LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
+
 
 # Redis activation
 @app.on_event("startup")

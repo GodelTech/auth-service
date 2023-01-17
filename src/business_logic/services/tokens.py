@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 from fastapi import Depends
 
@@ -207,7 +208,7 @@ class TokenService:
         else:
             raise GrantNotFoundError
 
-    async def check_authorisation_token(self, secret: str, token: str, token_type_hint: str = "access_token") -> Exception | bool:
+    async def check_authorisation_token(self, secret: str, token: str, token_type_hint: str = "access_token") -> Union[Exception, bool]:
         """ 
         Returns True if authorisation token is correct.
         Else rises PermissionError.
