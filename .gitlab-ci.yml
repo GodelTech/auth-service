@@ -106,9 +106,8 @@ deploy-to-dev-manual:
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CONTAINER_IMAGE}
     - echo ${CI_ENVIRONMENT_NAME}
-    - echo 'testing deploy-to-dev'
-    - ls -l /
-    - ls -l /helm
+    - echo 'testing deploy-to-dev'y
+    - pwd
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
     - helm list
