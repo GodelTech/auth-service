@@ -30,9 +30,6 @@ variables:
   CI_DEPLOY_USER: "a.shyrokau"
   CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  REDIS_HOST: "localhost"
-  REDIS_PASSWORD: ""
-  REDIS_PORT: 6379
 
 
 

@@ -5,9 +5,3 @@ imagePullSecret:
     server: ${CI_REGISTRY}
     username: ${CI_DEPLOY_USER}
     password: ${CI_DEPLOY_PASSWORD}
-
-redis:
-    nameOverride: ${REDIS_HOST}
-    password: ${REDIS_PASSWORD}
-    master:
-        port: ${REDIS_PORT}
