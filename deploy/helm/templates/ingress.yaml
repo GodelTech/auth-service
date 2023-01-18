@@ -5,9 +5,8 @@ metadata:
   namespace: {{ .Values.application.namespace  }}
   annotations:
     kubernetes.io/ingress.class: nginx
-    ingress.kubernetes.io/ssl-redirect: 'true'
-    kubernetes.io/ingress.allow-http: 'false'
     nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   tls:
     - hosts:
@@ -17,10 +16,10 @@ spec:
     - host: {{ .Values.application.domain }}
       http:
         paths:
-          - path: /
+          - path: /src(/|$)(.*)
             pathType: Prefix
             backend:
               service:
                 name: {{ .Values.application.name }}
                 port:
-                  number: 8000
+                  number: 80
