@@ -8,7 +8,7 @@ from fastapi_cache.coder import JsonCoder
 from src.config.settings.cache_time import CacheTimeSettings
 
 from src.business_logic.services.userinfo import UserInfoServices
-
+from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
 
@@ -49,8 +49,8 @@ async def get_userinfo(
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="You don't have permission for this claims"
         )
 
     except PermissionError:
@@ -61,7 +61,7 @@ async def get_userinfo(
     
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_403_FORBIDDEN, 
             detail="Incorrect Token"
         )
 
@@ -81,7 +81,7 @@ async def get_userinfo(
 )
 async def post_userinfo(
     request: Request,
-    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
     userinfo_class: UserInfoServices = Depends(),
 ):
     try:
@@ -100,8 +100,8 @@ async def post_userinfo(
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="You don't have permission for this claims"
         )
 
     except PermissionError:
@@ -112,7 +112,7 @@ async def post_userinfo(
     
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_403_FORBIDDEN, 
             detail="Incorrect Token"
         )
 
@@ -120,7 +120,6 @@ async def post_userinfo(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 
 @userinfo_router.get("/jwt", response_model=str, tags=["UserInfo"])
@@ -134,8 +133,11 @@ async def get_userinfo_jwt(
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),
     userinfo_class: UserInfoServices = Depends(),
 ):
+
     try:
         userinfo_class = userinfo_class
+        jwt_service = JWTService()
+        
         token = request.headers.get('authorization')
 
         if token != None:
@@ -144,15 +146,9 @@ async def get_userinfo_jwt(
             userinfo_class.authorization = auth_swagger
         else:
             raise PermissionError
-            
-        result = await userinfo_class.get_user_info_jwt()
-        return result
 
-    except ClaimsNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
-        )
+        logger.info("Collecting Claims from DataBase.")
+        return await jwt_service.encode_jwt(payload = await userinfo_class.get_user_info())
 
     except PermissionError:
         raise HTTPException(
@@ -162,8 +158,14 @@ async def get_userinfo_jwt(
     
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_403_FORBIDDEN, 
             detail="Incorrect Token"
+        )
+
+    except ClaimsNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="You don't have permission for this claims"
         )
 
     except:
@@ -178,8 +180,7 @@ async def get_userinfo_jwt(
 async def get_default_token():
     try:
         uis = UserInfoServices()
-        uis.jwt.set_expire_time(expire_hours=1)
-        return uis.jwt.encode_jwt(payload={"sub": "1"})
+        return await uis.jwt.encode_jwt(payload={"sub": "1"})
     except:
         raise HTTPException(status_code=500)
 
@@ -188,6 +189,6 @@ async def get_default_token():
 async def get_decode_token(token: str):
     try:
         uis = UserInfoServices()
-        return uis.jwt.decode_token(token)
+        return await uis.jwt.decode_token(token)
     except:
         raise HTTPException(status_code=500)

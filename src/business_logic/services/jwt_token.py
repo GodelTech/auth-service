@@ -27,6 +27,7 @@ class JWTService:
 
     async def decode_token(self, token: str, secret: None = None) -> dict:
         token = token.replace("Bearer ", "")
+        
         decoded = jwt.decode(
             token,
             key=self.keys.public_key,

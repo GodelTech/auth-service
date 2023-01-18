@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import delete
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-
+from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services.tokens import TokenService
 
 
@@ -27,7 +27,6 @@ class TestUserInfoService:
                 "nickname": "Nagibator2000",
                 "sub": 1,
             }
-        secret = await service.client_repo.get_client_secrete_by_client_id(client_id=service.client_id)
 
         async def new_check_authorisation_token(*args, **kwargs):
             return True
@@ -35,12 +34,12 @@ class TestUserInfoService:
         with mock.patch.object(
             TokenService, "check_authorisation_token", new=new_check_authorisation_token
         ):
-            token = await service.jwt.encode_jwt(secret=secret, payload=data_to_code, include_expire=False)
+            token = await service.jwt.encode_jwt(payload=data_to_code)
             service.authorization = token
             await service.persistent_grant_repo.create(
                 client_id="santa", data=token, user_id=3
             )
-            expected_part_one = {"sub": "1", "expire": "1"}
+            expected_part_one = {"sub": "1"}
             expected_part_two = data_to_code
             expected = expected_part_one | expected_part_two
             result = await service.get_user_info()

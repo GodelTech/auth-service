@@ -3,7 +3,7 @@ import logging
 import time
 import uuid
 from typing import Union
-
+from fastapi import status
 from sqlalchemy import exists, insert, select
 
 from src.data_access.postgresql.repositories.base import BaseRepository
@@ -58,10 +58,15 @@ class PersistentGrantRepository(BaseRepository):
         )
         return result.first()[0]
 
-    async def delete(self, client_id: str, data: str, grant_type: str):
-        grant_to_delete = await self.get(grant_type=grant_type, data=data)
-        await self.session.delete(grant_to_delete)
-        await self.session.flush()
+    async def delete(self, data: str, grant_type: str) -> int:
+        if await self.exists(grant_type=grant_type, data=data):
+            grant_to_delete = await self.get(grant_type=grant_type, data=data)
+            await self.session.delete(grant_to_delete)
+            await self.session.commit()
+            return status.HTTP_200_OK
+        else:
+            return status.HTTP_404_NOT_FOUND
+
 
     async def get_client_id_by_data(self, data):
         client_id = await self.session.execute(

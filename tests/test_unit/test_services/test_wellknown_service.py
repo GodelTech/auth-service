@@ -28,6 +28,7 @@ class TestWellKnownServies:
             "get_userinfo_jwt": "http://127.0.0.1:800...erinfo/jwt",
             "get_default_token": "http://127.0.0.1:800...ault_token",
             "get_openid_configuration": "http://127.0.0.1:800...figuration",
+            "get_tokens": "http://127.0.0.1:800...token",
             "false": "/ Not ready yet",
         }
 

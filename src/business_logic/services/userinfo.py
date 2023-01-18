@@ -14,10 +14,9 @@ class UserInfoServices:
         user_repo: UserRepository = Depends(get_repository(UserRepository)),
         client_repo: ClientRepository = Depends(get_repository(ClientRepository)),
         persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(PersistentGrantRepository)),
-        jwt_service: JWTService = Depends(),
         token_service: TokenService = Depends()
     ) -> None:
-        self.jwt = jwt_service
+        self.jwt = JWTService()
         self.token_service = token_service
         self.authorization = ...
         self.user_repo = user_repo
@@ -31,14 +30,8 @@ class UserInfoServices:
     ) -> dict:
         token = self.authorization
 
-        if self.client_id is None:
-            self.client_id = await self.persistent_grant_repo.get_client_id_by_data(token)
-        self.secret = await self.client_repo.get_client_secrete_by_client_id(self.client_id)
-
-        await self.token_service.check_authorisation_token(secret=self.secret, token=token)
-
         try:
-            decoded_token = await self.jwt.decode_token(token=token, secret=self.secret)
+            decoded_token = await self.jwt.decode_token(token=token)
             sub = int(decoded_token["sub"])
         except:
             raise ValueError
@@ -50,13 +43,5 @@ class UserInfoServices:
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        token = await self.jwt.encode_jwt(secret=self.secret, payload=result, include_expire=False)
+        token = await self.jwt.encode_jwt(payload=result)
         return token
-
-    @property
-    def client_id(self):
-        return self._client_id
-
-    @client_id.setter
-    def client_id(self, val):
-        self._client_id = val

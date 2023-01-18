@@ -64,7 +64,6 @@ async def user_info_service(connection: AsyncSession) -> UserInfoServices:
         user_repo=UserRepository(connection),
         client_repo=ClientRepository(connection),
         persistent_grant_repo=PersistentGrantRepository(connection),
-        jwt_service=JWTService(),
         token_service=TokenService()
     )
 
