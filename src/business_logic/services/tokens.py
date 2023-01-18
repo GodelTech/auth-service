@@ -193,7 +193,7 @@ class TokenService:
 
     async def revoke_token(self):
 
-        await self.check_authorisation_token(token = self.authorization)
+        # await self.check_authorisation_token(token = self.authorization)
     
         if self.request_body.token_type_hint != None:
             type_list = {self.request_body.token_type_hint, }
@@ -202,7 +202,7 @@ class TokenService:
 
         for token_type in type_list:
             if await self.persistent_grant_repo.exists(grant_type=token_type, data=self.request_body.token):
-                self.persistent_grant_repo.delete(
+                await self.persistent_grant_repo.delete(
                     grant_type=token_type, data=self.request_body.token)
                 break
         else:
@@ -215,9 +215,12 @@ class TokenService:
         token_type_hint default value is 'access_token'.
         """
 
-        if await self.jwt_service.check_spoiled_token(secret=secret, token=token):
+        try:
+            await self.jwt_service.decode_token(token=token)
+        except:
             raise PermissionError
-        elif not await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
+        
+        if not await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
             raise PermissionError
         else:
             return True

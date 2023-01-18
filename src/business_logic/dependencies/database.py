@@ -16,3 +16,17 @@ def get_repository(
         return repo_type(session)
 
     return _get_repo
+
+def get_repository_no_depends(
+        repo_type: Type[BaseRepository],
+):
+     def _get_repo(
+        engine = Container.db().engine
+     ) -> BaseRepository:
+        # sess = Container.db().get_connection()
+        # temp = Container.db().session_factory()
+        # session = await sess.__anext__()
+        repo = repo_type(engine)
+        return repo
+
+     return _get_repo()

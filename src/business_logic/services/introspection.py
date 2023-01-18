@@ -7,7 +7,7 @@ from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from fastapi import Depends
 from src.business_logic.dependencies.database import get_repository
 import datetime
-
+from jwt.exceptions import ExpiredSignatureError
 
 class IntrospectionServies():
     def __init__(self,
@@ -29,9 +29,15 @@ class IntrospectionServies():
 
     async def analyze_token(self) -> dict:
 
-        await self.token_service.checheck_authorisation_token(token = self.authorization)
+        #await self.token_service.checheck_authorisation_token(token = self.authorization)
+        
+        decoded_token = {}
 
-        decoded_token = self.jwt.decode_token(token=self.request_body.token)
+        try:
+            decoded_token = await self.jwt.decode_token(token=self.request_body.token)
+        except ExpiredSignatureError:
+            return {"active": False}
+        
         response = {}
 
         if self.request_body.token_type_hint == None:
@@ -39,15 +45,13 @@ class IntrospectionServies():
             list_of_types = [token_type[0] for token_type in PersistentGrant.TYPES_OF_GRANTS]
             
             for token_type in list_of_types:
-                if await self.persistent_grant_repo.exists(grant_type = token_type, data=decoded_token["data"]):
-                    if not self.jwt.check_spoiled_token(token=self.request_body.token):
-                        self.request_body.token_type_hint = token_type
-                        response = {"active": not self.jwt.check_spoiled_token(token=self.request_body.token)}
-                        break
+                if await self.persistent_grant_repo.exists(grant_type = token_type, data=self.request_body.token):
+                    self.request_body.token_type_hint = token_type
+                    response = {"active": True}
+                    break
         else:
-            exists = self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=decoded_token["data"])
-            spoiled = self.jwt.check_spoiled_token(token=self.request_body.token)
-            response = {"active": exists and not spoiled}
+            exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=self.request_body.token)
+            response = {"active": exists}
         
         if response["active"]:
             response["sub"] = decoded_token["sub"]
@@ -68,12 +72,22 @@ class IntrospectionServies():
                 response["iat"] = decoded_token["token_issued"]
             except:
                 pass
+            
+            try:
+                response['client_id'] = await self.get_client_id()
+            except:
+                pass
 
-            for claim in ('jti', 'aud', 'nbf', 'scope', 'client_id'):
+
+            for claim in ('jti', 'aud', 'nbf', 'scope',):
                 if claim in decoded_token.keys():
                     response[claim] = decoded_token[claim]
 
         return response
+
+    async def get_client_id(self) -> str:
+        grant = await self.persistent_grant_repo.get(data=self.request_body.token, grant_type=self.request_body.token_type_hint)
+        return grant.client_id
 
     def get_token_type(self) -> str:
         return 'Bearer'
