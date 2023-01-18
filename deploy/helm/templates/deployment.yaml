@@ -12,6 +12,12 @@ spec:
       labels:
         app: { .Values.application.name }}
     spec:
+      imagePullSecrets:
+        - name: gte-internal-python-identity-server-poc
+      initContainers:
+        - name: wait-for-dependency
+          image: { { .Values.init.image } }
+          imagePullPolicy: { { .Values.init.imagePullPolicy } }
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.application.image }}
