@@ -4,11 +4,10 @@ init:
 
 
 # ------------------------------------------------------------------------------
-# APP
+# Application
 # -----------------------------------------------------------------------------
 application:
   name: identity-server-poc
-  namespace: innovation
   image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
   domain: rnd-identityserver-dev.godeltech.com
   port: 8000
@@ -24,6 +23,14 @@ imagePullSecret:
   email: "noreply@godeltech.com"
 
 
+# ------------------------------------------------------------------------------
+# Application Service properties
+# -----------------------------------------------------------------------------
+service:
+  port: 8000
+  targetPort: 8000
+  type: ClusterIP
+
 ## How many instances to run
 replicaCount: 1
 
@@ -38,54 +45,3 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "200m"
-
-
-# ------------------------------------------------------------------------------
-# Application Service properties
-# -----------------------------------------------------------------------------
-service:
-  port: 8000
-  targetPort: 8000
-  type: ClusterIP
-
-
-# ------------------------------------------------------------------------------
-# Application Liveness probe
-# -----------------------------------------------------------------------------
-livenessProbe:
-  ## enabled is a flag to used to enable liveness probe
-  enabled: false
-  httpGet:
-  path: /meta/health
-  port: 80
-  ## initialDelaySeconds is a delay before liveness probe is initiated
-  initialDelaySeconds: 140
-  ## periodSeconds decides how often to perform the probe
-  periodSeconds: 10
-  ## timeoutSeconds decides when the probe times out
-  timeoutSeconds: 8
-  ## successThreshold is the minimum consecutive successes for the probe to be considered successful after having failed
-  successThreshold: 1
-  ## failureThreshold is the minimum consecutive failures for the probe to be considered failed after having succeeded
-  failureThreshold: 5
-
-# ------------------------------------------------------------------------------
-# Application Readiness probe
-# -----------------------------------------------------------------------------
-## Readiness check (pod ready to receive traffic) of the pod in deployment
-readinessProbe:
-  ## enabled is a flag to used to enable readiness probe
-  enabled: false
-  httpGet:
-  path: /meta/health
-  port: 80
-  ## initialDelaySeconds is a delay before readiness probe is initiate
-  initialDelaySeconds: 130
-  ## periodSeconds decides how often to perform the probe
-  periodSeconds: 10
-  ## timeoutSeconds decides when the probe times out
-  timeoutSeconds: 8
-  ## successThreshold is the minimum consecutive successes for the probe to be considered successful after having failed
-  successThreshold: 1
-  ## failureThreshold is the minimum consecutive failures for the probe to be considered failed after having succeeded
-  failureThreshold: 5
