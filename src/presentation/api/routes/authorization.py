@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from src.business_logic.services import AuthorisationService
+from src.business_logic.services import AuthorizationService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserNotFoundError,
@@ -22,7 +22,7 @@ auth_router = APIRouter(
 @auth_router.get("/", status_code=status.HTTP_302_FOUND, tags=["Authorization"])
 async def get_authorize(
     request_model: RequestModel = Depends(),
-    auth_class: AuthorisationService = Depends(),
+    auth_class: AuthorizationService = Depends(),
 ):
     try:
         auth_class = auth_class
@@ -77,7 +77,7 @@ async def get_authorize(
 )
 async def post_authorize(
     request_body: DataRequestModel = Depends(),
-    auth_class: AuthorisationService = Depends(),
+    auth_class: AuthorizationService = Depends(),
 ):
     try:
         request_model = RequestModel(**request_body.__dict__)

@@ -14,12 +14,12 @@ logger = logging.getLogger("is_app")
 
 class PersistentGrantRepository(BaseRepository):
     async def create(
-        self,
-        client_id: str,
-        data: str,
-        user_id: int,
-        grant_type: str = "code",
-        expiration_time: Union[int, datetime.datetime] = time.time(),
+        self, 
+        client_id: str, 
+        data: str, 
+        user_id: int, 
+        grant_type: str = 'code', 
+        expiration_time: int = 600,
     ) -> None:
         unique_key = str(uuid.uuid4())
         persistent_grant = {

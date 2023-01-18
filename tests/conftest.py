@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.main import get_application
 
-from src.business_logic.services.authorisation import AuthorisationService
+from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services.jwt_token import JWTService
@@ -45,10 +45,10 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
 
 
 @pytest_asyncio.fixture
-async def authorisation_service(
+async def authorization_service(
     connection: AsyncIterator[AsyncSession],
-) -> AuthorisationService:
-    auth_service = AuthorisationService(
+) -> AuthorizationService:
+    auth_service = AuthorizationService(
         client_repo=ClientRepository(connection),
         user_repo=UserRepository(connection),
         persistent_grant_repo=PersistentGrantRepository(connection),

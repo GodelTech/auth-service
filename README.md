@@ -16,7 +16,7 @@ And run the following command
 - *docker-compose -f ./docker-compose.yml up*
 
 You may run another command in a second terminal to execute tests with the following command
-- *docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"
+- *docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"*
 
 Or run the following command to run just postgresql, pgadmin, and redis services
 - *docker-compose -f ./docker-compose.dev.yml up*
