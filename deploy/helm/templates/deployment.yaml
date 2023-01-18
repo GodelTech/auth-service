@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.application.name  }}
+  name: identity-server-poc
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.application.name  }}
+      app: identity-server-poc
   template:
     metadata:
       labels:
-        app: {{ .Values.application.name  }}
+        app: identity-server-poc
     spec:
       containers:
-      - name: {{ .Values.application.name  }}
-        image: {{ .Values.application.image }}
+      - name: identity-server-poc
+        image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
         imagePullPolicy: IfNotPresent
         resources: {{ toYaml .Values.resources | indent 10 }}
         ports:
-        - containerPort: {{ .Values.application.port  }}
+        - containerPort: 8000
           protocol: TCP
