@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Values.application.name  }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Values.application.name  }}
@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: {{ .Values.application.name  }}
-        image: isp
-        imagePullPolicy: Never
+        image: {{ .Values.application.image }}
+        imagePullPolicy: IfNotPresent
         resources: {{ toYaml .Values.resources | indent 10 }}
         ports:
         - containerPort: {{ .Values.application.port  }}
