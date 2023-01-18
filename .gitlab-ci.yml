@@ -118,8 +118,8 @@ container:docker-build:
 deploy-to-dev:
   extends: .deploy-to-dev-ext
   stage: deploy-to-dev
-#  environment:
-#      name: development
+  environment:
+      name: development
   script:
     - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
