@@ -11,7 +11,7 @@ scope = (
 
 
 @pytest.mark.asyncio
-class TestAuthoriseEndpoint:
+class TestAuthorizeEndpoint:
     async def test_successful_authorize_request(self, client: AsyncClient):
         params = {
             "client_id": "test_client",

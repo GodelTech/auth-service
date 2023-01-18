@@ -13,7 +13,7 @@ from src.data_access.postgresql.repositories import (
 from src.presentation.api.models import RequestModel
 
 
-class AuthorisationService:
+class AuthorizationService:
     def __init__(
         self,
         client_repo: ClientRepository = Depends(

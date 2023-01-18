@@ -28,11 +28,11 @@ class TestUserInfoService:
                 "sub": 1,
             }
 
-        async def new_check_authorisation_token(*args, **kwargs):
+        async def new_check_authorization_token(*args, **kwargs):
             return True
 
         with mock.patch.object(
-            TokenService, "check_authorisation_token", new=new_check_authorisation_token
+            TokenService, "check_authorization_token", new=new_check_authorization_token
         ):
             token = await service.jwt.encode_jwt(payload=data_to_code)
             service.authorization = token
