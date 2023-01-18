@@ -13,7 +13,7 @@ spec:
         app: { .Values.application.name }}
     spec:
       containers:
-      - name: {{ .Release.Name }}
+      - name: {{ .Values.application.name }}
         image: {{ .Values.application.image }}
         imagePullPolicy: IfNotPresent
         resources: {{ toYaml .Values.resources | indent 10 }}
