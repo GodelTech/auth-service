@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: identity-server-poc
-        image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
+        image: {{ .Values.application.image  }}
         imagePullPolicy: IfNotPresent
         resources: {{ toYaml .Values.resources | indent 10 }}
         ports:
