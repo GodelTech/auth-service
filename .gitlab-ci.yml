@@ -53,11 +53,10 @@ build-and-test:
   stage: build
   script:
     - echo "Build and Test job is executed..."
+    - docker run -it -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
   image: ${IMAGE}
   variables:
     SERVICE: "${SERVICE_NAME}"
-  script:
-    - docker run -it -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
   rules:
     - when: always
 
