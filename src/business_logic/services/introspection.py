@@ -9,7 +9,8 @@ from src.business_logic.dependencies.database import get_repository
 import datetime
 from jwt.exceptions import ExpiredSignatureError
 
-class IntrospectionServies():
+
+class IntrospectionServies:
     def __init__(self,
                  grant_repo: PersistentGrantRepository = Depends(
                      get_repository(PersistentGrantRepository)),

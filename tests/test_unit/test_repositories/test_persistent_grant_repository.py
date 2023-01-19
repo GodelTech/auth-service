@@ -4,6 +4,7 @@ from sqlalchemy import select, delete
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository
 )
+from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
 
 
 @pytest.mark.asyncio
@@ -28,7 +29,6 @@ class TestPersistentGrantRepository:
         assert grant.subject_id == 2
         assert grant.data == 'iyuiyy'
 
-
     async def test_create_new_grant_not_full_data(self, connection):
         persistent_grant_repo = PersistentGrantRepository(connection)
         with pytest.raises(TypeError):
@@ -48,7 +48,7 @@ class TestPersistentGrantRepository:
         assert await persistent_grant_repo.exists(
             grant_type='code',
             data='elekltklkte'
-        ) == True
+        ) is True
 
         await persistent_grant_repo.delete(
             data='elekltklkte',
@@ -58,15 +58,13 @@ class TestPersistentGrantRepository:
         assert await persistent_grant_repo.exists(
             grant_type='code',
             data='elekltklkte'
-        ) == False
-
+        ) is False
 
     async def test_deleting_non_existing_grant(self, connection):
         persistent_grant_repo = PersistentGrantRepository(connection)
         response = await persistent_grant_repo.delete(data='foo', grant_type='bar')
         
         assert response == 404
-
 
     async def test_creating_grant_without_providing_type(self, connection):
         persistent_grant_repo = PersistentGrantRepository(connection) 
@@ -78,7 +76,7 @@ class TestPersistentGrantRepository:
         assert await persistent_grant_repo.exists(
             grant_type='code',
             data='secret_code'
-        ) == True
+        ) is True
         
         grant = await persistent_grant_repo.get(grant_type='code', data='secret_code')
         await persistent_grant_repo.delete(

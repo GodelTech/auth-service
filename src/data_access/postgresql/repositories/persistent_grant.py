@@ -3,22 +3,24 @@ import logging
 import time
 import uuid
 from typing import Union
+
 from fastapi import status
-from sqlalchemy import exists, insert, select
+from sqlalchemy import exists, insert, select, delete
 
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
 
 logger = logging.getLogger("is_app")
 
 
 class PersistentGrantRepository(BaseRepository):
     async def create(
-        self, 
-        client_id: str, 
-        data: str, 
-        user_id: int, 
-        grant_type: str = 'code', 
+        self,
+        client_id: str,
+        data: str,
+        user_id: int,
+        grant_type: str = 'code',
         expiration_time: int = 600,
     ) -> None:
         unique_key = str(uuid.uuid4())
@@ -48,6 +50,7 @@ class PersistentGrantRepository(BaseRepository):
             )
         )
         result = result.first()
+
         return result[0]
 
     async def get(self, grant_type: str, data: str):
@@ -67,7 +70,6 @@ class PersistentGrantRepository(BaseRepository):
         else:
             return status.HTTP_404_NOT_FOUND
 
-
     async def get_client_id_by_data(self, data):
         client_id = await self.session.execute(
             select(PersistentGrant.client_id).where(PersistentGrant.data == data)
@@ -75,7 +77,25 @@ class PersistentGrantRepository(BaseRepository):
         client_id = client_id.first()
 
         if client_id is None:
-            raise Exception( # add persistent grant error
+            raise PersistentGrantNotFoundError(
                 "Persistent grant you are looking for does not exist"
             )
         return client_id[0]
+
+    async def delete_persistent_grant_by_client_and_user_id(
+            self,
+            client_id: str,
+            user_id: int,
+            grant_type: str,
+            data: str
+            ) -> None:
+        if await self.exists(grant_type, data):
+            await self.session.execute(
+                delete(PersistentGrant).
+                where(PersistentGrant.client_id == client_id).
+                where(PersistentGrant.subject_id == user_id)
+            )
+            await self.session.commit()
+            return None
+        else:
+            raise PersistentGrantNotFoundError("Persistent grant you are looking for does not exist")

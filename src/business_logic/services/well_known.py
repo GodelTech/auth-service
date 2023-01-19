@@ -2,6 +2,7 @@ from src.data_access.postgresql.tables.client import Client
 from src.data_access.postgresql.tables.users import UserClaim
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 
+
 class WellKnownServies:
     def get_list_of_types(
         self, list_of_types: list = [("Not ready yet", "")]

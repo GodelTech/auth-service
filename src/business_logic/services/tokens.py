@@ -19,6 +19,7 @@ from src.presentation.api.models import BodyRequestTokenModel
 
 logger = logging.getLogger("is_app")
 
+
 def get_base_payload(user_id: str, client_id: str, expiration_time: int) -> dict:
     base_payload = {
         'iss': 'http://localhost:8000',
@@ -44,6 +45,7 @@ async def get_single_token(
     full_payload = {**base_payload, **additional_data}
     access_token = await jwt_service.encode_jwt(payload=full_payload)
     return access_token
+
 
 class TokenService:
     def __init__(

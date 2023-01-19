@@ -1,8 +1,9 @@
 from sqlalchemy import select
 
-from src.data_access.postgresql.errors.client import ClientNotFoundError
+from src.data_access.postgresql.errors.client import ClientNotFoundError, ClientPostLogoutRedirectUriError
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.client import Client, ClientSecret
+from src.data_access.postgresql.tables.client import Client, ClientPostLogoutRedirectUri
 
 
 class ClientRepository(BaseRepository):
@@ -31,4 +32,21 @@ class ClientRepository(BaseRepository):
 
     def __repr__(self):
         return "Client Repository"
+
+
+class ClientPostLogoutRedirectUriRepository(BaseRepository):
+
+    async def validate_post_logout_redirect_uri(self, client_id: str, logout_redirect_uri: str) -> bool:
+        logout_redirect_uri = await self.session.execute(
+            select(ClientPostLogoutRedirectUri).
+            where(ClientPostLogoutRedirectUri.client_id == client_id).
+            where(ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri)
+        )
+        redirect_uri = logout_redirect_uri.first()
+        if redirect_uri is None:
+            raise ClientPostLogoutRedirectUriError("Post logout redirect uri you are looking for does not exist")
+        return bool(redirect_uri)
+
+    def __repr__(self):
+        return "ClientPostLogoutRedirectUri Repository"
 
