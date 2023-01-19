@@ -21,7 +21,6 @@ from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
     UserRepository,
-    ClientPostLogoutRedirectUriRepository
 )
 
 
@@ -61,6 +60,16 @@ async def authorization_service(
 
 
 @pytest_asyncio.fixture
+async def end_session_service(connection: AsyncSession) -> EndSessionService:
+    end_sess_service = EndSessionService(
+        client_repo=ClientRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection)
+    )
+
+    return end_sess_service
+
+
+@pytest_asyncio.fixture
 async def user_info_service(connection: AsyncSession) -> UserInfoServices:
     user_info_service = UserInfoServices(
         user_repo=UserRepository(connection),
@@ -70,13 +79,3 @@ async def user_info_service(connection: AsyncSession) -> UserInfoServices:
     )
 
     return user_info_service
-
-
-@pytest_asyncio.fixture
-async def end_session_service(connection: AsyncSession) -> EndSessionService:
-    end_sess_service = EndSessionService(
-        client_logout_repo=ClientPostLogoutRedirectUriRepository(connection),
-        persistent_grant_repo=PersistentGrantRepository(connection)
-    )
-
-    return end_sess_service

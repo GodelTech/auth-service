@@ -37,7 +37,7 @@ class TestEndSessionService:
     async def test_logout(self, end_session_service, end_session_request_model):
         service = end_session_service
         service.request_model = end_session_request_model
-        await service._logout(client_id='double_test', user_id=2, data='secret_code', grant_type='code')
+        await service._logout(client_id='double_test', user_id=2)
         grant = await service.persistent_grant_repo.session.execute(
             select(PersistentGrant).
             where(PersistentGrant.client_id == 'double_test').
@@ -51,9 +51,7 @@ class TestEndSessionService:
         with pytest.raises(PersistentGrantNotFoundError):
             await service._logout(
                 client_id='test_client',
-                user_id=33333,
-                data='no_data',
-                grant_type='no_code'
+                user_id=33333
             )
 
     async def test_decode_id_token_hint(self, end_session_service, end_session_request_model):
