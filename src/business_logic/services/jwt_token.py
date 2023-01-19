@@ -35,3 +35,6 @@ class JWTService:
         )
 
         return decoded
+    
+    async def verify_token(self, token: str) -> bool:
+        return bool(await self.decode_token(token))
