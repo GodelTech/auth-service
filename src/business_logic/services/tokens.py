@@ -24,11 +24,12 @@ def get_base_payload(user_id: str, client_id: str, expiration_time: int) -> dict
     base_payload = {
         'iss': 'http://localhost:8000',
         'sub': user_id,
-        'aud': client_id,
+        'client': client_id,
         'iat': int(time.time()),
         'exp': int(time.time() + expiration_time)
     }
     return base_payload
+
 
 async def get_single_token(
     user_id: str, 
@@ -68,8 +69,7 @@ class TokenService:
         self.user_repo = user_repo
         self.jwt_service = JWTService()
 
-    async def get_tokens(self) -> list:
-    
+    async def get_tokens(self) -> dict:
         if self.request_model.grant_type == "code" and (self.request_model.redirect_uri == None or self.request_model.code == None):
             raise ValueError
 
@@ -156,7 +156,6 @@ class TokenService:
                         user_id=user_id,
                         grant_type="refresh_token",
                     )
-
                     return {
                         "access_token": access_token,
                         "refresh_token": refresh_token,
@@ -257,7 +256,6 @@ class TokenService:
                             jwt_service=self.jwt_service,
                             expiration_time=expiration_time
                         )
-
                         response = {
                             "access_token": new_access_token,
                             "token_type": "Bearer",

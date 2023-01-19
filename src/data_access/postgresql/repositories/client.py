@@ -30,12 +30,6 @@ class ClientRepository(BaseRepository):
             )
         return secrete[0]
 
-    def __repr__(self):
-        return "Client Repository"
-
-
-class ClientPostLogoutRedirectUriRepository(BaseRepository):
-
     async def validate_post_logout_redirect_uri(self, client_id: str, logout_redirect_uri: str) -> bool:
         logout_redirect_uri = await self.session.execute(
             select(ClientPostLogoutRedirectUri).
@@ -48,5 +42,4 @@ class ClientPostLogoutRedirectUriRepository(BaseRepository):
         return bool(redirect_uri)
 
     def __repr__(self):
-        return "ClientPostLogoutRedirectUri Repository"
-
+        return "Client Repository"

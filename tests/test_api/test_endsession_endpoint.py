@@ -3,9 +3,9 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert, delete
+from sqlalchemy import insert
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-
 from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA, TokenHint
 
 
@@ -20,6 +20,8 @@ class TestEndSessionEndpoint:
     ):
         service = end_session_service
         service.request_model = end_session_request_model
+        secret = await service.client_repo.get_client_secrete_by_client_id(client_id=TOKEN_HINT_DATA["client_id"])
+        token = await service.jwt_service.encode_jwt(secret=secret, payload={})
 
         grant = await service.persistent_grant_repo.session.execute(
             insert(PersistentGrant).values(
@@ -43,7 +45,7 @@ class TestEndSessionEndpoint:
         assert response.status_code == status.HTTP_302_FOUND
 
         await service.persistent_grant_repo.session.execute(
-            delete(PersistentGrant).where(PersistentGrant.client_id==TOKEN_HINT_DATA["client_id"])
+            delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
         )
         await service.persistent_grant_repo.session.commit()
 
