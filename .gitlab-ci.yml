@@ -14,7 +14,7 @@ include:
 
 
 stages:          # List of stages for jobs, and their order of execution
-  - build
+#  - build
   - container
   - deploy-to-dev
 
@@ -51,23 +51,23 @@ cache:
 ##################
 ## BUILD AND TEST
 ##################
-
-build-and-test:
-  stage: build
-  image: docker
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-  script:
-    - echo "Build and Test job is executed..."
-    - echo ${CI_REGISTRY_USER}
-    - echo ${CI_JOB_TOKEN}
-    - echo ${CI_REGISTRY}
-    - docker pull gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
-    - docker run -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
-  rules:
-    - when: always
+#
+#build-and-test:
+#  stage: build
+#  image: docker
+#  services:
+#    - docker:dind
+#  before_script:
+#    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+#  script:
+#    - echo "Build and Test job is executed..."
+#    - echo ${CI_REGISTRY_USER}
+#    - echo ${CI_JOB_TOKEN}
+#    - echo ${CI_REGISTRY}
+#    - docker pull gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
+#    - docker run -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
+#  rules:
+#    - when: always
 
 
 #build-and-test:
