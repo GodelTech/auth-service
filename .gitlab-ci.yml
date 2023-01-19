@@ -58,8 +58,7 @@ build-and-test:
   services:
     - docker:dind
   before_script:
-    - docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_TOKEN} ${CONTAINER_REGISTRY}
-    - docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_TOKEN} ${CONTAINER_REGISTRY_PROXY}
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - echo "Build and Test job is executed..."
     - docker pull gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
