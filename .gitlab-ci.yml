@@ -14,15 +14,16 @@ include:
 
 
 stages:          # List of stages for jobs, and their order of execution
-#  - build
-  - container
-  - deploy-to-dev
+  - build
+#  - container
+#  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
+  IMAGE: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
 #  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
 #  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
 #  PROJECT_NAME: innovation
@@ -47,6 +48,17 @@ cache:
 ##################
 ## BUILD AND TEST
 ##################
+
+build-and-test:
+  stage: build
+  script:
+    - echo "Build and Test job is executed..."
+  image: ${IMAGE}
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+  rules:
+    - when: always
+
 
 #build-and-test:
 #  stage: build
@@ -77,10 +89,10 @@ cache:
 ## CONTAINER
 ##################
 
-container:docker-build:
-  extends: .docker-build-artifact
-  only:
-    - Configure-CI-CD-pipeline
+#container:docker-build:
+#  extends: .docker-build-artifact
+#  only:
+#    - Configure-CI-CD-pipeline
 
 
 ##################
@@ -115,24 +127,24 @@ container:docker-build:
 #  only:
 #    - Configure-CI-CD-pipeline
 
-deploy-to-dev:
-  extends: .deploy-to-dev-ext
-  stage: deploy-to-dev
-  environment:
-      name: development
-  script:
-    - echo ${STAGE_IMAGE_PATH}
-    - echo ${CI_REGISTRY}
-    - echo ${CI_DEPLOY_USER}
-    - echo ${CI_DEPLOY_PASSWORD}
-    - echo ${CI_JOB_TOKEN}
-    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CI_PIPELINE_ID}
-    - echo ${SERVICE_NAME}
-    - echo ${CI_ENVIRONMENT_NAME}
-    - echo ${CI_PROJECT_PATH}
-  variables:
-    SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./deploy/helm
-  only:
-    - Configure-CI-CD-pipeline
+#deploy-to-dev:
+#  extends: .deploy-to-dev-ext
+#  stage: deploy-to-dev
+#  environment:
+#      name: development
+#  script:
+#    - echo ${STAGE_IMAGE_PATH}
+#    - echo ${CI_REGISTRY}
+#    - echo ${CI_DEPLOY_USER}
+#    - echo ${CI_DEPLOY_PASSWORD}
+#    - echo ${CI_JOB_TOKEN}
+#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+#    - echo ${CI_PIPELINE_ID}
+#    - echo ${SERVICE_NAME}
+#    - echo ${CI_ENVIRONMENT_NAME}
+#    - echo ${CI_PROJECT_PATH}
+#  variables:
+#    SERVICE: "${SERVICE_NAME}"
+#    HELM_PATH: ./deploy/helm
+#  only:
+#    - Configure-CI-CD-pipeline

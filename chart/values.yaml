@@ -1,0 +1,19 @@
+application:
+  name: isp
+  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
+  port: 8000
+
+
+
+# ------------------------------------------------------------------------------
+# Application Service properties
+# -----------------------------------------------------------------------------
+service:
+  port: 8000
+  targetPort: 8000
+  type: ClusterIP
+
+
+
+## How many instances to run
+replicaCount: 1
