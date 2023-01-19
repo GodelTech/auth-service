@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
-from src.business_logic.services.tokens import TokenService
+from src.business_logic.services import TokenService, JWTService
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.data_access.postgresql.errors import GrantNotFoundError
 import logging
@@ -38,11 +38,19 @@ async def post_revoke_token(
         logger.info(f'Revoking for token {request_body.token} started')
         return await token_class.revoke_token()
 
-    except PermissionError:
+    except PermissionError as e:
+        logger.error(e)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
-    except ValueError:
+    except ValueError as e:
+        logger.error(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")  
-    except GrantNotFoundError:
+    except GrantNotFoundError as e:
+        logger.error(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@revoke_router.get('/test_token', status_code= 200, tags=['Revoke'])
+async def get_test_token(
+    request: Request
+):
+    return await JWTService().encode_jwt(payload={"sub": "1"})

@@ -103,7 +103,7 @@ class TestUserInfoEndpoint:
             "key": "unique_key",
             "client_id": uis.client_id,
             "data": token,
-            "subject_id": 14,
+            "subject_id": 2,
             "type": "code", #"access_token"
             "expiration" : 1234567890
         }
@@ -147,7 +147,7 @@ class TestUserInfoEndpoint:
         except:
             pass
         
-        await create_persistent_grant_instance(service=uis, token=token, subject_id=14)
+        await create_persistent_grant_instance(service=uis, token=token, subject_id=2)
 
         for url in ('/userinfo/', '/userinfo/jwt'):
             params = {
@@ -164,14 +164,14 @@ class TestUserInfoEndpoint:
     async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(self, user_info_service, client: AsyncClient):
         uis = user_info_service
         uis.client_id = "santa"
-        token = await uis.jwt.encode_jwt(payload={"sub": "14"})
+        token = await uis.jwt.encode_jwt(payload={"sub": "2"})
 
         try:
             await clean_persistent_grant(service=uis, client_id=uis.client_id)
         except:
             pass
 
-        await create_persistent_grant_instance(service=uis, token=token, subject_id=14)
+        await create_persistent_grant_instance(service=uis, token=token, subject_id=2)
 
         for url in ('/userinfo/', '/userinfo/jwt'):
             headers = {
@@ -179,7 +179,7 @@ class TestUserInfoEndpoint:
             }
 
             await uis.persistent_grant_repo.create(
-                client_id="santa", data=token, user_id=14
+                client_id="santa", data=token, user_id=2
             )
 
             response = await client.request('GET', url, headers=headers)

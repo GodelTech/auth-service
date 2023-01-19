@@ -10,6 +10,12 @@ from .client import (
     ClientScope,
     ClientSecret,
 )
+from .persistent_grant import PersistentGrant
+from .users import (
+    User,
+    UserClaim,
+    Role
+)
 
 __all__ = [
     Client,

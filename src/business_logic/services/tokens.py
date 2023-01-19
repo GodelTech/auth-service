@@ -269,36 +269,41 @@ class TokenService:
 
     async def revoke_token(self):
 
-        await self.check_authorization_token(token = self.authorization)
+        await self.check_authorization_token(token=self.authorization)
     
-        if self.request_body.token_type_hint != None:
-            type_list = {self.request_body.token_type_hint, }
-        else:
-            type_list = {"access_token", "refresh_token"}
-
-        for token_type in type_list:
-            if await self.persistent_grant_repo.exists(grant_type=token_type, data=self.request_body.token):
+        token_type_hint =  self.request_body.token_type_hint
+        if token_type_hint == 'refresh_token':
+            logger.info('I am here')
+            logger.info(f'{token_type_hint}')
+            logger.info(f'{self.request_body.token}')
+            if await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=self.request_body.token):
                 await self.persistent_grant_repo.delete(
-                    grant_type=token_type, data=self.request_body.token)
-                break
+                    grant_type=token_type_hint, 
+                    data=self.request_body.token
+                )
+            else:
+                raise GrantNotFoundError
+        elif token_type_hint == 'access_token':
+            # TODO: realize logic for access_token revocation.
+            pass
         else:
             raise GrantNotFoundError
 
 
-    async def check_authorization_token(self, secret: str, token: str, token_type_hint: str = "access_token") -> Union[Exception, bool]:
+    async def check_authorization_token(
+        self, 
+        token: str,
+        secret: Union[str, None] = None
+    ) -> Union[Exception, bool]:
         """ 
         Returns True if authorization token is correct.
         Else rises PermissionError.
         token_type_hint default value is 'access_token'.
+        
+        TODO: Remove this logic to middleware.
         """
 
-        try:
-            await self.jwt_service.decode_token(token=token)
-        except:
-            raise PermissionError
-        
-        if not await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=token):
-            raise PermissionError
-        else:
-            return True
+        if await self.jwt_service.verify_token(token=token):
+            return True 
 
+        raise PermissionError 

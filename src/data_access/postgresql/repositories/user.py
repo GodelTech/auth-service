@@ -5,10 +5,18 @@ from src.data_access.postgresql.errors.user import (
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables.users import User, UserClaim
+from src.data_access.postgresql.tables import User, UserClaim
 
 
 class UserRepository(BaseRepository):
+    async def get_user_by_id(self, user_id: int) -> User:
+        user = await self.session.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = user.first()
+
+        return user[0]
+
     async def get_hash_password(self, user_name: str) -> tuple:
 
         user = await self.session.execute(
