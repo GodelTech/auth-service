@@ -5,6 +5,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 @pytest.mark.asyncio
 async def test_successful_openid_config_request(connection: AsyncSession, client: AsyncClient):
 

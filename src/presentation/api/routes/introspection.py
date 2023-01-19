@@ -32,7 +32,7 @@ async def post_introspection(
         else:
             raise ValueError
 
-        introspection_class.request_body= request_body
+        introspection_class.request_body = request_body
         logger.info(f'Introspection for token {request_body.token} started')
         return await introspection_class.analyze_token()
 

@@ -21,104 +21,101 @@ class TestIntrospectionEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_introspection_request(self, connection: AsyncSession, client: AsyncClient):
+        jwt = JWTService()
+        persistent_grant_repo = PersistentGrantRepository(connection)
+        user_repo = UserRepository(connection)
 
-            jwt = JWTService()
-            persistent_grant_repo = PersistentGrantRepository(connection)
-            user_repo = UserRepository(connection)
+        grant_type = "code"
+        payload = {
+            "sub": 1,
+            "exp": time.time() + 3600,
+        }
+        introspection_token = await jwt.encode_jwt(payload=payload)
+        access_token = await jwt.encode_jwt(payload={"sub": "1"})
 
-            grant_type = "code"
-            payload = {
-                "sub" : 1,
-                "exp": time.time() + 3600,
-            }
-            introspection_token = await jwt.encode_jwt(payload=payload)
-            access_token = await jwt.encode_jwt(payload={"sub": "1"})
+        await persistent_grant_repo.delete(
+            grant_type=grant_type,
+            data=introspection_token
+        )
 
-            
-            await persistent_grant_repo.delete(
-                grant_type=grant_type,
-                data=introspection_token
-            )
+        await persistent_grant_repo.create(
+            grant_type=grant_type,
+            data=introspection_token,
+            user_id=1,
+            client_id="test_client",
+            expiration_time=3600,
+        )
 
-            await persistent_grant_repo.create(
-                grant_type=grant_type,
-                data=introspection_token,
-                user_id=1,
-                client_id="test_client",
-                expiration_time=3600,
-            )
+        headers = {
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        params = {
+            'token': introspection_token,
+            'token_type_hint': grant_type
+        }
 
-            headers = {
-                "authorization": f"Bearer {access_token}",
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            params = {
-                'token': introspection_token,
-                'token_type_hint': grant_type
-            }
+        user = await user_repo.get_user_by_id(user_id=1)
+        answer = {
+            "active": True,
+            "scope": None,
+            "client_id": "test_client",
+            "username": user.username,
+            "token_type": "Bearer",
+            "exp": 0,
+            "iat": None,
+            "nbf": None,
+            "sub": "1",
+            "aud": None,
+            "iss": "http://testserver",
+            "jti": None
+        }
 
-            user = await user_repo.get_user_by_id(user_id=1)
-            answer = {
-                "active": True,
-                "scope": None,
-                "client_id": "test_client",
-                "username": user.username,
-                "token_type": "Bearer",
-                "exp": 0,
-                "iat": None,
-                "nbf": None,
-                "sub": "1",
-                "aud": None,
-                "iss": "http://testserver",
-                "jti": None
-                }
-            
-            response = await client.request(method="POST", url='/introspection/', data=params, headers=headers)
-            response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_200_OK
-            response_content["exp"] = 0
-            assert response_content == answer
+        response = await client.request(method="POST", url='/introspection/', data=params, headers=headers)
+        response_content = json.loads(response.content.decode('utf-8'))
+        assert response.status_code == status.HTTP_200_OK
+        response_content["exp"] = 0
+        assert response_content == answer
 
     @pytest.mark.asyncio
     async def test_successful_introspection_request_spoiled_token(self, connection: AsyncSession, client: AsyncClient):
+        jwt = JWTService()
+        persistent_grant_repo = PersistentGrantRepository(connection)
 
-            jwt = JWTService()
-            persistent_grant_repo = PersistentGrantRepository(connection)
+        grant_type = "code"
+        payload = {
+            "sub": 1,
+            "exp": time.time()
+        }
 
-            grant_type = "code"
-            payload = {
-                "sub" : 1,
-                "exp" : time.time()
-            }
+        introspection_token = await jwt.encode_jwt(payload=payload)
 
-            introspection_token = await jwt.encode_jwt(payload=payload)
+        await persistent_grant_repo.delete(
+            grant_type=grant_type,
+            data=introspection_token
+        )
 
-            await persistent_grant_repo.delete(
-                grant_type=grant_type,
-                data=introspection_token
-            )
+        await persistent_grant_repo.create(
+            grant_type=grant_type,
+            data=introspection_token,
+            user_id=1,
+            client_id="test_client",
+            expiration_time=1,
+        )
 
-            await persistent_grant_repo.create(
-                grant_type=grant_type,
-                data=introspection_token,
-                user_id=1,
-                client_id="test_client",
-                expiration_time=1,
-            )
-            
-            headers = {
-                "authorization": await jwt.encode_jwt(payload={"sub": "1"}, secret= '123'),
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            
-            params = {
-                'token': introspection_token,
-                'token_type_hint': grant_type
-            }
+        headers = {
+            "authorization": await jwt.encode_jwt(payload={"sub": "1"}, secret='123'),
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
 
-            response = await client.request(method="POST", url='/introspection/', data=params, headers=headers)
-            response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_200_OK
-            assert response_content["active"] == False
-            response_content["active"] = None
-            assert set(response_content.values()) == {None}
+        params = {
+            'token': introspection_token,
+            'token_type_hint': grant_type
+        }
+
+        response = await client.request(method="POST", url='/introspection/', data=params, headers=headers)
+        response_content = json.loads(response.content.decode('utf-8'))
+        assert response.status_code == status.HTTP_200_OK
+        assert response_content["active"] == False
+        response_content["active"] = None
+        assert set(response_content.values()) == {None}

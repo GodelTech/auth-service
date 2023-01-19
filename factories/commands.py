@@ -19,6 +19,7 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_table()
         cls.populate_claims_table()
+        cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
 
     @classmethod
@@ -58,6 +59,13 @@ class DataBasePopulation:
     def populate_client_secrets(cls):
         for client_id, secret in data.CLIENT_SECRETS.items():
             sec = cl_factory.ClientSecretFactory(client_id=client_id, value=secret)
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+    @classmethod
+    def populate_client_post_logout_redirect_uri(cls):
+        for item in data.CLIENT_IDS:
+            uri = cl_factory.ClientPostLogoutRedirectUriFactory(client_id=item)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 

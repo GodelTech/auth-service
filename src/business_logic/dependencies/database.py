@@ -17,6 +17,7 @@ def get_repository(
 
     return _get_repo
 
+
 def get_repository_no_depends(
         repo_type: Type[BaseRepository],
 ):
