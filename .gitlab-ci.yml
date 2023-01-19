@@ -14,7 +14,7 @@ include:
 
 
 stages:          # List of stages for jobs, and their order of execution
-#  - build
+  - build
   - container
   - deploy-to-dev
 
