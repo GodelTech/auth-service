@@ -15,8 +15,8 @@ include:
 
 stages:          # List of stages for jobs, and their order of execution
   - build
-#  - container
-#  - deploy-to-dev
+  - container
+  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
@@ -56,6 +56,8 @@ build-and-test:
   image: ${IMAGE}
   variables:
     SERVICE: "${SERVICE_NAME}"
+  script:
+    - docker run -it -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
   rules:
     - when: always
 
@@ -89,10 +91,10 @@ build-and-test:
 ## CONTAINER
 ##################
 
-#container:docker-build:
-#  extends: .docker-build-artifact
-#  only:
-#    - Configure-CI-CD-pipeline
+container:docker-build:
+  extends: .docker-build-artifact
+  only:
+    - Configure-CI-CD-pipeline
 
 
 ##################
@@ -127,24 +129,24 @@ build-and-test:
 #  only:
 #    - Configure-CI-CD-pipeline
 
-#deploy-to-dev:
-#  extends: .deploy-to-dev-ext
-#  stage: deploy-to-dev
-#  environment:
-#      name: development
-#  script:
-#    - echo ${STAGE_IMAGE_PATH}
-#    - echo ${CI_REGISTRY}
-#    - echo ${CI_DEPLOY_USER}
-#    - echo ${CI_DEPLOY_PASSWORD}
-#    - echo ${CI_JOB_TOKEN}
-#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#    - echo ${CI_PIPELINE_ID}
-#    - echo ${SERVICE_NAME}
-#    - echo ${CI_ENVIRONMENT_NAME}
-#    - echo ${CI_PROJECT_PATH}
-#  variables:
-#    SERVICE: "${SERVICE_NAME}"
-#    HELM_PATH: ./deploy/helm
-#  only:
-#    - Configure-CI-CD-pipeline
+deploy-to-dev:
+  extends: .deploy-to-dev-ext
+  stage: deploy-to-dev
+  environment:
+      name: development
+  script:
+    - echo ${STAGE_IMAGE_PATH}
+    - echo ${CI_REGISTRY}
+    - echo ${CI_DEPLOY_USER}
+    - echo ${CI_DEPLOY_PASSWORD}
+    - echo ${CI_JOB_TOKEN}
+    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+    - echo ${CI_PIPELINE_ID}
+    - echo ${SERVICE_NAME}
+    - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${CI_PROJECT_PATH}
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    HELM_PATH: ./deploy/helm
+  only:
+    - Configure-CI-CD-pipeline
