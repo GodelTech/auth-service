@@ -15,5 +15,7 @@ class CreateRSAKeypair:
 
         return RSAKeypair(
             private_key=private_key, 
-            public_key=public_key
+            public_key=public_key,
+            n = key.n,
+            e = key.e,
         )
