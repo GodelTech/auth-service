@@ -19,6 +19,13 @@ class TestRevokationEndpoint:
 
             grant_type = "refresh_token"
             revoke_token = "----token_to_delete-----"
+            
+            # In case last test failed
+            if await persistent_grant_repo.exists(grant_type=grant_type, data=revoke_token):
+                await persistent_grant_repo.delete(
+                grant_type=grant_type,
+                data=revoke_token
+                )
 
             await persistent_grant_repo.create(
                 grant_type=grant_type,
@@ -40,7 +47,9 @@ class TestRevokationEndpoint:
 
             response = await client.request(method="POST", url='/revoke/', data=params, headers=headers)
             assert response.status_code == status.HTTP_200_OK
-            assert not await persistent_grant_repo.exists(grant_type="refresh_token", data=revoke_token)
+            
+            assert not await persistent_grant_repo.exists(grant_type=grant_type, data=revoke_token)
+
 
 
     @pytest.mark.asyncio

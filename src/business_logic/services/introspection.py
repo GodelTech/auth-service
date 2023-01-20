@@ -29,15 +29,14 @@ class IntrospectionServies:
         self.persistent_grant_repo = grant_repo
 
     async def analyze_token(self) -> dict:
-
-        #await self.token_service.checheck_authorisation_token(token = self.authorization)
-        
         decoded_token = {}
 
         try:
             decoded_token = await self.jwt.decode_token(token=self.request_body.token)
         except ExpiredSignatureError:
             return {"active": False}
+        except:
+            raise ValueError
         
         response = {}
 

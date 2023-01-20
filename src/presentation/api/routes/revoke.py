@@ -31,16 +31,13 @@ async def post_revoke_token(
         elif auth_swagger != None:
             token_class.authorization = auth_swagger
         else:
-            raise ValueError
+            raise PermissionError
         
         token_class.request_body= request_body
 
         logger.info(f'Revoking for token {request_body.token} started')
         return await token_class.revoke_token()
 
-    except PermissionError as e:
-        logger.error(e)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
     except ValueError as e:
         logger.error(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")  

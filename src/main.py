@@ -7,6 +7,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
+from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
 from src.config import LogConfig
 from src.di import Container
 from src.presentation.api import router
@@ -30,11 +31,14 @@ def get_application(test=False) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
+    application.add_middleware(AuthorizationMiddleware)
+    
+    
     container.db()
     application.container = container
 
     application.include_router(router)
+    
     return application
 
 

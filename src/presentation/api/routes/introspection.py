@@ -30,7 +30,7 @@ async def post_introspection(
         elif auth_swagger != None:
             introspection_class.authorization = auth_swagger
         else:
-            raise ValueError
+            raise PermissionError
 
         introspection_class.request_body = request_body
         logger.info(f'Introspection for token {request_body.token} started')
@@ -39,11 +39,8 @@ async def post_introspection(
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
 
-    except PermissionError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
-
     except ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
     
     except:
-         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

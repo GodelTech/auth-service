@@ -53,12 +53,6 @@ async def get_userinfo(
             detail="You don't have permission for this claims"
         )
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -103,12 +97,6 @@ async def post_userinfo(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="You don't have permission for this claims"
         )
-
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
     
     except ValueError:
         raise HTTPException(
@@ -150,12 +138,6 @@ async def get_userinfo_jwt(
         logger.info("Collecting Claims from DataBase.")
         return await jwt_service.encode_jwt(payload = await userinfo_class.get_user_info())
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
