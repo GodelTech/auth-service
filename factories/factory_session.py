@@ -1,18 +1,10 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from src.config import get_app_settings
 
+settings = get_app_settings()
+db_url = settings.database_url.replace('asyncpg', 'psycopg2')
 engine = create_engine(
-    "postgresql+psycopg2://postgres:postgres@localhost/is_db"
+    db_url
 )
 session = scoped_session(sessionmaker(bind=engine))
-
-DATABASE_ASYNC_URL = "postgresql+asyncpg://postgres:postgres@localhost/is_db"
-
-async_engine = create_async_engine(
-    DATABASE_ASYNC_URL,
-    echo=True,
-    future=True,
-)
-
-async_session = scoped_session(sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession))
