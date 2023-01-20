@@ -268,8 +268,6 @@ class TokenService:
 
 
     async def revoke_token(self):
-
-        await self.check_authorization_token(token=self.authorization)
     
         token_type_hint =  self.request_body.token_type_hint
         if token_type_hint == 'refresh_token':
@@ -288,22 +286,3 @@ class TokenService:
             pass
         else:
             raise GrantNotFoundError
-
-
-    async def check_authorization_token(
-        self, 
-        token: str,
-        secret: Union[str, None] = None
-    ) -> Union[Exception, bool]:
-        """ 
-        Returns True if authorization token is correct.
-        Else rises PermissionError.
-        token_type_hint default value is 'access_token'.
-        
-        TODO: Remove this logic to middleware.
-        """
-
-        if await self.jwt_service.verify_token(token=token):
-            return True 
-
-        raise PermissionError 
