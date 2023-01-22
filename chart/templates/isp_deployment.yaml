@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Values.application.name  }}
 spec:
-  replicas: {{ .Values.replicaCount  }}
+  replicas: 1
   selector:
     matchLabels:
       app: {{ .Values.application.name  }}
@@ -12,10 +12,13 @@ spec:
       labels:
         app: {{ .Values.application.name  }}
     spec:
+      hostNetwork: true
+      imagePullSecrets:
+        - name: {{ .Values.application.name | }}
       containers:
       - name: isp-container
         image: {{ .Values.application.image  }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.application.port  }}
           protocol: TCP

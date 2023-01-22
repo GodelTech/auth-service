@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: identity-server-poc
-  namespace: identity-server-poc
+  name: {{ .Values.application.name  }}
+  namespace: {{ .Values.application.namespace  }}
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/ssl-redirect: "true"
@@ -15,13 +15,13 @@ spec:
         - {{ .Values.application.domain }}
       secretName: default-cert
   rules:
-    - host: rnd-identityserver-dev.godeltech.com
+    - host: {{ .Values.application.domain  }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: identity-server-poc
+                name: {{ .Values.application.name  }}
                 port:
                   number: 8000

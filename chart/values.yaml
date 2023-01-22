@@ -1,8 +1,15 @@
 application:
   name: isp
-  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
+  namespace: innovation
+  image: gte-internal/python/identity-server-poc:identity-server-poc-139313
   port: 8000
+  domain: rnd-identityserver-dev.godeltech.com
 
+
+imagePullSecret:
+  server: gitlab.godeltech.com:4567
+  username: a.shyrokau
+  password: g6aW27ZneDEwgNSWrxps
 
 
 # ------------------------------------------------------------------------------

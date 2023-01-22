@@ -142,6 +142,8 @@ deploy-to-dev:
   stage: deploy-to-dev
   environment:
       name: development
+  before_script:
+    - docker login -u ${CI_DEPLOY_USER} -p ${CI_DEPLOY_PASSWORD} ${CI_REGISTRY}
   script:
     - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
@@ -153,9 +155,11 @@ deploy-to-dev:
     - echo ${SERVICE_NAME}
     - echo ${CI_ENVIRONMENT_NAME}
     - echo ${CI_PROJECT_PATH}
+    - echo ${CONTAINER_REGISTRY_PROXY}
+    - docker built -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH} .
 
-  variables:
-    SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./deploy/helm
-  only:
-    - Configure-CI-CD-pipeline
+#  variables:
+#    SERVICE: "${SERVICE_NAME}"
+#    HELM_PATH: ./deploy/helm
+#  only:
+#    - Configure-CI-CD-pipeline

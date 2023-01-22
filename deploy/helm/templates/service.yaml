@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: identity-server-poc
+  name: {{ .Values.application.name  }}
 spec:
   selector:
-    app: identity-server-poc
+    app: {{ .Values.application.name  }}
   ports:
   - protocol: TCP
-    port: 8000
-    targetPort: 8000
-  type: ClusterIP
+    port: {{ .Values.service.port  }}
+    targetPort: {{ .Values.service.targetPort  }}
+  type: {{ .Values.service.type  }}

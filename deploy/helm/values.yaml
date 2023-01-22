@@ -8,6 +8,7 @@ init:
 # -----------------------------------------------------------------------------
 application:
   name: identity-server-poc
+  namespace: innovation
   image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
   domain: rnd-identityserver-dev.godeltech.com
   port: 8000
