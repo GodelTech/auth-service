@@ -159,7 +159,7 @@ deploy-to-dev:
     - echo ${CI_ENVIRONMENT_NAME}
     - echo ${CI_PROJECT_PATH}
     - echo ${CONTAINER_REGISTRY_PROXY}
-    - docker built -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH} .
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH} .
 
 #  variables:
 #    SERVICE: "${SERVICE_NAME}"
