@@ -99,10 +99,10 @@ cache:
 ## CONTAINER
 ##################
 
-#container:docker-build:
-#  extends: .docker-build-artifact
-#  only:
-#    - Configure-CI-CD-pipeline
+container:docker-build:
+  extends: .docker-build-artifact
+  only:
+    - Configure-CI-CD-pipeline
 
 
 ##################
