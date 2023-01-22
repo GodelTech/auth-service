@@ -99,10 +99,10 @@ cache:
 ## CONTAINER
 ##################
 
-container:docker-build:
-  extends: .docker-build-artifact
-  only:
-    - Configure-CI-CD-pipeline
+#container:docker-build:
+#  extends: .docker-build-artifact
+#  only:
+#    - Configure-CI-CD-pipeline
 
 
 ##################
@@ -140,13 +140,13 @@ container:docker-build:
 deploy-to-dev:
   extends: .deploy-to-dev-ext
   stage: deploy-to-dev
-  image: docker:19
-  services:
-    - name: docker:19-bind
+#  image: docker:19
+#  services:
+#    - name: docker:19-bind
   environment:
       name: development
-  before_script:
-    - docker login -u ${CI_DEPLOY_USER} -p ${CI_DEPLOY_PASSWORD} ${CI_REGISTRY}
+#  before_script:
+#    - docker login -u ${CI_DEPLOY_USER} -p ${CI_DEPLOY_PASSWORD} ${CI_REGISTRY}
   script:
     - echo ${STAGE_IMAGE_PATH}
     - echo ${CI_REGISTRY}
@@ -162,10 +162,10 @@ deploy-to-dev:
     - echo ${CI_PIPELINE_ID}
     - echo ${SERVICE_NAME}
     - echo ${CI_COMMIT_HASH}
-    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID} .
+#    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID} .
 
-#  variables:
-#    SERVICE: "${SERVICE_NAME}"
-#    HELM_PATH: ./deploy/helm
-#  only:
-#    - Configure-CI-CD-pipeline
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    HELM_PATH: ./chart
+  only:
+    - Configure-CI-CD-pipeline
