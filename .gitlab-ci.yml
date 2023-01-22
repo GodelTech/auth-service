@@ -140,6 +140,9 @@ container:docker-build:
 deploy-to-dev:
   extends: .deploy-to-dev-ext
   stage: deploy-to-dev
+  image: docker:19
+  services:
+    - name: docker:19-bind
   environment:
       name: development
   before_script:
