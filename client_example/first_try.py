@@ -1,5 +1,5 @@
+import asyncio
 import httpx
-from httpx import AsyncClient
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -12,24 +12,23 @@ params = {
             "client_id": "test_client",
             "response_type": "code",
             "scope": scope,
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "https://www.google.com/"
         }
 
+
 async def foo():
-    with httpx.AsyncClient() as client:
-     r1 = await client.get('https://www.example.com/')
+    async with httpx.AsyncClient() as client:
+        r1 = await client.request("GET", 'http://127.0.0.1:8000/authorize/', params=params)
+        return r1
 
-print(r1, sep="\n")
+print(asyncio.run(foo()))
 
 
-# r1 = httpx.get("http://127.0.0.1:8000/authorize/", params=params)
-# r2 = AsyncClient.request("self", method="GET", url="http://127.0.0.1:8000/authorize/", params=params)
-# r2 = httpx.get("http://127.0.0.1:8000/")
-# r3 = httpx.get("https://www.python-httpx.org/")
-# r4 = httpx.get('https://httpbin.org/get')
+# r2 = httpx.get("http://127.0.0.1:8000/authorize/", params=params)
+# print(r2)
 
-# r5 = httpx.post('https://httpbin.org/post', data={'key': 'value'})
-
-# r6 = httpx.post("http://127.0.0.1:8000/authorize/")
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(foo())
+# loop.close()
 
 
