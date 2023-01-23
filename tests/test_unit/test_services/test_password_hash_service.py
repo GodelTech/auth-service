@@ -15,7 +15,7 @@ class TestPasswordHash:
 
     def test_hash_password_wrong_format(self):
         with pytest.raises(WrongPasswordFormatError):
-            password = PasswordHash.hash_password(2345)
+            PasswordHash.hash_password(2345)
 
     @pytest.mark.parametrize("test_input, expected", TEST_VALIDATE_PASSWORD[:3])
     def test_validate_password(self, test_input, expected):

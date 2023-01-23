@@ -1,14 +1,10 @@
-from typing import AsyncIterator
-
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 
 class BaseRepository:
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+    def __init__(self, engine: AsyncEngine) -> None:
+        self._engine = engine
 
     @property
-    def session(self) -> AsyncSession:
-        return self._session
+    def engine(self) -> AsyncEngine:
+        return self._engine
