@@ -10,6 +10,8 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
 )
 from src.presentation.api.models import DataRequestModel, RequestModel
+from src.di.providers import provide_auth_service_stub
+
 
 logger = logging.getLogger("is_app")
 
@@ -22,7 +24,7 @@ auth_router = APIRouter(
 @auth_router.get("/", status_code=status.HTTP_302_FOUND, tags=["Authorization"])
 async def get_authorize(
     request_model: RequestModel = Depends(),
-    auth_class: AuthorizationService = Depends(),
+    auth_class: AuthorizationService = Depends(provide_auth_service_stub),
 ):
     try:
         auth_class = auth_class
@@ -77,7 +79,7 @@ async def get_authorize(
 )
 async def post_authorize(
     request_body: DataRequestModel = Depends(),
-    auth_class: AuthorizationService = Depends(),
+    auth_class: AuthorizationService = Depends(provide_auth_service_stub),
 ):
     try:
         request_model = RequestModel(**request_body.__dict__)

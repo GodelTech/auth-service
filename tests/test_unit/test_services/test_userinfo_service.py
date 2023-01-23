@@ -1,11 +1,8 @@
-import datetime
-
 import mock
 import pytest
 from sqlalchemy import delete
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services.tokens import TokenService
 
 
@@ -16,7 +13,7 @@ class RequestMock:
 @pytest.mark.asyncio
 class TestUserInfoService:
 
-    async def test_get_user_info_and_get_user_info_jwt(self, user_info_service):
+    async def test_get_user_info_and_get_user_info_jwt(self, user_info_service, connection):
         service = user_info_service
         service.client_id = "santa"
         data_to_code = {
@@ -46,10 +43,27 @@ class TestUserInfoService:
 
         assert expected_jwt[:10] == result_jwt[:10]
 
-        await service.persistent_grant_repo.session.execute(
+        await connection.execute(
                 delete(PersistentGrant).
                 where(PersistentGrant.client_id == "santa")
             )
-        await service.persistent_grant_repo.session.commit()
+        await connection.commit()
 
+        expected_part_one = {"sub": "1"}
+        expected_part_two = data_to_code
+        expected = expected_part_one | expected_part_two
+        result = await service.get_user_info()
+        expected_jwt = token
+        result_jwt = await service.get_user_info_jwt()
 
+        assert expected["name"] == result["name"]
+        assert expected["given_name"] == result["given_name"]
+        assert expected["nickname"] == result["nickname"]
+
+        assert expected_jwt[:10] == result_jwt[:10]
+
+        await connection.execute(
+                    delete(PersistentGrant).
+                    where(PersistentGrant.client_id == "santa")
+                )
+        await connection.commit()

@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -80,14 +80,19 @@ class TestAuthorizationService:
         with pytest.raises(UserNotFoundError):
             await service.get_redirect_url()
 
-    async def test_validate_client(self, authorization_service):
-        await authorization_service.client_repo.session.execute(
+    async def test_validate_client(self, authorization_service, connection):
+        await connection.execute(
             insert(Client).values(**DEFAULT_CLIENT)
         )
+        await connection.commit()
         client = await authorization_service._validate_client(
             client_id="default_test_client"
         )
         assert client is True
+        await connection.execute(
+            delete(Client).where(Client.client_id == "default_test_client")
+        )
+        await connection.commit()
 
     async def test_validate_client_error(self, authorization_service):
         with pytest.raises(ClientNotFoundError):

@@ -1,10 +1,8 @@
-from src.data_access.postgresql.tables.client import Client
 from src.data_access.postgresql.tables.users import UserClaim
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
-
 
 
 class WellKnownServies:

@@ -1,4 +1,6 @@
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
@@ -10,25 +12,34 @@ from src.data_access.postgresql.tables import User, UserClaim
 
 class UserRepository(BaseRepository):
     async def get_user_by_id(self, user_id: int) -> User:
-        user = await self.session.execute(
-            select(User).where(User.id == user_id)
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        user = user.first()
+        async with session_factory() as sess:
+            session = sess
+            user = await session.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = user.first()
 
-        return user[0]
+            return user[0]
 
     async def get_hash_password(self, user_name: str) -> tuple:
-
-        user = await self.session.execute(
-            select(User).where(User.username == user_name)
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        user = user.first()
+        async with session_factory() as sess:
+            session = sess
+            user = await session.execute(
+                select(User).where(User.username == user_name)
+            )
+            user = user.first()
 
-        if user is None:
-            raise UserNotFoundError("User you are looking for does not exist")
+            if user is None:
+                raise UserNotFoundError("User you are looking for does not exist")
 
-        user = user[0]
-        return user.password_hash, user.id
+            user = user[0]
+            return user.password_hash, user.id
 
     async def get_claims(self, id: int) -> dict:
         claims_of_user = await self.request_DB_for_claims(id)
@@ -47,16 +58,26 @@ class UserRepository(BaseRepository):
         return result
 
     async def request_DB_for_claims(self, id):
-        return await self.session.execute(
-            select(UserClaim).where(UserClaim.user_id == id)
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
         )
+        async with session_factory() as sess:
+            session = sess
+            return await session.execute(
+                select(UserClaim).where(UserClaim.user_id == id)
+            )
 
-    async def get_username_by_id(self, id:int) -> str:
-        users = await self.session.execute(select(User).where(User.id == id))
-        result = []
-        result = dict(next(users))["User"].username
+    async def get_username_by_id(self, id: int) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            users = await session.execute(select(User).where(User.id == id))
+            result = []
+            result = dict(next(users))["User"].username
 
-        return result
+            return result
 
     def __repr__(self) -> str:
         return "User repository"

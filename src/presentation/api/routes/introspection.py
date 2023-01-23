@@ -4,6 +4,7 @@ from src.presentation.api.models.introspection import ResponceIntrospectionModel
 import logging
 from typing import Union
 from jwt.exceptions import ExpiredSignatureError
+from src.di.providers import provide_introspection_service_stub
 
 logger = logging.getLogger('is_app')
 
@@ -14,10 +15,11 @@ introspection_router = APIRouter(
 
 @introspection_router.post('/', response_model = ResponceIntrospectionModel, tags=['Introspection'])
 async def post_introspection(
-    request:Request , 
+    request: Request,
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
-    request_body : BodyRequestIntrospectionModel= Depends(), 
-    introspection_class: IntrospectionServies = Depends()):
+    request_body: BodyRequestIntrospectionModel = Depends(),
+    introspection_class: IntrospectionServies = Depends(provide_introspection_service_stub)
+):
     
     
     try:
