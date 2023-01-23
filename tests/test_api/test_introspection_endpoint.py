@@ -1,12 +1,9 @@
-import mock
 import time
 import json
 import pytest
 
-from datetime import datetime
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories import UserRepository, PersistentGrantRepository
@@ -20,10 +17,10 @@ async def new_check_authorisation_token(*args, **kwargs):
 class TestIntrospectionEndpoint:
 
     @pytest.mark.asyncio
-    async def test_successful_introspection_request(self, connection: AsyncSession, client: AsyncClient):
+    async def test_successful_introspection_request(self, engine, client: AsyncClient):
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(connection)
-        user_repo = UserRepository(connection)
+        persistent_grant_repo = PersistentGrantRepository(engine)
+        user_repo = UserRepository(engine)
 
         grant_type = "code"
         payload = {
@@ -77,10 +74,12 @@ class TestIntrospectionEndpoint:
         response_content["exp"] = 0
         assert response_content == answer
 
+        await persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(user_id=1, client_id="test_client")
+
     @pytest.mark.asyncio
-    async def test_successful_introspection_request_spoiled_token(self, connection: AsyncSession, client: AsyncClient):
+    async def test_successful_introspection_request_spoiled_token(self, engine, client: AsyncClient):
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(connection)
+        persistent_grant_repo = PersistentGrantRepository(engine)
 
         grant_type = "code"
         payload = {
@@ -104,7 +103,7 @@ class TestIntrospectionEndpoint:
         )
 
         headers = {
-            "authorization": await jwt.encode_jwt(payload={"sub": "1"}, secret='123'),
+            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
             "Content-Type": "application/x-www-form-urlencoded"
         }
 
@@ -116,6 +115,11 @@ class TestIntrospectionEndpoint:
         response = await client.request(method="POST", url='/introspection/', data=params, headers=headers)
         response_content = json.loads(response.content.decode('utf-8'))
         assert response.status_code == status.HTTP_200_OK
-        assert response_content["active"] == False
+        assert response_content["active"] is False
         response_content["active"] = None
         assert set(response_content.values()) == {None}
+
+        await persistent_grant_repo.delete(
+            grant_type=grant_type,
+            data=introspection_token
+        )

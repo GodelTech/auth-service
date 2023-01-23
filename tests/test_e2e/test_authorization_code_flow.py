@@ -5,7 +5,6 @@ from sqlalchemy import select, insert, delete
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 from src.business_logic.services.jwt_token import JWTService
 
 
@@ -38,9 +37,7 @@ class TestAuthorizationCodeFlow:
         assert response.status_code == status.HTTP_302_FOUND
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
-        persistent_grant_repo = PersistentGrantRepository(connection)
-
-        secret_code = await persistent_grant_repo.session.execute(
+        secret_code = await connection.execute(
             select(PersistentGrant.data).
             where(PersistentGrant.client_id == "spider_man").
             where(PersistentGrant.subject_id == 8)
@@ -93,5 +90,3 @@ class TestAuthorizationCodeFlow:
         }
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_302_FOUND
-
-

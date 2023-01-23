@@ -1,5 +1,4 @@
 import datetime
-
 import pytest_asyncio
 
 from src.presentation.api.models.authorization import RequestModel

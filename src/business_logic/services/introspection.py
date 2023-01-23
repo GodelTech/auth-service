@@ -1,32 +1,33 @@
+import datetime
+
+from jwt.exceptions import ExpiredSignatureError
+
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-from fastapi import Depends
-from src.business_logic.dependencies.database import get_repository
-import datetime
-from jwt.exceptions import ExpiredSignatureError
+from src.business_logic.dependencies.database import get_repository_no_depends
 
 
 class IntrospectionServies:
-    def __init__(self,
-                 grant_repo: PersistentGrantRepository = Depends(
-                     get_repository(PersistentGrantRepository)),
-                 user_repo: UserRepository = Depends(
-                     get_repository(UserRepository)),
-                 client_repo: UserRepository = Depends(
-                     get_repository(ClientRepository))
-                 ) -> None:
-        self.jwt = JWTService()
+    def __init__(
+        self,
+        jwt: JWTService,
+        # token_service: TokenService,
+        user_repo: UserRepository,
+        client_repo: ClientRepository,
+        persistent_grant_repo: PersistentGrantRepository
+    ) -> None:
+        self.jwt = jwt
         self.request = ...
         self.authorization = ...
         self.request_body = ...
-        self.token_service = TokenService()
+        # self.token_service = token_service
         self.user_repo = user_repo
         self.client_repo = client_repo
-        self.persistent_grant_repo = grant_repo
+        self.persistent_grant_repo = persistent_grant_repo
 
     async def analyze_token(self) -> dict:
         decoded_token = {}
@@ -40,7 +41,7 @@ class IntrospectionServies:
         
         response = {}
 
-        if self.request_body.token_type_hint == None:
+        if self.request_body.token_type_hint is None:
 
             list_of_types = [token_type[0] for token_type in PersistentGrant.TYPES_OF_GRANTS]
             
@@ -77,7 +78,6 @@ class IntrospectionServies:
                 response['client_id'] = await self.get_client_id()
             except:
                 pass
-
 
             for claim in ('jti', 'aud', 'nbf', 'scope',):
                 if claim in decoded_token.keys():

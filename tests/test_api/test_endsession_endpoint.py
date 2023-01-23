@@ -2,8 +2,10 @@ import jwt
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert, delete
+from sqlalchemy import delete
 from sqlalchemy import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA, TokenHint
@@ -14,6 +16,7 @@ class TestEndSessionEndpoint:
 
     async def test_successful_authorize_request(
             self,
+            engine,
             client: AsyncClient,
             end_session_service,
             end_session_request_model
@@ -22,53 +25,63 @@ class TestEndSessionEndpoint:
         service.request_model = end_session_request_model
         secret = await service.client_repo.get_client_secrete_by_client_id(client_id=TOKEN_HINT_DATA["client_id"])
         token = await service.jwt_service.encode_jwt(secret=secret, payload={})
-
-        grant = await service.persistent_grant_repo.session.execute(
-            insert(PersistentGrant).values(
-                key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
-                expiration=False
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            grant = await session.execute(
+                insert(PersistentGrant).values(
+                    key="test_key",
+                    client_id=TOKEN_HINT_DATA["client_id"],
+                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    data=TOKEN_HINT_DATA["data"],
+                    type=TOKEN_HINT_DATA["type"],
+                    expiration=False
+                )
             )
-        )
-        await service.persistent_grant_repo.session.commit()
-        hint = TokenHint()
-        token_hint = await hint.get_token_hint()
-        params = {
-            "id_token_hint": token_hint,
-            "post_logout_redirect_uri": "http://www.jones.com/",
-            "state": "test_state",
-        }
-        response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_302_FOUND
+            await session.commit()
+            hint = TokenHint()
+            token_hint = await hint.get_token_hint()
+            params = {
+                "id_token_hint": token_hint,
+                "post_logout_redirect_uri": "http://www.jones.com/",
+                "state": "test_state",
+            }
+            response = await client.request("GET", "/endsession/", params=params)
+            assert response.status_code == status.HTTP_302_FOUND
 
-        await service.persistent_grant_repo.session.execute(
-            delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
-        )
-        await service.persistent_grant_repo.session.commit()
+            await session.execute(
+                delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
+            )
+            await session.commit()
 
     async def test_successful_authorize_request_without_uri(
             self,
+            engine,
             client: AsyncClient,
             end_session_service,
             end_session_request_model
     ):
         service = end_session_service
         service.request_model = end_session_request_model
-
-        grant = await service.persistent_grant_repo.session.execute(
-            insert(PersistentGrant).values(
-                key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
-                expiration=False
-            )
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
         )
-        await service.persistent_grant_repo.session.commit()
+        async with session_factory() as sess:
+            session = sess
+            grant = await session.execute(
+                insert(PersistentGrant).values(
+                    key="test_key",
+                    client_id=TOKEN_HINT_DATA["client_id"],
+                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    data=TOKEN_HINT_DATA["data"],
+                    type=TOKEN_HINT_DATA["type"],
+                    expiration=False
+                )
+            )
+            await session.commit()
+
         hint = TokenHint()
         token_hint = await hint.get_token_hint()
 
@@ -79,24 +92,30 @@ class TestEndSessionEndpoint:
 
     async def test_successful_authorize_request_wrong_uri(
             self,
+            engine,
             client: AsyncClient,
             end_session_service,
             end_session_request_model
     ):
         service = end_session_service
         service.request_model = end_session_request_model
-
-        grant = await service.persistent_grant_repo.session.execute(
-            insert(PersistentGrant).values(
-                key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
-                expiration=False
-            )
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
         )
-        await service.persistent_grant_repo.session.commit()
+        async with session_factory() as sess:
+            session = sess
+            grant = await session.execute(
+                insert(PersistentGrant).values(
+                    key="test_key",
+                    client_id=TOKEN_HINT_DATA["client_id"],
+                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    data=TOKEN_HINT_DATA["data"],
+                    type=TOKEN_HINT_DATA["type"],
+                    expiration=False
+                )
+            )
+            await session.commit()
+
         hint = TokenHint()
         token_hint = await hint.get_token_hint()
         params = {
