@@ -1,0 +1,12 @@
+[docker]
+dynaconf_merge = true
+
+
+[docker.db]
+echo = true
+uri = "postgresql+asyncpg://postgres:postgres@postgres:5432/is_db"
+
+
+[docker.redis]
+echo = true
+host = "redis"

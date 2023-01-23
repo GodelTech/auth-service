@@ -1,0 +1,19 @@
+[default]
+
+[default.security]
+# openssl rand -hex 32
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+[default.db]
+uri = ""
+echo = false
+
+
+[default.redis]
+host = "localhost"
+port = 6379
+cache_db = 0
+user = "default"
+password = ""
+prefix = "identity_server_poc"

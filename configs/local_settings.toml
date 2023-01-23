@@ -1,0 +1,12 @@
+[local]
+dynaconf_merge = true
+
+
+[local.db]
+echo = true
+uri = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+
+
+[local.redis]
+echo = true
+host = "localhost"
