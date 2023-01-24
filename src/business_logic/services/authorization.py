@@ -1,9 +1,6 @@
 import logging
 import secrets
 
-from fastapi import Depends
-
-from src.business_logic.dependencies.database import get_repository
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -13,17 +10,16 @@ from src.data_access.postgresql.repositories import (
 from src.presentation.api.models import RequestModel
 
 
+logger = logging.getLogger('is_app')
+
+
 class AuthorizationService:
     def __init__(
         self,
-        client_repo: ClientRepository = Depends(
-            get_repository(ClientRepository)
-        ),
-        user_repo: UserRepository = Depends(get_repository(UserRepository)),
-        persistent_grant_repo: PersistentGrantRepository = Depends(
-            get_repository(PersistentGrantRepository)
-        ),
-        password_service: PasswordHash = Depends(),
+        client_repo: ClientRepository,
+        user_repo: UserRepository,
+        persistent_grant_repo: PersistentGrantRepository,
+        password_service: PasswordHash
     ) -> None:
         self._request_model = None
         self.client_repo = client_repo

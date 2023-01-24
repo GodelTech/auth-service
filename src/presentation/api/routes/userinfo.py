@@ -11,6 +11,7 @@ from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
+from src.di.providers import provide_userinfo_service_stub
 
 
 logger = logging.getLogger("is_app")
@@ -31,7 +32,7 @@ userinfo_router = APIRouter(
 async def get_userinfo(
     request: Request,
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
-    userinfo_class: UserInfoServices = Depends(),
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
     try:
         userinfo_class = userinfo_class
@@ -53,12 +54,6 @@ async def get_userinfo(
             detail="You don't have permission for this claims"
         )
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -82,7 +77,7 @@ async def get_userinfo(
 async def post_userinfo(
     request: Request,
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
-    userinfo_class: UserInfoServices = Depends(),
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
     try:
         userinfo_class = userinfo_class
@@ -102,12 +97,6 @@ async def post_userinfo(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="You don't have permission for this claims"
-        )
-
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
         )
     
     except ValueError:
@@ -131,7 +120,7 @@ async def post_userinfo(
 async def get_userinfo_jwt(
     request: Request,
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServices = Depends(),
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
 
     try:
@@ -139,7 +128,6 @@ async def get_userinfo_jwt(
         jwt_service = JWTService()
         
         token = request.headers.get('authorization')
-
         if token != None:
             userinfo_class.authorization = token
         elif auth_swagger != None:
@@ -148,14 +136,8 @@ async def get_userinfo_jwt(
             raise PermissionError
 
         logger.info("Collecting Claims from DataBase.")
-        return await jwt_service.encode_jwt(payload = await userinfo_class.get_user_info())
+        return await userinfo_class.jwt.encode_jwt(payload = await userinfo_class.get_user_info())
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 

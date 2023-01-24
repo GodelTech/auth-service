@@ -1,30 +1,26 @@
-from fastapi import Depends
-
-
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-from src.business_logic.dependencies.database import get_repository
+from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
+
+from typing import Union
 
 
 class EndSessionService:
 
     def __init__(
-            self,
-            client_repo: ClientRepository = Depends(get_repository(
-                ClientRepository
-            )),
-            persistent_grant_repo: PersistentGrantRepository = Depends(get_repository(
-                PersistentGrantRepository
-            )),
+        self,
+        client_repo: ClientRepository,
+        persistent_grant_repo: PersistentGrantRepository,
+        jwt_service: JWTService
     ) -> None:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
-        self.jwt_service = JWTService()
+        self.jwt_service = jwt_service
         self._request_model = None
 
-    async def end_session(self) -> (str, None):
+    async def end_session(self) -> Union[str, None]:
         decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
         await self._logout(
             client_id=decoded_id_token_hint['client_id'],
@@ -57,7 +53,7 @@ class EndSessionService:
         return result
 
     @property
-    def request_model(self) -> (RequestEndSessionModel, None):
+    def request_model(self) -> Union[RequestEndSessionModel, None]:
         return self._request_model
 
     @request_model.setter

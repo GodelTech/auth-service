@@ -8,6 +8,7 @@ from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.business_logic.services.endsession import EndSessionService
 from src.data_access.postgresql.errors.client import ClientPostLogoutRedirectUriError
 from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
+from src.di.providers import provide_endsession_service_stub
 
 logger = logging.getLogger('is_app')
 
@@ -20,7 +21,7 @@ endsession_router = APIRouter(
 @endsession_router.get('/', status_code=status.HTTP_204_NO_CONTENT, tags=['End Session'])
 async def end_session(
         request_model: RequestEndSessionModel = Depends(),
-        service_class: EndSessionService = Depends(),
+        service_class: EndSessionService = Depends(provide_endsession_service_stub),
 ):
     try:
         service_class = service_class

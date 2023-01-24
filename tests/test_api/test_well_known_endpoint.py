@@ -3,16 +3,15 @@ import jwt
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import base64_to_long
 from Crypto.PublicKey.RSA import construct
 
 
 @pytest.mark.asyncio
-class TestWellKnown():
+class TestWellKnown:
     
-    async def test_successful_openid_config_request(connection: AsyncSession, client: AsyncClient):
+    async def test_successful_openid_config_request(self, client: AsyncClient):
 
         KEYS_REQUIRED = ('issuer', 'jwks_uri', 'authorization_endpoint', 'token_endpoint',
                         'id_token_signing_alg_values_supported', 'subject_types_supported', 'response_types_supported')
@@ -37,30 +36,30 @@ class TestWellKnown():
         for key in response_content.keys():
             assert key in KEYS_OPTIONAL
 
-    async def test_successful_jwks_request(connection: AsyncSession, client: AsyncClient):
+    async def test_successful_jwks_request(self, client: AsyncClient):
 
-            response = await client.request(method="GET", url='/.well-known/jwks')
-            response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_200_OK
-            assert type(response_content["keys"]) == list
-            assert type(response_content["keys"][0]) == dict
+        response = await client.request(method="GET", url='/.well-known/jwks')
+        response_content = json.loads(response.content.decode('utf-8'))
+        assert response.status_code == status.HTTP_200_OK
+        assert type(response_content["keys"]) == list
+        assert type(response_content["keys"][0]) == dict
             
-            jwt_service = JWTService()
-            response_content = response_content["keys"][0]
-            test_token = await jwt_service.encode_jwt(payload={"sub":1})
+        jwt_service = JWTService()
+        response_content = response_content["keys"][0]
+        test_token = await jwt_service.encode_jwt(payload={"sub":1})
             
-            if response_content["alg"] == "RS256":
-                n = base64_to_long(response_content["n"])
-                e = base64_to_long(response_content["e"])
+        if response_content["alg"] == "RS256":
+            n = base64_to_long(response_content["n"])
+            e = base64_to_long(response_content["e"])
 
-                test_key = construct((n, e))
+            test_key = construct((n, e))
 
-                assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
-                assert response_content["kty"] == "RSA"
-                assert bool(jwt.decode(
-                    jwt = test_token,
-                    key=test_key.public_key().export_key('PEM'),
-                    algorithms=["RS256",]
-                )
-                )
-                assert response_content["use"] == "sig"
+            assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
+            assert response_content["kty"] == "RSA"
+            assert bool(jwt.decode(
+                jwt = test_token,
+                key=test_key.public_key().export_key('PEM'),
+                algorithms=["RS256",]
+            )
+            )
+            assert response_content["use"] == "sig"

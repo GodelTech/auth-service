@@ -11,6 +11,7 @@ from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
 )
+from src.di.providers import provide_token_service_stub
 
 logger = logging.getLogger("is_app")
 
@@ -23,7 +24,7 @@ token_router = APIRouter(
 @token_router.post("/", response_model=ResponseTokenModel, tags=["Token"])
 async def get_tokens(
     request_body: BodyRequestTokenModel = Depends(),
-    token_class: TokenService = Depends(),
+    token_class: TokenService = Depends(provide_token_service_stub),
 ):
     try:
         token_class = token_class

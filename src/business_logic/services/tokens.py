@@ -3,9 +3,7 @@ import time
 
 from typing import Union
 
-from fastapi import Depends
-
-from src.business_logic.dependencies.database import get_repository
+from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import WrongGrantsError
 from src.data_access.postgresql.errors import GrantNotFoundError
@@ -14,7 +12,6 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository
 )
-from src.presentation.api.models import BodyRequestTokenModel
 
 
 logger = logging.getLogger("is_app")
@@ -50,44 +47,39 @@ async def get_single_token(
 
 class TokenService:
     def __init__(
-        self,
-        # request_model: BodyRequestTokenModel,
-        client_repo: ClientRepository = Depends(
-            get_repository(ClientRepository)
-        ),
-        persistent_grant_repo: PersistentGrantRepository = Depends(
-            get_repository(PersistentGrantRepository)
-        ),
-        user_repo: UserRepository = Depends(
-            get_repository(UserRepository)
-        ),
+            self,
+            client_repo: ClientRepository,
+            persistent_grant_repo: PersistentGrantRepository,
+            user_repo: UserRepository,
+            jwt_service: JWTService
     ) -> None:
         self.request_model = ...
         self.authorization = ...
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.user_repo = user_repo
-        self.jwt_service = JWTService()
+        self.jwt_service = jwt_service
 
     async def get_tokens(self) -> dict:
-        if self.request_model.grant_type == "code" and (self.request_model.redirect_uri == None or self.request_model.code == None):
+        if self.request_model.grant_type == "code" \
+                and (self.request_model.redirect_uri is None or self.request_model.code is None):
             raise ValueError
 
         elif self.request_model.grant_type == "password" and (
-            self.request_model.username == None
-            or self.request_model.password == None
+            self.request_model.username is None
+            or self.request_model.password is None
         ):
             raise ValueError
         elif (
             self.request_model.grant_type == "refresh_token"
-            and self.request_model.refresh_token == None
+            and self.request_model.refresh_token is None
         ):
             raise ValueError
 
         elif (
             self.request_model.grant_type
             == "urn:ietf:params:oauth:grant-type:device_code"
-            and self.request_model.device_code == None
+            and self.request_model.device_code is None
         ):
             raise ValueError
 
@@ -266,12 +258,9 @@ class TokenService:
 
                         return response
 
-
     async def revoke_token(self):
 
-        await self.check_authorization_token(token=self.authorization)
-    
-        token_type_hint =  self.request_body.token_type_hint
+        token_type_hint = self.request_body.token_type_hint
         if token_type_hint == 'refresh_token':
             logger.info('I am here')
             logger.info(f'{token_type_hint}')
@@ -288,22 +277,3 @@ class TokenService:
             pass
         else:
             raise GrantNotFoundError
-
-
-    async def check_authorization_token(
-        self, 
-        token: str,
-        secret: Union[str, None] = None
-    ) -> Union[Exception, bool]:
-        """ 
-        Returns True if authorization token is correct.
-        Else rises PermissionError.
-        token_type_hint default value is 'access_token'.
-        
-        TODO: Remove this logic to middleware.
-        """
-
-        if await self.jwt_service.verify_token(token=token):
-            return True 
-
-        raise PermissionError 

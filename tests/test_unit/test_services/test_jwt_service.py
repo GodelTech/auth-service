@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 
 from src.business_logic.services.jwt_token import JWTService

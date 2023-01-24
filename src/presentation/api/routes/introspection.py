@@ -4,6 +4,7 @@ from src.presentation.api.models.introspection import ResponceIntrospectionModel
 import logging
 from typing import Union
 from jwt.exceptions import ExpiredSignatureError
+from src.di.providers import provide_introspection_service_stub
 
 logger = logging.getLogger('is_app')
 
@@ -14,10 +15,11 @@ introspection_router = APIRouter(
 
 @introspection_router.post('/', response_model = ResponceIntrospectionModel, tags=['Introspection'])
 async def post_introspection(
-    request:Request , 
+    request: Request,
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
-    request_body : BodyRequestIntrospectionModel= Depends(), 
-    introspection_class: IntrospectionServies = Depends()):
+    request_body: BodyRequestIntrospectionModel = Depends(),
+    introspection_class: IntrospectionServies = Depends(provide_introspection_service_stub)
+):
     
     
     try:
@@ -30,7 +32,7 @@ async def post_introspection(
         elif auth_swagger != None:
             introspection_class.authorization = auth_swagger
         else:
-            raise ValueError
+            raise PermissionError
 
         introspection_class.request_body = request_body
         logger.info(f'Introspection for token {request_body.token} started')
@@ -39,11 +41,8 @@ async def post_introspection(
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
 
-    except PermissionError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
-
     except ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")
     
     except:
-         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

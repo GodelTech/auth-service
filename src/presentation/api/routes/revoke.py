@@ -4,6 +4,7 @@ from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.data_access.postgresql.errors import GrantNotFoundError
 import logging
 from typing import Union
+from src.di.providers import provide_token_service_stub
 
 logger = logging.getLogger('is_app')
 
@@ -16,8 +17,8 @@ revoke_router = APIRouter(
 async def post_revoke_token(
     request: Request, 
     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  #crutch for swagger
-    request_body : BodyRequestRevokeModel= Depends(), 
-    token_class: TokenService = Depends()
+    request_body: BodyRequestRevokeModel = Depends(),
+    token_class: TokenService = Depends(provide_token_service_stub)
     ):
 
     try:
@@ -31,16 +32,13 @@ async def post_revoke_token(
         elif auth_swagger != None:
             token_class.authorization = auth_swagger
         else:
-            raise ValueError
+            raise PermissionError
         
-        token_class.request_body= request_body
+        token_class.request_body = request_body
 
         logger.info(f'Revoking for token {request_body.token} started')
         return await token_class.revoke_token()
 
-    except PermissionError as e:
-        logger.error(e)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Authorization Token")
     except ValueError as e:
         logger.error(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token")  
