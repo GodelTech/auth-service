@@ -41,7 +41,8 @@ postgresql_load = factories.postgresql(
     "postgresql_proc",
     dbname="test-load-db",
     load=[
-        TEST_SQL_DIR + "/tables.sql",
+        TEST_SQL_DIR + "/table_clients.sql",
+        TEST_SQL_DIR + "/table_persistent_grants.sql",
         TEST_SQL_DIR + "/inserts.sql",
     ],
 )
