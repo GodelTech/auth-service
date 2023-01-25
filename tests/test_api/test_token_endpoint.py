@@ -2,8 +2,8 @@ import time
 
 import pytest
 from fastapi import status
-from httpx import AsyncClient
-
+from httpx import AsyncClient, Client
+import json
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
@@ -101,3 +101,40 @@ class TestTokenEndpoint:
                                         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    @pytest.mark.asyncio
+    async def test_client_credentials_successful(self, client: AsyncClient, connection):
+
+        params = {
+            'client_id': 'test_client',
+            'grant_type': 'client_credentials',
+            'client_secret': 'past',
+        }
+
+        response = await client.request("POST", "/token/", data=params, headers={'Content-Type': self.content_type})
+        response_content = json.loads(response.content.decode('utf-8'))
+        assert response.status_code == status.HTTP_200_OK
+        for param in ("access_token", "token_type", "expires_in","refresh_expires_in", "not_before_policy", "scope"):
+            assert response_content.get(param, 'test not asserted') != 'test not asserted'
+    
+    @pytest.mark.asyncio
+    async def test_client_credentials_incorrect_client_id(self, client: AsyncClient, connection):
+        
+        params = {
+            'client_id': 'Star_Platinum',
+            'grant_type': 'client_credentials',
+            'client_secret': 'past',
+        }
+        response = await client.request("POST", "/token/", data=params, headers={'Content-Type': self.content_type})
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.asyncio
+    async def test_client_credentials_incorrect_client_secret(self, client: AsyncClient, connection):
+        
+        params = {
+            'client_id': 'test_client',
+            'grant_type': 'client_credentials',
+            'client_secret': 'THE_WORLD',
+        }
+        response = await client.request("POST", "/token/", data=params, headers={'Content-Type': self.content_type})
+        assert response.status_code == status.HTTP_403_FORBIDDEN

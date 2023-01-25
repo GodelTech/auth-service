@@ -11,7 +11,7 @@ class TestClientRepository:
         client = await client_repo.get_client_by_client_id(
             client_id="test_client"
         )
-        assert client is True
+        assert bool(client) is True
 
     async def test_get_client_by_client_id_not_exists(self, engine):
         client_repo_error = ClientRepository(engine)

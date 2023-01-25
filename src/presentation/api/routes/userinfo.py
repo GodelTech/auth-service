@@ -159,18 +159,38 @@ async def get_userinfo_jwt(
 @userinfo_router.get(
     "/get_default_token", response_model=str, tags=["UserInfo"]
 )
-async def get_default_token():
+async def get_default_token(
+    with_iss_me: bool = None,
+    with_aud_facebook: bool = None,
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
+    ):
     try:
-        uis = UserInfoServices()
-        return await uis.jwt.encode_jwt(payload={"sub": "1"})
+        uis = userinfo_class
+        payload={"sub": "1"}
+        if with_iss_me:
+            payload["iss"] = "me"
+        if with_aud_facebook:
+            payload["aud"] = ["facebook"]
+        return await uis.jwt.encode_jwt(payload)
     except:
         raise HTTPException(status_code=500)
 
 
 @userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
-async def get_decode_token(token: str):
-    try:
-        uis = UserInfoServices()
-        return await uis.jwt.decode_token(token)
-    except:
+async def get_decode_token(
+    token: str, 
+    issuer:str = None, 
+    audience:str = None,
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub), 
+    ):
+    #try:
+        uis = userinfo_class
+        kwargs = {}
+        if issuer is not None:
+            kwargs["issuer"] = issuer
+        if audience is not None:
+            kwargs["audience"] = audience  
+
+        return await uis.jwt.decode_token(token, **kwargs)
+    #except:
         raise HTTPException(status_code=500)

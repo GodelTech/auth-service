@@ -1,6 +1,6 @@
 import logging
 import time
-
+import uuid
 from typing import Union
 
 from src.business_logic.dependencies.database import get_repository_no_depends
@@ -12,34 +12,46 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository
 )
-
+from src.presentation.api.models import BodyRequestTokenModel
+from src.data_access.postgresql.errors import ClientNotFoundError
 
 logger = logging.getLogger("is_app")
 
 
-def get_base_payload(user_id: str, client_id: str, expiration_time: int) -> dict:
+def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
+
+    if kwargs.get("user_id") and kwargs["user_id"] != '':
+        kwargs['sub'] = kwargs.get("user_id")
+
+    if kwargs.get("user_id"):
+        kwargs.pop("user_id")
+
     base_payload = {
         'iss': 'http://localhost:8000',
-        'sub': user_id,
         'client': client_id,
         'iat': int(time.time()),
         'exp': int(time.time() + expiration_time)
-    }
+    } | kwargs
     return base_payload
 
 
 async def get_single_token(
-    user_id: str, 
-    client_id: str, 
-    additional_data: dict, 
-    jwt_service: JWTService, 
-    expiration_time: int
-    ) -> str:
+    client_id: str,
+    additional_data: dict,
+    jwt_service: JWTService,
+    expiration_time: int,
+    **kwargs
+) -> str:
     """
     It can be used for id, access and refresh token.
     'Additional data' means scopes for access/refresh token and claims for id token
     """
-    base_payload = get_base_payload(user_id=user_id, client_id=client_id, expiration_time=expiration_time)
+    base_payload = get_base_payload(
+        # user_id=user_id,
+        client_id=client_id,
+        expiration_time=expiration_time,
+        **kwargs
+    )
     full_payload = {**base_payload, **additional_data}
     access_token = await jwt_service.encode_jwt(payload=full_payload)
     return access_token
@@ -53,6 +65,7 @@ class TokenService:
             user_repo: UserRepository,
             jwt_service: JWTService
     ) -> None:
+        self.request = ...
         self.request_model = ...
         self.authorization = ...
         self.client_repo = client_repo
@@ -83,9 +96,12 @@ class TokenService:
         ):
             raise ValueError
 
-        if await self.client_repo.get_client_by_client_id(
-            client_id=self.request_model.client_id
-        ):
+        elif self.request_model.grant_type == "client_credentials":
+            if self.request_model.client_secret is None:
+                raise ValueError
+            return await self.get_client_credentials()
+
+        if bool(await self.client_repo.get_client_by_client_id(client_id=self.request_model.client_id)):
             expiration_time = 600
             if self.request_model.grant_type == "code":
                 if await self.persistent_grant_repo.exists(
@@ -109,12 +125,12 @@ class TokenService:
                     # ACCESS TOKEN
                     scopes = {"scopes": self.request_model.scope}
                     access_token = await get_single_token(
-                        user_id,
-                        client_id, 
-                        additional_data=scopes, 
+                        user_id=user_id,
+                        client_id=client_id,
+                        additional_data=scopes,
                         jwt_service=self.jwt_service,
                         expiration_time=expiration_time
-                        )
+                    )
 
                     # ID TOKEN
                     claims = await self.user_repo.get_claims(id=1)
@@ -207,7 +223,6 @@ class TokenService:
                             expiration_time=expiration_time
                         )
 
-
                         # ID TOKEN
                         claims = await self.user_repo.get_claims(user_id)
                         id_token = await get_single_token(
@@ -258,7 +273,61 @@ class TokenService:
 
                         return response
 
-    async def revoke_token(self):
+    async def get_client_credentials(self) -> dict:
+        expiration_time = 600
+        client_from_db = ...
+
+        try:
+            client_from_db = await self.client_repo.get_client_by_client_id(client_id=self.request_model.client_id)
+            if not bool(client_from_db):
+                raise ClientNotFoundError
+
+            if await self.client_repo.get_client_secrete_by_client_id(client_id=self.request_model.client_id) != self.request_model.client_secret:
+                raise ClientNotFoundError
+        except:
+            raise ClientNotFoundError
+
+        scopes = await self.client_repo.get_client_scopes(client_id=client_from_db.client_id)
+        if len(scopes) == 1:
+            scopes = scopes[0]
+        elif len(scopes) == 0:
+            scopes = "No scope"
+
+        audience = await self.client_repo.get_client_claims(client_id=client_from_db.client_id)
+        access_token = await self.jwt_service.encode_jwt(
+            {
+                # "arc" : client_from_db.arc,  
+                # # ACR value is a set of arbitrary values that the client and idp agreed upon to communicate the level of authentication that happened. This is to give the client a level of confidence on the qualify of the authentication that took place.
+                # "jti" : str(uuid.uuid4()),        
+                # # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.7
+                # 'aud': audience, 
+                ## https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3
+                "azp": client_from_db.client_id,
+                "clientId": client_from_db.client_id,
+                "clientUri": client_from_db.client_uri,
+                # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.2
+                "sub": str(client_from_db.id),
+                "scope": scopes,
+                'typ': 'Bearer',
+                'exp': time.time() + expiration_time,
+                'iat': time.time(),
+                'iss': str(self.request.url).replace(
+                    self.request.url.path, "/"
+                )# https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1
+            }
+        )
+        response = {
+            "access_token": access_token,
+            "expires_in": expiration_time,
+            "token_type": "Bearer",
+            "refresh_expires_in": 0,
+            "not_before_policy": 0,
+            "scope": scopes
+
+        }
+        return response
+
+    async def revoke_token(self) -> None:
 
         token_type_hint = self.request_body.token_type_hint
         if token_type_hint == 'refresh_token':
@@ -267,7 +336,7 @@ class TokenService:
             logger.info(f'{self.request_body.token}')
             if await self.persistent_grant_repo.exists(grant_type=token_type_hint, data=self.request_body.token):
                 await self.persistent_grant_repo.delete(
-                    grant_type=token_type_hint, 
+                    grant_type=token_type_hint,
                     data=self.request_body.token
                 )
             else:
