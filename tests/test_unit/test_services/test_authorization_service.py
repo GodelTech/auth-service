@@ -88,7 +88,7 @@ class TestAuthorizationService:
         client = await authorization_service._validate_client(
             client_id="default_test_client"
         )
-        assert client is True
+        assert bool(client) is True
         await connection.execute(
             delete(Client).where(Client.client_id == "default_test_client")
         )
