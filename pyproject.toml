@@ -5,7 +5,7 @@ description = ""
 authors = ["None"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 fastapi = "^0.87.0"
 uvicorn = "^0.20.0"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
@@ -29,6 +29,9 @@ redis = "^4.4.0"
 pycryptodome = "^3.16.0"
 pyjwkest = "^1.4.2"
 dynaconf = "^3.1.11"
+pytest-postgresql = "^4.1.1"
+types-mock = "^5.0.0.2"
+mypy = "^0.991"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -49,7 +52,7 @@ line-length = 80
 
 [tool.mypy]
 files = "src"
-python_version = "3.9"
+python_version = "3.10"
 ignore_missing_imports = true
 check_untyped_defs = true
 disallow_any_generics = true

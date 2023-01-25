@@ -4,3 +4,8 @@ dynaconf_merge = true
 [development.db]
 echo = true
 uri = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+
+
+[development.redis]
+echo = true
+host = "redis"

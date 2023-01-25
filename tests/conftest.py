@@ -1,7 +1,10 @@
 import mock
-mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
-from typing import AsyncIterator
+mock.patch(
+    "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
+).start()
+
+from typing import AsyncIterator, Any
 
 import pytest_asyncio
 from fastapi import FastAPI
@@ -13,7 +16,11 @@ from src.main import get_application
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
-from src.data_access.postgresql.repositories import ClientRepository, UserRepository, PersistentGrantRepository
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    UserRepository,
+    PersistentGrantRepository,
+)
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.introspection import IntrospectionServies
@@ -21,16 +28,39 @@ from src.business_logic.services.tokens import TokenService
 
 from src.di import Container
 
+from pytest_postgresql import factories
+import os
+
+
+TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
+
+# Using the factory to create a postgresql instance
+postgresql_proc = factories.postgresql_proc()
+
+postgresql_load = factories.postgresql(
+    "postgresql_proc",
+    dbname="test-load-db",
+    load=[
+        TEST_SQL_DIR + "/tables.sql",
+        TEST_SQL_DIR + "/inserts.sql",
+    ],
+)
+
+
+@pytest_asyncio.fixture
+async def connection(postgresql_load: factories.postgresql) -> Any:
+    return postgresql_load
+
 
 @pytest_asyncio.fixture
 async def app() -> FastAPI:
     return get_application()
 
 
-@pytest_asyncio.fixture
-async def connection(app: FastAPI) -> AsyncIterator[AsyncSession]:
-    async with app.container.db().session_factory() as conn:
-        yield conn
+# @pytest_asyncio.fixture
+# async def connection(app: FastAPI) -> AsyncIterator[AsyncSession]:
+#     async with app.container.db().session_factory() as conn:
+#         yield conn
 
 
 @pytest_asyncio.fixture
@@ -44,7 +74,7 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
 
 
 @pytest_asyncio.fixture
-async def engine(app: FastAPI):
+async def engine(app: FastAPI) -> Any:
     return app.container.db().engine
 
 
@@ -55,7 +85,7 @@ async def authorization_service() -> AuthorizationService:
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
-        password_service=PasswordHash()
+        password_service=PasswordHash(),
     )
     return auth_service
 
@@ -66,7 +96,7 @@ async def end_session_service() -> EndSessionService:
     end_sess_service = EndSessionService(
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
-        jwt_service=JWTService()
+        jwt_service=JWTService(),
     )
     return end_sess_service
 
@@ -78,7 +108,7 @@ async def introspection_service() -> IntrospectionServies:
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
         user_repo=UserRepository(engine),
-        jwt=JWTService()
+        jwt=JWTService(),
     )
     return intro_service
 
@@ -103,6 +133,5 @@ async def token_service() -> TokenService:
         persistent_grant_repo=PersistentGrantRepository(engine),
         user_repo=UserRepository(engine),
         jwt_service=JWTService(),
-
     )
     return tk_service
