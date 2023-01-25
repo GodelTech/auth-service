@@ -5,7 +5,7 @@ description = ""
 authors = ["None"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 fastapi = "^0.87.0"
 uvicorn = "^0.20.0"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
@@ -52,7 +52,7 @@ line-length = 80
 
 [tool.mypy]
 files = "src"
-python_version = "3.10"
+python_version = "3.9"
 ignore_missing_imports = true
 check_untyped_defs = true
 disallow_any_generics = true
