@@ -1,16 +1,50 @@
-from sqlalchemy import select
+from sqlalchemy import select, exists, update, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-
+from src.data_access.postgresql.tables.group import Group
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables import User, UserClaim
+from src.data_access.postgresql.tables import User, UserClaim, Role
+from src.data_access.postgresql.tables.users import users_roles, users_groups
 
 
 class UserRepository(BaseRepository):
+    async def exists(self, user_id: int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+
+            result = await session.execute(
+                select(
+                    [
+                        exists().where(
+                            User.id == user_id
+                        )
+                    ]
+                )
+            )
+            result = result.first()
+            return result[0]
+
+    async def delete(self, user_id: int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            if await self.exists(user_id=user_id):
+                user_to_delete = await self.get_user_by_id(user_id=user_id)
+                await session.delete(user_to_delete)
+                await session.commit()
+                return True
+            else:
+                return False
+
     async def get_user_by_id(self, user_id: int) -> User:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -36,7 +70,8 @@ class UserRepository(BaseRepository):
             user = user.first()
 
             if user is None:
-                raise UserNotFoundError("User you are looking for does not exist")
+                raise UserNotFoundError(
+                    "User you are looking for does not exist")
 
             user = user[0]
             return user.password_hash, user.id
@@ -78,6 +113,175 @@ class UserRepository(BaseRepository):
             result = dict(next(users))["User"].username
 
             return result
+
+    async def get_all_users(self, group_id: int = None, role_id: int = None) -> list[User]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        async with session_factory() as sess:
+            session = sess
+            if group_id is None and role_id is None:
+                quiery = await session.execute(
+                    select(User)
+                )
+                quiery = quiery.all()
+                return [user[0] for user in quiery]
+            elif group_id is None and role_id is not None:
+                iterator = await session.execute(
+                    select(User)
+                    .join(
+                        Role,
+                        User.roles
+                    )
+                    .where(Role.id == role_id)
+                )
+                return [user[0] for user in iterator.all()]
+            elif group_id is not None and role_id is None:
+                iterator = await session.execute(
+                    select(User)
+                    .join(
+                        Group,
+                        User.roles
+                    )
+                    .where(Group.id == group_id)
+                )
+                return [user[0] for user in iterator.all()]
+            else:
+                iterator = await session.execute(
+                    select(User)
+                    .join(Group, User.groups)
+                    .join(Role, User.roles)
+                    .where(
+                        Group.id == group_id,
+                        Role.id == role_id
+                    )
+                )
+                return [user[0] for user in iterator.all()]
+
+    async def update(self, user_id: int, **kwargs) -> bool:
+
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            if await self.exists(user_id=user_id):
+                updates = update(User).values(
+                    **kwargs).where(User.id == user_id)
+                await session.execute(updates)
+                await session.commit()
+                return True
+            else:
+                return False
+
+    async def create(self, **kwargs) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try:
+            async with session_factory() as sess:
+                session = sess
+
+                await session.execute(
+                    insert(User).values(**kwargs)
+                )
+                await session.commit()
+                return True
+        except:
+            return False
+
+    async def add_group(self, user_id:int, group_id:int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try: 
+            async with session_factory() as sess:
+                session = sess
+                await session.execute(
+                    insert(users_groups).values(user_id = user_id, group_id = group_id)
+                    )
+                await session.commit()
+                return True
+        except:
+            return False
+
+    async def add_role(self, user_id:int, role_id:int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try: 
+            async with session_factory() as sess:
+                session = sess
+                await session.execute(
+                    insert(users_roles).values(user_id = user_id, role_id = role_id)
+                    )
+                await session.commit()
+                return True
+        except:
+            return False
+
+    async def remove_user_group(self, user_id:int, group_id:int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try: 
+            async with session_factory() as sess:
+                session = sess
+                sql = f"DELETE FROM users_groups WHERE user_id = {user_id} AND group_id = {group_id}"
+                await session.execute(sql)
+                await session.commit()
+            return True
+        except:
+            return False
+
+    async def remove_user_role(self, user_id:int, role_id:int) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try: 
+            async with session_factory() as sess:
+                session = sess
+                sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND group_id = {role_id}"
+                await session.execute(sql)
+                await session.commit()
+            return True
+        except:
+            return False
+
+    async def get_roles(self, user_id:int):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        async with session_factory() as sess:
+            session = sess
+            iterator = await session.execute(
+                    select(Role)
+                    .join(
+                        User,
+                        Role.users
+                    )
+                    .where(User.id == user_id)
+                )
+            return [role[0] for role in iterator.all()]
+    
+    async def get_groups(self, user_id:int):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        async with session_factory() as sess:
+            session = sess
+            iterator = await session.execute(
+                    select(Group)
+                    .join(
+                        User,
+                        Group.users
+                    )
+                    .where(User.id == user_id)
+                )
+            return [group[0] for group in iterator.all()]
 
     def __repr__(self) -> str:
         return "User repository"

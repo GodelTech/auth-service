@@ -77,7 +77,7 @@ class UserClaimFactory(SQLAlchemyModelFactory):
 
 class UserRolesFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = users.user_roles
+        model = users.users_roles
         sqlalchemy_session = sess.session
 
     role = factory.SubFactory(RoleFactory)

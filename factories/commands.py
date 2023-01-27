@@ -27,7 +27,7 @@ class DataBasePopulation:
         sess.session.execute("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
         sess.session.execute("TRUNCATE TABLE client_secrets RESTART IDENTITY")
         sess.session.execute("TRUNCATE TABLE user_claims RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE ")
+        sess.session.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
         sess.session.execute("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
         sess.session.commit()
 
