@@ -1,4 +1,4 @@
-from .client import ClientNotFoundError, WrongGrantsError, ClientPostLogoutRedirectUriError
+from .client import ClientNotFoundError, WrongGrantsError, ClientPostLogoutRedirectUriError, ClientRedirectUriError
 from .password import WrongPasswordError, WrongPasswordFormatError
 from .user import UserNotFoundError, ClaimsNotFoundError
 

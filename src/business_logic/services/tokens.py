@@ -28,7 +28,7 @@ def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
 
     base_payload = {
         'iss': 'http://localhost:8000',
-        'client': client_id,
+        'client_id': client_id,
         'iat': int(time.time()),
         'exp': int(time.time() + expiration_time)
     } | kwargs
@@ -303,8 +303,8 @@ class TokenService:
                 # 'aud': audience, 
                 ## https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3
                 "azp": client_from_db.client_id,
-                "clientId": client_from_db.client_id,
-                "clientUri": client_from_db.client_uri,
+                "client_id": client_from_db.client_id,
+                "client_uri": client_from_db.client_uri,
                 # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.2
                 "sub": str(client_from_db.id),
                 "scope": scopes,

@@ -18,6 +18,7 @@ from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.introspection import IntrospectionServies
 from src.business_logic.services.tokens import TokenService
+from src.business_logic.services.login_form_service import LoginFormService
 
 from src.di import Container
 
@@ -106,3 +107,12 @@ async def token_service() -> TokenService:
 
     )
     return tk_service
+
+
+@pytest_asyncio.fixture
+async def login_form_service() -> LoginFormService:
+    engine = Container.db().engine
+    login_service = LoginFormService(
+        client_repo=ClientRepository(engine),
+    )
+    return login_service

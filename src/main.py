@@ -4,8 +4,10 @@ from logging.config import dictConfig
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi.staticfiles import StaticFiles
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+from pathlib import Path
 
 from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
 from src.config import LogConfig
@@ -28,6 +30,8 @@ from src.di.providers import (
     provide_token_service,
     provide_userinfo_service_stub,
     provide_userinfo_service,
+    provide_login_form_service_stub,
+    provide_login_form_service
 )
 from src.di import Container
 
@@ -55,7 +59,11 @@ def get_application(test=False) -> FastAPI:
     application.container = container
     
     application.include_router(router)
-    
+    application.mount(
+        "/static",
+        StaticFiles(directory="src/presentation/api/templates/static"),
+        name="static")
+
     return application
 
 
@@ -123,6 +131,13 @@ def setup_di(app: FastAPI) -> None:
         provide_userinfo_service_stub
     ] = nodepends_provide_userinfo_service
 
+    nodepends_provide_login_form_service = lambda: provide_login_form_service(
+        client_repo=provide_client_repo(db_engine)
+    )
+
+    app.dependency_overrides[
+        provide_login_form_service_stub
+    ] = nodepends_provide_login_form_service
 
 
 app = get_application()

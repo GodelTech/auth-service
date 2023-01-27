@@ -22,5 +22,7 @@ from .services import (
     provide_token_service_stub,
     provide_token_service,
     provide_userinfo_service_stub,
-    provide_userinfo_service
+    provide_userinfo_service,
+    provide_login_form_service_stub,
+    provide_login_form_service
 )

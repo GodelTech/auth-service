@@ -16,7 +16,7 @@ scope = (
 )
 
 TOKEN_HINT_DATA = {
-    "user_id": 8,
+    "sub": 8,
     "client_id": "spider_man",
     "type": "code"
 }
@@ -31,9 +31,13 @@ class TestAuthorizationCodeFlow:
             "client_id": "spider_man",
             "response_type": "code",
             "scope": scope,
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
         response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        content_type = 'application/x-www-form-urlencoded'
+        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
         assert response.status_code == status.HTTP_302_FOUND
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token

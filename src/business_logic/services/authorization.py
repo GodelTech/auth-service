@@ -67,6 +67,11 @@ class AuthorizationService:
 
     async def _parse_scope_data(self, scope: str) -> dict:
         """ """
+        if len(scope.split("&")) == 2:
+            return {
+                item.split("=")[0]: item.split("=")[1]
+                for item in scope.split("&")
+            }
         return {
             item.split("=")[0]: item.split("=")[1]
             for item in scope.split("&")[1:]

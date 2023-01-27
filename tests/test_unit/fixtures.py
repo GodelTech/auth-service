@@ -103,14 +103,14 @@ def authorization_request_model() -> RequestModel:
 service = JWTService()
 
 TOKEN_HINT_DATA = {
-    "user_id": 3,
+    "sub": 3,
     "client_id": "santa",
     "data": "secret_code",
     "type": "code"
 }
 
 SHORT_TOKEN_HINT_DATA = {
-    "user_id": 3,
+    "sub": 3,
     "data": "secret_code",
     "type": "code"
 }

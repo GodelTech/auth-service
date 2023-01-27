@@ -7,3 +7,4 @@ from .endsession import EndSessionService
 from .tokens import TokenService
 from .introspection import IntrospectionServies
 from .userinfo import UserInfoServices
+from .login_form_service import LoginFormService
