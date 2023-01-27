@@ -111,6 +111,15 @@ class TestAuthorizationService:
         assert result["password"] == expected_password
         assert result["username"] == expected_username
 
+    async def test_parse_scope_data_len_two(self, authorization_service):
+        expected_password = "BestOfTheBest"
+        expected_username = "IronMan"
+
+        to_parse = "password=BestOfTheBest&username=IronMan"
+        result = await authorization_service._parse_scope_data(to_parse)
+        assert result["password"] == expected_password
+        assert result["username"] == expected_username
+
     async def test_parse_empty_scope(self, authorization_service):
         expected = {}
         to_parse = ""

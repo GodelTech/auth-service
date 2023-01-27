@@ -34,7 +34,7 @@ class TestEndSessionEndpoint:
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    subject_id=TOKEN_HINT_DATA["sub"],
                     data=TOKEN_HINT_DATA["data"],
                     type=TOKEN_HINT_DATA["type"],
                     expiration=False
@@ -74,7 +74,7 @@ class TestEndSessionEndpoint:
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    subject_id=TOKEN_HINT_DATA["sub"],
                     data=TOKEN_HINT_DATA["data"],
                     type=TOKEN_HINT_DATA["type"],
                     expiration=False
@@ -108,7 +108,7 @@ class TestEndSessionEndpoint:
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["user_id"],
+                    subject_id=TOKEN_HINT_DATA["sub"],
                     data=TOKEN_HINT_DATA["data"],
                     type=TOKEN_HINT_DATA["type"],
                     expiration=False

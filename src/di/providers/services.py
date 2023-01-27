@@ -11,6 +11,7 @@ from src.business_logic.services import (
     TokenService,
     IntrospectionServies,
     UserInfoServices,
+    LoginFormService
 )
 
 
@@ -120,4 +121,17 @@ def provide_userinfo_service(
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
     )
+
+
+def provide_login_form_service_stub():
+    ...
+
+
+def provide_login_form_service(
+    client_repo: ClientRepository,
+):
+    return LoginFormService(
+        client_repo=client_repo
+    )
+
 

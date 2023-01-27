@@ -21,6 +21,7 @@ class DataBasePopulation:
         cls.populate_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
+        cls.populate_client_redirect_uri()
 
     @classmethod
     def clean_data_from_database(cls):
@@ -70,9 +71,9 @@ class DataBasePopulation:
             cl_factory.sess.session.close()
 
     @classmethod
-    def populate_client_post_logout_redirect_uri(cls):
+    def populate_client_redirect_uri(cls):
         for item in data.CLIENT_IDS:
-            uri = cl_factory.ClientPostLogoutRedirectUriFactory(client_id=item)
+            uri = cl_factory.ClientRedirectUriFactory(client_id=item, redirect_uri="https://www.google.com/")
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
