@@ -24,9 +24,14 @@ class TestUserRepository:
             "$2b$12$RAC7jWdNn8Fudxc4OhudkOPK0eeBBWjGd5Iyfzma5F8uv9xD.jx/6"
         )
         self.user_repo = UserRepository(engine)
+
+        # The sequence id number is out of sync and raises duplicate key error
+        # We manually bring it back in sync
         await connection.execute(
-            insert(User).values(**DEFAULT_USER)
+            "SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users)+1);"
         )
+
+        await connection.execute(insert(User).values(**DEFAULT_USER))
         await connection.commit()
         user_hash_password, user_id = await self.user_repo.get_hash_password(
             user_name="DefaultTestClient"
@@ -54,11 +59,11 @@ class TestUserRepository:
 
     async def test_all(self, engine):
         self.user_repo = UserRepository(engine)
-        
+
         a = await self.user_repo.add_group(user_id=1, group_id=1)
         b = await self.user_repo.add_group(user_id=1, group_id=2)
         c = await self.user_repo.remove_user_group(user_id=1, group_id=1)
         d = await self.user_repo.add_group(user_id=1, group_id=3)
-        e = await self.user_repo.get_roles(user_id=1)        
+        e = await self.user_repo.get_roles(user_id=1)
         f = await self.user_repo.get_groups(user_id=1)
         assert f
