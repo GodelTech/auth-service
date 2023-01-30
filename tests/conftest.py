@@ -34,12 +34,62 @@ from src.business_logic.services.introspection import IntrospectionServies
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 
+from src.di.providers import (
+    provide_auth_service_stub,
+    provide_endsession_service_stub,
+    provide_introspection_service_stub,
+    provide_token_service_stub,
+    provide_userinfo_service_stub,
+)
+
+from tests.overrides.override_functions import (
+    nodepends_provide_auth_service_override,
+    nodepends_provide_endsession_servise_override,
+    nodepends_provide_introspection_service_override,
+    nodepends_provide_token_service_override,
+    nodepends_provide_userinfo_service_override,
+)
+
 from src.di import Container
 
 
 TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
 
-test_db = factories.postgresql_proc(port=5463, dbname="test_db", load=[])
+test_db = factories.postgresql_proc(
+    port=5463,
+    dbname="test_db",
+    load=[
+        TEST_SQL_DIR + "/table_clients.sql",
+        TEST_SQL_DIR + "/table_users.sql",
+        TEST_SQL_DIR + "/table_user_logins.sql",
+        TEST_SQL_DIR + "/table_client_id_restrictions.sql",
+        TEST_SQL_DIR + "/table_client_claims.sql",
+        TEST_SQL_DIR + "/table_client_redirect_uris.sql",
+        TEST_SQL_DIR + "/table_client_scopes.sql",
+        TEST_SQL_DIR + "/table_client_cors_origins.sql",
+        TEST_SQL_DIR + "/table_user_claims.sql",
+        TEST_SQL_DIR + "/table_identity_resources.sql",
+        TEST_SQL_DIR + "/table_roles.sql",
+        TEST_SQL_DIR + "/table_groups.sql",
+        TEST_SQL_DIR + "/table_api_resources.sql",
+        TEST_SQL_DIR + "/table_api_scopes.sql",
+        TEST_SQL_DIR + "/table_api_claims.sql",
+        TEST_SQL_DIR + "/table_api_scope_claims.sql",
+        TEST_SQL_DIR + "/table_client_grant_types.sql",
+        TEST_SQL_DIR + "/table_api_secrets.sql",
+        TEST_SQL_DIR + "/table_project_team.sql",
+        TEST_SQL_DIR + "/table_persistent_grants.sql",
+        TEST_SQL_DIR + "/table_identity_claims.sql",
+        TEST_SQL_DIR + "/table_client_secrets.sql",
+        TEST_SQL_DIR + "/table_client_post_logout_redirect_uris.sql",
+        TEST_SQL_DIR + "/table_permissions.sql",
+        TEST_SQL_DIR + "/table_permissions_groups.sql",
+        TEST_SQL_DIR + "/table_permissions_roles.sql",
+        TEST_SQL_DIR + "/table_redirect.sql",
+        TEST_SQL_DIR + "/table_users_groups.sql",
+        TEST_SQL_DIR + "/table_users_roles.sql",
+    ],
+)
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -70,6 +120,24 @@ async def connection(engine):
 @pytest_asyncio.fixture
 async def app() -> FastAPI:
     app = get_application()
+
+    # override stubs to use test db_uri
+    app.dependency_overrides[
+        provide_auth_service_stub
+    ] = nodepends_provide_auth_service_override
+    app.dependency_overrides[
+        provide_endsession_service_stub
+    ] = nodepends_provide_endsession_servise_override
+    app.dependency_overrides[
+        provide_introspection_service_stub
+    ] = nodepends_provide_introspection_service_override
+    app.dependency_overrides[
+        provide_token_service_stub
+    ] = nodepends_provide_token_service_override
+    app.dependency_overrides[
+        provide_userinfo_service_stub
+    ] = nodepends_provide_userinfo_service_override
+
     return app
 
 
