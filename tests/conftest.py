@@ -40,6 +40,7 @@ from src.di.providers import (
     provide_introspection_service_stub,
     provide_token_service_stub,
     provide_userinfo_service_stub,
+    provide_login_form_service_stub,
 )
 
 from tests.overrides.override_functions import (
@@ -48,6 +49,7 @@ from tests.overrides.override_functions import (
     nodepends_provide_introspection_service_override,
     nodepends_provide_token_service_override,
     nodepends_provide_userinfo_service_override,
+    nodepends_provide_login_form_service_override,
 )
 
 from src.di import Container
@@ -135,6 +137,9 @@ async def app() -> FastAPI:
     app.dependency_overrides[
         provide_userinfo_service_stub
     ] = nodepends_provide_userinfo_service_override
+    app.dependency_overrides[
+        provide_login_form_service_stub
+    ] = nodepends_provide_login_form_service_override
 
     return app
 
@@ -211,8 +216,7 @@ async def token_service(engine) -> TokenService:
 
 
 @pytest_asyncio.fixture
-async def login_form_service() -> LoginFormService:
-    engine = Container.db().engine
+async def login_form_service(engine) -> LoginFormService:
     login_service = LoginFormService(
         client_repo=ClientRepository(engine),
     )

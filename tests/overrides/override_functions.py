@@ -2,20 +2,16 @@ from src.di.providers import (
     provide_config,
     provide_db,
     provide_auth_service,
-    provide_auth_service_stub,
     provide_password_service,
     provide_endsession_service,
-    provide_endsession_service_stub,
     provide_client_repo,
     provide_user_repo,
     provide_persistent_grant_repo,
     provide_jwt_service,
-    provide_introspection_service_stub,
     provide_introspection_service,
-    provide_token_service_stub,
     provide_token_service,
-    provide_userinfo_service_stub,
     provide_userinfo_service,
+    provide_login_form_service,
 )
 
 
@@ -60,4 +56,10 @@ nodepends_provide_userinfo_service_override = lambda: provide_userinfo_service(
     user_repo=provide_user_repo(db_engine),
     client_repo=provide_client_repo(db_engine),
     persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+)
+
+nodepends_provide_login_form_service_override = (
+    lambda: provide_login_form_service(
+        client_repo=provide_client_repo(db_engine)
+    )
 )
