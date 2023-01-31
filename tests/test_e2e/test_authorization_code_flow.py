@@ -15,14 +15,16 @@ scope = (
     "the_beginner&username=PeterParker"
 )
 
-TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
+TOKEN_HINT_DATA = {
+    "sub": 8,
+    "client_id": "spider_man",
+    "type": "code"
+}
 
 
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlow:
-    async def test_successful_authorization_code_flow(
-        self, client: AsyncClient, connection
-    ):
+    async def test_successful_authorization_code_flow(self, client: AsyncClient, connection):
 
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
@@ -34,68 +36,50 @@ class TestAuthorizationCodeFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        content_type = "application/x-www-form-urlencoded"
-        response = await client.request(
-            "POST",
-            "/authorize/",
-            data=params,
-            headers={"Content-Type": content_type},
-        )
+        content_type = 'application/x-www-form-urlencoded'
+        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
         assert response.status_code == status.HTTP_302_FOUND
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
         secret_code = await connection.execute(
-            select(PersistentGrant.data)
-            .where(PersistentGrant.client_id == "spider_man")
-            .where(PersistentGrant.subject_id == 8)
+            select(PersistentGrant.data).
+            where(PersistentGrant.client_id == "spider_man").
+            where(PersistentGrant.subject_id == 8)
         )
 
         secret_code = secret_code.first()[0]
 
         params = {
-            "client_id": "spider_man",
-            "grant_type": "code",
-            "code": secret_code,
-            "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            'client_id': 'spider_man',
+            'grant_type': 'code',
+            'code': secret_code,
+            'scope': 'test',
+            'redirect_uri': 'https://www.arnold-mann.net/',
         }
 
-        content_type = "application/x-www-form-urlencoded"
+        content_type = 'application/x-www-form-urlencoded'
 
-        response = await client.request(
-            "POST",
-            "/token/",
-            data=params,
-            headers={"Content-Type": content_type},
-        )
+        response = await client.request('POST', '/token/', data=params, headers={'Content-Type': content_type})
         response_data = response.json()
-        access_token = response_data.get("access_token")
+        access_token = response_data.get('access_token')
 
         assert response.status_code == status.HTTP_200_OK
 
         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
-
-        # The sequence id number is out of sync and raises duplicate key error
-        # We manually bring it back in sync
-        await connection.execute(
-            "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
-        )
-
         await connection.execute(
             insert(UserClaim).values(
-                User=8, claim_type="name", claim_value="Peter"
+                User=8,
+                claim_type="name",
+                claim_value="Peter"
             )
-        )
+         )
         await connection.commit()
-        response = await client.request(
-            "GET", "/userinfo/", headers={"authorization": access_token}
-        )
+        response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
         assert response.status_code == status.HTTP_200_OK
         await connection.execute(
-            delete(UserClaim)
-            .where(UserClaim.user_id == 8)
-            .where(UserClaim.claim_type == "name")
-        )
+            delete(UserClaim).where(UserClaim.user_id == 8).
+            where(UserClaim.claim_type == "name")
+         )
         await connection.commit()
 
         # 4th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
