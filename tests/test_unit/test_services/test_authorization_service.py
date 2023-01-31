@@ -81,9 +81,12 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_validate_client(self, authorization_service, connection):
+        # The sequence id number is out of sync and raises duplicate key error
+        # We manually bring it back in sync
         await connection.execute(
-            insert(Client).values(**DEFAULT_CLIENT)
+            "SELECT setval(pg_get_serial_sequence('clients', 'id'), (SELECT MAX(id) FROM clients)+1);"
         )
+        await connection.execute(insert(Client).values(**DEFAULT_CLIENT))
         await connection.commit()
         client = await authorization_service._validate_client(
             client_id="default_test_client"
