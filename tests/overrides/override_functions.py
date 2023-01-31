@@ -15,7 +15,7 @@ from src.di.providers import (
 )
 
 
-database_url = "postgresql+asyncpg://postgres:@127.0.0.1:5463/test_db"
+database_url = "postgresql+asyncpg://test:test@localhost:5463/test"
 max_connection_count = 10
 db_engine = provide_db(
     database_url=database_url, max_connection_count=max_connection_count

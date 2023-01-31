@@ -17,8 +17,9 @@ from pytest_postgresql import factories
 from pytest_postgresql.janitor import DatabaseJanitor
 import pytest
 import asyncio
-
+import sqlalchemy
 from src.main import get_application
+from sqlalchemy import create_engine
 
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
@@ -33,6 +34,7 @@ from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.introspection import IntrospectionServies
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
+from src.data_access.postgresql.tables.base import Base
 
 from src.di.providers import (
     provide_auth_service_stub,
@@ -53,58 +55,48 @@ from tests.overrides.override_functions import (
 )
 
 from src.di import Container
+from testcontainers.postgres import PostgresContainer
+from sqlalchemy import text
 
 
 TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
 
-test_db = factories.postgresql_proc(
-    port=5463,
-    dbname="test_db",
-    load=[
-        TEST_SQL_DIR + "/table_clients.sql",
-        TEST_SQL_DIR + "/table_users.sql",
-        TEST_SQL_DIR + "/table_user_logins.sql",
-        TEST_SQL_DIR + "/table_client_id_restrictions.sql",
-        TEST_SQL_DIR + "/table_client_claims.sql",
-        TEST_SQL_DIR + "/table_client_redirect_uris.sql",
-        TEST_SQL_DIR + "/table_client_scopes.sql",
-        TEST_SQL_DIR + "/table_client_cors_origins.sql",
-        TEST_SQL_DIR + "/table_user_claims.sql",
-        TEST_SQL_DIR + "/table_identity_resources.sql",
-        TEST_SQL_DIR + "/table_roles.sql",
-        TEST_SQL_DIR + "/table_groups.sql",
-        TEST_SQL_DIR + "/table_api_resources.sql",
-        TEST_SQL_DIR + "/table_api_scopes.sql",
-        TEST_SQL_DIR + "/table_api_claims.sql",
-        TEST_SQL_DIR + "/table_api_scope_claims.sql",
-        TEST_SQL_DIR + "/table_client_grant_types.sql",
-        TEST_SQL_DIR + "/table_api_secrets.sql",
-        TEST_SQL_DIR + "/table_persistent_grants.sql",
-        TEST_SQL_DIR + "/table_identity_claims.sql",
-        TEST_SQL_DIR + "/table_client_secrets.sql",
-        TEST_SQL_DIR + "/table_client_post_logout_redirect_uris.sql",
-        TEST_SQL_DIR + "/table_permissions.sql",
-        TEST_SQL_DIR + "/table_permissions_groups.sql",
-        TEST_SQL_DIR + "/table_permissions_roles.sql",
-        TEST_SQL_DIR + "/table_users_groups.sql",
-        TEST_SQL_DIR + "/table_users_roles.sql",
-    ],
-)
-
 
 @pytest_asyncio.fixture(scope="session")
-async def engine(test_db):
-    pg_host = test_db.host
-    pg_port = test_db.port
-    pg_user = test_db.user
-    pg_password = test_db.password
-    pg_db = test_db.dbname
-
-    with DatabaseJanitor(
-        pg_user, pg_host, pg_port, pg_db, test_db.version, pg_password
-    ):
-        db_uri = f"postgresql+asyncpg://{pg_user}:@{pg_host}:{pg_port}/{pg_db}"
-        engine = create_async_engine(db_uri)
+async def engine():
+    postgres_container = PostgresContainer("postgres:9.5").with_bind_ports(
+        5432, 5463
+    )
+    with postgres_container as postgres:
+        db_url = postgres.get_connection_url()
+        db_url = db_url.replace("psycopg2", "asyncpg")
+        engine = create_async_engine(db_url, echo=True)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            users = open(TEST_SQL_DIR + "/users.sql")
+            query_users = text(users.read())
+            user_claims = open(TEST_SQL_DIR + "/user_claims.sql")
+            query_user_claims = text(user_claims.read())
+            clients = open(TEST_SQL_DIR + "/clients.sql")
+            query_clients = text(clients.read())
+            client_secrets = open(TEST_SQL_DIR + "/client_secrets.sql")
+            query_client_secrets = text(client_secrets.read())
+            client_redirect_uris = open(
+                TEST_SQL_DIR + "/client_redirect_uris.sql"
+            )
+            query_client_redirect_uris = text(client_redirect_uris.read())
+            client_post_logout_redirect_uris = open(
+                TEST_SQL_DIR + "/client_post_logout_redirect_uris.sql"
+            )
+            query_client_post_logout_redirect_uris = text(
+                client_post_logout_redirect_uris.read()
+            )
+            await conn.execute(query_clients)
+            await conn.execute(query_users)
+            await conn.execute(query_user_claims)
+            await conn.execute(query_client_post_logout_redirect_uris)
+            await conn.execute(query_client_secrets)
+            await conn.execute(query_client_redirect_uris)
         yield engine
 
 
