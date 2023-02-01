@@ -139,3 +139,10 @@ CLIENT_SECRETS = {
     "samuel": "themselves",
 }
 
+ROLES = [
+    "Programmer, applications",
+    "Journalist, broadcasting",
+    "Freight forwarder",
+    "Air cabin crew",
+    "Scientist, research (maths)"
+]

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
+from src.data_access.postgresql.errors.user import DuplicationError
 
 
 class RoleRepository(BaseRepository):
@@ -14,13 +15,7 @@ class RoleRepository(BaseRepository):
             session = sess
 
             result = await session.execute(
-                select(
-                    [
-                        exists().where(
-                            Role.id == role_id
-                        )
-                    ]
-                )
+                select(exists().where(Role.id == role_id))
             )
             result = result.first()
             return result[0]
@@ -85,7 +80,7 @@ class RoleRepository(BaseRepository):
                 await session.commit()
                 return True
         except:
-            return False
+            raise DuplicationError
 
     async def get_all_roles(self) -> list[Role]:
         session_factory = sessionmaker(
