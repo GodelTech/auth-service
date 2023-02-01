@@ -1,4 +1,4 @@
-from sqlalchemy import select, exists, update, insert, delete
+from sqlalchemy import select, exists, update, insert, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables.group import Group
@@ -9,7 +9,8 @@ from src.data_access.postgresql.errors.user import (
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import User, UserClaim, Role
 from src.data_access.postgresql.tables.users import users_roles, users_groups
-from src.data_access.postgresql.errors.user import DuplicationError 
+from src.data_access.postgresql.errors.user import DuplicationError
+
 
 class UserRepository(BaseRepository):
     async def exists(self, user_id: int) -> bool:
@@ -20,13 +21,7 @@ class UserRepository(BaseRepository):
             session = sess
 
             result = await session.execute(
-                select(
-                    [
-                        exists().where(
-                            User.id == user_id
-                        )
-                    ]
-                )
+                select(exists().where(User.id == user_id))
             )
             result = result.first()
             return result[0]
@@ -84,9 +79,7 @@ class UserRepository(BaseRepository):
         result = {}
 
         for claim in claims_of_user:
-            result[dict(claim)["UserClaim"].claim_type.code] = dict(claim)[
-                "UserClaim"
-            ].claim_value
+            result[claim[0].claim_type.code] = claim[0].claim_value
 
         if not result:
             raise ClaimsNotFoundError(
@@ -95,7 +88,7 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def request_DB_for_claims(self, id):
+    async def request_DB_for_claims(self, id: int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -112,9 +105,8 @@ class UserRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
             users = await session.execute(select(User).where(User.id == id))
-            result = []
-            result = dict(next(users))["User"].username
-
+            result = users.first()
+            result = result[0].username
             return result
 
     async def get_all_users(self, group_id: int = None, role_id: int = None) -> list[User]:
@@ -125,11 +117,11 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 if group_id is None and role_id is None:
-                    quiery = await session.execute(
+                    query = await session.execute(
                         select(User)
                     )
-                    quiery = quiery.all()
-                    return [user[0] for user in quiery]
+                    query = query.all()
+                    return [user[0] for user in query]
                 elif group_id is None and role_id is not None:
                     iterator = await session.execute(
                         select(User)
@@ -181,7 +173,7 @@ class UserRepository(BaseRepository):
                     raise ValueError
         except:
             raise DuplicationError
-            
+
     async def create(self, **kwargs) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -198,7 +190,7 @@ class UserRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def add_group(self, user_id:int, group_id:int) -> bool:
+    async def add_group(self, user_id: int, group_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -206,14 +198,14 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 await session.execute(
-                    insert(users_groups).values(user_id = user_id, group_id = group_id)
+                    insert(users_groups).values(user_id=user_id, group_id=group_id)
                     )
                 await session.commit()
                 return True
         except:
-            return DuplicationError
+            raise DuplicationError
 
-    async def add_role(self, user_id:int, role_id:int) -> bool:
+    async def add_role(self, user_id: int, role_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -221,14 +213,14 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 await session.execute(
-                    insert(users_roles).values(user_id = user_id, role_id = role_id)
+                    insert(users_roles).values(user_id=user_id, role_id=role_id)
                     )
                 await session.commit()
                 return True
         except:
-            return DuplicationError
+            raise DuplicationError
 
-    async def remove_user_groups(self, user_id:int, group_ids:list) -> bool:
+    async def remove_user_groups(self, user_id: int, group_ids: list) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -244,13 +236,13 @@ class UserRepository(BaseRepository):
                     group_ids = str(group_ids)[1:-1]
 
                 sql = f"DELETE FROM users_groups WHERE user_id = {user_id} AND group_id IN ({group_ids})"
-                await session.execute(sql)
+                await session.execute(text(sql))
                 await session.commit()
             return True
         except:
-            return ValueError
+            raise ValueError
 
-    async def remove_user_roles(self, user_id:int, role_ids:list) -> bool:
+    async def remove_user_roles(self, user_id: int, role_ids: list) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -266,13 +258,13 @@ class UserRepository(BaseRepository):
                     role_ids = str(role_ids)[1:-1]
 
                 sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND role_id IN ({role_ids})"
-                await session.execute(sql)
+                await session.execute(text(sql))
                 await session.commit()
             return True
         except:
             return False
 
-    async def get_roles(self, user_id:int) -> list[Role]:
+    async def get_roles(self, user_id: int) -> list[Role]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -291,7 +283,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_groups(self, user_id:int):
+    async def get_groups(self, user_id: int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

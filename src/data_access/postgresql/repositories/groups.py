@@ -1,10 +1,10 @@
-from sqlalchemy import select, exists, insert, delete, update
+from sqlalchemy import select, exists, insert, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from fastapi import status
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
-from src.data_access.postgresql.errors.user import DuplicationError 
+from src.data_access.postgresql.errors.user import DuplicationError
+
 
 class GroupRepository(BaseRepository):
 
@@ -23,14 +23,14 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def delete(self, group_id:int = None) -> int:
+    async def delete(self, group_id: int = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
             if group_id is None:
-                await session.execute("TRUNCATE TABLE groups RESTART IDENTITY CASCADE")
+                await session.execute(text("TRUNCATE TABLE groups RESTART IDENTITY CASCADE"))
                 await session.commit()
             elif await self.exists(group_id=group_id):
                 client_to_delete = await self.get_by_id(group_id=group_id)
@@ -39,7 +39,7 @@ class GroupRepository(BaseRepository):
             else:
                 raise ValueError
     
-    async def exists(self, group_id:int) -> bool:
+    async def exists(self, group_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -48,17 +48,13 @@ class GroupRepository(BaseRepository):
 
             result = await session.execute(
                 select(
-                    [
-                        exists().where(
-                            Group.id == group_id
-                        )
-                    ]
+                    exists().where(Group.id == group_id)
                 )
             )
             result = result.first()
             return result[0]
 
-    async def get_by_id(self, group_id:int) -> Group:
+    async def get_by_id(self, group_id: int) -> Group:
         try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
@@ -112,12 +108,12 @@ class GroupRepository(BaseRepository):
             main_group=main_group.dictionary(), all_groups=all_groups)}
         return result
 
-    def recursion(self, main_group:Group, all_groups:list) -> list:
+    def recursion(self, main_group: dict, all_groups: list) -> list | None:
         result = []
         groups_remove = []
         for group in all_groups:
             if main_group["id"] == group.parent_group:
-                result.append(group.dictionary()|{"subgroups" : ...})
+                result.append(group.dictionary() | {"subgroups": ...})
                 groups_remove.append(group)
 
         for group in groups_remove:
