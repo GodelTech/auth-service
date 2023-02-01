@@ -73,8 +73,11 @@ async def engine():
         engine = create_async_engine(db_url, echo=True)
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            # create all tables
             users = open(TEST_SQL_DIR + "/users.sql")
             query_users = text(users.read())
+
+            # create queries of insert statements from sql files
             user_claims = open(TEST_SQL_DIR + "/user_claims.sql")
             query_user_claims = text(user_claims.read())
             clients = open(TEST_SQL_DIR + "/clients.sql")
@@ -91,12 +94,15 @@ async def engine():
             query_client_post_logout_redirect_uris = text(
                 client_post_logout_redirect_uris.read()
             )
+
+            # populate database by executing queries
             await conn.execute(query_clients)
             await conn.execute(query_users)
             await conn.execute(query_user_claims)
             await conn.execute(query_client_post_logout_redirect_uris)
             await conn.execute(query_client_secrets)
             await conn.execute(query_client_redirect_uris)
+
         yield engine
 
 
