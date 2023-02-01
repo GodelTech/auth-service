@@ -38,21 +38,24 @@ class RoleRepository(BaseRepository):
                 await session.commit()
                 return True
             else:
-                return False
+                raise ValueError
 
     async def get_role_by_id(self, role_id: int) -> Role:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        async with session_factory() as sess:
-            session = sess
-            role = await session.execute(
-                select(Role).where(Role.id == role_id)
-            )
-            role = role.first()
+        try:
+            async with session_factory() as sess:
+                session = sess
+                role = await session.execute(
+                    select(Role).where(Role.id == role_id)
+                )
+                role = role.first()
 
-            return role[0]
-
+                return role[0]
+        except:
+            raise ValueError
+            
     async def update(self, role_id: int, **kwargs) -> bool:
 
         session_factory = sessionmaker(

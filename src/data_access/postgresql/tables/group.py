@@ -55,7 +55,14 @@ class Group(BaseModel):
 
     def __hash__(self) -> int:
         return self.id
-        
+    
+    def dictionary(self) -> dict:
+        return{
+            "id":self.id,
+            "name": self.name,
+            "parent_group": self.parent_group
+        }
+
 class Permission(BaseModel):
     __tablename__ = "permissions"
 

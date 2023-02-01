@@ -2,7 +2,9 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     UserRepository,
-    PersistentGrantRepository
+    PersistentGrantRepository,
+    GroupRepository,
+    RoleRepository,
 )
 
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -30,3 +32,9 @@ def provide_persistent_grant_repo_stub():
 
 def provide_persistent_grant_repo(engine: AsyncEngine) -> PersistentGrantRepository:
     return PersistentGrantRepository(engine)
+
+def provide_group_repo(engine: AsyncEngine) -> GroupRepository:
+    return GroupRepository(engine)
+
+def provide_role_repo(engine: AsyncEngine) -> RoleRepository:
+    return RoleRepository(engine)

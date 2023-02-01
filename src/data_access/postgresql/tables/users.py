@@ -26,7 +26,7 @@ users_roles = Table(
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     login_provider = Column(
         String,
         primary_key=True,
@@ -107,7 +107,7 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 

@@ -1,7 +1,9 @@
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
-    UserRepository
+    UserRepository,
+    GroupRepository,
+    RoleRepository,
 )
 from src.business_logic.services import (
     AuthorizationService,
@@ -11,7 +13,10 @@ from src.business_logic.services import (
     TokenService,
     IntrospectionServies,
     UserInfoServices,
-    LoginFormService
+    LoginFormService,
+    AdminUserService,
+    AdminGroupService,
+    AdminRoleService,
 )
 
 
@@ -103,9 +108,43 @@ def provide_token_service(
     )
 
 
-def provide_userinfo_service_stub():
+
+def provide_admin_user_service_stub():
     ...
 
+def provide_admin_user_service(
+        user_repo: UserRepository,
+):
+    return AdminUserService(
+        user_repo=user_repo,
+    )
+
+
+
+def provide_admin_group_service_stub():
+    ...
+
+def provide_admin_group_service(
+        group_repo: GroupRepository,
+):
+    return AdminGroupService(
+        group_repo=group_repo,
+    )
+
+
+def provide_admin_role_service_stub():
+    ...
+
+def provide_admin_role_service(
+        role_repo: RoleRepository,
+):
+    return AdminRoleService(
+        role_repo=role_repo,
+    )
+
+
+def provide_userinfo_service_stub():
+    ...
 
 def provide_userinfo_service(
         jwt: JWTService,
