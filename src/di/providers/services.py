@@ -28,13 +28,15 @@ def provide_auth_service(
     client_repo: ClientRepository,
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
-    password_service: PasswordHash
+    password_service: PasswordHash,
+    jwt_service: JWTService
 ):
     return AuthorizationService(
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,
-        password_service=password_service
+        password_service=password_service,
+        jwt_service=jwt_service
     )
 
 

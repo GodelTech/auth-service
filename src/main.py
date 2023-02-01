@@ -90,7 +90,8 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         user_repo=provide_user_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
-        password_service=provide_password_service()
+        password_service=provide_password_service(),
+        jwt_service=provide_jwt_service()
     )
     logger.info(f'{nodepends_provide_auth_service}')
 
