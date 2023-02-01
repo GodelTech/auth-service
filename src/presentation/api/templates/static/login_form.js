@@ -1,9 +1,19 @@
+// DOM variables
+
 let username = document.getElementById('user')
 let password = document.getElementById('pass')
 let log_button = document.getElementById('butt')
 let auth_form = document.getElementById('auth_form')
 let request_model = document.getElementById('rq_model')
 let div_elements = document.getElementsByClassName('model_elem')
+
+// external services variables
+
+let google = document.getElementById('Google')
+let github = document.getElementById('GitHub')
+let facebook = document.getElementById('FaceBook')
+let linkedin = document.getElementById('LinkedIn')
+let twitter = document.getElementById('Twitter')
 
 
 function formRequestModel(){
@@ -52,4 +62,34 @@ async function redirectToPost(event) {
     })
 }
 
+// External service functions
+
+function handleGitHub(){
+    window.location.href = 'https://github.com/';
+}
+
+function handleGoogle(){
+    window.location.href = 'https://www.google.com/';
+}
+
+function handleFacebook(){
+    window.location.href = 'https://www.facebook.com/';
+}
+
+function handleLinkedIn(){
+    window.location.href = 'https://www.linkedin.com/';
+}
+
+function handleTwitter(){
+    window.location.href = 'https://twitter.com/';
+}
+
+// EventListeners
+
 auth_form.addEventListener('submit', redirectToPost)
+
+github.addEventListener('click', handleGitHub)
+google.addEventListener('click', handleGoogle)
+facebook.addEventListener('click', handleFacebook)
+linkedin.addEventListener('click', handleLinkedIn)
+twitter.addEventListener('click', handleTwitter)

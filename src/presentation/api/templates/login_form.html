@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form</title>
     <script src="{{ url_for('static', path='/login_form.js')}}" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ url_for('static', path='/login_form.css')}}">
 </head>
 <body>
@@ -18,7 +19,16 @@
         <label>Enter Password</label>
         <input id="pass" type="password" name="auth_pass" placeholder="Password" required >
         <button id="butt" class="form_auth_button" type="submit" name="form_auth_submit">Login</button>
+
       </form>
+      {% if external_logins -%}
+      <p class="sing_in">Sign in with</p>
+<!--          <div class="externals">-->
+        {% for b in external_logins -%}
+          <button id={{ b }} class="form_auth_button" name="login_with_external_serv"> {{ b }} <i class="fa {{ external_logins[b] }}"></i></button>
+        {% endfor %}
+<!--          </div>-->
+    {% endif -%}
     </div>
   </div>
 
