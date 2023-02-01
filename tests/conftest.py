@@ -56,7 +56,8 @@ async def authorization_service() -> AuthorizationService:
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
-        password_service=PasswordHash()
+        password_service=PasswordHash(),
+        jwt_service=JWTService()
     )
     return auth_service
 

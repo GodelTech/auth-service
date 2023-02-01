@@ -3,7 +3,9 @@ import pytest
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientRedirectUriError,
+    WrongResponseTypeError,
 )
+from tests.test_unit.fixtures import authorization_request_model
 
 
 @pytest.mark.asyncio
@@ -33,3 +35,16 @@ class TestLoginFormService:
                 client_id="santa",
                 redirect_uri="no_uri"
             )
+
+    async def test_get_html_form(self, login_form_service, authorization_request_model):
+        service = login_form_service
+        service.request_model = authorization_request_model
+        result = await service.get_html_form()
+        assert result is True
+
+    async def test_get_html_form_wrong_response_type(self, login_form_service, authorization_request_model):
+        authorization_request_model.response_type = "some type"
+        service = login_form_service
+        service.request_model = authorization_request_model
+        with pytest.raises(WrongResponseTypeError):
+            await service.get_html_form()
