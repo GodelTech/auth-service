@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
 from src.data_access.postgresql.errors.user import DuplicationError
+from typing import Union
 
 
 class GroupRepository(BaseRepository):
@@ -108,7 +109,7 @@ class GroupRepository(BaseRepository):
             main_group=main_group.dictionary(), all_groups=all_groups)}
         return result
 
-    def recursion(self, main_group: dict, all_groups: list) -> list | None:
+    def recursion(self, main_group: dict, all_groups: list) -> Union[list, None]:
         result = []
         groups_remove = []
         for group in all_groups:
