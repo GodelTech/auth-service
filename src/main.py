@@ -10,6 +10,8 @@ from starlette.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
+from src.presentation.api.middleware.access_token_validation import AccessTokenMiddleware
+
 from src.config import LogConfig
 from src.presentation.api import router
 from src.di.providers import (
@@ -22,6 +24,8 @@ from src.di.providers import (
     provide_endsession_service_stub,
     provide_client_repo,
     provide_user_repo,
+    provide_group_repo,
+    provide_role_repo,
     provide_persistent_grant_repo,
     provide_jwt_service,
     provide_introspection_service_stub,
@@ -31,7 +35,13 @@ from src.di.providers import (
     provide_userinfo_service_stub,
     provide_userinfo_service,
     provide_login_form_service_stub,
-    provide_login_form_service
+    provide_login_form_service,
+    provide_admin_user_service_stub,
+    provide_admin_user_service,
+    provide_admin_group_service,
+    provide_admin_group_service_stub,
+    provide_admin_role_service_stub,
+    provide_admin_role_service,
 )
 from src.di import Container
 
@@ -52,7 +62,8 @@ def get_application(test=False) -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(AuthorizationMiddleware)
-    
+    # application.add_middleware(AccessTokenMiddleware)
+
     setup_di(application)
     container = Container()
     container.db()
@@ -138,6 +149,29 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_login_form_service_stub
     ] = nodepends_provide_login_form_service
+
+    nodepends_provide_admin_user_service = lambda: provide_admin_user_service(
+        user_repo=provide_user_repo(db_engine),
+    )
+
+    app.dependency_overrides[
+        provide_admin_user_service_stub
+    ] = nodepends_provide_admin_user_service
+    
+    nodepends_provide_admin_group_service = lambda: provide_admin_group_service(
+        group_repo=provide_group_repo(db_engine),
+    )
+
+    app.dependency_overrides[
+        provide_admin_group_service_stub
+    ] = nodepends_provide_admin_group_service
+    
+    nodepends_provide_admin_role_service = lambda: provide_admin_role_service(
+        role_repo=provide_role_repo(db_engine),
+    )
+    app.dependency_overrides[
+        provide_admin_role_service_stub
+    ] = nodepends_provide_admin_role_service
 
 
 app = get_application()
