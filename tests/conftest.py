@@ -72,12 +72,12 @@ async def engine():
         db_url = db_url.replace("psycopg2", "asyncpg")
         engine = create_async_engine(db_url, echo=True)
         async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
             # create all tables
-            users = open(TEST_SQL_DIR + "/users.sql")
-            query_users = text(users.read())
+            await conn.run_sync(Base.metadata.create_all)
 
             # create queries of insert statements from sql files
+            users = open(TEST_SQL_DIR + "/users.sql")
+            query_users = text(users.read())
             user_claims = open(TEST_SQL_DIR + "/user_claims.sql")
             query_user_claims = text(user_claims.read())
             clients = open(TEST_SQL_DIR + "/clients.sql")
