@@ -5,7 +5,6 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
 
 
-
 class RoleRepository(BaseRepository):
     async def exists(self, role_id: int) -> bool:
         session_factory = sessionmaker(

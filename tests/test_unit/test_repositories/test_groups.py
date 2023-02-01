@@ -65,10 +65,10 @@ class TestGroupRepository:
 
     async def test_setup(self, engine):
         group_repo = GroupRepository(engine)
-        await group_repo.delete()        
+        await group_repo.delete()
 
         for group in GROUPS:
-            await group_repo.create(name=group["name"], parent_group=group["parent_group"], id = group['id'])
+            await group_repo.create(name=group["name"], parent_group=group["parent_group"], id=group['id'])
 
         assert await group_repo.get_by_id(group_id=3)
 

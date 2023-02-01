@@ -1,4 +1,5 @@
 import factory
+from sqlalchemy import text
 
 import factories.data.data_for_factories as data
 import factories.factory_models.client_factory as cl_factory
@@ -25,11 +26,11 @@ class DataBasePopulation:
 
     @classmethod
     def clean_data_from_database(cls):
-        sess.session.execute("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE client_secrets RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE user_claims RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-        sess.session.execute("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
+        sess.session.execute(text("TRUNCATE TABLE persistent_grants RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE client_secrets RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE user_claims RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE "))
         sess.session.commit()
 
     @classmethod

@@ -1,6 +1,5 @@
 import logging
 import uuid
-from typing import Union
 
 from fastapi import status
 from sqlalchemy import insert, delete, select, exists
@@ -52,14 +51,12 @@ class PersistentGrantRepository(BaseRepository):
 
             result = await session.execute(
                 select(
-                    [
-                        exists().where(
+                    exists().where(
                             PersistentGrant.type == grant_type,
                             PersistentGrant.data == data,
                         )
-                    ]
+                    )
                 )
-            )
             result = result.first()
             return result[0]
 
@@ -118,14 +115,12 @@ class PersistentGrantRepository(BaseRepository):
             session = sess
             grant = await session.execute(
                 select(
-                    [
                         exists().where(
                             PersistentGrant.client_id == client_id,
                             PersistentGrant.subject_id == user_id,
                         )
-                    ]
+                    )
                 )
-            )
             grant = grant.first()
             if not grant[0]:
                 raise PersistentGrantNotFoundError('Persistent grant you are looking for does not exist')
