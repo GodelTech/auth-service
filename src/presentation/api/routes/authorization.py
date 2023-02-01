@@ -31,15 +31,14 @@ async def get_authorize(
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ):
     try:
-        print('1111111111111111111111111111111111111111111')
-
         auth_class = auth_class
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
+        external_logins = {"GitHub": "fa-github", "Google": "fa-google", "FaceBook": "fa-facebook", "LinkedIn": "fa-linkedin", "Twitter": "fa-twitter"}
         if return_form:
             return templates.TemplateResponse(
                 "login_form.html",
-                {"request": request, "request_model": request_model},
+                {"request": request, "request_model": request_model, "external_logins": external_logins},
                 status_code=200
             )
 
