@@ -14,11 +14,12 @@ from urllib.parse import urlencode
 
 import httpx
 
-from errors import HTTPXOAuthError
+from .errors import HTTPXOAuthError
 
 
 class OAuth2Error(HTTPXOAuthError):
     """Base exception class for OAuth2 client errors."""
+
     pass
 
 
@@ -47,7 +48,9 @@ class OAuth2Token(Dict[str, Any]):
         if "expires_at" in token_dict:
             token_dict["expires_at"] = int(token_dict["expires_at"])
         elif "expires_in" in token_dict:
-            token_dict["expires_at"] = int(time.time()) + int(token_dict["expires_in"])
+            token_dict["expires_at"] = int(time.time()) + int(
+                token_dict["expires_in"]
+            )
         super().__init__(token_dict)
 
     def is_expired(self):
@@ -124,12 +127,14 @@ class BaseOAuth2(Generic[T]):
         self, code: str, redirect_uri: str, code_verifier: Optional[str] = None
     ):
         async with self.get_httpx_client() as client:
+            print(code)
             data = {
-                "grant_type": "authorization_code",
+                "grant_type": "code",
                 "code": code,
                 "redirect_uri": redirect_uri,
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
+                "scope": "test",
             }
 
             if code_verifier:
@@ -138,11 +143,12 @@ class BaseOAuth2(Generic[T]):
             response = await client.post(
                 self.access_token_endpoint,
                 data=data,
-                headers=self.request_headers,
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
             )
 
             data = cast(Dict[str, Any], response.json())
-            # print(data)
 
             if response.status_code >= 400:
                 raise GetAccessTokenError(data)
@@ -172,7 +178,9 @@ class BaseOAuth2(Generic[T]):
 
             return OAuth2Token(data)
 
-    async def revoke_token(self, token: str, token_type_hint: Optional[str] = None):
+    async def revoke_token(
+        self, token: str, token_type_hint: Optional[str] = None
+    ):
         if self.revoke_token_endpoint is None:
             raise RevokeTokenNotSupportedError()
 
@@ -183,7 +191,9 @@ class BaseOAuth2(Generic[T]):
                 data["token_type_hint"] = token_type_hint
 
             response = await client.post(
-                self.revoke_token_endpoint, data=data, headers=self.request_headers
+                self.revoke_token_endpoint,
+                data=data,
+                headers=self.request_headers,
             )
 
             if response.status_code >= 400:

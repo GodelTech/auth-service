@@ -1,100 +1,73 @@
+from typing import Union
+from urllib.parse import urlencode
+
 import requests
-from fastapi import FastAPI, HTTPException, status
-from httpx import AsyncClient
+from fastapi import FastAPI, Header
+from fastapi.responses import RedirectResponse
+
+from .httpx_oauth.openid import OpenID
+
+client = OpenID(
+    client_id="test_client",
+    client_secret="past",
+    openid_configuration_endpoint="http://localhost:8000/.well-known/openid-configuration",
+)
 
 app = FastAPI()
 
-# Identity Server endpoint
-AUTH_SERVER = "http://localhost:8000"
+# Identity Server endpoints
 AUTH_URL = "http://localhost:8000/authorize/"
 TOKEN_URL = "http://localhost:8000/token/"
 USERINFO_URL = "http://localhost:8000/userinfo/"
 
 
 @app.get("/login")
-async def login():
-    # Get the authorization code by redirecting the user to the authorization endpoint of the identity server
-    # Check if user is auth
-    # If auth: redirect to profile
-    # If not auth: Some kind of form opens -> we provide username and password and both values goes to the scope?
-    authorization_endpoint = "http://localhost:8000/authorize/"
-    client_id = "test_client"
-    redirect_uri = "http://localhost:8001/profile"
-    response_type = "code"
-    scope = f"gcp-api%2520IdentityServerApi%26grant_type%3Dpassword%26client_id%3Dtest_client%26client_secret%3D65015c5e-c865-d3d4-3ba1-3abcb4e65500%26password%3Dtest_password%26username%3DTestClient"
-    state = "state"
-
-    authorization_url = f"{authorization_endpoint}?client_id={client_id}&response_type={response_type}&scope={scope}&redirect_uri={redirect_uri}&state={state}"
-    # redirection to identity server login page or smth
-    raise HTTPException(
-        status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-        headers={"location": authorization_url},
-    )
-
-
-@app.get("/profile")
-async def profile(code: str):
-    access_token = await obtain_jwt(code)
-
-    # Use the access token to access the user info endpoint of the identity server
-    headers = {"Authorization": access_token}
-    userinfo_response = requests.get(USERINFO_URL, headers=headers)
-    return userinfo_response.json()
-
-
-async def obtain_jwt(auth_code: str) -> str:
-    data = {
+async def get_login_form(
+    authorization: Union[str, None] = Header(default=None)
+):
+    if authorization:
+        access_token = authorization.split(" ")[-1]
+        # verify token
+        # ...
+        # if valid:
+        return RedirectResponse("http://localhost:8001/")
+    params = {
         "client_id": "test_client",
-        "grant_type": "code",
-        "scope": "test",
-        "redirect_uri": "https://www.google.com/",
-        "code": auth_code,
+        "response_type": "code",
+        "redirect_uri": "http://localhost:8001/",
     }
+    # redirect to the identity server login form
+    return RedirectResponse(f"{AUTH_URL}?{urlencode(params)}")
+    # as a result after making POST request to /authorize endpoint
+    # we'll be redirected to redirect_uri with a code
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
 
-    response = await AsyncClient().request(
-        'POST', f'{AUTH_SERVER}/token/', data=data, headers=headers
+@app.get("/")
+async def login_callback(code: str):
+    # Exchange the auth code for an access token
+    token = await client.get_access_token(
+        code=code, redirect_uri="http://localhost:8001/"
     )
-
-    if response.status_code != status.HTTP_200_OK:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid authorization code",
-        )
-    return response.json().get('access_token')
+    access_token, refresh_token = token["access_token"], token["refresh_token"]
+    # Use the access token to access the user info endpoint of the identity server
+    headers = {"Authorization": f"Bearer {access_token}"}
+    userinfo_response = requests.get(USERINFO_URL, headers=headers)
+    return {"message": "success", "profile": userinfo_response.json()}
 
 
-# grant_type: code
-#   - redirect_uri, code
-# grant_type: password
-#   - username, password
-# grant_type: refresh_token
-#   - refresh_token
-# grant_type: urn:ietf:params:oauth:grant-type:device_code
-#   - device_code
+@app.get("/todos")
+async def get_todos(
+    authorization: Union[str, None] = Header(default=None),
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),
+):
+    if authorization:
+        access_token = authorization.split(" ")[-1]
+    if auth_swagger is not None:
+        access_token = auth_swagger
+    # verify token
+    # ...
+    # if token is not valid or user don't have claims/permission raise an exception
 
-
-# implement it for different grant_types?
-
-
-# @app.get("/protected")
-# async def protected(access_token: str):
-#     # check if token was created by identity server?
-#     # check if token is valid?
-#     headers = {"authorization": access_token}
-#     response = await AsyncClient().request(
-#         'GET', "http://localhost:8001/protected", headers=headers
-#     )
-#     return response.json()
-
-
-# @app.post("/auth_code")
-# async def auth_code(auth_code: str):
-#     try:
-#         access_token = await obtain_jwt(auth_code)
-#     except HTTPException as e:
-#         return {"message": str(e.detail)}
-#     return {"access_token": access_token}
+    return {"todos": "blabla"}
