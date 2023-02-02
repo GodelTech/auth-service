@@ -4,10 +4,14 @@ from logging.config import dictConfig
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi.staticfiles import StaticFiles
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+from pathlib import Path
 
 from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
+from src.presentation.api.middleware.access_token_validation import AccessTokenMiddleware
+
 from src.config import LogConfig
 from src.presentation.api import router
 from src.di.providers import (
@@ -20,6 +24,8 @@ from src.di.providers import (
     provide_endsession_service_stub,
     provide_client_repo,
     provide_user_repo,
+    provide_group_repo,
+    provide_role_repo,
     provide_persistent_grant_repo,
     provide_jwt_service,
     provide_introspection_service_stub,
@@ -28,6 +34,14 @@ from src.di.providers import (
     provide_token_service,
     provide_userinfo_service_stub,
     provide_userinfo_service,
+    provide_login_form_service_stub,
+    provide_login_form_service,
+    provide_admin_user_service_stub,
+    provide_admin_user_service,
+    provide_admin_group_service,
+    provide_admin_group_service_stub,
+    provide_admin_role_service_stub,
+    provide_admin_role_service,
 )
 from src.di import Container
 
@@ -48,14 +62,19 @@ def get_application(test=False) -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(AuthorizationMiddleware)
-    
+    # application.add_middleware(AccessTokenMiddleware)
+
     setup_di(application)
     container = Container()
     container.db()
     application.container = container
     
     application.include_router(router)
-    
+    application.mount(
+        "/static",
+        StaticFiles(directory="src/presentation/api/templates/static"),
+        name="static")
+
     return application
 
 
@@ -71,7 +90,8 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         user_repo=provide_user_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
-        password_service=provide_password_service()
+        password_service=provide_password_service(),
+        jwt_service=provide_jwt_service()
     )
     logger.info(f'{nodepends_provide_auth_service}')
 
@@ -123,6 +143,36 @@ def setup_di(app: FastAPI) -> None:
         provide_userinfo_service_stub
     ] = nodepends_provide_userinfo_service
 
+    nodepends_provide_login_form_service = lambda: provide_login_form_service(
+        client_repo=provide_client_repo(db_engine)
+    )
+
+    app.dependency_overrides[
+        provide_login_form_service_stub
+    ] = nodepends_provide_login_form_service
+
+    nodepends_provide_admin_user_service = lambda: provide_admin_user_service(
+        user_repo=provide_user_repo(db_engine),
+    )
+
+    app.dependency_overrides[
+        provide_admin_user_service_stub
+    ] = nodepends_provide_admin_user_service
+    
+    nodepends_provide_admin_group_service = lambda: provide_admin_group_service(
+        group_repo=provide_group_repo(db_engine),
+    )
+
+    app.dependency_overrides[
+        provide_admin_group_service_stub
+    ] = nodepends_provide_admin_group_service
+    
+    nodepends_provide_admin_role_service = lambda: provide_admin_role_service(
+        role_repo=provide_role_repo(db_engine),
+    )
+    app.dependency_overrides[
+        provide_admin_role_service_stub
+    ] = nodepends_provide_admin_role_service
 
 
 app = get_application()

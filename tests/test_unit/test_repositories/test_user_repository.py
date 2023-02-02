@@ -51,3 +51,15 @@ class TestUserRepository:
         self.user_repo = UserRepository(engine)
         with pytest.raises(ClaimsNotFoundError):
             await self.user_repo.get_claims(id=55555)
+
+    async def test_all(self, engine):
+        self.user_repo = UserRepository(engine)
+        
+        a = await self.user_repo.add_group(user_id=1, group_id=1)
+        b = await self.user_repo.add_group(user_id=1, group_id=2)
+        c = await self.user_repo.remove_user_groups(user_id=1, group_ids=[2])
+        c2= await self.user_repo.get_groups(1)
+        d = await self.user_repo.add_group(user_id=1, group_id=3)
+        e = await self.user_repo.get_roles(user_id=1)        
+        f = await self.user_repo.get_groups(user_id=1)
+        assert f

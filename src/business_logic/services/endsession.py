@@ -24,7 +24,7 @@ class EndSessionService:
         decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
         await self._logout(
             client_id=decoded_id_token_hint['client_id'],
-            user_id=decoded_id_token_hint['user_id']
+            user_id=decoded_id_token_hint['sub']
         )
         if self.request_model.post_logout_redirect_uri:
             if await self._validate_logout_redirect_uri(

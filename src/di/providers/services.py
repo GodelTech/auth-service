@@ -1,7 +1,9 @@
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
-    UserRepository
+    UserRepository,
+    GroupRepository,
+    RoleRepository,
 )
 from src.business_logic.services import (
     AuthorizationService,
@@ -11,6 +13,10 @@ from src.business_logic.services import (
     TokenService,
     IntrospectionServies,
     UserInfoServices,
+    LoginFormService,
+    AdminUserService,
+    AdminGroupService,
+    AdminRoleService,
 )
 
 
@@ -22,13 +28,15 @@ def provide_auth_service(
     client_repo: ClientRepository,
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
-    password_service: PasswordHash
+    password_service: PasswordHash,
+    jwt_service: JWTService
 ):
     return AuthorizationService(
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,
-        password_service=password_service
+        password_service=password_service,
+        jwt_service=jwt_service
     )
 
 
@@ -102,9 +110,43 @@ def provide_token_service(
     )
 
 
-def provide_userinfo_service_stub():
+
+def provide_admin_user_service_stub():
     ...
 
+def provide_admin_user_service(
+        user_repo: UserRepository,
+):
+    return AdminUserService(
+        user_repo=user_repo,
+    )
+
+
+
+def provide_admin_group_service_stub():
+    ...
+
+def provide_admin_group_service(
+        group_repo: GroupRepository,
+):
+    return AdminGroupService(
+        group_repo=group_repo,
+    )
+
+
+def provide_admin_role_service_stub():
+    ...
+
+def provide_admin_role_service(
+        role_repo: RoleRepository,
+):
+    return AdminRoleService(
+        role_repo=role_repo,
+    )
+
+
+def provide_userinfo_service_stub():
+    ...
 
 def provide_userinfo_service(
         jwt: JWTService,
@@ -120,4 +162,17 @@ def provide_userinfo_service(
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
     )
+
+
+def provide_login_form_service_stub():
+    ...
+
+
+def provide_login_form_service(
+    client_repo: ClientRepository,
+):
+    return LoginFormService(
+        client_repo=client_repo
+    )
+
 

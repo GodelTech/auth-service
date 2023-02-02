@@ -60,7 +60,7 @@ class TestEndSessionService:
         service.request_model = end_session_request_model
         data = await service._decode_id_token_hint(service.request_model.id_token_hint)
 
-        assert data["user_id"] == 3
+        assert data["sub"] == 3
         assert data["data"] == "secret_code"
 
     async def test_decode_id_token_hint_error(self, end_session_service):
@@ -76,7 +76,7 @@ class TestEndSessionService:
             insert(PersistentGrant).values(
                 key="test_key",
                 client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
+                subject_id=TOKEN_HINT_DATA["sub"],
                 data=TOKEN_HINT_DATA["data"],
                 type=TOKEN_HINT_DATA["type"],
                 expiration=False
@@ -100,7 +100,7 @@ class TestEndSessionService:
             insert(PersistentGrant).values(
                 key="test_key",
                 client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
+                subject_id=TOKEN_HINT_DATA["sub"],
                 data=TOKEN_HINT_DATA["data"],
                 type=TOKEN_HINT_DATA["type"],
                 expiration=False
@@ -122,7 +122,7 @@ class TestEndSessionService:
             insert(PersistentGrant).values(
                 key="test_key",
                 client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["user_id"],
+                subject_id=TOKEN_HINT_DATA["sub"],
                 data=TOKEN_HINT_DATA["data"],
                 type=TOKEN_HINT_DATA["type"],
                 expiration=False

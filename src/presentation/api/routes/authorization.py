@@ -1,40 +1,47 @@
 import logging
 
-from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import APIRouter, Depends, status, Request
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-from src.business_logic.services import AuthorizationService
+from src.business_logic.services import AuthorizationService, LoginFormService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserNotFoundError,
     WrongPasswordError,
+    ClientRedirectUriError,
+    WrongResponseTypeError,
 )
 from src.presentation.api.models import DataRequestModel, RequestModel
-from src.di.providers import provide_auth_service_stub
+from src.di.providers import provide_auth_service_stub, provide_login_form_service_stub
 
 
 logger = logging.getLogger("is_app")
 
+templates = Jinja2Templates(directory="src/presentation/api/templates/")
 
 auth_router = APIRouter(
     prefix="/authorize",
 )
 
 
-@auth_router.get("/", status_code=status.HTTP_302_FOUND, tags=["Authorization"])
+@auth_router.get("/", status_code=status.HTTP_200_OK, tags=["Authorization"], response_class=HTMLResponse)
 async def get_authorize(
+    request: Request,
     request_model: RequestModel = Depends(),
-    auth_class: AuthorizationService = Depends(provide_auth_service_stub),
+    auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ):
     try:
         auth_class = auth_class
         auth_class.request_model = request_model
-        firmed_redirect_uri = await auth_class.get_redirect_url()
-        response = RedirectResponse(
-            firmed_redirect_uri, status_code=status.HTTP_302_FOUND
-        )
-
-        return response
+        return_form = await auth_class.get_html_form()
+        external_logins = {"GitHub": "fa-github", "Google": "fa-google", "FaceBook": "fa-facebook", "LinkedIn": "fa-linkedin", "Twitter": "fa-twitter"}
+        if return_form:
+            return templates.TemplateResponse(
+                "login_form.html",
+                {"request": request, "request_model": request_model, "external_logins": external_logins},
+                status_code=200
+            )
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -42,11 +49,11 @@ async def get_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Client not found"},
         )
-    except UserNotFoundError as exception:
+    except ClientRedirectUriError as exception:
         logger.exception(exception)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "User not found"},
+            content={"message": "Redirect Uri not found"},
         )
     except WrongPasswordError as exception:
         logger.exception(exception)
@@ -54,25 +61,12 @@ async def get_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Bad password"},
         )
-    except KeyError as exception:
-        message = (
-            f"KeyError: key {exception} does not exist is not in the scope"
-        )
-        logger.exception(message)
+    except WrongResponseTypeError as exception:
+        logger.exception(exception)
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "message": "The scope is missing a password, or a username"
-            },
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "Bad response type"},
         )
-    except IndexError as exception:
-        message = f"IndexError: {exception} - Impossible to parse the scope"
-        logger.exception(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Impossible to parse the scope"},
-        )
-
 
 @auth_router.post(
     "/", status_code=status.HTTP_302_FOUND, tags=["Authorization"]

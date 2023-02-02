@@ -25,16 +25,15 @@ class JWTService:
 
         return token
 
-    async def decode_token(self, token: str, secret: None = None) -> dict:
+    async def decode_token(self, token: str, **kwargs) -> dict:
 
         token = token.replace("Bearer ", "")
-
         decoded = jwt.decode(
             token,
             key=self.keys.public_key,
-            algorithms=self.algorithms
+            algorithms=self.algorithms,
+            **kwargs
         )
-
         return decoded
 
     async def verify_token(self, token: str) -> bool:

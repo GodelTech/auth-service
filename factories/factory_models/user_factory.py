@@ -52,7 +52,7 @@ class RoleFactory(SQLAlchemyModelFactory):
         model = users.Role
         sqlalchemy_session = sess.session
 
-    name = factory.Faker("word")
+    name = factory.Faker("job")
 
     @factory.post_generation
     def users(self, create, extracted, **kwargs):
@@ -77,7 +77,7 @@ class UserClaimFactory(SQLAlchemyModelFactory):
 
 class UserRolesFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = users.user_roles
+        model = users.users_roles
         sqlalchemy_session = sess.session
 
     role = factory.SubFactory(RoleFactory)

@@ -7,7 +7,7 @@ from .base import BaseModel
 class IdentityClaim(BaseModel):
     __tablename__ = "identity_claims"
 
-    identity_resource_id = Column(Integer, ForeignKey("identity_resources.id"))
+    identity_resource_id = Column(Integer, ForeignKey("identity_resources.id", ondelete='CASCADE'))
     type = Column(String)
 
     def __str__(self) -> str:

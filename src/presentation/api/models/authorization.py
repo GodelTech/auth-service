@@ -8,7 +8,7 @@ from pydantic import BaseModel
 class RequestModel(BaseModel):
     client_id: str
     response_type: str
-    scope: str
+    scope: Optional[str]
     redirect_uri: str
     state: Optional[str]
     response_mode: Optional[str]

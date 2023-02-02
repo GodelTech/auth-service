@@ -20,7 +20,7 @@ class ApiSecret(BaseModel):
     API_SECRET_TYPE = [("sha256", "Sha256"), ("sha512", "Sha512")]
     __tablename__ = "api_secrets"
 
-    api_resources_id = Column(Integer, ForeignKey("api_resources.id"))
+    api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
     description = Column(String, nullable=True)
     expiration = Column(DateTime, nullable=False)
     type = Column(ChoiceType(API_SECRET_TYPE))
@@ -34,7 +34,7 @@ class ApiClaim(BaseModel):
     API_CLAIM_TYPE = [("string", "String")]
     __tablename__ = "api_claims"
 
-    api_resources_id = Column(Integer, ForeignKey("api_resources.id"))
+    api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
     type = Column(ChoiceType(API_CLAIM_TYPE))
 
     def __str__(self):
@@ -44,7 +44,7 @@ class ApiClaim(BaseModel):
 class ApiScope(BaseModel):
     __tablename__ = "api_scopes"
 
-    api_resources_id = Column(Integer, ForeignKey("api_resources.id"))
+    api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
     description = Column(String, nullable=True)
     name = Column(String, nullable=False)
     display_name = Column(String, nullable=True)
@@ -73,7 +73,7 @@ class ApiScopeClaim(BaseModel):
     ]
     __tablename__ = "api_scope_claims"
 
-    api_scopes_id = Column(Integer, ForeignKey("api_scopes.id"))
+    api_scopes_id = Column(Integer, ForeignKey("api_scopes.id", ondelete='CASCADE'))
     type = Column(ChoiceType(API_SCOPE_CLAIM_TYPE))
 
     def __str__(self):
