@@ -33,4 +33,6 @@ from .services import (
     provide_admin_group_service,
     provide_admin_role_service_stub,
     provide_admin_role_service,
+    provide_admin_auth_service_stub,
+    provide_admin_auth_service
 )
