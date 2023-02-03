@@ -40,7 +40,7 @@ def exceptions_wrapper(func):
 async def get_group(
     request: Request,
     access_token: str = Header(description="Access token"),
-    request_model: RequestGroupModel = Depends(),
+    request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
 
@@ -74,7 +74,7 @@ async def get_all_groups(
 async def get_subgroups(
     request: Request,
     access_token: str = Header(description="Access token"),
-    request_model: RequestGroupModel = Depends(),
+    request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
