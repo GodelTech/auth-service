@@ -6,11 +6,19 @@ from src.data_access.postgresql.tables.group import *
 from src.data_access.postgresql.errors.user import DuplicationError
 from typing import Union
 
+def params_to_dict(**kwargs):
+    result = {}
+    for key in kwargs:
+        if kwargs[key] is not None:
+            result[key] = kwargs[key]
+    return result
+
 
 class GroupRepository(BaseRepository):
 
-    async def create(self, **kwargs) -> None:
+    async def create(self, name:str = None, parent_group: int = None, id:int = None) -> None:
         try:
+            kwargs = params_to_dict(name=name, parent_group=parent_group, id = id)
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -71,6 +79,23 @@ class GroupRepository(BaseRepository):
                 return result.first()[0]
         except:
             raise ValueError
+    
+    async def get_group_by_name(self, name: str) -> Group:
+        
+        try:
+            session_factory = sessionmaker(
+                self.engine, expire_on_commit=False, class_=AsyncSession
+            )
+            async with session_factory() as sess:
+                session = sess
+                group = await session.execute(
+                    select(Group).where(Group.name == name)
+                )
+                group = group.first()
+
+                return group[0]
+        except:
+            raise ValueError
 
     async def get_all_groups(self) -> list:
         session_factory = sessionmaker(
@@ -85,11 +110,12 @@ class GroupRepository(BaseRepository):
 
             return result
 
-    async def update(self, group_id: int, **kwargs):
+    async def update(self, group_id: int, name:str = None, parent_group: int = None):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
+            kwargs = params_to_dict(name=name, parent_group=parent_group)
             async with session_factory() as sess:
                 session = sess
                 if await self.exists(group_id=group_id):

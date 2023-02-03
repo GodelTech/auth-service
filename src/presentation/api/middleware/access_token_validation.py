@@ -20,7 +20,7 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
             token = request.headers.get('access-token')
 
             try:
-                if not bool(await self.jwt_service.verify_token(token)):
+                if not await self.jwt_service.verify_token(token):
                     logger.exception("403 Incorrect Access Token")
                     return JSONResponse(
                         status_code=status.HTTP_403_FORBIDDEN,
