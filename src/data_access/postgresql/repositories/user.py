@@ -10,6 +10,14 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import User, UserClaim, Role
 from src.data_access.postgresql.tables.users import users_roles, users_groups
 from src.data_access.postgresql.errors.user import DuplicationError
+from typing import Union
+
+def params_to_dict(**kwargs):
+    result = {}
+    for key in kwargs:
+        if kwargs[key] is not None:
+            result[key] = kwargs[key]
+    return result
 
 
 class UserRepository(BaseRepository):
@@ -26,7 +34,7 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
 
-    async def delete(self, user_id: int) -> bool:
+    async def delete(self, user_id: int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -36,7 +44,6 @@ class UserRepository(BaseRepository):
                 user_to_delete = await self.get_user_by_id(user_id=user_id)
                 await session.delete(user_to_delete)
                 await session.commit()
-                return True
             else:
                 raise ValueError
 
@@ -109,6 +116,22 @@ class UserRepository(BaseRepository):
             result = result[0].username
             return result
 
+    async def get_user_by_username(self, username:str) -> User:
+        try:
+            session_factory = sessionmaker(
+                self.engine, expire_on_commit=False, class_=AsyncSession
+            )
+            async with session_factory() as sess:
+                session = sess
+                user = await session.execute(
+                    select(User).where(User.username == username)
+                )
+                user = user.first()
+
+                return user[0]
+        except:
+            raise ValueError
+
     async def get_all_users(self, group_id: int = None, role_id: int = None) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -156,11 +179,38 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def update(self, user_id: int, **kwargs) -> bool:
+    async def update(
+            self, 
+            user_id: int,
+            id: Union[None, str] = None,
+            username: Union[None, str] = None,
+            security_stamp: Union[None, str] = None,
+            email: Union[None, str] = None,
+            email_confirmed: Union[None, bool] = None,
+            phone_number: Union[None, str] = None,
+            phone_number_confirmed: Union[None, bool] = None,
+            two_factors_enabled: Union[None, bool] = None,
+            lockout_end_date_utc: Union[None, str] = None,
+            password_hash: Union[None, str] = None,
+            lockout_enabled: Union[None, bool] = False,
+            access_failed_count: Union[None, int] = None,
+        ):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
+            kwargs = params_to_dict(id = id, 
+                                username = username, 
+                                security_stamp = security_stamp,
+                                email = email, 
+                                email_confirmed = email_confirmed, 
+                                phone_number = phone_number, 
+                                phone_number_confirmed = phone_number_confirmed, 
+                                two_factors_enabled = two_factors_enabled, 
+                                lockout_end_date_utc = lockout_end_date_utc, 
+                                lockout_enabled = lockout_enabled,
+                                password_hash = password_hash,
+                                access_failed_count = access_failed_count)
             async with session_factory() as sess:
                 session = sess
                 if await self.exists(user_id=user_id):
@@ -168,17 +218,42 @@ class UserRepository(BaseRepository):
                         **kwargs).where(User.id == user_id)
                     await session.execute(updates)
                     await session.commit()
-                    return True
                 else:
                     raise ValueError
         except:
             raise DuplicationError
 
-    async def create(self, **kwargs) -> bool:
+    async def create(
+        self,
+        id: Union[None, str] = None,
+        username: Union[None, str] = None,
+        security_stamp: Union[None, str] = None,
+        email: Union[None, str] = None,
+        email_confirmed: Union[None, bool] = None,
+        phone_number: Union[None, str] = None,
+        phone_number_confirmed: Union[None, bool] = None,
+        two_factors_enabled: Union[None, bool] = None,
+        lockout_end_date_utc: Union[None, str] = None,
+        password_hash: Union[None, str] = None,
+        lockout_enabled: Union[None, bool] = False,
+        access_failed_count: Union[None, int] = 0,
+        ) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
+            kwargs = params_to_dict(id = id, 
+                                    username = username, 
+                                    security_stamp = security_stamp,
+                                    email = email, 
+                                    email_confirmed = email_confirmed, 
+                                    phone_number = phone_number, 
+                                    phone_number_confirmed = phone_number_confirmed, 
+                                    two_factors_enabled = two_factors_enabled, 
+                                    lockout_end_date_utc = lockout_end_date_utc, 
+                                    lockout_enabled = lockout_enabled,
+                                    password_hash = password_hash,
+                                    access_failed_count = access_failed_count)
             async with session_factory() as sess:
                 session = sess
 
@@ -186,22 +261,25 @@ class UserRepository(BaseRepository):
                     insert(User).values(**kwargs)
                 )
                 await session.commit()
-                return True
         except:
             raise DuplicationError
 
-    async def add_group(self, user_id: int, group_id: int) -> bool:
+    async def add_group(self, user_id:int, group_id:int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        try: 
-            async with session_factory() as sess:
-                session = sess
-                await session.execute(
-                    insert(users_groups).values(user_id=user_id, group_id=group_id)
-                    )
-                await session.commit()
-                return True
+        try:
+                async with session_factory() as sess:
+                    session = sess
+                    flag_one = (await session.execute(select([exists().where(Group.id == group_id)]))).first()[0]
+                    flag_two = (await session.execute(select([exists().where(User.id == user_id)]))).first()[0]
+                    if flag_one and flag_two:
+                        await session.execute(insert(users_groups).values(user_id = user_id, group_id = group_id))
+                        await session.commit()
+                    elif not flag_two or not flag_one:
+                        raise ValueError
+        except ValueError:
+            raise ValueError
         except:
             raise DuplicationError
 
@@ -227,36 +305,19 @@ class UserRepository(BaseRepository):
         try: 
             async with session_factory() as sess:
                 session = sess
-
-                if len(group_ids) == 0:
-                    return False
-                elif len(group_ids) == 1:
-                    group_ids = group_ids[0]
-                else:
-                    group_ids = str(group_ids)[1:-1]
-
                 sql = f"DELETE FROM users_groups WHERE user_id = {user_id} AND group_id IN ({group_ids})"
                 await session.execute(text(sql))
                 await session.commit()
-            return True
         except:
             raise ValueError
 
-    async def remove_user_roles(self, user_id: int, role_ids: list) -> bool:
+    async def remove_user_roles(self, user_id:int, role_ids:str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try: 
             async with session_factory() as sess:
                 session = sess
-
-                if len(role_ids) == 0:
-                    return False
-                elif len(role_ids) == 1:
-                    role_ids = role_ids[0]
-                else:
-                    role_ids = str(role_ids)[1:-1]
-
                 sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND role_id IN ({role_ids})"
                 await session.execute(text(sql))
                 await session.commit()

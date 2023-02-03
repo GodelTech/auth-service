@@ -41,7 +41,7 @@ def exceptions_wrapper(func):
 async def get_role(
     request: Request,
     access_token: str = Header(description="Access token"),
-    request_model: RequestRoleModel = Depends(),
+    request_model: RequestRoleBaseModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ):
 
@@ -64,11 +64,11 @@ async def get_all_roles(
     return { "all_roles" : await role_class.get_all_roles()}
 
 
-@admin_role_router.post(
+@admin_role_router.get(
     "/get_roles", response_model=dict, tags=["Administration Role"]
 )
 @exceptions_wrapper
-async def get_all_roles(
+async def get_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestListRoleModel = Depends(),
