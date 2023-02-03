@@ -1,97 +1,81 @@
 from typing import Union
 from pydantic import BaseModel
-from dataclasses import dataclass
-from fastapi import Form
 
-@dataclass
 class RequestDefaultUserModel(BaseModel):
-    user_id: int = Form(...)
-
-    class Config:
-        orm_mode = True
-
-class RequestUserModel(BaseModel):
 
     user_id: int
 
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestAllUserModel:
-    group_id: Union[int, None] = Form(None)
-    role_id: Union[int, None] = Form(None)
+class RequestAllUserModel(BaseModel):
+    group_id: Union[int, None]
+    role_id: Union[int, None]
 
     class Config:
         orm_mode = True
-
 
 class ResponceAllUserModel(BaseModel):
-    all_users: str
+    all_users: list
 
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestUpdateUserModel:
-    user_id: int = Form(...)
-    username: Union[None, str] = Form(None)
-    email: Union[None, str] = Form(None)
-    email_confirmed: Union[None, bool] = Form(None)
-    phone_number: Union[None, str] = Form(None)
-    phone_number_confirmed: Union[None, bool] = Form(None)
-    two_factors_enabled: Union[None, bool] = Form(None)
-    lockout_end_date_utc: Union[None, str] = Form(None)
-    lockout_enabled: Union[None, bool] = Form(None)
+class RequestUpdateUserModel(BaseModel):
+    user_id: int
+    username: Union[None, str]
+    email: Union[None, str]
+    email_confirmed: Union[None, bool] 
+    phone_number: Union[None, str]
+    phone_number_confirmed: Union[None, bool]
+    two_factors_enabled: Union[None, bool]
+    lockout_end_date_utc: Union[None, str]
+    lockout_enabled: Union[None, bool]
     
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestCreateUserModel:
-    email:str = Form(...)
-    security_stamp:str = Form(...)
-    phone_number:str = Form(...)
-    two_factors_enabled:bool = Form(...)
-    username:str = Form(...)
-    password:str = Form(...)
+class RequestCreateUserModel(BaseModel):
+    email:str
+    security_stamp:str
+    phone_number:str 
+    two_factors_enabled:bool 
+    username:str 
+    password:str 
 
-    def dictionary(self):
+    def __dict__(self):
         return{
             "email":self.email,
             "security_stamp":self.security_stamp,
             "phone_number":self.phone_number,
             "two_factors_enabled":self.two_factors_enabled,
             "username":self.username,
-            "password":self.password
+            #"password":self.password
         }
 
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestGroupsUserModel:
+class RequestGroupsUserModel(BaseModel):
 
-    user_id: int = Form(...)
-    group_ids: str = Form(..., description='Example: "1,2,3"')
+    user_id: int 
+    group_ids: list[int]
 
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestRolesUserModel:    
-    user_id: int = Form(...)
-    role_ids: str = Form(..., description='Example: "1,2,3"')
+class RequestRolesUserModel(BaseModel):    
+    user_id: int 
+    role_ids: list[int] 
 
     class Config:
         orm_mode = True
 
         
-@dataclass
-class RequestPasswordUserModel:
+class RequestPasswordUserModel(BaseModel):
 
-    user_id: int = Form(...)
-    new_password: str = Form(...)
+    user_id: int 
+    new_password: str
 
     class Config:
         orm_mode = True
