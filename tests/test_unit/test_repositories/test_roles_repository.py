@@ -40,27 +40,26 @@ class TestRoleRepository:
         updated = await role_repo.update(role_id=5, name=new_role)
         updated_role = await role_repo.get_role_by_id(5)
 
+        assert updated is True
         assert updated_role.name == new_role
 
     async def test_update_not_exist_role(self, engine):
         role_repo = RoleRepository(engine)
         new_role = "not_exist"
-        try:
-            updated = await role_repo.update(role_id=-1, name=new_role)
-        except ValueError:
-            pass
-        else:
-            raise AssertionError
+        updated = await role_repo.update(role_id=55555, name=new_role)
+
+        assert updated is False
 
     async def test_create(self, engine, connection):
         role_repo = RoleRepository(engine)
         new_role = "new_role"
-        try:
-            await role_repo.create(name=new_role)
-        except:
-            raise AssertionError
-        role_id = (await role_repo.get_role_by_name(new_role)).id
-        await role_repo.delete(role_id= role_id)
+        created = await role_repo.create(name=new_role)
+        assert created is True
+
+        await connection.execute(
+            delete(Role).where(Role.name == new_role)
+        )
+        await connection.commit()
 
     async def test_create_duplicate(self, engine):
         role_repo = RoleRepository(engine)

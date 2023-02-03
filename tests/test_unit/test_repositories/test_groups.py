@@ -63,11 +63,14 @@ GROUPS = [
 @pytest.mark.asyncio
 class TestGroupRepository:
 
-    # async def test_setup(self, engine):
-    #     group_repo = GroupRepository(engine)
-    #     #await group_repo.delete()        
+    async def test_setup(self, engine):
+        group_repo = GroupRepository(engine)
+        await group_repo.delete()
 
-    #     assert await group_repo.get_by_id(group_id=3)
+        for group in GROUPS:
+            await group_repo.create(name=group["name"], parent_group=group["parent_group"], id=group['id'])
+
+        assert await group_repo.get_by_id(group_id=3)
 
     async def test_get_all_groups(self, engine):
         group_repo = GroupRepository(engine)
