@@ -62,8 +62,7 @@ class AdminRoleService():
     async def get_role(self, role_id):
         return await self.role_repo.get_role_by_id(role_id=role_id)
 
-    async def get_roles(self, role_ids:str) -> list[Role]:
-        role_ids = [int(number) for number in role_ids.split(",")]
+    async def get_roles(self, role_ids) -> list[Role]:
         return [await self.role_repo.get_role_by_id(role_id= role_id) for role_id in role_ids]
 
     async def get_all_roles(self) -> list[Role]:
@@ -132,23 +131,23 @@ class AdminUserService():
     async def current_user():
         pass
 
-    async def add_user_roles(self, user_id:int ,role_ids: str) -> None:
-        role_ids = [int(number) for number in role_ids.split(",")]
+    async def add_user_roles(self, user_id:int ,role_ids: list) -> None:
         for role_id in role_ids:
             await self.user_repo.add_role(user_id=user_id, role_id=role_id)
         
 
-    async def remove_user_roles(self, user_id:int ,role_ids: str):
+    async def remove_user_roles(self, user_id:int ,role_ids: list):
         return await self.user_repo.remove_user_roles(user_id=user_id, role_ids=role_ids)
 
     async def get_user_roles(self, user_id:int):
         return await self.user_repo.get_roles(user_id=user_id)
     
 
-    async def add_user_groups(self, user_id:int, group_ids:str) -> bool:
-        group_ids = [int(number) for number in group_ids.split(",")]
+    async def add_user_groups(self, user_id:int, group_ids:list) -> bool:
         for group_id in group_ids: 
             await self.user_repo.add_group(user_id = user_id, group_id=group_id)
+        else:
+            return True
 
     async def get_user_groups(self, user_id:int):
         return await self.user_repo.get_groups(user_id=user_id)
@@ -166,7 +165,7 @@ class AdminUserService():
         
     async def change_password(self, user_id:int, new_password:str):
         new_password = PasswordHash.hash_password(password=new_password)
-        await self.user_repo.update(user_id=user_id, password_hash = new_password)
+        await self.update_user(user_id=user_id, password_hash = new_password)
 
     async def send_email_verification():
         pass
@@ -175,7 +174,7 @@ class AdminUserService():
         return await self.user_repo.get_user_by_id(user_id=user_id)
 
     async def update_user(self, user_id:int, kwargs):
-        await self.user_repo.update(user_id=user_id, **kwargs)
+        return await self.user_repo.update(user_id=user_id, **kwargs)
         
     async def delete_user(self, user_id:int):
         await self.user_repo.delete(user_id=user_id)

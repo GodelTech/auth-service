@@ -71,7 +71,7 @@ def get_application(test=False) -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(AuthorizationMiddleware)
-    application.add_middleware(AccessTokenMiddleware)
+    # application.add_middleware(AccessTokenMiddleware)
 
     setup_di(application)
     container = Container()
