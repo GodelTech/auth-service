@@ -13,13 +13,9 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from pytest_postgresql import factories
-from pytest_postgresql.janitor import DatabaseJanitor
 import pytest
 import asyncio
-import sqlalchemy
 from src.main import get_application
-from sqlalchemy import create_engine
 
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
@@ -53,9 +49,7 @@ from tests.overrides.override_functions import (
     nodepends_provide_userinfo_service_override,
     nodepends_provide_login_form_service_override,
 )
-
-from src.di import Container
-from testcontainers.postgres import PostgresContainer
+from tests.overrides.override_test_container import CustomPostgresContainer
 from sqlalchemy import text
 
 
@@ -64,7 +58,7 @@ TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
 
 @pytest_asyncio.fixture(scope="session")
 async def engine():
-    postgres_container = PostgresContainer("postgres:9.5").with_bind_ports(
+    postgres_container = CustomPostgresContainer("postgres:9.5").with_bind_ports(
         5432, 5463
     )
     with postgres_container as postgres:
