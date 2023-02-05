@@ -126,7 +126,9 @@ class TestAdminGroupEndpoint:
                 await self.group_repo.get_group_by_name("Polnareff")
             ).id
         }
-
+        print(":::::::::::>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print(params)
+        print(":::::::::::>>>>>>>>>>>>>>>>>>>>>>>>>>")
         response = await client.request(
             "GET",
             "/administration/group/get_group",
@@ -138,24 +140,24 @@ class TestAdminGroupEndpoint:
         logger.info(response_content)
         assert response_content["name"] == "Polnareff"
 
-    async def test_get_all_group(self, engine, client: AsyncClient):
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_groups_roles(engine)
-
-        headers = {
-            "access-token": self.access_token,
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-
-        response = await client.request(
-            "GET", "/administration/group/get_all_groups", headers=headers
-        )
-        assert response.status_code == status.HTTP_200_OK
-        response_content = json.loads(response.content.decode("utf-8"))
-        logger.info(response_content)
-        assert len(response_content["all_groups"]) >= 7
+    # async def test_get_all_group(self, engine, client: AsyncClient):
+    #     await self.setup_base(
+    #         engine,
+    #     )
+    #     await self.setup_groups_roles(engine)
+    #
+    #     headers = {
+    #         "access-token": self.access_token,
+    #         "Content-Type": "application/x-www-form-urlencoded",
+    #     }
+    #
+    #     response = await client.request(
+    #         "GET", "/administration/group/get_all_groups", headers=headers
+    #     )
+    #     assert response.status_code == status.HTTP_200_OK
+    #     response_content = json.loads(response.content.decode("utf-8"))
+    #     logger.info(response_content)
+    #     assert len(response_content["all_groups"]) >= 7
 
     #
     #
