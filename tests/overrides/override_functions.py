@@ -84,6 +84,8 @@ nodepends_provide_admin_group_service_override = (
     )
 )
 
-nodepends_provide_admin_role_service = lambda: provide_admin_role_service(
-    role_repo=provide_role_repo(db_engine),
+nodepends_provide_admin_role_service_override = (
+    lambda: provide_admin_role_service(
+        role_repo=provide_role_repo(db_engine),
+    )
 )

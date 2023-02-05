@@ -118,7 +118,6 @@ async def app() -> FastAPI:
     app.dependency_overrides[
         provide_login_form_service_stub
     ] = nodepends_provide_login_form_service_override
-
     app.dependency_overrides[
         provide_admin_user_service_stub
     ] = nodepends_provide_admin_user_service_override
