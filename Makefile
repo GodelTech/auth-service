@@ -44,7 +44,7 @@ populate-db:
 ## Run pytests
 test:
 	@echo '${GREEN}Running tests:${RESET}'
-	pytest tests/test_unit/test_repositories/test_client_repository.py -ra -s
+	pytest -ra -s
 
 
 ## Docker
