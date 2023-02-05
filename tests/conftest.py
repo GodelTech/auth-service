@@ -70,9 +70,6 @@ async def engine():
     ).with_bind_ports(5432, 5463)
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
-        print(":::::::::::::::::::::>>>>>>>>>>>>>>>>")
-        print(db_url)
-        print(":::::::::::::::::::::>>>>>>>>>>>>>>>>")
         db_url = db_url.replace("psycopg2", "asyncpg")
         engine = create_async_engine(db_url, echo=True)
 
