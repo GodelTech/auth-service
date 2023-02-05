@@ -53,73 +53,91 @@ class TestAdminGroupEndpoint:
         }
         await self.user_repo.create(**data)
 
-    # async def setup_groups_roles(self, engine):
-    #     group_repo = GroupRepository(engine)
-    #     groups = [
-    #         {
-    #             "name": "Polnareff",
-    #             "parent_group": None
-    #         },
-    #         {
-    #             "name": "Giorno",
-    #             "parent_group": None
-    #         },]
-    #     for group in groups:
-    #         try:
-    #             await group_repo.create(**group)
-    #         except DuplicationError:
-    #             logger.info(group["name"] + " group already exists")
-    #
-    #     groups = [
-    #         {
-    #             "name": "Gold",
-    #             "parent_group": (await group_repo.get_group_by_name(name = "Giorno")).id
-    #         },
-    #         {
-    #             "name": "Expirience",
-    #             "parent_group": (await group_repo.get_group_by_name(name = "Giorno")).id
-    #         },
-    #         {
-    #             "name": "Silver",
-    #             "parent_group": (await group_repo.get_group_by_name(name = "Polnareff")).id
-    #         },
-    #         {
-    #             "name": "Chariot",
-    #             "parent_group": (await group_repo.get_group_by_name(name = "Polnareff")).id
-    #         },]
-    #     for group in groups:
-    #         try:
-    #             await group_repo.create(**group)
-    #         except DuplicationError:
-    #             logger.info(group["name"] + " group already exists")
-    #
-    #     groups = [
-    #         {
-    #             "name":"Reqiuem",
-    #             "parent_group": (await group_repo.get_group_by_name(name = "Expirience")).id
-    #         }
-    #         ]
-    #     for group in groups:
-    #         try:
-    #             await group_repo.create(**group)
-    #         except DuplicationError:
-    #             logger.info(group["name"] + " group already exists")
-    #
-    # async def test_get_group(self, engine, client:AsyncClient):
-    #     await self.setup_base(engine,)
-    #     await self.setup_groups_roles(engine)
-    #
-    #     headers = {
-    #         "access-token" : self.access_token,
-    #         "Content-Type": "application/x-www-form-urlencoded"
-    #         }
-    #     params ={"group_id":(await self.group_repo.get_group_by_name("Polnareff")).id}
-    #
-    #     response = await client.request("GET", "/administration/group/get_group", headers=headers, params=params)
-    #     assert response.status_code == status.HTTP_200_OK
-    #     response_content = json.loads(response.content.decode('utf-8'))
-    #     logger.info(response_content)
-    #     assert response_content['name'] == "Polnareff"
+    async def setup_groups_roles(self, engine):
+        group_repo = GroupRepository(engine)
+        groups = [
+            {"name": "Polnareff", "parent_group": None},
+            {"name": "Giorno", "parent_group": None},
+        ]
+        for group in groups:
+            try:
+                await group_repo.create(**group)
+            except DuplicationError:
+                logger.info(group["name"] + " group already exists")
+
+        groups = [
+            {
+                "name": "Gold",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Giorno")
+                ).id,
+            },
+            {
+                "name": "Expirience",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Giorno")
+                ).id,
+            },
+            {
+                "name": "Silver",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Polnareff")
+                ).id,
+            },
+            {
+                "name": "Chariot",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Polnareff")
+                ).id,
+            },
+        ]
+        for group in groups:
+            try:
+                await group_repo.create(**group)
+            except DuplicationError:
+                logger.info(group["name"] + " group already exists")
+
+        groups = [
+            {
+                "name": "Reqiuem",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Expirience")
+                ).id,
+            }
+        ]
+        for group in groups:
+            try:
+                await group_repo.create(**group)
+            except DuplicationError:
+                logger.info(group["name"] + " group already exists")
+
+    async def test_get_group(self, engine, client: AsyncClient):
+        await self.setup_base(
+            engine,
+        )
+        await self.setup_groups_roles(engine)
+
+        headers = {
+            "access-token": self.access_token,
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        params = {
+            "group_id": (
+                await self.group_repo.get_group_by_name("Polnareff")
+            ).id
+        }
+
+        response = await client.request(
+            "GET",
+            "/administration/group/get_group",
+            headers=headers,
+            params=params,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_content = json.loads(response.content.decode("utf-8"))
+        logger.info(response_content)
+        assert response_content["name"] == "Polnareff"
+
     #
     # async def test_get_all_group(self, engine, client:AsyncClient):
     #     await self.setup_base(engine,)
