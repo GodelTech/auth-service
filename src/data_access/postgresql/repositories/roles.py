@@ -3,8 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
+from src.data_access.postgresql.errors.user import DuplicationError
+from typing import Union
 
-
+def params_to_dict(**kwargs):
+    result = {}
+    for key in kwargs:
+        if kwargs[key] is not None:
+            result[key] = kwargs[key]
+    return result
+    
 
 class RoleRepository(BaseRepository):
     async def exists(self, role_id: int) -> bool:
@@ -15,13 +23,7 @@ class RoleRepository(BaseRepository):
             session = sess
 
             result = await session.execute(
-                select(
-                    [
-                        exists().where(
-                            Role.id == role_id
-                        )
-                    ]
-                )
+                select(exists().where(Role.id == role_id))
             )
             result = result.first()
             return result[0]
@@ -38,42 +40,64 @@ class RoleRepository(BaseRepository):
                 await session.commit()
                 return True
             else:
-                return False
+                raise ValueError
+    
+    async def get_role_by_name(self, name: str) -> Role:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try:
+            async with session_factory() as sess:
+                session = sess
+                role = await session.execute(
+                    select(Role).where(Role.name == name)
+                )
+                role = role.first()
+
+                return role[0]
+        except:
+            raise ValueError
 
     async def get_role_by_id(self, role_id: int) -> Role:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        async with session_factory() as sess:
-            session = sess
-            role = await session.execute(
-                select(Role).where(Role.id == role_id)
-            )
-            role = role.first()
+        try:
+            async with session_factory() as sess:
+                session = sess
+                role = await session.execute(
+                    select(Role).where(Role.id == role_id)
+                )
+                role = role.first()
 
-            return role[0]
+                return role[0]
+        except:
+            raise ValueError
+            
+    async def update(self, role_id: int, name: str):
 
-    async def update(self, role_id: int, **kwargs) -> bool:
-
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            if await self.exists(role_id=role_id):
-                updates = update(Role).values(
-                    **kwargs).where(Role.id == role_id)
-                await session.execute(updates)
-                await session.commit()
-                return True
-            else:
-                return False
-
-    async def create(self, **kwargs) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
+            async with session_factory() as sess:
+                session = sess
+                if await self.exists(role_id=role_id):
+                    updates = update(Role).values(name = name).where(Role.id == role_id)
+                    await session.execute(updates)
+                    await session.commit()
+                else:
+                    raise ValueError
+        except ValueError:
+            raise ValueError
+        except:
+            raise DuplicationError
+    async def create(self, name:str, id:int = None) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        try:
+            kwargs = params_to_dict(name=name, id=id)
             async with session_factory() as sess:
                 session = sess
 
@@ -81,9 +105,8 @@ class RoleRepository(BaseRepository):
                     insert(Role).values(**kwargs)
                 )
                 await session.commit()
-                return True
         except:
-            return False
+            raise DuplicationError
 
     async def get_all_roles(self) -> list[Role]:
         session_factory = sessionmaker(

@@ -63,26 +63,26 @@ class TestAuthorizeEndpoint:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content
 
-    # async def test_unsuccessful_authorize_request_bad_user_name_get(
-    #     self, client: AsyncClient
-    # ):
-    #     local_scope = (
-    #         "gcp-api%20IdentityServerApi&grant_type="
-    #         "password&client_id=test_client&client_secret="
-    #         "65015c5e-c865-d3d4-3ba1-3abcb4e65500&password="
-    #         "wrong_password&username=BadNameTestClient"
-    #     )
-    #     params = {
-    #         "client_id": "test_client",
-    #         "response_type": "code",
-    #         "scope": local_scope,
-    #         "redirect_uri": "https://www.google.com/",
-    #     }
-    #     expected_content = '{"message":"User not found"}'
-    #     response = await client.request("GET", "/authorize/", params=params)
-    #
-    #     assert response.status_code == status.HTTP_404_NOT_FOUND
-    #     assert response.content.decode("UTF-8") == expected_content
+    async def test_unsuccessful_authorize_request_bad_response_type(
+        self, client: AsyncClient
+    ):
+        local_scope = (
+            "gcp-api%20IdentityServerApi&grant_type="
+            "password&client_id=test_client&client_secret="
+            "65015c5e-c865-d3d4-3ba1-3abcb4e65500&password="
+            # "wrong_password&username=BadNameTestClient"
+        )
+        params = {
+            "client_id": "test_client",
+            "response_type": "some_type",
+            "scope": local_scope,
+            "redirect_uri": "https://www.google.com/",
+        }
+        expected_content = '{"message":"Bad response type"}'
+        response = await client.request("GET", "/authorize/", params=params)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.content.decode("UTF-8") == expected_content
 
     # async def test_unsuccessful_authorize_request_wrong_scope_index_error_get(
     #     self, client: AsyncClient

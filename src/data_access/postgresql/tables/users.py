@@ -18,15 +18,15 @@ from .base import Base, BaseModel
 users_roles = Table(
     "users_roles",
     BaseModel.metadata,
-    Column("role_id", ForeignKey("roles.id"), primary_key=True),
-    Column("user_id", ForeignKey("users.id"), primary_key=True),
+    Column("role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
+    Column("user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     login_provider = Column(
         String,
         primary_key=True,
@@ -107,7 +107,7 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 

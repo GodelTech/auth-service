@@ -1,11 +1,11 @@
 # Project installation
 
-
 ##### Link to the GIT repository:
 
 - *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
 
 ##### Running docker:
+
 We have docker-compose.dev.yml and docker-compose.yml where the first one
 will run postgresql, pgadmin and redis.
 And the docker-compose.yml will create a separate network and run
@@ -13,15 +13,16 @@ postgresql, pgadmin, redis and app all together.
 If you want to spin up all services, first you need to switch to DockerAppSettings
 In src/config/setup.py make: app_env = DockerAppSettings().app_env
 And run the following command
+
 - *docker-compose -f ./docker-compose.yml up*
 
 You may run another command in a second terminal to execute tests with the following command
+
 - *docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"*
 
 Or run the following command to run just postgresql, pgadmin, and redis services
+
 - *docker-compose -f ./docker-compose.dev.yml up*
-
-
 
 ##### Starting poetry:
 
@@ -63,31 +64,28 @@ Example (add your versions to *.vscode/settings.json*):
 - login: *admin@example.com*, password: *admin* .After logging create your personal accaunt.
 - After relogging:right click "*Server*" -> "*Register*" ->"*Server*".
 
-    Name:*is_db*
+  Name:*is_db*
 
-    Host name/adress:*172.20.0.1* (or your own adress)
+  Host name/adress:*172.20.0.1* (or your own adress)
 
-    Username:***postgres***
+  Username:***postgres***
 
-    Password:*postgres*
+  Password:*postgres*
 
 ##### Alembic update or change DB:
+
 - upgrade:
-    "alembic upgrade heads"
+  "alembic upgrade heads"
 - change:
-    "alembic revision --autogenerate -m "[_**Your comment**_]" "
+  "alembic revision --autogenerate -m "[_**Your comment**_]" "
 
 ##### Links:
 
-
 * Server:
 
-    *http://127.0.0.1:8000/*
-
+  *http://127.0.0.1:8000/*
 * Swagger:
-
-*
-    http://127.0.0.1:8000/docs*
+* http://127.0.0.1:8000/docs*
 
 - PostgreSQL admin:
-    *http://localhost/login?next=%2Fbrowser%2F*
+  *http://localhost/login?next=%2Fbrowser%2F*

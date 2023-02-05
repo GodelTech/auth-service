@@ -36,7 +36,7 @@ class ClientRepository(BaseRepository):
                 )
             return client[0]
 
-    async def validate_client_by_client_id(self, client_id:str) -> bool:
+    async def validate_client_by_client_id(self, client_id: str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -44,13 +44,7 @@ class ClientRepository(BaseRepository):
             session = sess
 
             result = await session.execute(
-                select(
-                    [
-                        exists().where(
-                            Client.client_id == client_id,
-                        )
-                    ]
-                )
+                select(exists().where(Client.client_id == client_id,))
             )
             result = result.first()
             if not result[0]:
@@ -85,14 +79,12 @@ class ClientRepository(BaseRepository):
 
             logout_redirect_uri = await session.execute(
                 select(
-                    [
-                        exists().where(
+                    exists().where(
                             ClientPostLogoutRedirectUri.client_id == client_id,
                             ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
                         )
-                    ]
+                    )
                 )
-            )
             result = logout_redirect_uri.first()
             if not result[0]:
                 raise ClientPostLogoutRedirectUriError("Post logout redirect uri you are looking for does not exist")
@@ -107,20 +99,18 @@ class ClientRepository(BaseRepository):
 
             redirect_uri = await session.execute(
                 select(
-                    [
                         exists().where(
                             ClientRedirectUri.client_id == client_id,
                             ClientRedirectUri.redirect_uri == redirect_uri,
                         )
-                    ]
+                    )
                 )
-            )
             result = redirect_uri.first()
             if not result[0]:
                 raise ClientRedirectUriError("Redirect uri you are looking for does not exist")
             return result[0]
 
-    async def get_client_scopes(self, client_id:str) -> list:
+    async def get_client_scopes(self, client_id: str) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -136,7 +126,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_redirect_uris(self, client_id:str) -> list:
+    async def get_client_redirect_uris(self, client_id: str) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -152,7 +142,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_claims(self, client_id:str) -> list:
+    async def get_client_claims(self, client_id: str) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

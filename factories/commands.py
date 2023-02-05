@@ -1,4 +1,5 @@
 import factory
+from sqlalchemy import text
 
 import factories.data.data_for_factories as data
 import factories.factory_models.client_factory as cl_factory
@@ -22,14 +23,16 @@ class DataBasePopulation:
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
         cls.populate_client_redirect_uri()
+        cls.populate_roles()
 
     @classmethod
     def clean_data_from_database(cls):
-        sess.session.execute("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE client_secrets RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE user_claims RESTART IDENTITY")
-        sess.session.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-        sess.session.execute("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
+        sess.session.execute(text("TRUNCATE TABLE persistent_grants RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE client_secrets RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE user_claims RESTART IDENTITY"))
+        sess.session.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE "))
+        sess.session.execute(text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE "))
         sess.session.commit()
 
     @classmethod
@@ -74,6 +77,13 @@ class DataBasePopulation:
     def populate_client_redirect_uri(cls):
         for item in data.CLIENT_IDS:
             uri = cl_factory.ClientRedirectUriFactory(client_id=item, redirect_uri="https://www.google.com/")
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+    @classmethod
+    def populate_roles(cls):
+        for role in data.ROLES:
+            user_factory.RoleFactory(name=role)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 

@@ -67,7 +67,7 @@ class ClientIdRestriction(BaseModel):
     __tablename__ = "client_id_restrictions"
 
     provider = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.provider}"
@@ -78,7 +78,7 @@ class ClientClaim(BaseModel):
 
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"
@@ -88,7 +88,7 @@ class ClientScope(BaseModel):
     __tablename__ = "client_scopes"
 
     scope = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -98,7 +98,7 @@ class ClientPostLogoutRedirectUri(BaseModel):
     __tablename__ = "client_post_logout_redirect_uris"
 
     post_logout_redirect_uri = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -108,7 +108,7 @@ class ClientCorsOrigin(BaseModel):
     __tablename__ = "client_cors_origins"
 
     origin = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -118,7 +118,7 @@ class ClientRedirectUri(BaseModel):
     __tablename__ = "client_redirect_uris"
 
     redirect_uri = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -128,7 +128,7 @@ class ClientGrantType(BaseModel):
     __tablename__ = "client_grant_types"
 
     grant_type = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -141,7 +141,7 @@ class ClientSecret(BaseModel):
     expiration = Column(Integer, nullable=False)
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
 
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"

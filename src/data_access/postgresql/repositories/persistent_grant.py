@@ -1,6 +1,5 @@
 import logging
 import uuid
-from typing import Union
 
 from fastapi import status
 from sqlalchemy import delete, exists, insert, select
@@ -59,12 +58,10 @@ class PersistentGrantRepository(BaseRepository):
 
             result = await session.execute(
                 select(
-                    [
-                        exists().where(
-                            PersistentGrant.type == grant_type,
-                            PersistentGrant.data == data,
-                        )
-                    ]
+                    exists().where(
+                        PersistentGrant.type == grant_type,
+                        PersistentGrant.data == data,
+                    )
                 )
             )
             result = result.first()
@@ -130,12 +127,10 @@ class PersistentGrantRepository(BaseRepository):
             session = sess
             grant = await session.execute(
                 select(
-                    [
-                        exists().where(
-                            PersistentGrant.client_id == client_id,
-                            PersistentGrant.subject_id == user_id,
-                        )
-                    ]
+                    exists().where(
+                        PersistentGrant.client_id == client_id,
+                        PersistentGrant.subject_id == user_id,
+                    )
                 )
             )
             grant = grant.first()

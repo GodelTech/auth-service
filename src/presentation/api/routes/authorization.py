@@ -9,7 +9,8 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserNotFoundError,
     WrongPasswordError,
-    ClientRedirectUriError
+    ClientRedirectUriError,
+    WrongResponseTypeError,
 )
 from src.presentation.api.models import DataRequestModel, RequestModel
 from src.di.providers import provide_auth_service_stub, provide_login_form_service_stub
@@ -31,15 +32,14 @@ async def get_authorize(
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ):
     try:
-        print('1111111111111111111111111111111111111111111')
-
         auth_class = auth_class
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
+        external_logins = {"GitHub": "fa-github", "Google": "fa-google", "FaceBook": "fa-facebook", "LinkedIn": "fa-linkedin", "Twitter": "fa-twitter"}
         if return_form:
             return templates.TemplateResponse(
                 "login_form.html",
-                {"request": request, "request_model": request_model},
+                {"request": request, "request_model": request_model, "external_logins": external_logins},
                 status_code=200
             )
 
@@ -61,7 +61,12 @@ async def get_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Bad password"},
         )
-
+    except WrongResponseTypeError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "Bad response type"},
+        )
 
 @auth_router.post(
     "/", status_code=status.HTTP_302_FOUND, tags=["Authorization"]
