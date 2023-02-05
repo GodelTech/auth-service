@@ -44,7 +44,7 @@ populate-db:
 ## Run pytests
 test:
 	@echo '${GREEN}Running tests:${RESET}'
-	pytest tests/test_unit/test_services/test_authorization_service.py -ra -s
+	pytest -ra -s
 
 
 ## Docker
