@@ -6,12 +6,18 @@ from src.di.providers import (
     provide_endsession_service,
     provide_client_repo,
     provide_user_repo,
+    provide_group_repo,
+    provide_role_repo,
     provide_persistent_grant_repo,
     provide_jwt_service,
     provide_introspection_service,
     provide_token_service,
     provide_userinfo_service,
     provide_login_form_service,
+    provide_admin_user_service,
+    provide_admin_group_service,
+    provide_admin_role_service,
+    provide_admin_auth_service,
 )
 
 
@@ -64,4 +70,20 @@ nodepends_provide_login_form_service_override = (
     lambda: provide_login_form_service(
         client_repo=provide_client_repo(db_engine)
     )
+)
+
+nodepends_provide_admin_user_service_override = (
+    lambda: provide_admin_user_service(
+        user_repo=provide_user_repo(db_engine),
+    )
+)
+
+nodepends_provide_admin_group_service_override = (
+    lambda: provide_admin_group_service(
+        group_repo=provide_group_repo(db_engine),
+    )
+)
+
+nodepends_provide_admin_role_service = lambda: provide_admin_role_service(
+    role_repo=provide_role_repo(db_engine),
 )

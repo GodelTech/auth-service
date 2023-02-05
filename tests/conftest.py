@@ -38,6 +38,9 @@ from src.di.providers import (
     provide_token_service_stub,
     provide_userinfo_service_stub,
     provide_login_form_service_stub,
+    provide_admin_group_service_stub,
+    provide_admin_role_service_stub,
+    provide_admin_user_service_stub,
 )
 
 from tests.overrides.override_functions import (
@@ -47,6 +50,9 @@ from tests.overrides.override_functions import (
     nodepends_provide_token_service_override,
     nodepends_provide_userinfo_service_override,
     nodepends_provide_login_form_service_override,
+    nodepends_provide_admin_user_service_override,
+    nodepends_provide_admin_group_service_override,
+    nodepends_provide_admin_role_service_override,
 )
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
@@ -112,6 +118,16 @@ async def app() -> FastAPI:
     app.dependency_overrides[
         provide_login_form_service_stub
     ] = nodepends_provide_login_form_service_override
+
+    app.dependency_overrides[
+        provide_admin_user_service_stub
+    ] = nodepends_provide_admin_user_service_override
+    app.dependency_overrides[
+        provide_admin_group_service_stub
+    ] = nodepends_provide_admin_group_service_override
+    app.dependency_overrides[
+        provide_admin_role_service_stub
+    ] = nodepends_provide_admin_role_service_override
 
     return app
 
