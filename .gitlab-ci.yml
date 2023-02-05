@@ -1,7 +1,7 @@
 stages:          # List of stages for jobs, and their order of execution
-#  - build
-  - container
-  - deploy-to-dev
+  - build
+#  - container
+#  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
