@@ -26,6 +26,7 @@ nodepends_provide_auth_service_override = lambda: provide_auth_service(
     user_repo=provide_user_repo(db_engine),
     persistent_grant_repo=provide_persistent_grant_repo(db_engine),
     password_service=provide_password_service(),
+    jwt_service=provide_jwt_service(),
 )
 
 nodepends_provide_endsession_servise_override = (

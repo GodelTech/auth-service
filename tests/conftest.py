@@ -66,18 +66,19 @@ async def engine():
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")
         engine = create_async_engine(db_url, echo=True)
+
+        # create all tables
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+        # populate database
+        DataBasePopulation.populate_database()
+
         yield engine
 
 
 @pytest_asyncio.fixture(scope="session")
 async def connection(engine):
-    # create all tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    # populate database
-    DataBasePopulation.populate_database()
-
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
