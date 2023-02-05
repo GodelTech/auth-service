@@ -11,7 +11,6 @@ import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 import pytest
 import asyncio
@@ -50,7 +49,9 @@ from tests.overrides.override_functions import (
     nodepends_provide_login_form_service_override,
 )
 from tests.overrides.override_test_container import CustomPostgresContainer
-from sqlalchemy import text
+from factories.commands import DataBasePopulation
+
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
@@ -58,50 +59,25 @@ TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
 
 @pytest_asyncio.fixture(scope="session")
 async def engine():
-    postgres_container = CustomPostgresContainer("postgres:9.5").with_bind_ports(
-        5432, 5463
-    )
+    postgres_container = CustomPostgresContainer(
+        "postgres:11.5"
+    ).with_bind_ports(5432, 5463)
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")
         engine = create_async_engine(db_url, echo=True)
-        async with engine.begin() as conn:
-            # create all tables
-            await conn.run_sync(Base.metadata.create_all)
-
-            # create queries of insert statements from sql files
-            users = open(TEST_SQL_DIR + "/users.sql")
-            query_users = text(users.read())
-            user_claims = open(TEST_SQL_DIR + "/user_claims.sql")
-            query_user_claims = text(user_claims.read())
-            clients = open(TEST_SQL_DIR + "/clients.sql")
-            query_clients = text(clients.read())
-            client_secrets = open(TEST_SQL_DIR + "/client_secrets.sql")
-            query_client_secrets = text(client_secrets.read())
-            client_redirect_uris = open(
-                TEST_SQL_DIR + "/client_redirect_uris.sql"
-            )
-            query_client_redirect_uris = text(client_redirect_uris.read())
-            client_post_logout_redirect_uris = open(
-                TEST_SQL_DIR + "/client_post_logout_redirect_uris.sql"
-            )
-            query_client_post_logout_redirect_uris = text(
-                client_post_logout_redirect_uris.read()
-            )
-
-            # populate database by executing queries
-            await conn.execute(query_clients)
-            await conn.execute(query_users)
-            await conn.execute(query_user_claims)
-            await conn.execute(query_client_post_logout_redirect_uris)
-            await conn.execute(query_client_secrets)
-            await conn.execute(query_client_redirect_uris)
-
         yield engine
 
 
 @pytest_asyncio.fixture(scope="session")
 async def connection(engine):
+    # create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # populate database
+    DataBasePopulation.populate_database()
+
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
