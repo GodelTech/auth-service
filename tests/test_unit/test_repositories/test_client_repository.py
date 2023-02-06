@@ -1,6 +1,9 @@
 import pytest
 
-from src.data_access.postgresql.errors.client import ClientNotFoundError, ClientRedirectUriError
+from src.data_access.postgresql.errors.client import (
+    ClientNotFoundError,
+    ClientRedirectUriError,
+)
 from src.data_access.postgresql.repositories.client import ClientRepository
 
 
@@ -38,8 +41,7 @@ class TestClientRepository:
     async def test_validate_client_redirect_uri(self, engine):
         client_repo = ClientRepository(engine)
         uri = await client_repo.validate_client_redirect_uri(
-            client_id="test_client",
-            redirect_uri="https://www.google.com/"
+            client_id="test_client", redirect_uri="https://www.google.com/"
         )
         assert uri is True
 
@@ -47,6 +49,5 @@ class TestClientRepository:
         client_repo = ClientRepository(engine)
         with pytest.raises(ClientRedirectUriError):
             await client_repo.validate_client_redirect_uri(
-                client_id="test_client",
-                redirect_uri="just_uri"
+                client_id="test_client", redirect_uri="just_uri"
             )
