@@ -6,6 +6,7 @@ from src.data_access.postgresql.tables import Role
 from src.data_access.postgresql.errors.user import DuplicationError
 from typing import Union
 
+
 def params_to_dict(**kwargs):
     result = {}
     for key in kwargs:
@@ -92,7 +93,8 @@ class RoleRepository(BaseRepository):
             raise ValueError
         except:
             raise DuplicationError
-    async def create(self, name:str, id:int = None) -> bool:
+
+    async def create(self, name: str, id: int = None) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
