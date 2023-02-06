@@ -8,12 +8,21 @@ from fastapi.staticfiles import StaticFiles
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from pathlib import Path
+from sqladmin import Admin
 
 from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
 from src.presentation.api.middleware.access_token_validation import AccessTokenMiddleware
 
 from src.config import LogConfig
 from src.presentation.api import router
+from src.di import Container
+from src.presentation.admin_ui.controllers import (
+    AdminAuthController,
+    ClientAdminController,
+    UserAdminController,
+    PersistentGrantAdminController,
+    RoleAdminController
+)
 from src.di.providers import (
     provide_config,
     provide_db,
@@ -42,8 +51,8 @@ from src.di.providers import (
     provide_admin_group_service_stub,
     provide_admin_role_service_stub,
     provide_admin_role_service,
+    provide_admin_auth_service
 )
-from src.di import Container
 
 
 logger = logging.getLogger("is_app")
@@ -62,22 +71,24 @@ def get_application(test=False) -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(AuthorizationMiddleware)
-    # application.add_middleware(AccessTokenMiddleware)
+    application.add_middleware(AccessTokenMiddleware)
 
     setup_di(application)
     container = Container()
     container.db()
     application.container = container
-    
+
     application.include_router(router)
     application.mount(
         "/static",
         StaticFiles(directory="src/presentation/api/templates/static"),
-        name="static")
+        name="static"
+    )
 
     return application
 
 
+# TODO: move the creation of RSA keys here.
 def setup_di(app: FastAPI) -> None:
     config = provide_config()
 
@@ -86,6 +97,24 @@ def setup_di(app: FastAPI) -> None:
         max_connection_count=config.max_connection_count
     )
 
+    # Register admin-ui controllers on application start-up.
+    admin = Admin(
+        app, 
+        db_engine, 
+        authentication_backend=AdminAuthController(
+            secret_key='1234',
+            auth_service=provide_admin_auth_service(
+                user_repo=provide_user_repo(db_engine),
+                password_service=provide_password_service(),
+                jwt_service=provide_jwt_service()
+            )
+        )
+    )
+    admin.add_view(ClientAdminController)
+    admin.add_view(UserAdminController)
+    admin.add_view(PersistentGrantAdminController)
+    admin.add_view(RoleAdminController)
+
     nodepends_provide_auth_service = lambda: provide_auth_service(
         client_repo=provide_client_repo(db_engine),
         user_repo=provide_user_repo(db_engine),
@@ -93,8 +122,6 @@ def setup_di(app: FastAPI) -> None:
         password_service=provide_password_service(),
         jwt_service=provide_jwt_service()
     )
-    logger.info(f'{nodepends_provide_auth_service}')
-
     app.dependency_overrides[
         provide_auth_service_stub
     ] = nodepends_provide_auth_service
@@ -104,19 +131,16 @@ def setup_di(app: FastAPI) -> None:
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
         jwt_service=provide_jwt_service()
     )
-
     app.dependency_overrides[
         provide_endsession_service_stub
     ] = nodepends_provide_endsession_servise
 
     nodepends_provide_introspection_service = lambda: provide_introspection_service(
         jwt=provide_jwt_service(),
-        # token_service=provide_token_service(),
         user_repo=provide_user_repo(db_engine),
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine)
     )
-
     app.dependency_overrides[
         provide_introspection_service_stub
     ] = nodepends_provide_introspection_service
@@ -127,7 +151,6 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
     )
-
     app.dependency_overrides[
         provide_token_service_stub
     ] = nodepends_provide_token_service
@@ -138,7 +161,6 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
     )
-
     app.dependency_overrides[
         provide_userinfo_service_stub
     ] = nodepends_provide_userinfo_service
@@ -178,6 +200,8 @@ def setup_di(app: FastAPI) -> None:
 app = get_application()
 
 
+
+# TODO: Move this code to setup_di() function.
 LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 
 

@@ -17,6 +17,7 @@ from src.business_logic.services import (
     AdminUserService,
     AdminGroupService,
     AdminRoleService,
+    AdminAuthService
 )
 
 
@@ -44,7 +45,7 @@ def provide_password_service_stub():
     ...
 
 
-def provide_password_service():
+def provide_password_service() -> PasswordHash:
     return PasswordHash()
 
 
@@ -56,7 +57,7 @@ def provide_endsession_service(
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
         jwt_service: JWTService
-):
+) -> EndSessionService:
     return EndSessionService(
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
@@ -68,7 +69,7 @@ def provide_jwt_service_stub():
     ...
 
 
-def provide_jwt_service():
+def provide_jwt_service() -> JWTService:
     return JWTService()
 
 
@@ -82,7 +83,7 @@ def provide_introspection_service(
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository
-):
+) -> IntrospectionServies:
     return IntrospectionServies(
         jwt=jwt,
         # token_service=token_service,
@@ -101,7 +102,7 @@ def provide_token_service(
         persistent_grant_repo: PersistentGrantRepository,
         user_repo: UserRepository,
         jwt_service: JWTService
-):
+) -> TokenService:
     return TokenService(
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
@@ -154,7 +155,7 @@ def provide_userinfo_service(
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-):
+) -> UserInfoServices:
     return UserInfoServices(
         jwt=jwt,
         # token_service=token_service,
@@ -170,9 +171,23 @@ def provide_login_form_service_stub():
 
 def provide_login_form_service(
     client_repo: ClientRepository,
-):
+) -> LoginFormService:
     return LoginFormService(
         client_repo=client_repo
     )
 
 
+def provide_admin_auth_service_stub():
+    ...
+
+
+def provide_admin_auth_service(
+    user_repo: UserRepository,
+    password_service: PasswordHash,
+    jwt_service: JWTService
+) -> AdminAuthService:
+    return AdminAuthService(
+        user_repo=user_repo,
+        password_service=password_service,
+        jwt_service=jwt_service
+    )
