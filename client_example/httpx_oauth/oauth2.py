@@ -127,7 +127,6 @@ class BaseOAuth2(Generic[T]):
         self, code: str, redirect_uri: str, code_verifier: Optional[str] = None
     ):
         async with self.get_httpx_client() as client:
-            print(code)
             data = {
                 "grant_type": "code",
                 "code": code,
