@@ -1,10 +1,11 @@
-from sqlalchemy import select, exists, insert, text, update
+from sqlalchemy import select, exists, insert, text, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
 from src.data_access.postgresql.errors.user import DuplicationError
 from typing import Union
+
 
 def params_to_dict(**kwargs):
     result = {}
@@ -16,9 +17,9 @@ def params_to_dict(**kwargs):
 
 class GroupRepository(BaseRepository):
 
-    async def create(self, name:str = None, parent_group: int = None, id:int = None) -> None:
+    async def create(self, name: str = None, parent_group: int = None, id: int = None) -> None:
         try:
-            kwargs = params_to_dict(name=name, parent_group=parent_group, id = id)
+            kwargs = params_to_dict(name=name, parent_group=parent_group, id=id)
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -110,7 +111,7 @@ class GroupRepository(BaseRepository):
 
             return result
 
-    async def update(self, group_id: int, name:str = None, parent_group: int = None):
+    async def update(self, group_id: int, name: str = None, parent_group: int = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -125,6 +126,8 @@ class GroupRepository(BaseRepository):
                     await session.commit()
                 else:
                     raise ValueError
+        except ValueError:
+            raise ValueError
         except:
             raise DuplicationError
 

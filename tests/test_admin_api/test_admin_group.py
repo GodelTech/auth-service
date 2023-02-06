@@ -16,6 +16,7 @@ from src.data_access.postgresql.errors.user import DuplicationError
 
 logger = logging.getLogger("is_app")
 
+
 @pytest.mark.asyncio
 class TestAdminGroupEndpoint:
 
