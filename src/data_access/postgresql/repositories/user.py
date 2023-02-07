@@ -86,7 +86,7 @@ class UserRepository(BaseRepository):
         result = {}
 
         for claim in claims_of_user:
-            result[claim[0].claim_type.code] = claim[0].claim_value
+            result[claim[0].claim_type] = claim[0].claim_value
 
         if not result:
             raise ClaimsNotFoundError(

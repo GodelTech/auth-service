@@ -1,4 +1,4 @@
-from src.data_access.postgresql.tables.users import UserClaim
+from src.data_access.postgresql.tables.users import UserClaim, USER_CLAIM_TYPE
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
@@ -46,7 +46,7 @@ class WellKnownServies:
 
         # RECOMMENDED
         result["claims_supported"] = self.get_list_of_types(
-            UserClaim.USER_CLAIM_TYPE
+            USER_CLAIM_TYPE
         )
         result["scopes_supported"] = self.get_list_of_types()
         result["registration_endpoint"] = urls_dict["false"]

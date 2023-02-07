@@ -36,7 +36,7 @@ class ApiSecret(BaseModel):
     __tablename__ = "api_secrets"
     __table_args__ =  (
                     CheckConstraint(
-                    sqltext= f'"type" IN {str(API_SECRET_TYPE)[1:-1]}', 
+                    sqltext= f'"type" IN ({str(API_SECRET_TYPE)[1:-1]})', 
                     name = "types_in_list"
                     ),)
     api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
@@ -54,7 +54,7 @@ class ApiClaim(BaseModel):
     __tablename__ = "api_claims"
     __table_args__ =  (
                     CheckConstraint(
-                    sqltext= f'"type" IN {str(API_CLAIM_TYPE)[1:-1]}', 
+                    sqltext= f'"type" IN ({str(API_CLAIM_TYPE)[1:-1]})', 
                     name = "types_claim_in_list"
                     ),)
     
@@ -85,7 +85,7 @@ class ApiScopeClaim(BaseModel):
     __tablename__ = "api_scope_claims"
     __table_args__ =  (
                     CheckConstraint(
-                    sqltext= f'"type" IN {str(API_SCOPE_CLAIM_TYPE)[1:-1]}', 
+                    sqltext= f'"type" IN ({str(API_SCOPE_CLAIM_TYPE)[1:-1]})', 
                     name = "types_scope_claim_in_list"
                     ),)
     

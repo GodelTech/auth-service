@@ -12,7 +12,7 @@ class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
     __table_args__ =  (
                     CheckConstraint(
-                    sqltext= f'"type" IN {str(TYPES_OF_GRANTS)[1:-1]}', 
+                    sqltext= f'"type" IN ({str(TYPES_OF_GRANTS)[1:-1]})', 
                     name = "type_in_list"
                     ),)
     

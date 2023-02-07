@@ -111,7 +111,7 @@ class UserClaim(BaseModel):
     __tablename__ = "user_claims"
     __table_args__ =  (
                     CheckConstraint(
-                    sqltext= f'"claim_type" IN {str(USER_CLAIM_TYPE)[1:-1]}', 
+                    sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
                     name = "claim_type_in_list"
                     ),)
     user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
