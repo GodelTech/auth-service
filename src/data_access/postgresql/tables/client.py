@@ -1,21 +1,18 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, CheckConstraint
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import ChoiceType
+#from sqlalchemy_utils import ChoiceType
 
 from .base import BaseModel
 
 
 class Client(BaseModel):
 
-    ACCESS_TOKEN_TYPES = [("jwt", "Jwt"), ("reference", "Reference")]
-    PROTOCOL_TYPES = [("open_id_connect", "OpenID Connect")]
-    REFRESH_TOKEN_EXPIRATION = [
-        ("absolute", "Absolute"),
-        ("sliding", "Sliding"),
-    ]
-    REFRESH_TOKEN_USAGE = [("one_time_only", "OneTimeOnly"), ("reuse", "ReUse")]
+    ACCESS_TOKEN_TYPES = ["jwt", "reference",]
+    PROTOCOL_TYPES = ["open_id_connect"]
+    REFRESH_TOKEN_EXPIRATION = ["absolute", "sliding"]
+    REFRESH_TOKEN_USAGE = ["one_time_only", "reuse"]
 
     __tablename__ = "clients"
 
@@ -24,7 +21,7 @@ class Client(BaseModel):
         Integer, default=2592000, nullable=False
     )
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
-    access_token_type = Column(ChoiceType(ACCESS_TOKEN_TYPES))
+    access_token_type = Column("access_token_type",String(), CheckConstraint(f'"access_token_type" IN {str(ACCESS_TOKEN_TYPES)[1:-1]}'))
     allow_access_token_via_browser = Column(
         Boolean, default=False, nullable=False
     )
@@ -46,9 +43,9 @@ class Client(BaseModel):
     logout_session_required = Column(Boolean, nullable=False)
     logout_uri = Column(String, nullable=False)
     prefix_client_claims = Column(String)
-    protocol_type = Column(ChoiceType(PROTOCOL_TYPES))
-    refresh_token_expiration = Column(ChoiceType(REFRESH_TOKEN_EXPIRATION))
-    refresh_token_usage = Column(ChoiceType(REFRESH_TOKEN_USAGE))
+    protocol_type = Column(String(), CheckConstraint(f'"protocol_type" IN ({str(PROTOCOL_TYPES)[1:-1]})'))
+    refresh_token_expiration = Column(String(), CheckConstraint(f'"refresh_token_expiration" IN ({str(REFRESH_TOKEN_EXPIRATION)[1:-1]})'))
+    refresh_token_usage = Column(String(), CheckConstraint(f'"refresh_token_usage" IN ({str(REFRESH_TOKEN_USAGE)[1:-1]})'))
     require_client_secret = Column(Boolean, default=True, nullable=False)
     require_consent = Column(Boolean, default=True, nullable=False)
     require_pkce = Column(Boolean, default=False, nullable=False)
@@ -56,6 +53,8 @@ class Client(BaseModel):
         Integer, default=1296000, nullable=False
     )
     update_access_token_claims_on_refresh = Column(
+
+
         Boolean, default=False, nullable=False
     )
 
