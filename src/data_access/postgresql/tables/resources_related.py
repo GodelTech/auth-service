@@ -86,7 +86,7 @@ class ApiScopeClaim(BaseModel):
     __table_args__ =  (
                     CheckConstraint(
                     sqltext= f'"type" IN {str(API_SCOPE_CLAIM_TYPE)[1:-1]}', 
-                    name = "types_in_list"
+                    name = "types_scope_claim_in_list"
                     ),)
     
     api_scopes_id = Column(Integer, ForeignKey("api_scopes.id", ondelete='CASCADE'))
