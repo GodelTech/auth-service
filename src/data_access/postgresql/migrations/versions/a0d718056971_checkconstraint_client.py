@@ -8,6 +8,9 @@ Create Date: 2023-02-07 17:32:34.133571
 from alembic import op
 import sqlalchemy as sa
 from src.data_access.postgresql.tables.client import ACCESS_TOKEN_TYPES, PROTOCOL_TYPES, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_USAGE
+from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
+from src.data_access.postgresql.tables.resources_related import API_SCOPE_CLAIM_TYPE, API_CLAIM_TYPE, API_SECRET_TYPE
+from src.data_access.postgresql.tables.users import USER_CLAIM_TYPE
 
 def from_list_of_str_to_str(values):
     result = ""
@@ -45,6 +48,33 @@ def upgrade() -> None:
         f'"access_token_type" IN ({from_list_of_str_to_str(ACCESS_TOKEN_TYPES)})'
     )
     
+    op.create_check_constraint(
+        "type_in_list",
+        "persistent_grants",
+        f'"type" IN ({from_list_of_str_to_str(TYPES_OF_GRANTS)})'
+    )
+
+    op.create_check_constraint(
+        "claim_type_in_list",
+        "user_claims",
+        f'"claim_type" IN ({from_list_of_str_to_str(USER_CLAIM_TYPE)})'
+    )
+
+    op.create_check_constraint(
+        "type_in_list",
+        "api_scope_claims",
+        f'"type" IN ({from_list_of_str_to_str(API_SCOPE_CLAIM_TYPE)})'
+    )
+    op.create_check_constraint(
+        "type_in_list",
+        "api_claims",
+        f'"type" IN ({from_list_of_str_to_str(API_CLAIM_TYPE)})'
+    )
+    op.create_check_constraint(
+        "type_in_list",
+        "api_secrets",
+        f'"type" IN ({from_list_of_str_to_str(API_SECRET_TYPE)})'
+    )
     # ### end Alembic commands ###
 
 
@@ -54,4 +84,9 @@ def downgrade() -> None:
     op.drop_constraint("refresh_token_expiration_in_list", "clients", type_="check")
     op.drop_constraint("refresh_token_usage_in_list", "clients", type_="check")
     op.drop_constraint("access_token_type_in_list", "clients", type_="check")
+    op.drop_constraint("type_in_list", "api_secrets", type_="check")
+    op.drop_constraint("type_in_list", "api_claims", type_="check")
+    op.drop_constraint("type_in_list", "api_scope_claims", type_="check")
+    op.drop_constraint("claim_type_in_list", "user_claims", type_="check")
+    op.drop_constraint("type_in_list", "persistent_grants", type_="check")
     # ### end Alembic commands ###
