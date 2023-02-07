@@ -42,7 +42,7 @@ def upgrade() -> None:
     op.create_check_constraint(
         "refresh_token_usage_in_list",
         "clients",
-        f'"protocol_type" IN ({from_list_of_str_to_str(REFRESH_TOKEN_USAGE)})'
+        f'"refresh_token_usage" IN ({from_list_of_str_to_str(REFRESH_TOKEN_USAGE)})'
     )
     op.create_check_constraint(
         "access_token_type_in_list",
