@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy_utils import ChoiceType
+
 
 from .base import BaseModel
 

@@ -9,11 +9,34 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    CheckConstraint,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import ChoiceType
 from src.data_access.postgresql.tables.group import users_groups, permissions_roles
 from .base import Base, BaseModel
+
+
+USER_CLAIM_TYPE = [
+        "name", 
+        "given_name",
+        "family_name",
+        "middle_name",
+        "nickname", 
+        "preferred_username", 
+        "profile",
+        "picture",
+        "website",
+        "email", 
+        "email_verified",
+        "gender", 
+        "birthdate",
+        "zoneinfo",
+        "locale", 
+        "phone_number", 
+        "phone_number_verified",
+        "address", 
+        "updated_at", 
+    ]
 
 users_roles = Table(
     "users_roles",
@@ -84,31 +107,15 @@ class Role(BaseModel):
 
 
 class UserClaim(BaseModel):
-    USER_CLAIM_TYPE = [
-        ("name", "Name"),
-        ("given_name", "Given name"),
-        ("family_name", "Family name"),
-        ("middle_name", "Middle name"),
-        ("nickname", "Nickname"),
-        ("preferred_username", "Preferred username"),
-        ("profile", "Profile"),
-        ("picture", "Picture"),
-        ("website", "Website"),
-        ("email", "Email"),
-        ("email_verified", "Email verified"),
-        ("gender", "Gender"),
-        ("birthdate", "Birthdate"),
-        ("zoneinfo", "Zoneinfo"),
-        ("locale", "Locale"),
-        ("phone_number", "Phone number"),
-        ("phone_number_verified", "Phone number verified"),
-        ("address", "Address"),
-        ("updated_at", "Updated at"),
-    ]
+   
     __tablename__ = "user_claims"
-
+    __table_args__ =  (
+                    CheckConstraint(
+                    sqltext= f'"claim_type" IN {str(USER_CLAIM_TYPE)[1:-1]}', 
+                    name = "claim_type_in_list"
+                    ),)
     user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
+    claim_type = Column(String())
     claim_value = Column(String, nullable=False)
 
     def __str__(self):

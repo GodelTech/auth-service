@@ -1,9 +1,24 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy_utils import ChoiceType
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, CheckConstraint
+
 
 from .base import BaseModel
 
-
+API_SECRET_TYPE = ["sha256", "sha512"]
+API_CLAIM_TYPE = ["string", "string2"]
+API_SCOPE_CLAIM_TYPE = [
+        "name",
+        "family_name",
+        "middle_name",
+        "nickname",
+        "preferred_username",
+        "profile_picture",
+        "website",
+        "gender", 
+        "birthdate",
+        "zone_info",
+        "locale",
+        "updated_at",
+    ]
 class ApiResource(BaseModel):
     __tablename__ = "api_resources"
 
@@ -17,13 +32,17 @@ class ApiResource(BaseModel):
 
 
 class ApiSecret(BaseModel):
-    API_SECRET_TYPE = [("sha256", "Sha256"), ("sha512", "Sha512")]
+   
     __tablename__ = "api_secrets"
-
+    __table_args__ =  (
+                    CheckConstraint(
+                    sqltext= f'"type" IN {str(API_SECRET_TYPE)[1:-1]}', 
+                    name = "types_in_list"
+                    ),)
     api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
     description = Column(String, nullable=True)
     expiration = Column(DateTime, nullable=False)
-    type = Column(ChoiceType(API_SECRET_TYPE))
+    type = Column(String(10))
     value = Column(String, nullable=True)
 
     def __str__(self):
@@ -31,11 +50,16 @@ class ApiSecret(BaseModel):
 
 
 class ApiClaim(BaseModel):
-    API_CLAIM_TYPE = [("string", "String")]
+    
     __tablename__ = "api_claims"
-
+    __table_args__ =  (
+                    CheckConstraint(
+                    sqltext= f'"type" IN {str(API_CLAIM_TYPE)[1:-1]}', 
+                    name = "types_claim_in_list"
+                    ),)
+    
     api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
-    type = Column(ChoiceType(API_CLAIM_TYPE))
+    type = Column(String)
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
@@ -57,24 +81,16 @@ class ApiScope(BaseModel):
 
 
 class ApiScopeClaim(BaseModel):
-    API_SCOPE_CLAIM_TYPE = [
-        ("name", "Name"),
-        ("family_name", "Family Name"),
-        ("middle_name", "Middle name"),
-        ("nickname", "Nickname"),
-        ("preferred_username", "Preferred username"),
-        ("profile_picture", "Profile picture"),
-        ("website", "Website"),
-        ("gender", "Gender"),
-        ("birthdate", "Birthdate"),
-        ("zone_info", "Zone info"),
-        ("locale", "Locale"),
-        ("updated_at", "Updated at"),
-    ]
+    
     __tablename__ = "api_scope_claims"
-
+    __table_args__ =  (
+                    CheckConstraint(
+                    sqltext= f'"type" IN {str(API_SCOPE_CLAIM_TYPE)[1:-1]}', 
+                    name = "types_in_list"
+                    ),)
+    
     api_scopes_id = Column(Integer, ForeignKey("api_scopes.id", ondelete='CASCADE'))
-    type = Column(ChoiceType(API_SCOPE_CLAIM_TYPE))
+    type = Column(String)
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
