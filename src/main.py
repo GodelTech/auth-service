@@ -10,18 +10,23 @@ from starlette.middleware.cors import CORSMiddleware
 from pathlib import Path
 from sqladmin import Admin
 
-from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware
-from src.presentation.api.middleware.access_token_validation import AccessTokenMiddleware
+from src.presentation.api.middleware.authorization_validation import (
+    AuthorizationMiddleware,
+)
+from src.presentation.api.middleware.access_token_validation import (
+    AccessTokenMiddleware,
+)
 
 from src.config import LogConfig
 from src.presentation.api import router
 from src.di import Container
+from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 from src.presentation.admin_ui.controllers import (
     AdminAuthController,
     ClientAdminController,
     UserAdminController,
     PersistentGrantAdminController,
-    RoleAdminController
+    RoleAdminController,
 )
 from src.di.providers import (
     provide_config,
@@ -51,7 +56,7 @@ from src.di.providers import (
     provide_admin_group_service_stub,
     provide_admin_role_service_stub,
     provide_admin_role_service,
-    provide_admin_auth_service
+    provide_admin_auth_service,
 )
 
 
@@ -82,7 +87,7 @@ def get_application(test=False) -> FastAPI:
     application.mount(
         "/static",
         StaticFiles(directory="src/presentation/api/templates/static"),
-        name="static"
+        name="static",
     )
 
     return application
@@ -90,25 +95,22 @@ def get_application(test=False) -> FastAPI:
 
 # TODO: move the creation of RSA keys here.
 def setup_di(app: FastAPI) -> None:
-    config = provide_config()
-
     db_engine = provide_db(
-        database_url=config.database_url,
-        max_connection_count=config.max_connection_count
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
     # Register admin-ui controllers on application start-up.
     admin = Admin(
-        app, 
-        db_engine, 
+        app,
+        db_engine,
         authentication_backend=AdminAuthController(
-            secret_key='1234',
+            secret_key="1234",
             auth_service=provide_admin_auth_service(
                 user_repo=provide_user_repo(db_engine),
                 password_service=provide_password_service(),
-                jwt_service=provide_jwt_service()
-            )
-        )
+                jwt_service=provide_jwt_service(),
+            ),
+        ),
     )
     admin.add_view(ClientAdminController)
     admin.add_view(UserAdminController)
@@ -120,7 +122,7 @@ def setup_di(app: FastAPI) -> None:
         user_repo=provide_user_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
         password_service=provide_password_service(),
-        jwt_service=provide_jwt_service()
+        jwt_service=provide_jwt_service(),
     )
     app.dependency_overrides[
         provide_auth_service_stub
@@ -129,17 +131,19 @@ def setup_di(app: FastAPI) -> None:
     nodepends_provide_endsession_servise = lambda: provide_endsession_service(
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
-        jwt_service=provide_jwt_service()
+        jwt_service=provide_jwt_service(),
     )
     app.dependency_overrides[
         provide_endsession_service_stub
     ] = nodepends_provide_endsession_servise
 
-    nodepends_provide_introspection_service = lambda: provide_introspection_service(
-        jwt=provide_jwt_service(),
-        user_repo=provide_user_repo(db_engine),
-        client_repo=provide_client_repo(db_engine),
-        persistent_grant_repo=provide_persistent_grant_repo(db_engine)
+    nodepends_provide_introspection_service = (
+        lambda: provide_introspection_service(
+            jwt=provide_jwt_service(),
+            user_repo=provide_user_repo(db_engine),
+            client_repo=provide_client_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+        )
     )
     app.dependency_overrides[
         provide_introspection_service_stub
@@ -180,7 +184,7 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_admin_user_service_stub
     ] = nodepends_provide_admin_user_service
-    
+
     nodepends_provide_admin_group_service = lambda: provide_admin_group_service(
         group_repo=provide_group_repo(db_engine),
     )
@@ -188,7 +192,7 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_admin_group_service_stub
     ] = nodepends_provide_admin_group_service
-    
+
     nodepends_provide_admin_role_service = lambda: provide_admin_role_service(
         role_repo=provide_role_repo(db_engine),
     )
@@ -200,17 +204,10 @@ def setup_di(app: FastAPI) -> None:
 app = get_application()
 
 
-
-# TODO: Move this code to setup_di() function.
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
-
-
 # Redis activation
 @app.on_event("startup")
 async def startup():
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(
-        LOCAL_REDIS_URL, encoding="utf8", decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")

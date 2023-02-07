@@ -15,7 +15,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 import pytest
 import asyncio
 from src.main import get_application
-
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
@@ -31,29 +30,6 @@ from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.data_access.postgresql.tables.base import Base
 
-from src.di.providers import (
-    provide_auth_service_stub,
-    provide_endsession_service_stub,
-    provide_introspection_service_stub,
-    provide_token_service_stub,
-    provide_userinfo_service_stub,
-    provide_login_form_service_stub,
-    provide_admin_group_service_stub,
-    provide_admin_role_service_stub,
-    provide_admin_user_service_stub,
-)
-
-from tests.overrides.override_functions import (
-    nodepends_provide_auth_service_override,
-    nodepends_provide_endsession_servise_override,
-    nodepends_provide_introspection_service_override,
-    nodepends_provide_token_service_override,
-    nodepends_provide_userinfo_service_override,
-    nodepends_provide_login_form_service_override,
-    nodepends_provide_admin_user_service_override,
-    nodepends_provide_admin_group_service_override,
-    nodepends_provide_admin_role_service_override,
-)
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 
@@ -94,38 +70,7 @@ async def connection(engine):
 
 @pytest_asyncio.fixture
 async def app() -> FastAPI:
-    app = get_application()
-
-    # override stubs to use test db_uri
-    app.dependency_overrides[
-        provide_auth_service_stub
-    ] = nodepends_provide_auth_service_override
-    app.dependency_overrides[
-        provide_endsession_service_stub
-    ] = nodepends_provide_endsession_servise_override
-    app.dependency_overrides[
-        provide_introspection_service_stub
-    ] = nodepends_provide_introspection_service_override
-    app.dependency_overrides[
-        provide_token_service_stub
-    ] = nodepends_provide_token_service_override
-    app.dependency_overrides[
-        provide_userinfo_service_stub
-    ] = nodepends_provide_userinfo_service_override
-    app.dependency_overrides[
-        provide_login_form_service_stub
-    ] = nodepends_provide_login_form_service_override
-    app.dependency_overrides[
-        provide_admin_user_service_stub
-    ] = nodepends_provide_admin_user_service_override
-    app.dependency_overrides[
-        provide_admin_group_service_stub
-    ] = nodepends_provide_admin_group_service_override
-    app.dependency_overrides[
-        provide_admin_role_service_stub
-    ] = nodepends_provide_admin_role_service_override
-
-    return app
+    return get_application()
 
 
 @pytest_asyncio.fixture
