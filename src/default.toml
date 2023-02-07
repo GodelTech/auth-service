@@ -1,0 +1,14 @@
+[default]
+
+[default.security]
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+[default.db]
+uri = ""
+echo = false
+
+
+[default.redis]
+url = "redis://127.0.0.1:6379"
