@@ -1,33 +1,23 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from client_example import crud
 from client_example.database import get_db
 from client_example.schemas import RequestNoteCreate, ResponseNote
-from client_example.utils import (
-    get_current_user,
-    get_identity_server_public_key,
-    is_token_valid_test,
-)
+from client_example.utils import get_current_user
 
 router = APIRouter(prefix="/notes", tags=['Notes'])
 
 
+# TODO add filter to crud
 @router.get("/", response_model=List[ResponseNote])
 async def get_notes(
-    # request: Request,
     limit: int = 10,
     skip: int = 0,
-    # current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # public_key = get_identity_server_public_key()
-    # access_token = request.headers.get('Authorization').split(" ")[-1]
-
-    # if not is_token_valid_test(access_token, public_key):
-    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     notes = crud.get_notes(db, skip, limit)
     if notes is None:
         raise HTTPException(

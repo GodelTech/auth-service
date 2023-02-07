@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from client_example.utils import is_token_valid_test
+from client_example.utils import TokenValidator
 
 REQUESTS_WITH_AUTH = [
     {"method": "GET", 'path': '/notes/'},
@@ -12,8 +12,11 @@ REQUESTS_WITH_AUTH = [
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp):
+    def __init__(
+        self, app: ASGIApp, token_validator: TokenValidator = TokenValidator()
+    ):
         self.app = app
+        self.token_validator = token_validator
 
     async def dispatch_func(self, request: Request, call_next):
         for request_with_auth in REQUESTS_WITH_AUTH:
@@ -33,7 +36,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
 
                 # TODO modify it to catch expired signature
                 try:
-                    if not bool(await is_token_valid_test(token)):
+                    if not bool(
+                        await self.token_validator.is_token_valid(token)
+                    ):
                         return JSONResponse(
                             status_code=status.HTTP_401_UNAUTHORIZED,
                             content="Incorrect Authorization Token",
