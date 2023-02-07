@@ -1,18 +1,12 @@
-FROM python:3.9-slim-buster as requirements-stage
+FROM python:3.9-slim-buster
 
-WORKDIR /tmp
+WORKDIR /Identity
 
 RUN pip install poetry
 
-COPY ./pyproject.toml ./poetry.lock* /tmp/
+COPY ./pyproject.toml ./poetry.lock* /Identity/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
-
-FROM python:3.9-slim-buster
-
-WORKDIR /
-
-COPY --from=requirements-stage /tmp/requirements.txt /requirements.txt
 
 RUN apt-get update \
   # dependencies for building Python packages
@@ -24,15 +18,12 @@ RUN apt-get update \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/* \
-  && pip install --no-cache-dir --upgrade -r /requirements.txt
+  && pip install --no-cache-dir --upgrade -r /Identity/requirements.txt
 
-COPY . /
+COPY . /Identity
 
-RUN chmod +x /start.sh
+RUN chmod +x /Identity/start.sh
 
 EXPOSE 8000
 
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
-RUN chmod +x /wait
-
-CMD /wait && /start.sh
+CMD /Identity/start.sh
