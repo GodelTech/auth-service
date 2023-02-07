@@ -1,4 +1,5 @@
 import logging
+import os
 
 from src.config.settings.app import AppSettings
 
@@ -11,4 +12,4 @@ class DevAppSettings(AppSettings):
     logging_level: int = logging.DEBUG
 
     class Config(AppSettings.Config):
-        env_file = ".env"
+        env_file = os.path.join(os.getcwd(), "envfiles/.env.development")

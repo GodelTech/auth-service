@@ -28,7 +28,11 @@ mock = "^4.0.3"
 redis = "^4.4.0"
 pycryptodome = "^3.16.0"
 pyjwkest = "^1.4.2"
+dynaconf = "^3.1.11"
 jinja2 = "^3.1.2"
+pytest-postgresql = "^4.1.1"
+psycopg = "^3.1.8"
+testcontainers = "^3.7.1"
 sqladmin = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
