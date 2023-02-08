@@ -93,7 +93,7 @@ class UserClaim(BaseModel):
    # user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
 # user = relationship("User", back_populates="claims")
     claim_type_id = Column(Integer, ForeignKey("USER_CLAIM_TYPE.id", ondelete='CASCADE'), nullable=False)
-    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaim")
+    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaim", lazy='joined')
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
