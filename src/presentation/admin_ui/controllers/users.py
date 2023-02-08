@@ -1,7 +1,11 @@
 from sqladmin import ModelView
-from src.data_access.postgresql.tables import User
+from src.data_access.postgresql.tables import User, UserClaim
 
 
 class UserAdminController(ModelView, model=User):
-    column_list = [User.id, User.username, User.email, User.email_confirmed, User.phone_number,
+    column_list = [User.id, User.username,
                    User.claims]
+
+class UserClaimAdminController(ModelView, model=UserClaim):
+    column_list = [UserClaim.claim_type,
+                   UserClaim.claim_value,]
