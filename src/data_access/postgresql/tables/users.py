@@ -87,6 +87,8 @@ class User(BaseModel):
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
+    claims = relationship("UserClaim", backref = "user")
+
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
 
@@ -109,12 +111,29 @@ class Role(BaseModel):
 class UserClaim(BaseModel):
    
     __tablename__ = "user_claims"
+    # __table_args__ =  (
+    #                 CheckConstraint(
+    #                 sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
+    #                 name = "claim_type_in_list"
+    #                 ),)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    #user = relationship("User", back_populates = "claims",) #foreign_keys="UserClaim.user_id")
+    claim_type = Column(String())
+    claim_value = Column(String, nullable=False)
+
+    def __str__(self):
+        return f"Model {self.__tablename__}: {self.id}"
+
+class UserClaim(BaseModel):
+   
+    __tablename__ = "user_claims"
     __table_args__ =  (
                     CheckConstraint(
                     sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
                     name = "claim_type_in_list"
                     ),)
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    #user = relationship("User", back_populates = "claims",) #foreign_keys="UserClaim.user_id")
     claim_type = Column(String())
     claim_value = Column(String, nullable=False)
 
