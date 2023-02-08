@@ -1,5 +1,4 @@
 from .base import Base
-from .group import Group, Permission
 from .client import (
     Client,
     ClientClaim,
@@ -17,7 +16,6 @@ from .users import (
     UserClaim,
     Role
 )
-from .choice_tables import ChoiceUserClaimType
 
 __all__ = [
     Client,

@@ -14,8 +14,29 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from src.data_access.postgresql.tables.group import users_groups, permissions_roles
 from .base import Base, BaseModel
-from .choice_tables import ChoiceUserClaimType
 
+
+USER_CLAIM_TYPE = [
+        "name", 
+        "given_name",
+        "family_name",
+        "middle_name",
+        "nickname", 
+        "preferred_username", 
+        "profile",
+        "picture",
+        "website",
+        "email", 
+        "email_verified",
+        "gender", 
+        "birthdate",
+        "zoneinfo",
+        "locale", 
+        "phone_number", 
+        "phone_number_verified",
+        "address", 
+        "updated_at", 
+    ]
 
 users_roles = Table(
     "users_roles",
@@ -66,11 +87,9 @@ class User(BaseModel):
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
-    def __repr__(self):
-        return self.id
     def __str__(self):
-        return f"{self.id} id - {self.username}"
-    claims = relationship("UserClaim", back_populates="user", cascade="all, delete-orphan")
+        return f"Model {self.__tablename__}: {self.id}"
+
 
 class Role(BaseModel):
     __tablename__ = "roles"
@@ -90,16 +109,14 @@ class Role(BaseModel):
 class UserClaim(BaseModel):
    
     __tablename__ = "user_claims"
-    # __table_args__ =  (
-    #                 CheckConstraint(
-    #                 sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
-    #                 name = "claim_type_in_list"
-    #                 ),)
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-    user = relationship("User", back_populates="claims")
-    claim_type_id = Column(Integer, ForeignKey("USER_CLAIM_TYPE.id", ondelete='CASCADE'), nullable=False)
-    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaim")
+    __table_args__ =  (
+                    CheckConstraint(
+                    sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
+                    name = "claim_type_in_list"
+                    ),)
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    claim_type = Column(String())
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
-        return f"{self.claim_type}: {self.claim_value}"
+        return f"Model {self.__tablename__}: {self.id}"
