@@ -14,7 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from src.data_access.postgresql.tables.group import users_groups, permissions_roles
 from .base import Base, BaseModel
-
+from .choice_tables import ChoiceUserClaimType
 
 
 users_roles = Table(
@@ -67,10 +67,10 @@ class User(BaseModel):
         "Group", secondary="users_groups", back_populates="users"
     )
     def __repr__(self):
-        return  f"{self.id} id - {self.username}"
+        return self.id
     def __str__(self):
         return f"{self.id} id - {self.username}"
-    #claims = relationship("UserClaim", back_populates="user", cascade="all, delete-orphan")
+    claims = relationship("UserClaim", back_populates="user", cascade="all, delete-orphan")
 
 class Role(BaseModel):
     __tablename__ = "roles"
@@ -90,10 +90,15 @@ class Role(BaseModel):
 class UserClaim(BaseModel):
    
     __tablename__ = "user_claims"
-   # user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-# user = relationship("User", back_populates="claims")
+    # __table_args__ =  (
+    #                 CheckConstraint(
+    #                 sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
+    #                 name = "claim_type_in_list"
+    #                 ),)
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user = relationship("User", back_populates="claims")
     claim_type_id = Column(Integer, ForeignKey("USER_CLAIM_TYPE.id", ondelete='CASCADE'), nullable=False)
-    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaim", lazy='joined')
+    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaim")
     claim_value = Column(String, nullable=False)
 
     def __str__(self):

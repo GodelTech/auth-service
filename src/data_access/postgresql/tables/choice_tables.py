@@ -8,20 +8,6 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 from .base import BaseModel
 
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.sql import func
-
-Base = declarative_base()
-
-
-class BaseModel2(Base):
-    __abstract__ = True
-
-    id = Column(String, primary_key=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(
-        DateTime, server_default=func.now(), onupdate=datetime.datetime.now
-    )
 
 ACCESS_TOKEN_TYPES = ["jwt", "reference",]
 PROTOCOL_TYPES = ["open_id_connect", "open_id_connect2"]
@@ -78,12 +64,33 @@ class ChoiseRefreshTokenUsageType(BaseModel):
 # UserClaims
 
 
+USER_CLAIM_TYPE = [
+        "name", 
+        "given_name",
+        "family_name",
+        "middle_name",
+        "nickname", 
+        "preferred_username", 
+        "profile",
+        "picture",
+        "website",
+        "email", 
+        "email_verified",
+        "gender", 
+        "birthdate",
+        "zoneinfo",
+        "locale", 
+        "phone_number", 
+        "phone_number_verified",
+        "address", 
+        "updated_at", 
+    ]
+
 class ChoiceUserClaimType(BaseModel):
     __tablename__ = "USER_CLAIM_TYPE"
 
     type = Column(String, unique =True)
-    userclaim = relationship("UserClaim", back_populates="claim_type", cascade="all, delete-orphan", lazy='joined')
-    
+    userclaim = relationship("UserClaim", back_populates="claim_type", cascade="all, delete-orphan")
     def __str__(self) -> str:
         return f"{self.type}"
     
