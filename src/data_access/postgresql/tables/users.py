@@ -70,6 +70,7 @@ class UserLogin(BaseModel):
 class User(BaseModel):
     __tablename__ = "users"
 
+    username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=True, unique=True)
     email_confirmed = Column(Boolean, default=False, nullable=True)
     password_hash = Column(String, nullable=False)
@@ -80,15 +81,16 @@ class User(BaseModel):
     lockout_end_date_utc = Column(Date, nullable=True)
     lockout_enabled = Column(Boolean, default=True, nullable=True)
     access_failed_count = Column(Integer, default=0, nullable=False)
-    username = Column(String, nullable=False, unique=True)
+    
     roles = relationship(
         "Role", secondary="users_roles", back_populates="users"
     )
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
+    claims = relationship("UserClaim", back_populates = "user")
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"{self.username}: {self.id}"
 
 
 class Role(BaseModel):
@@ -101,6 +103,8 @@ class Role(BaseModel):
     permissions = relationship(
         "Permission", secondary= permissions_roles, back_populates="roles"
     )
+    
+
 
     def __str__(self):
         return f"Role {self.name} - {self.id}"
@@ -114,9 +118,13 @@ class UserClaim(BaseModel):
                     sqltext= f'"claim_type" IN ({str(USER_CLAIM_TYPE)[1:-1]})', 
                     name = "claim_type_in_list"
                     ),)
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    claim_type = Column(String())
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user = relationship("User", back_populates = "claims", foreign_keys="UserClaim.user_id", lazy="selectin")
+    
+    
+    claim_type_id = Column(Integer, ForeignKey("user_claim_types.id", ondelete='CASCADE'), nullable=False)
+    claim_type = relationship("ChoiceUserClaimType", back_populates="userclaims")
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"{self.claim_type}: {self.claim_value}"
