@@ -87,10 +87,10 @@ class User(BaseModel):
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
-    claims = relationship("UserClaim", backref = "user", foreign_keys="UserClaim.user_id")
+    claims = relationship("UserClaim", back_populates = "user", foreign_keys="UserClaim.user_id")
 
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"id {self.id}\t{self.username}"
 
 
 class Role(BaseModel):
@@ -113,19 +113,19 @@ class UserClaim(BaseModel):
     __tablename__ = "user_claims"
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-
+    user = relationship("User",  back_populates="claims")
     claim_type = Column(String, ForeignKey("user_claim_types.type", ondelete='CASCADE'), nullable=False)
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"{self.claim_type}: {self.claim_value}"
 
 class UserClaimType(Base):
    
     __tablename__ = "user_claim_types"
 
     type = Column(String, primary_key=True)
-    claim = relationship("UserClaim", backref = "type",) #foreign_keys="UserClaim.claim_type_id") #foreign_keys="UserClaim.user_id")
+    claim = relationship("UserClaim", backref = "type",) 
     
 
     def __str__(self):
