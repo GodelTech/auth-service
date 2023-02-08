@@ -8,6 +8,7 @@ from jwkest import base64_to_long
 # Identity Server endpoints
 AUTH_URL = "http://localhost:8000/authorize/"
 TOKEN_URL = "http://localhost:8000/token/"
+CONFIG_URL = "http://localhost:8000/.well-known/openid-configuration"
 JWKS_URL = "http://localhost:8000/.well-known/jwks"
 USERINFO_URL = "http://localhost:8000/userinfo/"
 INTROSPECTION_URL = "http://localhost:8000/introspection/"
@@ -37,7 +38,7 @@ class TokenValidator:
         except (
             jwt.exceptions.InvalidSignatureError,
             jwt.exceptions.DecodeError,
-            jwt.exceptions.ExpiredSignatureError,
+            # jwt.exceptions.ExpiredSignatureError,
         ) as e:
             print(e)
             # if expired refresh token

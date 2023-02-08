@@ -1,8 +1,10 @@
+import jwt
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
+from client_example.routers.auth import client
 from client_example.utils import TokenValidator
 
 REQUESTS_WITH_AUTH = [
@@ -24,11 +26,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 request_with_auth["path"] == request.url.path
                 and request_with_auth["method"] == request.method
             ):
-                token = request.headers.get('authorization')
-                if token is None:
-                    token = request.headers.get('auth-swagger')
+                access_token = request.headers.get('authorization')
 
-                if token is None:
+                if access_token is None:
                     return JSONResponse(
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         content="Incorrect Authorization Token",
@@ -37,7 +37,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 # TODO modify it to catch expired signature
                 try:
                     if not bool(
-                        await self.token_validator.is_token_valid(token)
+                        await self.token_validator.is_token_valid(access_token)
                     ):
                         return JSONResponse(
                             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,11 +46,43 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                     else:
                         response = await call_next(request)
                         return response
-                except:
-                    return JSONResponse(
-                        status_code=status.HTTP_401_UNAUTHORIZED,
-                        content="Incorrect Authorization Token",
-                    )
+                except jwt.exceptions.ExpiredSignatureError as e:
+                    print(e)
+
+                    refresh_token = request.cookies.get('refresh_token')
+
+                    if refresh_token is None:
+                        return JSONResponse(
+                            status_code=status.HTTP_401_UNAUTHORIZED,
+                            content="Incorrect Refresh Token",
+                        )
+
+                    # todo there is no error handling in token service
+                    new_token = await client.refresh_token(refresh_token)
+                    # if expired return 401
+                    new_access_token = new_token['access_token']
+
+                    # save new access token to client
+
+                    try:
+                        if not bool(
+                            await self.token_validator.is_token_valid(
+                                new_access_token
+                            )
+                        ):
+                            return JSONResponse(
+                                status_code=status.HTTP_401_UNAUTHORIZED,
+                                content="Incorrect Authorization Token",
+                            )
+                        else:
+                            response = await call_next(request)
+                            return response
+
+                    except:
+                        return JSONResponse(
+                            status_code=status.HTTP_401_UNAUTHORIZED,
+                            content="Incorrect Refresh Token",
+                        )
         else:
             response = await call_next(request)
             return response
