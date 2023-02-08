@@ -17,11 +17,11 @@ from .users import (
     Role
 )
 from .choice_tables import (
-    ChoiceUserClaimType, 
+    # ChoiceUserClaimType, 
     ChoiceAccessTokenType, 
     # ChoiceProtokolType, 
     # ChoiceRefreshTokenExpirationType, 
-    # ChoiceRefreshTokenUsageType
+    # ChoiceRefreshTokenUsageType`
     )
 __all__ = [
     Client,

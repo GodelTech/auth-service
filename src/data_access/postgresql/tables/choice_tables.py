@@ -64,14 +64,15 @@ class ChoiceAccessTokenType(BaseModel):
 # UserClaims
 
 
-class ChoiceUserClaimType(BaseModel):
-    __tablename__ = "user_claim_types"
+# class ChoiceUserClaimType(BaseModel):
+#     
+    # __tablename__ = "user_claim_types"
 
-    type = Column(String, unique =True)
-    userclaims = relationship("UserClaim", back_populates="claim_type", cascade="all, delete-orphan",)
+    # type = Column(String, unique =True)
+    # userclaims = relationship("UserClaim",  cascade="all, delete-orphan", back_populates="claim_type",)
     
-    def __str__(self) -> str:
-        return f"{self.type}"
+    # def __str__(self) -> str:
+    #     return f"{self.type}"
     
-    def __repr__(self) -> str:
-        return f"{self.type}"
+    # def __repr__(self) -> str:
+    #     return f"{self.type}"

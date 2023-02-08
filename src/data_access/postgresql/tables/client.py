@@ -29,8 +29,8 @@ class Client(BaseModel):
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
     access_token_type = Column(String(),)
 
-    access_token_type_id = Column(Integer, ForeignKey("access_token_types.id", ondelete='CASCADE'), nullable=False)
-    access_token_type = relationship("ChoiceAccessTokenType", back_populates="client")
+    # access_token_type_id = Column(Integer, ForeignKey("access_token_types.id", ondelete='CASCADE'), nullable=False)
+    # access_token_type = relationship("ChoiceAccessTokenType", back_populates="client")
 
     allow_access_token_via_browser = Column(
         Boolean, default=False, nullable=False
