@@ -113,13 +113,14 @@ class UserClaim(BaseModel):
     __tablename__ = "user_claims"
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+
     claim_type = Column(String, ForeignKey("user_claim_types.type", ondelete='CASCADE'), nullable=False)
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
 
-class UserClaimTypes(Base):
+class UserClaimType(Base):
    
     __tablename__ = "user_claim_types"
 

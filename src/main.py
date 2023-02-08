@@ -28,6 +28,7 @@ from src.presentation.admin_ui.controllers import (
     PersistentGrantAdminController,
     RoleAdminController,
     UserClaimAdminController,
+    TypesUserClaimAdminController
 )
 from src.di.providers import (
     provide_config,
@@ -118,6 +119,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(PersistentGrantAdminController)
     admin.add_view(RoleAdminController)
     admin.add_view(UserClaimAdminController)
+    admin.add_view(TypesUserClaimAdminController)
 
     nodepends_provide_auth_service = lambda: provide_auth_service(
         client_repo=provide_client_repo(db_engine),

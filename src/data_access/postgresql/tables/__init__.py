@@ -14,7 +14,8 @@ from .persistent_grant import PersistentGrant
 from .users import (
     User,
     UserClaim,
-    Role
+    Role,
+    UserClaimType
 )
 
 __all__ = [
