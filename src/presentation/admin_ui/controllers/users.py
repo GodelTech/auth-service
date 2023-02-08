@@ -7,5 +7,5 @@ class UserAdminController(ModelView, model=User):
                    User.username, 
                    User.email, 
                    User.phone_number,
-                   User.claims
+                   #User.claims
                    ]

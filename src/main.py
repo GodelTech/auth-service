@@ -1,7 +1,7 @@
 import logging
 from logging.config import dictConfig
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.staticfiles import StaticFiles
