@@ -16,22 +16,18 @@ class Client(BaseModel):
     
 
     __tablename__ = "clients"
-    # __table_args__ =  (
-    #     CheckConstraint(sqltext= f'protocol_type IN ({str(PROTOCOL_TYPES)[1:-1]})', name = "check1"),
-    #     CheckConstraint(sqltext= f'refresh_token_expiration IN ({str(REFRESH_TOKEN_EXPIRATION)[1:-1]})', name = "check2"),
-    #     CheckConstraint(sqltext= f'refresh_token_usage IN ({str(REFRESH_TOKEN_USAGE)[1:-1]})', name = "check3"),
-    #     CheckConstraint(sqltext= f'access_token_type IN ({str(ACCESS_TOKEN_TYPES)[1:-1]})', name = "check4")
-    #     )
+    __table_args__ =  (
+        CheckConstraint(sqltext= f'protocol_type IN ({str(PROTOCOL_TYPES)[1:-1]})', name = "check1"),
+        CheckConstraint(sqltext= f'refresh_token_expiration IN ({str(REFRESH_TOKEN_EXPIRATION)[1:-1]})', name = "check2"),
+        CheckConstraint(sqltext= f'refresh_token_usage IN ({str(REFRESH_TOKEN_USAGE)[1:-1]})', name = "check3"),
+        CheckConstraint(sqltext= f'access_token_type IN ({str(ACCESS_TOKEN_TYPES)[1:-1]})', name = "check4")
+        )
     client_id = Column(String(80), nullable=False, unique=True)
     absolute_refresh_token_lifetime = Column(
         Integer, default=2592000, nullable=False
     )
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
     access_token_type = Column(String(),)
-
-    access_token_type_id = Column(Integer, ForeignKey("access_token_types.id", ondelete='CASCADE'), nullable=False)
-    access_token_type = relationship("ChoiceAccessTokenType", back_populates="client")
-
     allow_access_token_via_browser = Column(
         Boolean, default=False, nullable=False
     )
@@ -53,16 +49,9 @@ class Client(BaseModel):
     logout_session_required = Column(Boolean, nullable=False)
     logout_uri = Column(String, nullable=False)
     prefix_client_claims = Column(String)
-
-    # protocol_type_id = Column(Integer, ForeignKey("protocol_types.id"), nullable=True)
-    # protocol_type = relationship("ChoiceProtokolType", back_populates="client")
-
-    # refresh_token_expiration_id = Column(Integer, ForeignKey("refresh_token_types.id"), nullable=True)
-    # refresh_token_expiration = relationship("ChoiceRefreshTokenExpirationType", back_populates="client")
-
-    # refresh_token_usage_id = Column(Integer, ForeignKey("refresh_token_usage_types.id"), nullable=True)
-    # refresh_token_usage = relationship("ChoiceRefreshTokenUsageType", back_populates="client")
-
+    protocol_type = Column(String(),)
+    refresh_token_expiration = Column(String())
+    refresh_token_usage = Column(String())
     require_client_secret = Column(Boolean, default=True, nullable=False)
     require_consent = Column(Boolean, default=True, nullable=False)
     require_pkce = Column(Boolean, default=False, nullable=False)
@@ -77,6 +66,12 @@ class Client(BaseModel):
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.client_name}"
 
+    # __table_args__ =  (
+    #     CheckConstraint(protocol_type.in_(PROTOCOL_TYPES)),
+    #     CheckConstraint(refresh_token_expiration.in_(REFRESH_TOKEN_EXPIRATION)),
+    #     CheckConstraint(refresh_token_usage.in_(REFRESH_TOKEN_USAGE)),
+    #     CheckConstraint(access_token_type.in_(ACCESS_TOKEN_TYPES))
+    #     )
 
 class ClientIdRestriction(BaseModel):
     __tablename__ = "client_id_restrictions"

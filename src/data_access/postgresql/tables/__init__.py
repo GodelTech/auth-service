@@ -16,13 +16,7 @@ from .users import (
     UserClaim,
     Role
 )
-from .choice_tables import (
-    ChoiceUserClaimType, 
-    ChoiceAccessTokenType, 
-    # ChoiceProtokolType, 
-    # ChoiceRefreshTokenExpirationType, 
-    # ChoiceRefreshTokenUsageType
-    )
+
 __all__ = [
     Client,
     ClientIdRestriction,
