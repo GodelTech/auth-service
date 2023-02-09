@@ -10,7 +10,7 @@ from .client import (
     ClientScope,
     ClientSecret,
 )
-from .persistent_grant import PersistentGrant
+from .persistent_grant import PersistentGrant, PersistentGrantTypes
 from .users import (
     User,
     UserClaim,

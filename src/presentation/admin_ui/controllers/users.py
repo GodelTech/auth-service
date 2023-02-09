@@ -7,9 +7,9 @@ class UserAdminController(ModelView, model=User):
                    User.claims]
 
 class UserClaimAdminController(ModelView, model=UserClaim):
-    column_list = [UserClaim.claim_type,
+    column_list = [UserClaim.type,
                    UserClaim.claim_value,
                    UserClaim.user]
 
 class TypesUserClaimAdminController(ModelView, model=UserClaimType):
-    column_list = [UserClaimType.type,]
+    column_list = [UserClaimType.type_of_claim,]

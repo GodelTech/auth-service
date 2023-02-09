@@ -63,6 +63,7 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+# EnvironmentContext.configure.compare_type = True
 
 def do_run_migrations(connection):
     context.configure(connection=connection, target_metadata=target_metadata)

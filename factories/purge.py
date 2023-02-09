@@ -19,6 +19,10 @@ class DataBasePurge:
     @classmethod
     def clean_data_from_database(cls):
         sess.session.execute(text("DROP TABLE access_token_types CASCADE"))
+        sess.session.execute(text("DROP TABLE protocol_types CASCADE"))
+        sess.session.execute(text("DROP TABLE refresh_token_expiration_types CASCADE"))
+        sess.session.execute(text("DROP TABLE refresh_token_usage_types CASCADE"))
+        sess.session.execute(text("DROP TABLE user_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_claims CASCADE"))
         sess.session.execute(text("DROP TABLE api_resources CASCADE"))
         sess.session.execute(text("DROP TABLE api_scope_claims CASCADE"))
@@ -40,11 +44,7 @@ class DataBasePurge:
         sess.session.execute(text("DROP TABLE permissions_groups CASCADE"))
         sess.session.execute(text("DROP TABLE permissions_roles CASCADE"))
         sess.session.execute(text("DROP TABLE persistent_grants CASCADE"))
-        sess.session.execute(text("DROP TABLE protocol_types CASCADE"))
-        sess.session.execute(text("DROP TABLE refresh_token_expiration_types CASCADE"))
-        sess.session.execute(text("DROP TABLE refresh_token_usage_types CASCADE"))
         sess.session.execute(text("DROP TABLE roles CASCADE"))
-        sess.session.execute(text("DROP TABLE user_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE user_claims CASCADE"))
         sess.session.execute(text("DROP TABLE user_logins CASCADE"))
         sess.session.execute(text("DROP TABLE users CASCADE"))

@@ -114,7 +114,9 @@ class UserClaim(BaseModel):
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
     user = relationship("User",  back_populates="claims")
-    claim_type = Column(String, ForeignKey("user_claim_types.type", ondelete='CASCADE'), nullable=False)
+
+    claim_type = Column(Integer, ForeignKey("user_claim_types.id", ondelete='CASCADE'), nullable=False)
+    type = relationship("UserClaimType", backref = "claim",) 
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
@@ -123,10 +125,8 @@ class UserClaim(BaseModel):
 class UserClaimType(Base):
    
     __tablename__ = "user_claim_types"
-
-    type = Column(String, primary_key=True)
-    claim = relationship("UserClaim", backref = "type",) 
+    id = Column(Integer, primary_key=True)
+    type_of_claim = Column(String, unique=True)
     
-
     def __str__(self):
-        return f"{self.type}"
+        return f"{self.type_of_claim}"
