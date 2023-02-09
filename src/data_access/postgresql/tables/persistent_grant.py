@@ -11,25 +11,20 @@ TYPES_OF_GRANTS = ["code","refresh_token"]
 
 class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
-    # __table_args__ =  (
-    #                 CheckConstraint(
-    #                 sqltext= f'"type" IN ({str(TYPES_OF_GRANTS)[1:-1]})', 
-    #                 name = "type_in_list"
-    #                 ),)
     
-    key = Column(String(512), unique=True, nullable=False)
+    #key = Column(String(512), unique=True, nullable=False)
     #client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-   # client = relationship("Client", backref = "grants", foreign_keys = "PersistentGrant.client_id" )
-    data = Column(String(2048), nullable=False)
+    #client = relationship("Client", backref = "grants", foreign_keys = "PersistentGrant.client_id" )
+    data = Column(String, nullable=False)
     expiration = Column(Integer, nullable=False)
     #subject_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     #client = relationship("User", backref = "grants", foreign_keys = "PersistentGrant.subject_id")
 
-    type_of_grant = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
-    grant_type = relationship("PersistentGrantTypes", backref = "grants") #, foreign_keys = "PersistentGrant.type_of_grant") 
+    persistent_grant_type_id = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
+    persistent_grant_type = relationship("PersistentGrantTypes",  backref="grant", foreign_keys="PersistentGrant.persistent_grant_type_id")
 
     def __str__(self) -> str:
-        return f"{self.__tablename__}: {self.key}"
+        return f"{self.data}"
 
     
 class PersistentGrantTypes(Base):

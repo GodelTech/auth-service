@@ -30,6 +30,10 @@ from src.presentation.admin_ui.controllers import (
     UserClaimAdminController,
     TypesUserClaimAdminController,
     PersistentGrantTypesAdminController,
+    AccessTokenTypeAdminController,
+    ProtocolTypeController,
+    RefreshTokenUsageTypeController,
+    RefreshTokenExpirationTypeController,
 )
 from src.di.providers import (
     provide_config,
@@ -115,13 +119,24 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
+    # Client 
     admin.add_view(ClientAdminController)
+    admin.add_view(AccessTokenTypeAdminController)
+    admin.add_view(ProtocolTypeController)
+    admin.add_view(RefreshTokenUsageTypeController)
+    admin.add_view(RefreshTokenExpirationTypeController)
+    
+    # User/UserClaim
     admin.add_view(UserAdminController)
-    admin.add_view(PersistentGrantAdminController)
-    admin.add_view(RoleAdminController)
     admin.add_view(UserClaimAdminController)
     admin.add_view(TypesUserClaimAdminController)
+
+    #Grants
+    admin.add_view(PersistentGrantAdminController)
     admin.add_view(PersistentGrantTypesAdminController)
+
+    # Other
+    admin.add_view(RoleAdminController)
 
 
     nodepends_provide_auth_service = lambda: provide_auth_service(

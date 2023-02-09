@@ -9,6 +9,11 @@ from .client import (
     ClientRedirectUri,
     ClientScope,
     ClientSecret,
+
+    AccessTokenType,
+    ProtocolType,
+    RefreshTokenExpirationType,
+    RefreshTokenUsageType,
 )
 from .persistent_grant import PersistentGrant, PersistentGrantTypes
 from .users import (
