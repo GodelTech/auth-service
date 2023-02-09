@@ -18,13 +18,16 @@ class PersistentGrant(BaseModel):
     #                 ),)
     
     key = Column(String(512), unique=True, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    #client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+   # client = relationship("Client", backref = "grants", foreign_keys = "PersistentGrant.client_id" )
     data = Column(String(2048), nullable=False)
     expiration = Column(Integer, nullable=False)
-    subject_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    client = relationship("User", backref = "grants",)
+    #subject_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    #client = relationship("User", backref = "grants", foreign_keys = "PersistentGrant.subject_id")
+
     type_of_grant = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
-    grant_type = relationship("PersistentGrantTypes", backref = "grant",)
+    grant_type = relationship("PersistentGrantTypes", backref = "grants") #, foreign_keys = "PersistentGrant.type_of_grant") 
+
     def __str__(self) -> str:
         return f"{self.__tablename__}: {self.key}"
 

@@ -20,8 +20,8 @@ class Client(BaseModel):
         Integer, default=2592000, nullable=False
     )
     access_token_lifetime = Column(Integer, default=3600, nullable=False)
-    access_token_type_type = Column(String, ForeignKey("access_token_types.type", ondelete='CASCADE'), nullable=False)
-    access_token_type = relationship("AccessTokenType",  backref="client", foreign_keys="Client.access_token_type_type")
+    # access_token_type_type = Column(String, ForeignKey("access_token_types.type", ondelete='CASCADE'), nullable=False)
+    # access_token_type = relationship("AccessTokenType",  backref="client", foreign_keys="Client.access_token_type_type")
     allow_access_token_via_browser = Column(
         Boolean, default=False, nullable=False
     )
@@ -45,15 +45,15 @@ class Client(BaseModel):
     prefix_client_claims = Column(String)
     
     
-    protocol_type_type = Column(String, ForeignKey("protocol_types.type", ondelete='CASCADE'), nullable=False)
-    protocol_type = relationship("ProtocolType",  backref="client", foreign_keys="Client.protocol_type_type")
+    # protocol_type_type = Column(String, ForeignKey("protocol_types.type", ondelete='CASCADE'), nullable=False)
+    # protocol_type = relationship("ProtocolType",  backref="client", foreign_keys="Client.protocol_type_type")
 
 
-    refresh_token_expiration_type = Column(String, ForeignKey("refresh_token_expiration_types.type", ondelete='CASCADE'), nullable=False)
-    refresh_token_expiration = relationship("RefreshTokenExpirationType",  backref="client", foreign_keys="Client.refresh_token_expiration_type")
+    # refresh_token_expiration_type = Column(String, ForeignKey("refresh_token_expiration_types.type", ondelete='CASCADE'), nullable=False)
+    # refresh_token_expiration = relationship("RefreshTokenExpirationType",  backref="client", foreign_keys="Client.refresh_token_expiration_type")
 
-    refresh_token_usage_type = Column(String, ForeignKey("refresh_token_usage_types.type", ondelete='CASCADE'), nullable=False)
-    refresh_token_usage = relationship("RefreshTokenUsageType",  backref="client", foreign_keys="Client.refresh_token_usage_type")
+    # refresh_token_usage_type = Column(String, ForeignKey("refresh_token_usage_types.type", ondelete='CASCADE'), nullable=False)
+    # refresh_token_usage = relationship("RefreshTokenUsageType",  backref="client", foreign_keys="Client.refresh_token_usage_type")
 
     require_client_secret = Column(Boolean, default=True, nullable=False)
     require_consent = Column(Boolean, default=True, nullable=False)
@@ -69,45 +69,46 @@ class Client(BaseModel):
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.client_name}"
 
-class AccessTokenType(Base):
-    __tablename__ = "access_token_types"
-    type = Column(String, primary_key=True)
+# class AccessTokenType(Base):
+#     __tablename__ = "access_token_types"
+#     type = Column(String, primary_key=True)
 
-    def __str__(self) -> str:
-        return f"{self.type}"
+#     def __str__(self) -> str:
+#         return f"{self.type}"
     
-    def __repr__(self) -> str:
-        return f"{self.type}"
+#     def __repr__(self) -> str:
+#         return f"{self.type}"
 
-class ProtocolType(Base):
-    __tablename__ = 'protocol_types'
-    type = Column(String, primary_key=True)
+# class ProtocolType(Base):
+#     __tablename__ = 'protocol_types'
+#     type = Column(String, primary_key=True)
 
-    def __str__(self) -> str:
-        return f"{self.type}"
+#     def __str__(self) -> str:
+#         return f"{self.type}"
     
-    def __repr__(self) -> str:
-        return f"{self.type}"
+#     def __repr__(self) -> str:
+#         return f"{self.type}"
 
-class RefreshTokenExpirationType(Base):
-    __tablename__ = 'refresh_token_expiration_types'
-    type = Column(String, primary_key=True)
+# class RefreshTokenExpirationType(Base):
+#     __tablename__ = 'refresh_token_expiration_types'
+#     type = Column(String, primary_key=True)
 
-    def __str__(self) -> str:
-        return f"{self.type}"
+#     def __str__(self) -> str:
+#         return f"{self.type}"
     
-    def __repr__(self) -> str:
-        return f"{self.type}"
+#     def __repr__(self) -> str:
+#         return f"{self.type}"
     
-class RefreshTokenUsageType(Base):
-    __tablename__ = 'refresh_token_usage_types'
-    type = Column(String, primary_key=True)
+# class RefreshTokenUsageType(Base):
+#     __tablename__ = 'refresh_token_usage_types'
+#     type = Column(String, primary_key=True)
 
-    def __str__(self) -> str:
-        return f"{self.type}"
+#     def __str__(self) -> str:
+#         return f"{self.type}"
     
-    def __repr__(self) -> str:
-        return f"{self.type}"
+#     def __repr__(self) -> str:
+#         return f"{self.type}"
+
 
 class ClientIdRestriction(BaseModel):
     __tablename__ = "client_id_restrictions"
