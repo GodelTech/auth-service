@@ -2,14 +2,17 @@ from sqladmin import ModelView
 from src.data_access.postgresql.tables import User, UserClaim, UserClaimType
 
 
-class UserAdminController(ModelView, model=User):
+class UserAdminController(ModelView, model=User,):
+    icon = "fa-solid fa-user"
     column_list = [User.id, User.username,
                    User.claims]
 
 class UserClaimAdminController(ModelView, model=UserClaim):
+    icon = "fa-solid fa-user"
     column_list = [#UserClaim.type,
                    UserClaim.claim_value,
                    UserClaim.user]
 
 class TypesUserClaimAdminController(ModelView, model=UserClaimType):
+    icon = "fa-solid fa-user"
     column_list = [UserClaimType.type_of_claim,]

@@ -15,14 +15,26 @@ from .client import (
     RefreshTokenExpirationType,
     RefreshTokenUsageType,
 )
-from .persistent_grant import PersistentGrant, PersistentGrantTypes
+from .persistent_grant import (
+    PersistentGrant, 
+    PersistentGrantTypes,
+    )
 from .users import (
     User,
     UserClaim,
     Role,
     UserClaimType
 )
-
+from .resources_related import (
+    ApiClaim, 
+    ApiClaimType, 
+    ApiResource, 
+    ApiScope, 
+    ApiScopeClaim, 
+    ApiScopeClaimType, 
+    ApiSecret, 
+    ApiSecretType,  
+)
 __all__ = [
     Client,
     ClientIdRestriction,

@@ -383,6 +383,14 @@ docs = ["furo (>=2022.12.7)", "sphinx-autodoc-typehints (>=1.19.5)", "sphinx (>=
 testing = ["covdefaults (>=2.2.2)", "coverage (>=7.0.1)", "pytest-cov (>=4)", "pytest-timeout (>=2.1)", "pytest (>=7.2)"]
 
 [[package]]
+name = "fontawesomefree"
+version = "6.3.0"
+description = "Font Awesome Free"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "frozenlist"
 version = "1.3.3"
 description = "A list-like structure which implements collections.abc.MutableSequence"
@@ -1175,7 +1183,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "a1cf47899db0a896edba975ceff7d38a7c347ee205c408a0526569f113918a1d"
+content-hash = "cf3dac91394f40e482e66ec547667978998251b6baa6314f5ae1fab4bb0937c6"
 
 [metadata.files]
 aiohttp = []
@@ -1207,6 +1215,7 @@ faker = []
 fastapi = []
 fastapi-cache2 = []
 filelock = []
+fontawesomefree = []
 frozenlist = []
 future = []
 greenlet = []

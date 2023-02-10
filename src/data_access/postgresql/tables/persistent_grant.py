@@ -9,6 +9,8 @@ LIFESPAN_OF_TOKEN = 999
 
 TYPES_OF_GRANTS = ["code","refresh_token"]
 
+
+
 class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
     
@@ -21,7 +23,7 @@ class PersistentGrant(BaseModel):
     #client = relationship("User", backref = "grants", foreign_keys = "PersistentGrant.subject_id")
 
     persistent_grant_type_id = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
-    persistent_grant_type = relationship("PersistentGrantTypes",  backref="grant", foreign_keys="PersistentGrant.persistent_grant_type_id")
+    persistent_grant_type = relationship("PersistentGrantTypes",  backref="grants", foreign_keys="PersistentGrant.persistent_grant_type_id")
 
     def __str__(self) -> str:
         return f"{self.data}"
@@ -31,7 +33,7 @@ class PersistentGrantTypes(Base):
    
     __tablename__ = "persistent_grant_types"
     id = Column(Integer, primary_key=True)
-    type_of_grant = Column(String, unique=True, nullable=False)
+    type_of_grant = Column(String, nullable=False)
     
     def __str__(self):
         return f"{self.type_of_grant}"

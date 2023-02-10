@@ -22,6 +22,7 @@ from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 from src.presentation.admin_ui.controllers import (
+    SeparationLine,
     AdminAuthController,
     ClientAdminController,
     UserAdminController,
@@ -34,6 +35,14 @@ from src.presentation.admin_ui.controllers import (
     ProtocolTypeController,
     RefreshTokenUsageTypeController,
     RefreshTokenExpirationTypeController,
+    ApiResourceAdminController,
+    ApiSecretAdminController,
+    ApiSecretTypeAdminController,
+    ApiClaimAdminController,
+    ApiClaimTypeAdminController,
+    ApiScopeAdminController,
+    ApiScopeClaimAdminController,
+    ApiScopeClaimTypeAdminController,
 )
 from src.di.providers import (
     provide_config,
@@ -125,15 +134,28 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ProtocolTypeController)
     admin.add_view(RefreshTokenUsageTypeController)
     admin.add_view(RefreshTokenExpirationTypeController)
-    
+    admin.add_view(SeparationLine)
     # User/UserClaim
     admin.add_view(UserAdminController)
     admin.add_view(UserClaimAdminController)
     admin.add_view(TypesUserClaimAdminController)
-
+    admin.add_view(SeparationLine)
+    
     #Grants
     admin.add_view(PersistentGrantAdminController)
     admin.add_view(PersistentGrantTypesAdminController)
+    admin.add_view(SeparationLine)
+
+    #ApiResourses
+    admin.add_view(ApiResourceAdminController)
+    admin.add_view(ApiSecretAdminController)
+    admin.add_view(ApiSecretTypeAdminController)
+    admin.add_view(ApiClaimAdminController)
+    admin.add_view(ApiClaimTypeAdminController)
+    admin.add_view(ApiScopeAdminController)
+    admin.add_view(ApiScopeClaimAdminController)
+    admin.add_view(ApiScopeClaimTypeAdminController)
+    admin.add_view(SeparationLine)
 
     # Other
     admin.add_view(RoleAdminController)
