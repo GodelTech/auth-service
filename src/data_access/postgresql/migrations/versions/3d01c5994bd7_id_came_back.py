@@ -1,8 +1,8 @@
-"""client_id_column
+"""id_came_back
 
-Revision ID: 47f5f7783c8b
-Revises: ddb8b065c1d5
-Create Date: 2023-02-10 15:41:18.986352
+Revision ID: 3d01c5994bd7
+Revises: 6a65a2974456
+Create Date: 2023-02-10 16:49:07.180379
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '47f5f7783c8b'
-down_revision = 'ddb8b065c1d5'
+revision = '3d01c5994bd7'
+down_revision = '6a65a2974456'
 branch_labels = None
 depends_on = None
 
