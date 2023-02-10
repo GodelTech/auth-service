@@ -18,7 +18,7 @@ class BaseModel(Base):
 
 
 class Note(BaseModel):
-    __tablename__ = 'notes'
+    __tablename__ = "notes"
 
     title = Column(String, nullable=False, index=True)
     content = Column(String, index=True)

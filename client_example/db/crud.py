@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from client_example.api import schemas
+from client_example.db import models
 
 
 def create_user_note(
@@ -13,8 +14,14 @@ def create_user_note(
     return db_item
 
 
-def get_notes(db: Session, skip: int, limit: int):
-    return db.query(models.Note).offset(skip).limit(limit).all()
+def get_notes(db: Session, skip: int, limit: int, user_id: int):
+    return (
+        db.query(models.Note)
+        .filter(models.Note.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_note(db: Session, id: int):

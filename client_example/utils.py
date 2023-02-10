@@ -1,8 +1,6 @@
 import jwt
 import requests
 from Crypto.PublicKey.RSA import construct
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from jwkest import base64_to_long
 
 # Identity Server endpoints
@@ -12,8 +10,6 @@ CONFIG_URL = "http://localhost:8000/.well-known/openid-configuration"
 JWKS_URL = "http://localhost:8000/.well-known/jwks"
 USERINFO_URL = "http://localhost:8000/userinfo/"
 INTROSPECTION_URL = "http://localhost:8000/introspection/"
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
 
 
 class TokenValidator:
@@ -38,22 +34,3 @@ class TokenValidator:
 
     async def is_token_valid(self, token: str) -> bool:
         return bool(await self.decode_token(token))
-
-
-def verify_access_token(token: str, credentials_exception):
-    headers = {
-        "authorization": f"Bearer {token}",
-    }
-    response = requests.get(USERINFO_URL, headers=headers)
-    if response.status_code == status.HTTP_401_UNAUTHORIZED:
-        raise credentials_exception
-    return response.json()
-
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    return verify_access_token(token, credentials_exception)

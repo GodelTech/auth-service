@@ -11,12 +11,12 @@ client = OpenID(
     client_secret="past",
     openid_configuration_endpoint=CONFIG_URL,
 )
-router = APIRouter(tags=['Authentication'])
+router = APIRouter(tags=["Authentication"])
 
 
 @router.get("/")
 async def index(request: Request):
-    token = request.headers.get('Authorization')
+    token = request.headers.get("Authorization")
     if token and await TokenValidator().is_token_valid(token):
         return RedirectResponse("/notes")
     else:
@@ -25,7 +25,7 @@ async def index(request: Request):
 
 @router.get("/login")
 async def get_login_form(request: Request):
-    token = request.headers.get('Authorization')
+    token = request.headers.get("Authorization")
     if token and await TokenValidator().is_token_valid(token):
         return RedirectResponse("/notes")
 
