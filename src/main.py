@@ -30,7 +30,7 @@ from src.presentation.admin_ui.controllers import (
     RoleAdminController,
     UserClaimAdminController,
     TypesUserClaimAdminController,
-    PersistentGrantTypesAdminController,
+    PersistentGrantTypeAdminController,
     AccessTokenTypeAdminController,
     ProtocolTypeController,
     RefreshTokenUsageTypeController,
@@ -43,6 +43,17 @@ from src.presentation.admin_ui.controllers import (
     ApiScopeAdminController,
     ApiScopeClaimAdminController,
     ApiScopeClaimTypeAdminController,
+    IdentityResourceAdminController, 
+    IdentityClaimAdminController,
+    PermissionAdminController, 
+    GroupAdminController,
+    ClientSecretController,
+    ClientGrantTypeController,
+    ClientRedirectUriController,
+    ClientCorsOriginController,
+    ClientPostLogoutRedirectUriController,
+    ClientClaimController,
+    ClientIdRestrictionController,
 )
 from src.di.providers import (
     provide_config,
@@ -134,16 +145,30 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ProtocolTypeController)
     admin.add_view(RefreshTokenUsageTypeController)
     admin.add_view(RefreshTokenExpirationTypeController)
+    admin.add_view(ClientSecretController)
+    admin.add_view(ClientGrantTypeController)
+    admin.add_view(ClientRedirectUriController)
+    admin.add_view(ClientCorsOriginController)
+    admin.add_view(ClientPostLogoutRedirectUriController)
+    admin.add_view(ClientClaimController)
+    admin.add_view(ClientIdRestrictionController)
     admin.add_view(SeparationLine)
+
     # User/UserClaim
     admin.add_view(UserAdminController)
     admin.add_view(UserClaimAdminController)
     admin.add_view(TypesUserClaimAdminController)
     admin.add_view(SeparationLine)
     
+    # Other
+    admin.add_view(RoleAdminController)
+    admin.add_view(GroupAdminController)
+    admin.add_view(PermissionAdminController)
+    admin.add_view(SeparationLine)
+
     #Grants
     admin.add_view(PersistentGrantAdminController)
-    admin.add_view(PersistentGrantTypesAdminController)
+    admin.add_view(PersistentGrantTypeAdminController)
     admin.add_view(SeparationLine)
 
     #ApiResourses
@@ -156,9 +181,13 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ApiScopeClaimAdminController)
     admin.add_view(ApiScopeClaimTypeAdminController)
     admin.add_view(SeparationLine)
-
-    # Other
-    admin.add_view(RoleAdminController)
+    
+    #Identity Resourses
+    admin.add_view(IdentityResourceAdminController)
+    admin.add_view(IdentityClaimAdminController)
+    admin.add_view(SeparationLine)
+    
+    
 
 
     nodepends_provide_auth_service = lambda: provide_auth_service(

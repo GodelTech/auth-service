@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from src.data_access.postgresql.tables import Client, AccessTokenType, RefreshTokenUsageType, ProtocolType, RefreshTokenExpirationType
+from src.data_access.postgresql.tables.client import *
 
 
 class ClientAdminController(ModelView, model=Client):
@@ -21,3 +21,51 @@ class RefreshTokenUsageTypeController(ModelView, model=RefreshTokenUsageType):
 class RefreshTokenExpirationTypeController(ModelView, model=RefreshTokenExpirationType):
     icon = "fa-solid fa-mobile-screen-button"
     column_list = [RefreshTokenExpirationType.id, RefreshTokenExpirationType.type]
+
+
+
+
+class ClientIdRestrictionController(ModelView, model=ClientIdRestriction):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientIdRestriction.id, 
+                   ClientIdRestriction.provider]
+
+class ClientClaimController(ModelView, model=ClientClaim):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientClaim.id, 
+                   ClientClaim.type,
+                   ClientClaim.value
+                   ]
+
+class ClientPostLogoutRedirectUriController(ModelView, model=ClientPostLogoutRedirectUri):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientPostLogoutRedirectUri.id, 
+                   ClientPostLogoutRedirectUri.post_logout_redirect_uri]
+
+class ClientCorsOriginController(ModelView, model=ClientCorsOrigin):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientCorsOrigin.id, 
+                   ClientCorsOrigin.origin
+                   ]
+
+class ClientRedirectUriController(ModelView, model=ClientRedirectUri):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientRedirectUri.id, 
+                   ClientRedirectUri.redirect_uri]
+
+class ClientGrantTypeController(ModelView, model=ClientGrantType):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientGrantType.id, 
+                   ClientGrantType.grant_type]
+
+class ClientSecretController(ModelView, model=ClientSecret):
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [
+        ClientSecret.id, 
+        ClientSecret.type,
+        ClientSecret.description,
+        ClientSecret.expiration,
+        ClientSecret.type,
+        ClientSecret.value,
+        ClientSecret.client_id ]
+

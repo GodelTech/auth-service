@@ -5,9 +5,20 @@ from .clients import (
     ProtocolTypeController,
     RefreshTokenUsageTypeController,
     RefreshTokenExpirationTypeController,
+    ClientSecretController,
+    ClientGrantTypeController,
+    ClientRedirectUriController,
+    ClientCorsOriginController,
+    ClientPostLogoutRedirectUriController,
+    ClientClaimController,
+    ClientIdRestrictionController,
     )
-from .users import UserAdminController, UserClaimAdminController, TypesUserClaimAdminController
-from .persistent_grants import PersistentGrantAdminController, PersistentGrantTypesAdminController
+from .users import (
+    UserAdminController, 
+    UserClaimAdminController, 
+    TypesUserClaimAdminController, 
+    )
+from .persistent_grants import PersistentGrantAdminController, PersistentGrantTypeAdminController
 from .roles import RoleAdminController
 from .resources_related import (
     ApiResourceAdminController,
@@ -19,6 +30,11 @@ from .resources_related import (
     ApiScopeClaimAdminController,
     ApiScopeClaimTypeAdminController,
 )
+from .identity_resource import IdentityResourceAdminController, IdentityClaimAdminController
+from .group import PermissionAdminController, GroupAdminController
+
+
+
 
 from sqladmin import ModelView
 from sqlalchemy.orm import declarative_base

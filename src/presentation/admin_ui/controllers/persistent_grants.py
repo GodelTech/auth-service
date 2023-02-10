@@ -1,15 +1,15 @@
 from sqladmin import ModelView
-from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantTypes
+from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantType
 
 
 class PersistentGrantAdminController(ModelView, model=PersistentGrant):
     icon = "fa-solid fa-key"
     column_list = [PersistentGrant.id, 
-                   #PersistentGrant.client_id, 
-                   PersistentGrant.data,
-                   #PersistentGrant.persistent_grant_type_id
+                   PersistentGrant.client_id, 
+                   PersistentGrant.expiration,
+                   PersistentGrant.grant_data
                    ]
 
-class PersistentGrantTypesAdminController(ModelView, model=PersistentGrantTypes):
+class PersistentGrantTypeAdminController(ModelView, model=PersistentGrantType):
     icon = "fa-solid fa-key"
-    column_list = [PersistentGrantTypes.id, PersistentGrantTypes.type_of_grant]
+    column_list = [PersistentGrantType.id, PersistentGrantType.type_of_grant]

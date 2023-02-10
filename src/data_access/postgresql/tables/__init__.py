@@ -17,13 +17,14 @@ from .client import (
 )
 from .persistent_grant import (
     PersistentGrant, 
-    PersistentGrantTypes,
+    PersistentGrantType
     )
 from .users import (
     User,
     UserClaim,
     Role,
-    UserClaimType
+    UserClaimType, 
+    UserLogin
 )
 from .resources_related import (
     ApiClaim, 
@@ -35,6 +36,8 @@ from .resources_related import (
     ApiSecret, 
     ApiSecretType,  
 )
+from .identity_resource import IdentityClaim, IdentityResource
+from .group import Group, Permission
 __all__ = [
     Client,
     ClientIdRestriction,

@@ -6,10 +6,6 @@ from sqlalchemy.orm import relationship
 
 from .base import BaseModel, Base
 
-ACCESS_TOKEN_TYPES = ["jwt", "reference",]
-PROTOCOL_TYPES = ["open_id_connect", "open_id_connect2"]
-REFRESH_TOKEN_EXPIRATION = ["absolute", "sliding"]
-REFRESH_TOKEN_USAGE = ["one_time_only", "reuse"]
 
 class Client(BaseModel):
 
@@ -64,10 +60,13 @@ class Client(BaseModel):
     update_access_token_claims_on_refresh = Column(
         Boolean, default=False, nullable=False
     )
-    
+    grants = relationship("PersistentGrant", back_populates = "client", foreign_keys = "PersistentGrant.client_id")
+
+    def __str__(self) -> str:
+        return f"{self.id} id: {self.client_name}"
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_name}"
+        return f"{self.id} id: {self.client_name}"
 
 class AccessTokenType(Base):
     __tablename__ = "access_token_types"
@@ -119,9 +118,9 @@ class ClientIdRestriction(BaseModel):
 
     provider = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "id_restrictions",)
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.provider}"
+        return f"{self.provider}"
 
 
 class ClientClaim(BaseModel):
@@ -130,9 +129,9 @@ class ClientClaim(BaseModel):
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "claims",)
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.type}"
+        return f"{self.type}"
 
 
 class ClientScope(BaseModel):
@@ -140,9 +139,12 @@ class ClientScope(BaseModel):
 
     scope = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client = relationship("Client", backref = "scopes",)
+    def __str__(self) -> str:
+        return f"{self.scope}"
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.id}"
+        return f"{self.scope}"
 
 
 class ClientPostLogoutRedirectUri(BaseModel):
@@ -150,7 +152,11 @@ class ClientPostLogoutRedirectUri(BaseModel):
 
     post_logout_redirect_uri = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client = relationship("Client", backref = "post_logout_redirect_uris",)
 
+    def __str__(self) -> str:
+        return f"{self.post_logout_redirect_uri}"
+    
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
@@ -160,7 +166,7 @@ class ClientCorsOrigin(BaseModel):
 
     origin = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "cors_origins",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
@@ -170,7 +176,7 @@ class ClientRedirectUri(BaseModel):
 
     redirect_uri = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "redirect_uris",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
@@ -180,7 +186,7 @@ class ClientGrantType(BaseModel):
 
     grant_type = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "grant_types",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 
@@ -193,6 +199,6 @@ class ClientSecret(BaseModel):
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-
+    client = relationship("Client", backref = "secrets",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"

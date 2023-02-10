@@ -14,22 +14,22 @@ TYPES_OF_GRANTS = ["code","refresh_token"]
 class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
     
-    #key = Column(String(512), unique=True, nullable=False)
-    #client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-    #client = relationship("Client", backref = "grants", foreign_keys = "PersistentGrant.client_id" )
-    data = Column(String, nullable=False)
+    key = Column(String(512), unique=True, nullable=False)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'), nullable=False)
+    client = relationship("Client", back_populates = "grants", foreign_keys = "PersistentGrant.client_id" )
+    grant_data = Column(String, nullable=False)
     expiration = Column(Integer, nullable=False)
-    #subject_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    #client = relationship("User", backref = "grants", foreign_keys = "PersistentGrant.subject_id")
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user = relationship("User", back_populates = "grants", foreign_keys = "PersistentGrant.user_id")
 
     persistent_grant_type_id = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
-    persistent_grant_type = relationship("PersistentGrantTypes",  backref="grants", foreign_keys="PersistentGrant.persistent_grant_type_id")
+    persistent_grant_type = relationship("PersistentGrantType",  backref="grants", foreign_keys="PersistentGrant.persistent_grant_type_id")
 
     def __str__(self) -> str:
-        return f"{self.data}"
+        return f":{self.expiration}"
 
     
-class PersistentGrantTypes(Base):
+class PersistentGrantType(Base):
    
     __tablename__ = "persistent_grant_types"
     id = Column(Integer, primary_key=True)
