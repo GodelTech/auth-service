@@ -15,7 +15,7 @@ class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
     
     key = Column(String(512), unique=True, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'), nullable=False)
+    client_id = Column(String, ForeignKey("clients.client_id", ondelete='CASCADE'), nullable=False)
     client = relationship("Client", back_populates = "grants", foreign_keys = "PersistentGrant.client_id" )
     grant_data = Column(String, nullable=False)
     expiration = Column(Integer, nullable=False)

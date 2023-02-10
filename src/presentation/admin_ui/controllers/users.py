@@ -9,7 +9,7 @@ class UserAdminController(ModelView, model=User,):
 
 class UserClaimAdminController(ModelView, model=UserClaim):
     icon = "fa-solid fa-user"
-    column_list = [UserClaim.type,
+    column_list = [UserClaim.claim_type,
                    UserClaim.claim_value,
                    UserClaim.user]
 

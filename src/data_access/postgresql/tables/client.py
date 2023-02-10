@@ -117,7 +117,7 @@ class ClientIdRestriction(BaseModel):
     __tablename__ = "client_id_restrictions"
 
     provider = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "id_restrictions",)
     def __repr__(self) -> str:
         return f"{self.provider}"
@@ -128,7 +128,7 @@ class ClientClaim(BaseModel):
 
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "claims",)
     def __repr__(self) -> str:
         return f"{self.type}"
@@ -138,7 +138,7 @@ class ClientScope(BaseModel):
     __tablename__ = "client_scopes"
 
     scope = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "scopes",)
     def __str__(self) -> str:
         return f"{self.scope}"
@@ -151,7 +151,7 @@ class ClientPostLogoutRedirectUri(BaseModel):
     __tablename__ = "client_post_logout_redirect_uris"
 
     post_logout_redirect_uri = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "post_logout_redirect_uris",)
 
     def __str__(self) -> str:
@@ -165,7 +165,7 @@ class ClientCorsOrigin(BaseModel):
     __tablename__ = "client_cors_origins"
 
     origin = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "cors_origins",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -175,7 +175,7 @@ class ClientRedirectUri(BaseModel):
     __tablename__ = "client_redirect_uris"
 
     redirect_uri = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "redirect_uris",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -185,7 +185,7 @@ class ClientGrantType(BaseModel):
     __tablename__ = "client_grant_types"
 
     grant_type = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "grant_types",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -198,7 +198,7 @@ class ClientSecret(BaseModel):
     expiration = Column(Integer, nullable=False)
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
     client = relationship("Client", backref = "secrets",)
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.type}"

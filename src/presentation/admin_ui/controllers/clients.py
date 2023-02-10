@@ -67,5 +67,5 @@ class ClientSecretController(ModelView, model=ClientSecret):
         ClientSecret.expiration,
         ClientSecret.type,
         ClientSecret.value,
-        ClientSecret.client_id ]
+        ]
 
