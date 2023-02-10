@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import httpx
 
-from .errors import GetIdEmailError
+from .errors import GetIdError
 from .oauth2 import BaseOAuth2, OAuth2Error
 
 BASE_SCOPES = ["openid", "email"]
@@ -44,7 +44,7 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
             base_scopes,
         )
 
-    async def get_id_email(self, token: str) -> Tuple[str, Optional[str]]:
+    async def get_id(self, token: str) -> int:
         async with self.get_httpx_client() as client:
             response = await client.get(
                 self.openid_configuration["userinfo_endpoint"],
@@ -55,8 +55,8 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
             )
 
             if response.status_code >= 400:
-                raise GetIdEmailError(response.json())
+                raise GetIdError(response.json())
 
             data: Dict[str, Any] = response.json()
 
-            return str(data["sub"]), data.get("email")
+            return int(data["sub"])

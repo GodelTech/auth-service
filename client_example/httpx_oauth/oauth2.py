@@ -6,7 +6,6 @@ from typing import (
     Generic,
     List,
     Optional,
-    Tuple,
     TypeVar,
     cast,
 )
@@ -198,7 +197,7 @@ class BaseOAuth2(Generic[T]):
             if response.status_code >= 400:
                 raise RevokeTokenError(response.json())
 
-    async def get_id_email(self, token: str) -> Tuple[str, Optional[str]]:
+    async def get_id(self, token: str) -> int:
         raise NotImplementedError()
 
     def get_httpx_client(self) -> AsyncContextManager[httpx.AsyncClient]:
