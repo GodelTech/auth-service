@@ -7,6 +7,7 @@ from typing import (
     List,
     Optional,
     TypeVar,
+    Union,
     cast,
 )
 from urllib.parse import urlencode
@@ -67,6 +68,7 @@ class BaseOAuth2(Generic[T]):
     client_secret: str
     authorize_endpoint: str
     access_token_endpoint: str
+    # end_session_endpoint: str
     refresh_token_endpoint: Optional[str]
     revoke_token_endpoint: Optional[str]
     base_scopes: Optional[List[str]]
@@ -78,6 +80,8 @@ class BaseOAuth2(Generic[T]):
         client_secret: str,
         authorize_endpoint: str,
         access_token_endpoint: str,
+        # TODO it's not in config yet, that's why it needs to be hardcoded
+        # end_session_endpoint: str = "http://localhost:8000/endsession/",
         refresh_token_endpoint: Optional[str] = None,
         revoke_token_endpoint: Optional[str] = None,
         name: str = "oauth2",
@@ -89,6 +93,7 @@ class BaseOAuth2(Generic[T]):
         self.access_token_endpoint = access_token_endpoint
         self.refresh_token_endpoint = refresh_token_endpoint
         self.revoke_token_endpoint = revoke_token_endpoint
+        # self.end_session_endpoint = end_session_endpoint
         self.name = name
         self.base_scopes = base_scopes
 
@@ -121,6 +126,31 @@ class BaseOAuth2(Generic[T]):
             params = {**params, **extras_params}  # type: ignore
 
         return f"{self.authorize_endpoint}?{urlencode(params)}"
+
+    # async def logout(
+    #     self,
+    #     id_token_hint: str,
+    #     redirect_uri: Optional[str] = None,
+    #     state: Optional[str] = None,
+    # ) -> Union[str, None]:
+    #     async with self.get_httpx_client() as client:
+    #         params = {
+    #             "id_token_hint": id_token_hint,
+    #         }
+
+    #         if redirect_uri is not None:
+    #             params["redirect_uri"] = redirect_uri
+
+    #         if state is not None:
+    #             params["state"] = state
+
+    #         print(self.end_session_endpoint)
+
+    #         response = await client.get(
+    #             url=self.end_session_endpoint,
+    #             params=params,
+    #         )
+    #         return response
 
     async def get_access_token(
         self, code: str, redirect_uri: str, code_verifier: Optional[str] = None

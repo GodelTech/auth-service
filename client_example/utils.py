@@ -10,6 +10,7 @@ CONFIG_URL = "http://localhost:8000/.well-known/openid-configuration"
 JWKS_URL = "http://localhost:8000/.well-known/jwks"
 USERINFO_URL = "http://localhost:8000/userinfo/"
 INTROSPECTION_URL = "http://localhost:8000/introspection/"
+ENDSESSION_URL = "http://localhost:8000/endsession/"
 
 
 class TokenValidator:

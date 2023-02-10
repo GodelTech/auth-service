@@ -7,8 +7,8 @@ from client_example.api.middleware.auth_validation import (
 )
 from client_example.api.routers import auth, notes
 from client_example.config.logging import LogConfig
-from client_example.data_access import models
-from client_example.data_access.database import engine
+from client_example.db import models
+from client_example.db.database import engine
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()

@@ -1,6 +1,8 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
+from fastapi import Request
+from fastapi.responses import RedirectResponse
 
 from .errors import GetIdError
 from .oauth2 import BaseOAuth2, OAuth2Error
@@ -60,3 +62,26 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
             data: Dict[str, Any] = response.json()
 
             return int(data["sub"])
+
+    async def logout(
+        self,
+        id_token_hint: str,
+        redirect_uri: Optional[str] = None,
+        state: Optional[str] = None,
+    ) -> RedirectResponse:
+        async with self.get_httpx_client() as client:
+            params = {
+                "id_token_hint": id_token_hint,
+            }
+
+            if redirect_uri is not None:
+                params["post_logout_redirect_uri"] = redirect_uri
+
+            if state is not None:
+                params["state"] = state
+
+            response = await client.get(
+                url="http://localhost:8000/endsession/",
+                params=params,
+            )
+            return response

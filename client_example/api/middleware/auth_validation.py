@@ -20,11 +20,14 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
     ):
         self.app = app
         self.token_validator = token_validator
-        self.protected_endpoints = "/notes"
+        self.protected_endpoints = ('/notes', '/logout')
 
     async def dispatch_func(self, request: Request, call_next):
-        if self.protected_endpoints in request.url.path:
-            access_token = request.headers.get("authorization")
+        if any(
+            endpoint in request.url.path
+            for endpoint in self.protected_endpoints
+        ):
+            access_token = request.headers.get('authorization')
 
             try:
                 await self.token_validator.is_token_valid(access_token)
@@ -36,8 +39,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 logger.info("Token has expired. Refreshing the token...")
                 return await self.get_new_token(request, call_next)
 
-            except PyJWTError:
-                logger.error("Authorization Failed")
+            # AttributeError handles not providing token at all
+            except (PyJWTError, AttributeError) as e:
+                logger.exception("Authorization failed", e)
                 return self._get_unauthorized_response()
 
         response = await call_next(request)
@@ -59,7 +63,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 return await self._validate_new_token(
                     new_access_token, request, call_next
                 )
-            logger.error("Incorrect refresh token")
+            logger.info("Incorrect refresh token")
             return self._get_unauthorized_response()
 
         except (RefreshTokenError, JSONDecodeError):
@@ -74,8 +78,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             return response
 
-        except PyJWTError:
-            logger.error("Incorrect new access token")
+        except PyJWTError as e:
+            logger.exception("Incorrect new access token", e)
             return self._get_unauthorized_response()
 
     def _get_unauthorized_response(self):

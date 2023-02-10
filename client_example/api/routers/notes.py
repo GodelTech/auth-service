@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from client_example.api.routers.auth import client
 from client_example.api.schemas import RequestNoteCreate, ResponseNote
-from client_example.data_access import crud
-from client_example.data_access.database import get_db
+from client_example.db import crud
+from client_example.db.database import get_db
 
 router = APIRouter(prefix='/notes', tags=['Notes'])
 
