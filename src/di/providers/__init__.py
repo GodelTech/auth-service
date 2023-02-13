@@ -9,6 +9,8 @@ from .repositories import (
     provide_user_repo_stub,
     provide_group_repo,
     provide_role_repo,
+    provide_device_repo,
+    provide_device_repo_stub
 )
 from .services import (
     provide_auth_service,
@@ -34,5 +36,7 @@ from .services import (
     provide_admin_role_service_stub,
     provide_admin_role_service,
     provide_admin_auth_service_stub,
-    provide_admin_auth_service
+    provide_admin_auth_service,
+    provide_device_service_stub,
+    provide_device_service
 )

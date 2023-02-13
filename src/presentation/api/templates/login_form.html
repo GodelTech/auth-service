@@ -38,6 +38,24 @@
     {% endfor %}
   </div>
 
+  <div class="modal" id="modal_window">
+    <p class="form_auth_block_head_text">Confirm Device Login</p>
+    <div class="buttons">
+      <button id="yes_butt" class="form_device_button" name="form_auth_submit">Confirm</button>
+      <button id="no_butt" class="form_device_button" name="form_auth_submit">Cancel</button>
+    </div>
+  </div>
+
+  <div class="modal" id="credentials_modal_window">
+    <p class="form_auth_block_head_text credentials_note">You have entered incorrect user credentials</p>
+    <div class="buttons credentials_button">
+      <button id="try_again_butt" class="form_device_button" name="credentials_overload">Try again</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay_modal"></div>
+
+  
 <!-- <div id="rq_model">
     <div class="model_elem" id="client_id">santa</div>
     <div class="model_elem" id="response_type">code</div>

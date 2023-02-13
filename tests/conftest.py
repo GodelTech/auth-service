@@ -22,6 +22,7 @@ from src.data_access.postgresql.repositories import (
     ClientRepository,
     UserRepository,
     PersistentGrantRepository,
+    DeviceRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
@@ -93,6 +94,7 @@ async def authorization_service(engine) -> AuthorizationService:
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
+        device_repo=DeviceRepository(engine),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
     )
@@ -137,6 +139,7 @@ async def token_service(engine) -> TokenService:
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
         user_repo=UserRepository(engine),
+        device_repo=DeviceRepository(engine),
         jwt_service=JWTService(),
     )
     return tk_service

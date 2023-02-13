@@ -4,6 +4,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     GroupRepository,
     RoleRepository,
+    DeviceRepository
 )
 from src.business_logic.services import (
     AuthorizationService,
@@ -17,7 +18,8 @@ from src.business_logic.services import (
     AdminUserService,
     AdminGroupService,
     AdminRoleService,
-    AdminAuthService
+    AdminAuthService,
+    DeviceService
 )
 
 
@@ -29,6 +31,7 @@ def provide_auth_service(
     client_repo: ClientRepository,
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
+    device_repo: DeviceRepository,
     password_service: PasswordHash,
     jwt_service: JWTService
 ):
@@ -36,6 +39,7 @@ def provide_auth_service(
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,
+        device_repo=device_repo,
         password_service=password_service,
         jwt_service=jwt_service
     )
@@ -101,12 +105,14 @@ def provide_token_service(
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
         user_repo: UserRepository,
+        device_repo: DeviceRepository,
         jwt_service: JWTService
 ) -> TokenService:
     return TokenService(
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,
+        device_repo=device_repo,
         jwt_service=jwt_service
     )
 
@@ -190,4 +196,18 @@ def provide_admin_auth_service(
         user_repo=user_repo,
         password_service=password_service,
         jwt_service=jwt_service
+    )
+
+
+def provide_device_service_stub():
+    ...
+
+
+def provide_device_service(
+    client_repo: ClientRepository,
+    device_repo: DeviceRepository,
+) -> DeviceService:
+    return DeviceService(
+        client_repo=client_repo,
+        device_repo=device_repo
     )
