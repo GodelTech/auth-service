@@ -52,9 +52,9 @@ build-and-test:
   before_script:
     - docker info
   script:
-    - make docker
+    - docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock identity
     - docker ps
-    - make docker-test
+    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
   rules:
     - when: always
 
