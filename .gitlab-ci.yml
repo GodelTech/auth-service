@@ -75,7 +75,7 @@ build-and-test:
     - echo ${SERVICE}
     - echo ${SERVICE_NAME}
     - echo ${CI_PIPELINE_ID}
-    - echo ${DOCKER_IMAGES_PATH}"
+    - echo ${DOCKER_IMAGES_PATH}
     - docker images
 #    - docker build -t identity .
 #    - docker pull ${CONTAINER_IMAGE}
