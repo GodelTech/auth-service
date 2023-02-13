@@ -27,6 +27,7 @@ variables:
 #  IMAGE: docker:20.10.16
   IMAGE_NAME: ${SERVICE_NAME}-${CI_PIPELINE_ID}
   CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+#  DOCKER_IMAGE_PATH:
 #  CONTAINER_IMAGE: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-142723
 #  CI_DEPLOY_USER: "a.shyrokau"
 #  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
@@ -71,7 +72,7 @@ build-and-test:
     - echo ${IMAGE_NAME}
     - docker pull ${CONTAINER_IMAGE}
     - docker images
-    - docker run -d -p 8000:8000 ${IMAGE_NAME}
+    - docker run -d -p 8000:8000 ${CONTAINER_IMAGE}
     - docker ps
     - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
   dependencies:
