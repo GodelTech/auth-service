@@ -8,6 +8,7 @@ from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
     UserRepository,
+    DeviceRepository,
 )
 from src.presentation.api.models import RequestModel
 
@@ -16,17 +17,19 @@ logger = logging.getLogger(__name__)
 
 class AuthorizationService:
     def __init__(
-        self,
-        client_repo: ClientRepository,
-        user_repo: UserRepository,
-        persistent_grant_repo: PersistentGrantRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+            self,
+            client_repo: ClientRepository,
+            user_repo: UserRepository,
+            persistent_grant_repo: PersistentGrantRepository,
+            device_repo: DeviceRepository,
+            password_service: PasswordHash,
+            jwt_service: JWTService,
     ) -> None:
         self._request_model = None
         self.client_repo = client_repo
         self.user_repo = user_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.device_repo = device_repo
         self.password_service = password_service
         self.jwt_service = jwt_service
 
@@ -59,6 +62,10 @@ class AuthorizationService:
                     return await self.get_redirect_url_id_token_token_response_type(
                         user_id=user_id
                     )
+                elif self.request_model.response_type == "urn:ietf:params:oauth:grant-type:device_code":
+                    return await self.get_redirect_url_device_code_response_type(
+                        user_id=user_id
+                    )
 
     async def get_redirect_url_code_response_type(self, user_id: int) -> str:
         secret_code = secrets.token_urlsafe(32)
@@ -71,6 +78,23 @@ class AuthorizationService:
         return await self._update_redirect_url_with_params(
             secret_code=secret_code
         )
+
+    async def get_redirect_url_device_code_response_type(self, user_id: int) -> str:
+        scope_data = await self._parse_scope_data(
+            scope=self.request_model.scope
+        )
+        user_code = scope_data["user_code"]
+        device = await self.device_repo.get_device_by_user_code(user_code=user_code)
+        secret_code = device.device_code
+        await self.persistent_grant_repo.create(
+            client_id=self.request_model.client_id,
+            data=secret_code,
+            user_id=user_id,
+            grant_type="urn:ietf:params:oauth:grant-type:device_code"
+        )
+        await self.device_repo.delete_by_user_code(user_code=user_code)
+
+        return "http://127.0.0.1:8000/device/auth/success"
 
     async def get_redirect_url_token_response_type(self, user_id: int) -> str:
         expiration_time = 600
@@ -131,14 +155,14 @@ class AuthorizationService:
 
     async def _parse_scope_data(self, scope: str) -> dict:
         """ """
-        if len(scope.split("&")) == 2:
-            return {
-                item.split("=")[0]: item.split("=")[1]
-                for item in scope.split("&")
-            }
+        # if len(scope.split("&")) == 2:
+        #     return {
+        #         item.split("=")[0]: item.split("=")[1]
+        #         for item in scope.split("&")
+        #     }
         return {
             item.split("=")[0]: item.split("=")[1]
-            for item in scope.split("&")[1:]
+            for item in scope.split("&") if len(item.split("=")) == 2
         }
 
     async def _update_redirect_url_with_params(self, secret_code: str) -> str:

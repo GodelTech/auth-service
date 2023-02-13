@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 import uuid
@@ -9,11 +10,15 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     GrantNotFoundError,
     WrongGrantsError,
+    DeviceRegistrationError,
+    DeviceCodeNotFoundError,
+    DeviceCodeExpirationTimeError,
 )
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
     UserRepository,
+    DeviceRepository,
 )
 from src.presentation.api.models import BodyRequestTokenModel
 
@@ -65,6 +70,7 @@ class TokenService:
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
         user_repo: UserRepository,
+        device_repo: DeviceRepository,
         jwt_service: JWTService,
     ) -> None:
         self.request = ...
@@ -73,6 +79,7 @@ class TokenService:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.user_repo = user_repo
+        self.device_repo = device_repo
         self.jwt_service = jwt_service
 
     async def get_tokens(self) -> dict:
@@ -283,6 +290,82 @@ class TokenService:
                         }
 
                         return response
+                else:
+                    raise GrantNotFoundError
+
+            if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
+                if not await self.persistent_grant_repo.exists(
+                    grant_type=self.request_model.grant_type,
+                    data=self.request_model.device_code,
+                ):
+                    if await self.device_repo.validate_device_code(device_code=self.request_model.device_code):
+                        # add check for expire time
+                        now = datetime.datetime.now()
+                        check_time = datetime.datetime.timestamp(now)
+                        expire_in = await self.device_repo.get_expiration_time(device_code=self.request_model.device_code)
+                        if check_time > expire_in:
+                            await self.device_repo.delete_by_device_code(device_code=self.request_model.device_code)
+                            raise DeviceCodeExpirationTimeError("Device code expired")
+                        raise DeviceRegistrationError("Device registration in progress")
+                    else:
+                        raise DeviceCodeNotFoundError("Such device code does not exist")
+                elif await self.persistent_grant_repo.exists(
+                    grant_type=self.request_model.grant_type,
+                    data=self.request_model.device_code,
+                ):
+                    grant = await self.persistent_grant_repo.get(
+                        grant_type=self.request_model.grant_type,
+                        data=self.request_model.device_code,
+                    )
+
+                    # checks if client provided in request is the same that in the db have provided grants
+                    if grant.client_id != self.request_model.client_id:
+                        raise WrongGrantsError(
+                            "Client from request has been found in the database\
+                            but don't have provided grants"
+                        )
+                    user_id = grant.subject_id
+                    client_id = self.request_model.client_id
+
+                    # ACCESS TOKEN
+                    scopes = {"scopes": self.request_model.scope}
+                    access_token = await get_single_token(
+                        user_id=user_id,
+                        client_id=client_id,
+                        additional_data=scopes,
+                        jwt_service=self.jwt_service,
+                        expiration_time=expiration_time,
+                    )
+
+                    # deleting old grant because now it won't be used anywhere and...
+                    await self.persistent_grant_repo.delete(
+                        data=self.request_model.device_code,
+                        grant_type=self.request_model.grant_type,
+                    )
+
+                    # ...creating new refresh token grant
+                    refresh_token = await get_single_token(
+                        user_id=user_id,
+                        client_id=client_id,
+                        additional_data=scopes,
+                        jwt_service=self.jwt_service,
+                        expiration_time=expiration_time * 6,
+                    )
+
+                    await self.persistent_grant_repo.create(
+                        client_id=self.request_model.client_id,
+                        data=refresh_token,
+                        expiration_time=expiration_time,
+                        user_id=user_id,
+                        grant_type="refresh_token",
+                    )
+                    return {
+                        "access_token": access_token,
+                        "token_type": "Bearer",
+                        "expires_in": expiration_time,
+                        "refresh_token": refresh_token,
+                    }
+
                 else:
                     raise GrantNotFoundError
 

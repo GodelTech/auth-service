@@ -7,6 +7,9 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     GrantNotFoundError,
     WrongGrantsError,
+    DeviceCodeExpirationTimeError,
+    DeviceRegistrationError,
+    DeviceCodeNotFoundError,
 )
 from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.tokens import (
@@ -52,7 +55,21 @@ async def get_tokens(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token"
         )
-
+    except DeviceCodeExpirationTimeError as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Device code expired"
+        )
+    except DeviceRegistrationError as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Device registration in progress"
+        )
+    except DeviceCodeNotFoundError as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Such device code does not exist"
+        )
     except ValueError as e:
         logger.exception(e)
         raise HTTPException(

@@ -7,9 +7,9 @@ from fastapi.templating import Jinja2Templates
 from src.business_logic.services import AuthorizationService, LoginFormService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
-    ClientRedirectUriError,
     UserNotFoundError,
     WrongPasswordError,
+    ClientRedirectUriError,
     WrongResponseTypeError,
 )
 from src.di.providers import (
@@ -131,11 +131,4 @@ async def post_authorize(
             content={
                 "message": "The scope is missing a password, or a username"
             },
-        )
-    except IndexError as exception:
-        message = f"IndexError: {exception} - Impossible to parse the scope"
-        logger.exception(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Impossible to parse the scope"},
         )
