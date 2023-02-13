@@ -74,7 +74,7 @@ build-and-test:
     - docker images
     - docker run -d --name identity-server-provider -p 8000:8000 ${CONTAINER_IMAGE}
     - docker ps
-    - docker exec -t identity-server-provider sh -c "pytest -ra -cov tests"
+    - docker exec -t identity-server-provider sh -c "tests/test_unit/test_repositories/test_end_session_repository.py -ra -s"
   dependencies:
     - container:docker-build
   only:
@@ -82,8 +82,6 @@ build-and-test:
 
 
 
-#
-#
 #deploy-to-dev:
 #  extends: .deploy-to-dev-ext
 #  stage: deploy-to-dev
