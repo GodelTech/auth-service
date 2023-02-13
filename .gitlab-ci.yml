@@ -16,7 +16,6 @@ include:
 stages:
   - container
   - build
-
 #  - deploy-to-dev
 
 
@@ -27,6 +26,7 @@ variables:
 #  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   IMAGE: docker:20.10.16
+  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
 
 
 # Pip's cache doesn't store the python packages
@@ -65,6 +65,7 @@ build-and-test:
     - docker info
   script:
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+    - echo ${CONTAINER_IMAGE}
     - docker images
 #    - docker build -t identity .
 #    - docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock identity
