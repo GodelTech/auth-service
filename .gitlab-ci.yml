@@ -42,7 +42,7 @@ build-and-test:
   image: ${IMAGE}
   variables:
     SERVICE: "${SERVICE_NAME}"
-    ENV_FOR_DYNACONF: development
+    ENV_FOR_DYNACONF: test
   script:
     - apt-get update && pip install poetry
     - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
