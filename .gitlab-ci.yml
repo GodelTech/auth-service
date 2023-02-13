@@ -74,7 +74,7 @@ build-and-test:
     - docker images
     - docker run -d --name identity-server-provider -p 8000:8000 ${CONTAINER_IMAGE}
     - docker ps
-    - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
+    - docker exec -t identity-server-provider sh -c "pytest -ra -cov tests"
   dependencies:
     - container:docker-build
   only:
