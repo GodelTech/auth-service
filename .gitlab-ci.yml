@@ -23,7 +23,7 @@ stages:
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  IMAGE: repository.godeltech.com:18443/python:3.9-slim-buster
+  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 
