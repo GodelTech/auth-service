@@ -23,15 +23,13 @@ stages:
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-#  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 #  IMAGE: docker:20.10.16
 #  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 #  CONTAINER_IMAGE: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-142723
-  CI_DEPLOY_USER: "a.shyrokau"
-  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
-  CONTAINER_REGISTRY: repository.godeltech.com:18445
-  CONTAINER_REGISTRY_PROXY: repository.godeltech.com:18443
+#  CI_DEPLOY_USER: "a.shyrokau"
+#  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
+
 
 
 # Pip's cache doesn't store the python packages
@@ -53,6 +51,8 @@ container:docker-build:
   extends: .docker-build-artifact
   variables:
     LABEL_NAME: "identity-server-provider"
+  script:
+    - docker images
   only:
     - Configure-CI-CD-pipeline
 
