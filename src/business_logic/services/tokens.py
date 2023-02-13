@@ -17,7 +17,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.presentation.api.models import BodyRequestTokenModel
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
@@ -29,10 +29,10 @@ def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
         kwargs.pop("user_id")
 
     base_payload = {
-        'iss': 'http://localhost:8000',
-        'client_id': client_id,
-        'iat': int(time.time()),
-        'exp': int(time.time() + expiration_time)
+        "iss": "http://localhost:8000",
+        "client_id": client_id,
+        "iat": int(time.time()),
+        "exp": int(time.time() + expiration_time),
     } | kwargs
     return base_payload
 
