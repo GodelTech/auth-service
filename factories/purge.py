@@ -18,12 +18,11 @@ class DataBasePurge:
 
     @classmethod
     def clean_data_from_database(cls):
-        # sess.session.execute(text("DROP TABLE access_token_types CASCADE"))
-        # sess.session.execute(text("DROP TABLE protocol_types CASCADE"))
-        # sess.session.execute(text("DROP TABLE refresh_token_expiration_types CASCADE"))
-        # sess.session.execute(text("DROP TABLE refresh_token_usage_types CASCADE"))
-        # sess.session.execute(text("DROP TABLE user_claim_types CASCADE"))
-
+        sess.session.execute(text("DROP TABLE access_token_types CASCADE"))
+        sess.session.execute(text("DROP TABLE protocol_types CASCADE"))
+        sess.session.execute(text("DROP TABLE refresh_token_expiration_types CASCADE"))
+        sess.session.execute(text("DROP TABLE refresh_token_usage_types CASCADE"))
+        sess.session.execute(text("DROP TABLE user_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_claims CASCADE"))
         sess.session.execute(text("DROP TABLE api_resources CASCADE"))
         sess.session.execute(text("DROP TABLE api_scope_claims CASCADE"))
