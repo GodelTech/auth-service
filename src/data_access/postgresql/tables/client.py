@@ -40,10 +40,8 @@ class Client(BaseModel):
     logout_uri = Column(String, nullable=False)
     prefix_client_claims = Column(String)
     
-    
     protocol_type_id = Column(Integer, ForeignKey("protocol_types.id", ondelete='CASCADE'), nullable=False)
     protocol_type = relationship("ProtocolType",  backref="client", foreign_keys="Client.protocol_type_id")
-
 
     refresh_token_expiration_type_id = Column(Integer, ForeignKey("refresh_token_expiration_types.id", ondelete='CASCADE'), nullable=False)
     refresh_token_expiration_type = relationship("RefreshTokenExpirationType",  backref="client", foreign_keys="Client.refresh_token_expiration_type_id")

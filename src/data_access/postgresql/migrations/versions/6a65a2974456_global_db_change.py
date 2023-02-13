@@ -141,6 +141,9 @@ def upgrade() -> None:
     op.drop_constraint('user_logins_User_fkey', 'user_logins', type_='foreignkey')
     op.create_foreign_key(None, 'user_logins', 'users', ['user_id'], ['id'], ondelete='CASCADE')
     op.drop_column('user_logins', 'User')
+
+
+    
     # ### end Alembic commands ###
 
 
