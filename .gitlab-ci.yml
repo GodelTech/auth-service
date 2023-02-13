@@ -14,8 +14,9 @@ include:
 
 
 stages:
+  - container
   - build
-#  - container
+
 #  - deploy-to-dev
 
 
