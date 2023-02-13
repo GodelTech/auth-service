@@ -21,7 +21,7 @@ userinfo_router = APIRouter(
 
 
 @userinfo_router.get(
-    "/", response_model=ResponseUserInfoModel, tags=["UserInfo"]
+    "/", response_model=dict, tags=["UserInfo"]
 )
 @cache(
     expire=CacheTimeSettings.USERINFO,
