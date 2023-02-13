@@ -1,5 +1,12 @@
-from src.data_access.postgresql.tables.client import Client
+import logging
+
+from jwkest import base64_to_long, long_to_base64
+
+from src.business_logic.services.jwt_token import JWTService
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
+
+logger = logging.getLogger(__name__)
 
 
 class WellKnownServies:
@@ -37,7 +44,7 @@ class WellKnownServies:
         result["response_types_supported"] = self.get_list_of_types()
 
         # may be REQUIRED
-        result["token_endpoint"] = urls_dict["false"]
+        result["token_endpoint"] = urls_dict["get_tokens"]
         result["end_session_endpoint"] = urls_dict["false"]
         result["check_session_iframe"] = urls_dict["false"]
 
@@ -94,8 +101,33 @@ class WellKnownServies:
             "id_token_encryption_alg_values_supported"
         ] = self.get_list_of_types()
         result["acr_values_supported"] = self.get_list_of_types()
-        result["grant_types_supported"] = self.get_list_of_types()
+        result["grant_types_supported"] = self.get_list_of_types(
+            PersistentGrant.TYPES_OF_GRANTS
+        )
         result["response_modes_supported"] = self.get_list_of_types()
         # result[""] = urls_dict['false']
 
+        return result
+
+    async def get_jwks(self) -> dict:
+        jwt_service = JWTService()
+        kty = ""
+        if "RS" in jwt_service.algorithm:
+            kty = "RSA"
+        elif "HS" in jwt_service.algorithm:
+            kty = "HMAC"
+        else:
+            raise ValueError
+
+        result = {
+            "kty": kty,
+            "alg": jwt_service.algorithm,
+            "use": "sig",
+            # "kid" : ... ,
+            "n": long_to_base64(await jwt_service.get_module()),
+            "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
+        }
+        logger.info(
+            f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"
+        )
         return result

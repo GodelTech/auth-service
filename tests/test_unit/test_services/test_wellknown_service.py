@@ -1,11 +1,26 @@
+import jwt
 import mock
 import pytest
+from Crypto.PublicKey.RSA import construct
+from jwkest import base64_to_long
 
+from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.well_known import WellKnownServies
 
 
 class RequestMock:
     authorization = 0
+
+
+async def decode_token(self, token: str, secret: None = None) -> dict:
+    token = token.replace("Bearer ", "")
+
+    decoded = jwt.decode(
+        token,
+        key=self.keys.public_key,
+        algorithms=self.algorithms
+    )
+    return decoded
 
 
 @pytest.mark.asyncio
@@ -28,12 +43,13 @@ class TestWellKnownServies:
             "get_userinfo_jwt": "http://127.0.0.1:800...erinfo/jwt",
             "get_default_token": "http://127.0.0.1:800...ault_token",
             "get_openid_configuration": "http://127.0.0.1:800...figuration",
+            "get_tokens": "http://127.0.0.1:800...token",
             "false": "/ Not ready yet",
         }
 
     async def test_well_known_openid_cofig(self):
         with mock.patch.object(
-            WellKnownServies, "get_all_urls", new=self.new_get_all_urls
+                WellKnownServies, "get_all_urls", new=self.new_get_all_urls
         ):
             result = await self.wks.get_openid_configuration()
             dict_of_parametrs_and_types = {
@@ -93,3 +109,24 @@ class TestWellKnownServies:
 
             for key in KEYS_REQUIRED:
                 assert key in result.keys()
+
+    async def test_jwks_RSA(self):
+        jwt_service = JWTService()
+        result = await self.wks.get_jwks()
+        test_token = await jwt_service.encode_jwt(payload={"sub": 1})
+
+        if result["alg"] == "RS256":
+            n = base64_to_long(result["n"])
+            e = base64_to_long(result["e"])
+
+            test_key = construct((n, e))
+
+            assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
+            assert result["kty"] == "RSA"
+            assert bool(jwt.decode(
+                jwt=test_token,
+                key=test_key.public_key().export_key('PEM'),
+                algorithms=["RS256", ]
+            )
+            )
+            assert result["use"] == "sig"

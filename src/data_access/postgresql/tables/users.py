@@ -12,21 +12,21 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
-
+from src.data_access.postgresql.tables.group import users_groups, permissions_roles
 from .base import Base, BaseModel
 
-user_roles = Table(
-    "project_team",
+users_roles = Table(
+    "users_roles",
     BaseModel.metadata,
-    Column("role", Integer, ForeignKey("roles.id")),
-    Column("user", Integer, ForeignKey("users.id")),
+    Column("role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
+    Column("user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     login_provider = Column(
         String,
         primary_key=True,
@@ -59,9 +59,11 @@ class User(BaseModel):
     access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
     roles = relationship(
-        "Role", secondary="project_team", back_populates="users"
+        "Role", secondary="users_roles", back_populates="users"
     )
-
+    groups = relationship(
+        "Group", secondary="users_groups", back_populates="users"
+    )
     def __str__(self):
         return f"Model {self.__tablename__}: {self.id}"
 
@@ -71,11 +73,14 @@ class Role(BaseModel):
 
     name = Column(String, nullable=False, unique=True)
     users = relationship(
-        "User", secondary="project_team", back_populates="roles"
+        "User", secondary= users_roles, back_populates="roles"
+    )
+    permissions = relationship(
+        "Permission", secondary= permissions_roles, back_populates="roles"
     )
 
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"Role {self.name} - {self.id}"
 
 
 class UserClaim(BaseModel):
@@ -102,7 +107,7 @@ class UserClaim(BaseModel):
     ]
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer, ForeignKey("users.id"))
+    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 

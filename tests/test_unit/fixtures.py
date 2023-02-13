@@ -1,8 +1,10 @@
 import datetime
-
 import pytest_asyncio
 
 from src.presentation.api.models.authorization import RequestModel
+from src.presentation.api.models.endsession import RequestEndSessionModel
+from src.business_logic.services.jwt_token import JWTService
+
 
 TEST_VALIDATE_PASSWORD = [
     (
@@ -76,7 +78,7 @@ DEFAULT_USER_CLAIMS = [
 
 
 @pytest_asyncio.fixture
-def authorization_request_model():
+def authorization_request_model() -> RequestModel:
     request_model = RequestModel(
         client_id="test_client",
         response_type="code",
@@ -95,4 +97,46 @@ def authorization_request_model():
         acr_values="test_data",
     )
 
+    return request_model
+
+
+service = JWTService()
+
+TOKEN_HINT_DATA = {
+    "sub": 3,
+    "client_id": "santa",
+    "data": "secret_code",
+    "type": "code"
+}
+
+SHORT_TOKEN_HINT_DATA = {
+    "sub": 3,
+    "data": "secret_code",
+    "type": "code"
+}
+
+
+class TokenHint:
+    sv = JWTService()
+
+    @classmethod
+    async def get_token_hint(cls):
+        token_hint = await cls.sv.encode_jwt(payload=TOKEN_HINT_DATA)
+        return token_hint
+
+    @classmethod
+    async def get_short_token_hint(cls):
+        short_token_hint = await cls.sv.encode_jwt(payload=SHORT_TOKEN_HINT_DATA)
+        return short_token_hint
+
+
+@pytest_asyncio.fixture
+async def end_session_request_model() -> RequestEndSessionModel:
+    tk_hint = TokenHint()
+    token_hint = await tk_hint.get_token_hint()
+    request_model = RequestEndSessionModel(
+        id_token_hint=token_hint,
+        post_logout_redirect_uri='https://www.scott.org/',
+        state='test_state'
+    )
     return request_model

@@ -1,7 +1,6 @@
 from typing import Optional
-
+import logging
 from pydantic import BaseModel
-
 
 class ResponseOpenIdConfiguration(BaseModel):
     issuer: str
@@ -44,6 +43,21 @@ class ResponseOpenIdConfiguration(BaseModel):
     acr_values_supported: Optional[list]
     grant_types_supported: Optional[list]
     response_modes_supported: Optional[list]
+
+    class Config:
+        orm_mode = True
+
+    def __repr__(self) -> str:
+        return f"Model {self.__class__.__name__}"
+
+class ResponseJWKS(BaseModel):
+    keys: list
+
+    # kty: str # RS256
+    # kid : Optional[str]  # key id in case we have more than one keyy
+    # use : str  # "sig" or "enc"
+    # n : str  # module
+    # e : str  # graduation
 
     class Config:
         orm_mode = True

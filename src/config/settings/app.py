@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import PostgresDsn, SecretStr
 
+from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
 from src.config.settings.base import BaseAppSettings
 
 
@@ -23,6 +24,8 @@ class AppSettings(BaseAppSettings):
     secret_key: SecretStr = "secret"
 
     allowed_hosts: List[str] = ["*"]
+
+    keys: RSAKeypair = CreateRSAKeypair().execute()
 
     class Config:
         validate_assignment = True

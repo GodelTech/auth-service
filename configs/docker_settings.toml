@@ -1,0 +1,8 @@
+[docker]
+dynaconf_merge = true
+
+
+[docker.db]
+echo = true
+url = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+max_connection_count = 10

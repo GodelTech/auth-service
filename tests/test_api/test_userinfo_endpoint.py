@@ -1,13 +1,13 @@
 import json
-import mock
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
-from src.business_logic.services.userinfo import UserInfoServies
-from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 ANSWER_USER_INFO = {'sub': '1',
                     'name': 'Daniil',
@@ -31,17 +31,19 @@ ANSWER_USER_INFO = {'sub': '1',
                     'updated_at': 1234567890,
                     }
 
+
 class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
-    async def test_successful_userinfo_request(connection: AsyncSession, client: AsyncClient):
+    async def test_successful_userinfo_request(self, user_info_service, client: AsyncClient):
+        uis = user_info_service
+        uis.client_id = "santa"
+        token = await uis.jwt.encode_jwt(payload={"sub": 1})
 
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
-        
         headers = {
-            'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
+            'authorization': token,
         }
+
         response = await client.request('GET', '/userinfo/', headers=headers)
 
         assert response.status_code == status.HTTP_200_OK
@@ -49,63 +51,68 @@ class TestUserInfoEndpoint:
         for key in ANSWER_USER_INFO:
             assert response_content[key] == ANSWER_USER_INFO[key]
 
-
     @pytest.mark.asyncio
-    async def test_successful_userinfo_jwt(connection: AsyncSession, client: AsyncClient):
-
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
-        token = uis.jwt.encode_jwt(payload = {"sub":"1"})
+    async def test_successful_userinfo_jwt(self, user_info_service, client: AsyncClient):
+        uis = user_info_service
+        uis.client_id = "santa"
+        token = await uis.jwt.encode_jwt(payload={"sub": 1})
 
         headers = {
             'authorization': token,
+            'accept': 'application/json'
         }
+        uis.authorization = token
+
         response = await client.request('GET', '/userinfo/jwt', headers=headers)
 
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode('utf-8'))
-        response_content = uis.jwt.decode_token(response_content)
-        answer = {k : ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
+        response_content = await uis.jwt.decode_token(token=response_content)
+        answer = {k: ANSWER_USER_INFO[k] for k in ANSWER_USER_INFO.keys()}
         answer["email_verified"] = 'true'
         answer["phone_number_verified"] = 'false'
         answer["updated_at"] = str(answer["updated_at"])
+
         assert response_content == answer
 
     @pytest.mark.asyncio
-    async def test_userinfo_and_userinfo_jwt_request_with_incorect_token(connection: AsyncSession, client: AsyncClient):
-
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
+    async def test_userinfo_and_userinfo_jwt_request_with_incorrect_token(
+            self,
+            user_info_service,
+            client: AsyncClient
+    ):
+        uis = user_info_service
+        uis.client_id = "santa"
+        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+        token = await uis.jwt.encode_jwt(payload={"blablabla": "blablabla"})
 
         for url in ('/userinfo/', '/userinfo/jwt'):
-            token = uis.jwt.encode_jwt(payload={"blablabla": "blablabla"})
             params = {
                 'authorization': token,
             }
-            response = await client.request('GET', url, params=params)
+            response = await client.request('GET', url, headers=params)
             response_content = json.loads(response.content.decode('utf-8'))
-            assert response.status_code == status.HTTP_401_UNAUTHORIZED
-            assert response_content == {'detail': 'Incorrect Authorization Token'} 
-
+            assert response.status_code == status.HTTP_403_FORBIDDEN
+            assert response_content == {'detail': "Incorrect Token"}
 
     @pytest.mark.asyncio
-    async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(connection: AsyncSession, client: AsyncClient):
-
-        async def new_execute_empty(*args, **kwargs):
-            return ()
-
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
+    async def test_userinfo_and_userinfo_jwt_request_with_user_without_claims(
+            self,
+            user_info_service,
+            client: AsyncClient
+    ):
+        uis = user_info_service
+        uis.client_id = "santa"
+        token = await uis.jwt.encode_jwt(payload={"sub": "2"})
 
         for url in ('/userinfo/', '/userinfo/jwt'):
+            headers = {
+                'authorization': token,
+            }
 
-            with mock.patch.object(UserRepository, "request_DB_for_claims", new=new_execute_empty):
-                headers = {
-                    'authorization': uis.jwt.encode_jwt(payload = {"sub":"1"}),
-                }
-                response = await client.request('GET', url, headers=headers)
+            response = await client.request('GET', url, headers=headers)
 
-                assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+            assert response.status_code == status.HTTP_403_FORBIDDEN
 
-                response_content = json.loads(response.content.decode('utf-8'))
-                assert response_content == {"detail": "Claims for user you are looking for does not exist"}
+            response_content = json.loads(response.content.decode('utf-8'))
+            assert response_content == {"detail": "You don't have permission for this claims"}

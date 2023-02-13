@@ -1,0 +1,22 @@
+[default]
+
+[default.security]
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+[default.db]
+uri = ""
+echo = false
+
+
+[default.redis]
+url = "redis://127.0.0.1:6379"
+
+
+[default.logging]
+console_log_level = "DEBUG"
+all_logs_files_path = "./logs/all/"
+all_logs_filename = "all_identity_server_provider.log"
+important_logs_files_path = "./logs/important/"
+important_logs_filename = "important_identity_server_provider.log"

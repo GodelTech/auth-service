@@ -1,29 +1,34 @@
-from fastapi import Depends
-
-from src.business_logic.dependencies.database import get_repository
+from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.repositories.client import ClientRepository
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 
-class UserInfoServies:
+class UserInfoServices:
     def __init__(
-        self,
-        user_repo: UserRepository = Depends(get_repository(UserRepository)),
+            self,
+            jwt: JWTService,
+            user_repo: UserRepository,
+            client_repo: ClientRepository,
+            persistent_grant_repo: PersistentGrantRepository,
     ) -> None:
-        self.jwt = JWTService()
-        #self.token_service = TokenService()
+        self.jwt = jwt
         self.authorization = ...
         self.user_repo = user_repo
+        self.client_repo = client_repo
+        self.persistent_grant_repo = persistent_grant_repo
+        self.client_id = None
+        self.secret = None
 
     async def get_user_info(
         self,
     ) -> dict:
         token = self.authorization
-
-        #await self.token_service.checheck_authorisation_token(token = token)
         try:
-            sub = int(self.jwt.decode_token(token=token)["sub"])
+            decoded_token = await self.jwt.decode_token(token=token)
+            sub = int(decoded_token["sub"])
         except:
             raise ValueError
 
@@ -34,4 +39,5 @@ class UserInfoServies:
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        return self.jwt.encode_jwt(payload=result, include_expire=False)
+        token = await self.jwt.encode_jwt(payload=result)
+        return token

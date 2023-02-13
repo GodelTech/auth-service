@@ -8,7 +8,7 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
-        exclude: ^factories/data/|^tests/
+        exclude: ^factories/data/|^tests/|^src/main
 
   - repo: https://github.com/psf/black
     rev: 22.3.0
@@ -19,6 +19,7 @@ repos:
     rev: v0.930
     hooks:
       - id: mypy
+        exclude: ^tests/|src/main
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0

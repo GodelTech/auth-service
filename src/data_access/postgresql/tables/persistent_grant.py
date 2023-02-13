@@ -13,13 +13,16 @@ LIFESPAN_OF_TOKEN = 999
 class PersistentGrant(BaseModel):
     __tablename__ = "persistent_grants"
 
-    TYPES_OF_GRANTS = [("code", "code")]
+    TYPES_OF_GRANTS = [
+        ("code", "code"),
+        ("refresh_token", "refresh_token")
+        ]
 
     key = Column(String(512), unique=True, nullable=False)
-    client_id = Column(String(80), ForeignKey("clients.client_id"))
+    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
     data = Column(String(2048), nullable=False)
     expiration = Column(Integer, nullable=False)
-    subject_id = Column(Integer, ForeignKey("users.id"))
+    subject_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     type = Column(ChoiceType(TYPES_OF_GRANTS), nullable=False)
 
     def __str__(self) -> str:

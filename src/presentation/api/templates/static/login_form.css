@@ -1,0 +1,121 @@
+*{
+  font-family: Arial;
+}
+
+.form_auth_block{
+    width: 500px;
+    margin: 0 auto;
+    margin-top: 7%;
+    border: double 4px;
+    background-size: cover;
+    border-radius: 20px;
+    border-color: #add8e6;
+}
+/* .form_auth_block_content{
+  padding-top: 5%;
+} */
+.form_auth_block_head_text{
+    display: block;
+    text-align: center;
+    margin: 8px;
+    padding: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background: #ffffff;
+    opacity: 0.7;
+}
+.form_auth_block label{
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background: #ffffff;
+    opacity: 0.7;
+    font-weight: 600;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+.form_auth_block input{
+  display: block;
+  margin: 0 auto;
+  width: 80%;
+  height: 45px;
+  border-radius: 10px;
+  border:none;
+  outline: none;
+  border: solid;
+  border-color: grey;
+  padding-left: 15px;
+}
+input:focus {
+  color: #000000;
+  border-radius: 10px;
+  border: 2px solid #436fea;
+}
+.form_auth_button{
+    display: block;
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+    background-color: #add8e6;
+}
+
+#butt{
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+#rq_model{
+  display: none;
+}
+
+.externals{
+  display: flex;
+  width: 80%;
+  height: 20%;
+  margin: 0 auto;
+  margin-top: 10px;
+  /* border: solid 1px; */
+  border-radius: 10px;
+  border-color: #b3cad2;
+  justify-content: space-around;;
+}
+
+.sing_in{
+  display: block;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #ffffff;
+  opacity: 0.7;
+}
+
+.external_login{
+  width: 18%;
+  margin-left: 5px;
+  padding: 5px;
+  background-color:  #add8e6;
+  border: double 2px gray;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.external_login:hover{
+  background-color: #33b3de;
+}
+
+.form_auth_button:hover{
+  background-color: #33b3de;
+}
+
+.fa {
+  margin-left: 10px;
+  color: #436fea;
+  border: solid gray 1px;
+  padding: 3px;
+  border-radius: 3px;
+}

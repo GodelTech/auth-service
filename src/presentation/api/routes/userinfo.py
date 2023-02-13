@@ -1,18 +1,19 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
+from typing import Union
 
-from fastapi_cache.decorator import cache
-from src.business_logic.cache.key_builders import builder_with_parametr
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
+from fastapi_cache.decorator import cache
+
+from src.business_logic.cache.key_builders import builder_with_parametr
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
-
-from src.business_logic.services.userinfo import UserInfoServies
-
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
+from src.di.providers import provide_userinfo_service_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
 
-
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 userinfo_router = APIRouter(
     prefix="/userinfo",
@@ -29,12 +30,14 @@ userinfo_router = APIRouter(
 )
 async def get_userinfo(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServies = Depends(),
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),  # crutch for swagger
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get('authorization')
+        token = request.headers.get("authorization")
 
         if token != None:
             userinfo_class.authorization = token
@@ -48,26 +51,17 @@ async def get_userinfo(
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission for this claims",
         )
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Incorrect Token"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
     except:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @userinfo_router.post(
@@ -80,12 +74,14 @@ async def get_userinfo(
 )
 async def post_userinfo(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServies = Depends(),
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),  # crutch for swagger
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get('authorization')
+        token = request.headers.get("authorization")
 
         if token != None:
             userinfo_class.authorization = token
@@ -99,27 +95,17 @@ async def post_userinfo(
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission for this claims",
         )
 
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Incorrect Token"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
     except:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @userinfo_router.get("/jwt", response_model=str, tags=["UserInfo"])
@@ -130,63 +116,79 @@ async def post_userinfo(
 )
 async def get_userinfo_jwt(
     request: Request,
-    auth_swagger: str | None = Header(default=None, description="Authorization"),
-    userinfo_class: UserInfoServies = Depends(),
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
+
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get('authorization')
+        jwt_service = JWTService()
 
+        token = request.headers.get("authorization")
         if token != None:
             userinfo_class.authorization = token
         elif auth_swagger != None:
             userinfo_class.authorization = auth_swagger
         else:
             raise PermissionError
-            
-        result = await userinfo_class.get_user_info_jwt()
-        return result
+
+        logger.info("Collecting Claims from DataBase.")
+        return await userinfo_class.jwt.encode_jwt(
+            payload=await userinfo_class.get_user_info()
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
+        )
 
     except ClaimsNotFoundError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Claims for user you are looking for does not exist",
-        )
-
-    except PermissionError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Incorrect Authorization Token"
-        )
-    
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Incorrect Token"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission for this claims",
         )
 
     except:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @userinfo_router.get(
     "/get_default_token", response_model=str, tags=["UserInfo"]
 )
-async def get_default_token():
+async def get_default_token(
+    with_iss_me: bool = None,
+    with_aud_facebook: bool = None,
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
+):
     try:
-        uis = UserInfoServies()
-        uis.jwt.set_expire_time(expire_hours=1)
-        return uis.jwt.encode_jwt(payload={"sub": "1"})
+        uis = userinfo_class
+        payload = {"sub": "1"}
+        if with_iss_me:
+            payload["iss"] = "me"
+        if with_aud_facebook:
+            payload["aud"] = ["facebook"]
+        return await uis.jwt.encode_jwt(payload)
     except:
         raise HTTPException(status_code=500)
 
 
 @userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
-async def get_decode_token(token: str):
-    try:
-        uis = UserInfoServies()
-        return uis.jwt.decode_token(token)
-    except:
-        raise HTTPException(status_code=500)
+async def get_decode_token(
+    token: str,
+    issuer: str = None,
+    audience: str = None,
+    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
+):
+    # try:
+    uis = userinfo_class
+    kwargs = {}
+    if issuer is not None:
+        kwargs["issuer"] = issuer
+    if audience is not None:
+        kwargs["audience"] = audience
+
+    return await uis.jwt.decode_token(token, **kwargs)
+    # except:
+    raise HTTPException(status_code=500)

@@ -1,8 +1,9 @@
 import logging
 
+from src.business_logic.dependencies.database import get_repository_no_depends
 from src.data_access.postgresql.repositories import PersistentGrantRepository
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 class BaseGrantService:
