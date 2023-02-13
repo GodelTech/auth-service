@@ -17,7 +17,6 @@ from src.presentation.api.middleware.access_token_validation import (
     AccessTokenMiddleware,
 )
 
-from src.config import LogConfig
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
@@ -59,13 +58,16 @@ from src.di.providers import (
     provide_admin_auth_service,
 )
 
+import logging
+from src.log import LOGGING_CONFIG
 
-logger = logging.getLogger("is_app")
+
+logger = logging.getLogger(__name__)
 
 
 def get_application(test=False) -> FastAPI:
     # configure logging
-    dictConfig(LogConfig().to_dict)
+    dictConfig(LOGGING_CONFIG)
 
     application = FastAPI()
     application.add_middleware(

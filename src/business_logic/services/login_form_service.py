@@ -1,10 +1,10 @@
 import logging
 
-from src.data_access.postgresql.repositories import ClientRepository
 from src.data_access.postgresql.errors import WrongResponseTypeError
+from src.data_access.postgresql.repositories import ClientRepository
 from src.presentation.api.models import RequestModel
 
-logger = logging.getLogger('is_app')
+logger = logging.getLogger(__name__)
 
 
 class LoginFormService:
@@ -22,10 +22,16 @@ class LoginFormService:
                 client_id=self.request_model.client_id,
                 redirect_uri=self.request_model.redirect_uri,
             ):
-                if self.request_model.response_type in ["code", "token", "id_token token"]:
+                if self.request_model.response_type in [
+                    "code",
+                    "token",
+                    "id_token token",
+                ]:
                     return True
                 else:
-                    raise WrongResponseTypeError("You try to pass unprocessable response type")
+                    raise WrongResponseTypeError(
+                        "You try to pass unprocessable response type"
+                    )
 
     async def _validate_client(self, client_id: str) -> bool:
         """
@@ -36,13 +42,14 @@ class LoginFormService:
         )
         return client
 
-    async def _validate_client_redirect_uri(self, client_id: str, redirect_uri: str) -> bool:
+    async def _validate_client_redirect_uri(
+        self, client_id: str, redirect_uri: str
+    ) -> bool:
         """
         Checks if the redirect uri is in the database.
         """
         client = await self.client_repo.validate_client_redirect_uri(
-            client_id=client_id,
-            redirect_uri=redirect_uri
+            client_id=client_id, redirect_uri=redirect_uri
         )
         return client
 

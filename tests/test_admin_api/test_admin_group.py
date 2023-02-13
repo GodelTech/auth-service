@@ -14,7 +14,7 @@ from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
 from src.data_access.postgresql.errors.user import DuplicationError
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

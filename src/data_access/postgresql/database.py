@@ -6,7 +6,7 @@ from sqlalchemy.pool import NullPool
 
 from src.config.settings.app import AppSettings
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 class Database:
