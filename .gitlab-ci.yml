@@ -26,7 +26,7 @@ variables:
 #  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   IMAGE: docker:20.10.16
-#  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 #  CONTAINER_IMAGE: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-142723
   CI_DEPLOY_USER: "a.shyrokau"
   CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
@@ -75,10 +75,9 @@ build-and-test:
     - echo ${SERVICE}
     - echo ${SERVICE_NAME}
     - echo ${CI_PIPELINE_ID}
-    - echo ${DOCKER_IMAGES_PATH}
     - docker images
 #    - docker build -t identity .
-#    - docker pull ${CONTAINER_IMAGE}
+    - docker pull ${CONTAINER_IMAGE}
 #    - docker run -d -p 8000:8000 ${CONTAINER_IMAGE}
 #    - docker ps
 #    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
