@@ -15,7 +15,7 @@ include:
 
 stages:
   - container
-#  - build
+  - build
 #  - deploy-to-dev
 
 
@@ -80,6 +80,8 @@ build-and-test:
 #    - docker run -d -p 8000:8000 ${CONTAINER_IMAGE}
 #    - docker ps
 #    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
+  dependencies:
+    - container
   only:
     - Configure-CI-CD-pipeline
 
