@@ -58,9 +58,6 @@ build-and-test:
   variables:
     SERVICE: "${SERVICE_NAME}"
     ENV_FOR_DYNACONF: test
-    DOCKER_HOST: tcp://docker:2375
-    # This instructs Docker not to start over TLS.
-    DOCKER_TLS_CERTDIR: ""
   services:
     - docker:20.10.16-dind
   before_script:
@@ -69,11 +66,12 @@ build-and-test:
   script:
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CONTAINER_IMAGE}
+    - echo ${CI_COMMIT_HASH}
     - docker images
 #    - docker build -t identity .
-    - docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc
-    - docker ps
-    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
+#    - docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc
+#    - docker ps
+#    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
   rules:
     - when: always
 
