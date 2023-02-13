@@ -146,3 +146,23 @@ ROLES = [
     "Air cabin crew",
     "Scientist, research (maths)"
 ]
+
+
+ACCESS_TOKEN_TYPES = [
+    "jwt", 
+    "reference"
+    ]
+
+PROTOCOL_TYPES = [
+    "open_id_connect",
+    ]
+
+REFRESH_TOKEN_EXPIRATION_TYPES = [
+    "absolute",
+    "sliding",
+    ]
+
+REFRESH_TOKEN_USAGE = [
+    "one_time_only", 
+    "reuse"
+    ]

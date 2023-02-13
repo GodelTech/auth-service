@@ -1,5 +1,6 @@
 from src.data_access.postgresql.tables.users import UserClaim, USER_CLAIM_TYPE
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
@@ -97,8 +98,7 @@ class WellKnownServies:
             "id_token_encryption_alg_values_supported"
         ] = self.get_list_of_types()
         result["acr_values_supported"] = self.get_list_of_types()
-        result["grant_types_supported"] = self.get_list_of_types(
-            PersistentGrant.TYPES_OF_GRANTS)
+        result["grant_types_supported"] = self.get_list_of_types(TYPES_OF_GRANTS)
         result["response_modes_supported"] = self.get_list_of_types()
         # result[""] = urls_dict['false']
 

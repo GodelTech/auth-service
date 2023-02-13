@@ -18,12 +18,12 @@ class DataBasePopulation:
 
         # populate database
         cls.populate_client_table()
-        cls.populate_user_table()
-        cls.populate_claims_table()
-        cls.populate_client_post_logout_redirect_uri()
-        cls.populate_client_secrets()
-        cls.populate_client_redirect_uri()
-        cls.populate_roles()
+        # cls.populate_user_table()
+        # cls.populate_claims_table()
+        # cls.populate_client_post_logout_redirect_uri()
+        # cls.populate_client_secrets()
+        # cls.populate_client_redirect_uri()
+        # cls.populate_roles()
 
     @classmethod
     def clean_data_from_database(cls):
@@ -31,13 +31,41 @@ class DataBasePopulation:
         sess.session.execute(text("TRUNCATE TABLE client_secrets RESTART IDENTITY"))
         sess.session.execute(text("TRUNCATE TABLE user_claims RESTART IDENTITY"))
         sess.session.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE"))
-        sess.session.execute(text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE "))
-        sess.session.execute(text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE "))
+        sess.session.execute(text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE"))
+
+        sess.session.execute(text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE protocol_types RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE refresh_token_expiration_types RESTART IDENTITY CASCADE"))
+        sess.session.execute(text("TRUNCATE TABLE refresh_token_usage_types RESTART IDENTITY CASCADE"))
+
         sess.session.commit()
 
     @classmethod
     def populate_client_table(cls):
 
+        # Firstly populating types and usages that are needed for the Client 
+        for i in range(len(data.ACCESS_TOKEN_TYPES)):
+            token = cl_factory.AccessTokenTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+        for i in range(len(data.PROTOCOL_TYPES)):
+            token = cl_factory.ProtocolTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+        
+        for i in range(len(data.REFRESH_TOKEN_EXPIRATION_TYPES)):
+            token = cl_factory.RefreshTokenExpirationTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+        for i in range(len(data.REFRESH_TOKEN_USAGE)):
+            token = cl_factory.RefreshTokenUsageTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+        # Finally populating CLient
         for i in range(len(data.CLIENT_IDS)):
             client = cl_factory.ClientFactory()
             cl_factory.sess.session.commit()

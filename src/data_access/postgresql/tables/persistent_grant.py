@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, CheckConstraint
 from sqlalchemy.orm import relationship
-from src.data_access.postgresql.tables.client import Client
+# from src.data_access.postgresql.tables.client import Client
 
 from .base import BaseModel, Base
 
