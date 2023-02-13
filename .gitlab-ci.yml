@@ -81,7 +81,7 @@ build-and-test:
 #    - docker ps
 #    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
   dependencies:
-    - container
+    - container:docker-build
   only:
     - Configure-CI-CD-pipeline
 
