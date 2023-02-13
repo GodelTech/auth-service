@@ -21,6 +21,7 @@ from src.business_logic.services import (
     AdminAuthService,
     DeviceService
 )
+from src.scripts.dto import RSAKeypair
 
 
 def provide_auth_service_stub():
@@ -73,8 +74,8 @@ def provide_jwt_service_stub():
     ...
 
 
-def provide_jwt_service() -> JWTService:
-    return JWTService()
+def provide_jwt_service(keys: RSAKeypair) -> JWTService:
+    return JWTService(keys=keys)
 
 
 def provide_introspection_service_stub():

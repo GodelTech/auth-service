@@ -20,6 +20,7 @@ from src.presentation.api.middleware.access_token_validation import (
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
+from src.scripts.create_rsa_keys import CreateRSAKeypair
 from src.presentation.admin_ui.controllers import (
     AdminAuthController,
     ClientAdminController,
@@ -84,7 +85,11 @@ def get_application(test=False) -> FastAPI:
     application.add_middleware(AuthorizationMiddleware)
     application.add_middleware(AccessTokenMiddleware)
 
+    rsa_keypair = CreateRSAKeypair().execute()
+    application.rsa_keypair = rsa_keypair
+
     setup_di(application)
+    
     container = Container()
     container.db()
     application.container = container
@@ -114,7 +119,7 @@ def setup_di(app: FastAPI) -> None:
             auth_service=provide_admin_auth_service(
                 user_repo=provide_user_repo(db_engine),
                 password_service=provide_password_service(),
-                jwt_service=provide_jwt_service(),
+                jwt_service=provide_jwt_service(keys=app.rsa_keypair),
             ),
         ),
     )
@@ -129,7 +134,7 @@ def setup_di(app: FastAPI) -> None:
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
         device_repo=provide_device_repo(db_engine),
         password_service=provide_password_service(),
-        jwt_service=provide_jwt_service(),
+        jwt_service=provide_jwt_service(keys=app.rsa_keypair),
     )
     app.dependency_overrides[
         provide_auth_service_stub
@@ -138,7 +143,7 @@ def setup_di(app: FastAPI) -> None:
     nodepends_provide_endsession_servise = lambda: provide_endsession_service(
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
-        jwt_service=provide_jwt_service(),
+        jwt_service=provide_jwt_service(keys=app.rsa_keypair),
     )
     app.dependency_overrides[
         provide_endsession_service_stub
@@ -146,7 +151,7 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_introspection_service = (
         lambda: provide_introspection_service(
-            jwt=provide_jwt_service(),
+            jwt=provide_jwt_service(keys=app.rsa_keypair),
             user_repo=provide_user_repo(db_engine),
             client_repo=provide_client_repo(db_engine),
             persistent_grant_repo=provide_persistent_grant_repo(db_engine),
@@ -157,7 +162,7 @@ def setup_di(app: FastAPI) -> None:
     ] = nodepends_provide_introspection_service
 
     nodepends_provide_token_service = lambda: provide_token_service(
-        jwt_service=provide_jwt_service(),
+        jwt_service=provide_jwt_service(keys=app.rsa_keypair),
         user_repo=provide_user_repo(db_engine),
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
@@ -168,7 +173,7 @@ def setup_di(app: FastAPI) -> None:
     ] = nodepends_provide_token_service
 
     nodepends_provide_userinfo_service = lambda: provide_userinfo_service(
-        jwt=provide_jwt_service(),
+        jwt=provide_jwt_service(keys=app.rsa_keypair),
         user_repo=provide_user_repo(db_engine),
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
