@@ -27,6 +27,8 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   IMAGE: docker:20.10.16
   CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+  CI_DEPLOY_USER: "a.shyrokau"
+  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
 
 
 # Pip's cache doesn't store the python packages
@@ -63,6 +65,7 @@ build-and-test:
     - docker:20.10.16-dind
   before_script:
     - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CONTAINER_IMAGE}
