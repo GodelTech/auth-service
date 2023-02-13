@@ -1,8 +1,11 @@
-from typing import Optional
 import hashlib
+import logging
+from typing import Optional
+
 from fastapi import Request, Response
 
-import logging
+logger = logging.getLogger(__name__)
+
 
 def builder_with_parametr(
     func,
@@ -12,9 +15,13 @@ def builder_with_parametr(
     args: Optional[tuple] = None,
     kwargs: Optional[dict] = None,
 ):
-    logger = logging.getLogger("is_app")
+
     prefix = f"client-{request.client.host}"
-    dict_to_encode = {k: kwargs[k] for k in kwargs.keys() if type(kwargs[k]) in (str, int, float, bool, dict, str, list)}
+    dict_to_encode = {
+        k: kwargs[k]
+        for k in kwargs.keys()
+        if type(kwargs[k]) in (str, int, float, bool, dict, str, list)
+    }
 
     cache_key = (
         prefix

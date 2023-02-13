@@ -1,20 +1,16 @@
 import logging
+
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 
-from src.business_logic.services import AdminAuthService
 from src.business_logic.dto import AdminCredentialsDTO
+from src.business_logic.services import AdminAuthService
 
-
-logger = logging.getLogger('is_app')
+logger = logging.getLogger(__name__)
 
 
 class AdminAuthController(AuthenticationBackend):
-    def __init__(
-        self, 
-        secret_key: str,
-        auth_service: AdminAuthService
-    ) -> None:
+    def __init__(self, secret_key: str, auth_service: AdminAuthService) -> None:
         self.auth_service = auth_service
         super().__init__(secret_key=secret_key)
 
@@ -23,8 +19,8 @@ class AdminAuthController(AuthenticationBackend):
         try:
             token = await self.auth_service.authorize(
                 credentials=AdminCredentialsDTO(
-                    username=data_from_form.get('username'),
-                    password=data_from_form.get('password')
+                    username=data_from_form.get("username"),
+                    password=data_from_form.get("password"),
                 )
             )
             request.session.update({"Token": token})
