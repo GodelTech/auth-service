@@ -77,8 +77,8 @@ build-and-test:
     - echo ${CI_PIPELINE_ID}
     - docker images
 #    - docker build -t identity .
-#    - docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc
-#    - docker ps
+    - docker run -d -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
+    - docker ps
 #    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
   rules:
     - when: always
