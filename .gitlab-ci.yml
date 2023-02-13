@@ -47,7 +47,7 @@ build-and-test:
     - apt-get update && pip install poetry
     - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
     - apt-get install dialog apt-utils -y
-    - apt-get install postgresql -y
+#    - apt-get install postgresql -y
 #    - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
 #    - runuser -l postgres -c "psql -c \"CREATE DATABASE is_db;\""
     - apt-get install -y build-essential libpq-dev gettext make

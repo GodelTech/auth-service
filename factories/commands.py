@@ -6,7 +6,6 @@ import factories.factory_models.client_factory as cl_factory
 import factories.factory_models.user_factory as user_factory
 import factories.factory_session as sess
 
-
 factory.random.reseed_random(0)
 
 
@@ -14,8 +13,10 @@ class DataBasePopulation:
     @classmethod
     def populate_database(cls):
         # clean data from the tables in database
-        cls.clean_data_from_database()
-
+        # cls.clean_data_from_database()
+        print(
+            "Factory Boy: populate_database )))))))))))))))#################::::::::::::::111"
+        )
         # populate database
         cls.populate_client_table()
         cls.populate_user_table()
@@ -24,15 +25,30 @@ class DataBasePopulation:
         cls.populate_client_secrets()
         cls.populate_client_redirect_uri()
         cls.populate_roles()
+        print(
+            "Factory Boy: populate_database )))))))))))))))#################::::::::::::::222"
+        )
 
     @classmethod
     def clean_data_from_database(cls):
-        sess.session.execute(text("TRUNCATE TABLE persistent_grants RESTART IDENTITY"))
-        sess.session.execute(text("TRUNCATE TABLE client_secrets RESTART IDENTITY"))
-        sess.session.execute(text("TRUNCATE TABLE user_claims RESTART IDENTITY"))
-        sess.session.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE"))
-        sess.session.execute(text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE "))
-        sess.session.execute(text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE "))
+        sess.session.execute(
+            text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
+        )
+        sess.session.execute(
+            text("TRUNCATE TABLE client_secrets RESTART IDENTITY")
+        )
+        sess.session.execute(
+            text("TRUNCATE TABLE user_claims RESTART IDENTITY")
+        )
+        sess.session.execute(
+            text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+        )
+        sess.session.execute(
+            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
+        )
+        sess.session.execute(
+            text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE ")
+        )
         sess.session.commit()
 
     @classmethod
@@ -69,14 +85,18 @@ class DataBasePopulation:
     @classmethod
     def populate_client_secrets(cls):
         for client_id, secret in data.CLIENT_SECRETS.items():
-            sec = cl_factory.ClientSecretFactory(client_id=client_id, value=secret)
+            sec = cl_factory.ClientSecretFactory(
+                client_id=client_id, value=secret
+            )
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
     @classmethod
     def populate_client_redirect_uri(cls):
         for item in data.CLIENT_IDS:
-            uri = cl_factory.ClientRedirectUriFactory(client_id=item, redirect_uri="https://www.google.com/")
+            uri = cl_factory.ClientRedirectUriFactory(
+                client_id=item, redirect_uri="https://www.google.com/"
+            )
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
