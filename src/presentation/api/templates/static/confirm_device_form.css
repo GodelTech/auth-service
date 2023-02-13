@@ -1,0 +1,55 @@
+*{
+    font-family: Arial;
+  }
+  
+.confirmation, .cancel{
+  width: 40%;
+  margin: 0 auto;
+  margin-top: 15%;
+  background-size: cover;
+  border-radius: 20px;
+}
+
+.confirmation{
+  border: double 4px;
+  border-color: #4ca547;
+}
+
+.cancel{
+  border: solid 4px;
+  border-color: red;
+
+}
+
+.confirmation h3{
+  text-align: center;
+  font-size: 1.4rem;
+  color: green;
+}
+
+.cancel h3{
+  text-align: center;
+  font-size: 1.4rem;
+  color: red;
+}
+
+.icon_frame{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fa{
+  color: green;
+}
+
+.fa_red{
+  color: red;
+}
+
+.confirmation p, .cancel p{
+  text-align: center;
+  padding: 1rem;
+  color: rgb(19, 20, 19);
+  font-size: 0.9rem;
+}

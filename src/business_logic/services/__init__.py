@@ -10,3 +10,4 @@ from .userinfo import UserInfoServices
 from .login_form_service import LoginFormService
 from .admin_api import AdminUserService, AdminGroupService, AdminRoleService
 from .admin_auth import AdminAuthService
+from .device_auth import DeviceService

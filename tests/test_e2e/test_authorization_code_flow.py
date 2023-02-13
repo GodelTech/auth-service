@@ -1,7 +1,7 @@
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, text
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
@@ -78,7 +78,7 @@ class TestAuthorizationCodeFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
         )
 
         await connection.execute(

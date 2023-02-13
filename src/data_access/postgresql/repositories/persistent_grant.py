@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from fastapi import status
-from sqlalchemy import delete, exists, insert, select
+from sqlalchemy import delete, exists, insert, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -42,7 +42,7 @@ class PersistentGrantRepository(BaseRepository):
             # The sequence id number is out of sync and raises duplicate key error
             # We manually bring it back in sync
             await session.execute(
-                "SELECT setval(pg_get_serial_sequence('persistent_grants', 'id'), (SELECT MAX(id) FROM persistent_grants)+1);"
+                text("SELECT setval(pg_get_serial_sequence('persistent_grants', 'id'), (SELECT MAX(id) FROM persistent_grants)+1);")
             )
             await session.execute(
                 insert(PersistentGrant).values(**persistent_grant)
