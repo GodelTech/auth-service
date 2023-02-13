@@ -55,33 +55,33 @@ container:docker-build:
     - Configure-CI-CD-pipeline
 
 
-#build-and-test:
-#  stage: build
+build-and-test:
+  stage: build
 #  image: docker
-#  variables:
-#    SERVICE: "${SERVICE_NAME}"
-#    ENV_FOR_DYNACONF: test
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    ENV_FOR_DYNACONF: test
 #  services:
 #    - docker:dind
 #  before_script:
 #    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-#  script:
-#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#    - echo ${CONTAINER_IMAGE}
-#    - echo ${CI_COMMIT_HASH}
-#    - echo ${CI_ENVIRONMENT_NAME}
-#    - echo ${SERVICE}
-#    - echo ${SERVICE_NAME}
-#    - echo ${CI_PIPELINE_ID}
-#    - echo ${DOCKER_IMAGES_PATH}
-#    - docker images
-##    - docker build -t identity .
-##    - docker pull ${CONTAINER_IMAGE}
-##    - docker run -d -p 8000:8000 ${CONTAINER_IMAGE}
-##    - docker ps
-##    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
-#  rules:
-#    - when: always
+  script:
+    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+    - echo ${CONTAINER_IMAGE}
+    - echo ${CI_COMMIT_HASH}
+    - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${SERVICE}
+    - echo ${SERVICE_NAME}
+    - echo ${CI_PIPELINE_ID}
+    - echo ${DOCKER_IMAGES_PATH}
+    - docker images
+#    - docker build -t identity .
+#    - docker pull ${CONTAINER_IMAGE}
+#    - docker run -d -p 8000:8000 ${CONTAINER_IMAGE}
+#    - docker ps
+#    - docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
+  only:
+    - Configure-CI-CD-pipeline
 
 
 
