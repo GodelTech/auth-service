@@ -1,11 +1,11 @@
 import logging
+
 import jwt
 
-from src.di import Container
 from src.config.rsa_keys import RSAKeypair
+from src.di import Container
 
-
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 class JWTService:
@@ -16,11 +16,9 @@ class JWTService:
 
     async def encode_jwt(self, payload: dict = {}, secret: None = None) -> str:
         token = jwt.encode(
-            payload=payload, 
-            key=self.keys.private_key, 
-            algorithm=self.algorithm
+            payload=payload, key=self.keys.private_key, algorithm=self.algorithm
         )
-        
+
         logger.info(f"Created token.")
 
         return token
@@ -32,15 +30,15 @@ class JWTService:
             token,
             key=self.keys.public_key,
             algorithms=self.algorithms,
-            **kwargs
+            **kwargs,
         )
         return decoded
 
     async def verify_token(self, token: str) -> bool:
         return bool(await self.decode_token(token))
-    
+
     async def get_module(self):
-        return self.keys.n 
+        return self.keys.n
 
     async def get_pub_key_expanent(self):
         return self.keys.e

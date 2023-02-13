@@ -11,17 +11,17 @@ from src.data_access.postgresql.repositories import (
 )
 from src.presentation.api.models import RequestModel
 
-logger = logging.getLogger('is_app')
+logger = logging.getLogger(__name__)
 
 
 class AuthorizationService:
     def __init__(
-            self,
-            client_repo: ClientRepository,
-            user_repo: UserRepository,
-            persistent_grant_repo: PersistentGrantRepository,
-            password_service: PasswordHash,
-            jwt_service: JWTService
+        self,
+        client_repo: ClientRepository,
+        user_repo: UserRepository,
+        persistent_grant_repo: PersistentGrantRepository,
+        password_service: PasswordHash,
+        jwt_service: JWTService,
     ) -> None:
         self._request_model = None
         self.client_repo = client_repo
@@ -48,11 +48,17 @@ class AuthorizationService:
 
             if user_hash_password and validated:
                 if self.request_model.response_type == "code":
-                    return await self.get_redirect_url_code_response_type(user_id=user_id)
+                    return await self.get_redirect_url_code_response_type(
+                        user_id=user_id
+                    )
                 elif self.request_model.response_type == "token":
-                    return await self.get_redirect_url_token_response_type(user_id=user_id)
+                    return await self.get_redirect_url_token_response_type(
+                        user_id=user_id
+                    )
                 elif self.request_model.response_type == "id_token token":
-                    return await self.get_redirect_url_id_token_token_response_type(user_id=user_id)
+                    return await self.get_redirect_url_id_token_token_response_type(
+                        user_id=user_id
+                    )
 
     async def get_redirect_url_code_response_type(self, user_id: int) -> str:
         secret_code = secrets.token_urlsafe(32)
@@ -74,35 +80,43 @@ class AuthorizationService:
             client_id=self.request_model.client_id,
             additional_data=scope,
             jwt_service=self.jwt_service,
-            expiration_time=expiration_time
+            expiration_time=expiration_time,
         )
 
-        uri_data = f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}" \
-                   f"&token_type=Bearer"
+        uri_data = (
+            f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
+            f"&token_type=Bearer"
+        )
         result_uri = self.request_model.redirect_uri + "?" + uri_data
         return result_uri
 
-    async def get_redirect_url_id_token_token_response_type(self, user_id: int) -> str:
+    async def get_redirect_url_id_token_token_response_type(
+        self, user_id: int
+    ) -> str:
         expiration_time = 600
         scope = {"scopes": self.request_model.scope}
-        claims = await self.user_repo.get_claims(id=1) # change to user_id when database will be ready
+        claims = await self.user_repo.get_claims(
+            id=1
+        )  # change to user_id when database will be ready
         access_token = await get_single_token(
             user_id=user_id,
             client_id=self.request_model.client_id,
             additional_data=scope,
             jwt_service=self.jwt_service,
-            expiration_time=expiration_time
+            expiration_time=expiration_time,
         )
         id_token = await get_single_token(
             user_id=user_id,
             client_id=self.request_model.client_id,
             additional_data=claims,
             jwt_service=self.jwt_service,
-            expiration_time=expiration_time
+            expiration_time=expiration_time,
         )
 
-        uri_data = f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}" \
-                   f"&id_token={id_token}&token_type=Bearer"
+        uri_data = (
+            f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
+            f"&id_token={id_token}&token_type=Bearer"
+        )
         result_uri = self.request_model.redirect_uri + "?" + uri_data
         return result_uri
 

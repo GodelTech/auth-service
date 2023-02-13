@@ -36,9 +36,6 @@ from factories.commands import DataBasePopulation
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
-TEST_SQL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/test_sql"
-
-
 @pytest_asyncio.fixture(scope="session")
 async def engine():
     postgres_container = CustomPostgresContainer(

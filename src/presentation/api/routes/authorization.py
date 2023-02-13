@@ -1,22 +1,24 @@
 import logging
 
-from fastapi import APIRouter, Depends, status, Request
-from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from src.business_logic.services import AuthorizationService, LoginFormService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
+    ClientRedirectUriError,
     UserNotFoundError,
     WrongPasswordError,
-    ClientRedirectUriError,
     WrongResponseTypeError,
 )
+from src.di.providers import (
+    provide_auth_service_stub,
+    provide_login_form_service_stub,
+)
 from src.presentation.api.models import DataRequestModel, RequestModel
-from src.di.providers import provide_auth_service_stub, provide_login_form_service_stub
 
-
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="src/presentation/api/templates/")
 
@@ -25,7 +27,12 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.get("/", status_code=status.HTTP_200_OK, tags=["Authorization"], response_class=HTMLResponse)
+@auth_router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    tags=["Authorization"],
+    response_class=HTMLResponse,
+)
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
@@ -35,12 +42,22 @@ async def get_authorize(
         auth_class = auth_class
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
-        external_logins = {"GitHub": "fa-github", "Google": "fa-google", "FaceBook": "fa-facebook", "LinkedIn": "fa-linkedin", "Twitter": "fa-twitter"}
+        external_logins = {
+            "GitHub": "fa-github",
+            "Google": "fa-google",
+            "FaceBook": "fa-facebook",
+            "LinkedIn": "fa-linkedin",
+            "Twitter": "fa-twitter",
+        }
         if return_form:
             return templates.TemplateResponse(
                 "login_form.html",
-                {"request": request, "request_model": request_model, "external_logins": external_logins},
-                status_code=200
+                {
+                    "request": request,
+                    "request_model": request_model,
+                    "external_logins": external_logins,
+                },
+                status_code=200,
             )
 
     except ClientNotFoundError as exception:
@@ -67,6 +84,7 @@ async def get_authorize(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "Bad response type"},
         )
+
 
 @auth_router.post(
     "/", status_code=status.HTTP_302_FOUND, tags=["Authorization"]
