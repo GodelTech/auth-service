@@ -20,24 +20,20 @@ class DataBasePopulation:
 
         # populate database
         cls.populate_user_claim_types_table()
-        
-        cls.populate_access_token_types_table()
-
         cls.populate_api_claim_types_table()
         cls.populate_api_secrets_types_table()
         cls.populate_api_scope_claim_types_table()
         cls.populate_persistent_grant_types_table()
-        # cls.populate_client_table()
+        cls.populate_client_table()
         cls.populate_user_table()
         cls.populate_user_claims_table()
-        cls.populate_client_post_logout_redirect_uri()
+        # cls.populate_client_post_logout_redirect_uri()
         # cls.populate_client_secrets()
         # cls.populate_client_redirect_uri()
         # cls.populate_roles()
 
     @classmethod
     def clean_data_from_database(cls):
-        sess.session.execute(text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE"))
         sess.session.execute(text("TRUNCATE TABLE user_claim_types RESTART IDENTITY CASCADE"))
         sess.session.execute(text("TRUNCATE TABLE api_claim_types RESTART IDENTITY CASCADE"))
         sess.session.execute(text("TRUNCATE TABLE api_scope_claim_types RESTART IDENTITY CASCADE"))
@@ -65,12 +61,12 @@ class DataBasePopulation:
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
-    @classmethod
-    def populate_access_token_types_table(cls):
-        for val in data.ACCESS_TOKEN_TYPES:
-            type = cl_factory.AccessTokenTypeFactory(type=val)
-            cl_factory.sess.session.commit()
-            cl_factory.sess.session.close()
+    # @classmethod
+    # def populate_access_token_types_table(cls):
+    #     for val in data.ACCESS_TOKEN_TYPES:
+    #         type = cl_factory.AccessTokenTypeFactory(type=val)
+    #         cl_factory.sess.session.commit()
+    #         cl_factory.sess.session.close()
 
     @classmethod
     def populate_api_claim_types_table(cls):
@@ -130,7 +126,7 @@ class DataBasePopulation:
         for i in range(len(data.CLIENT_IDS)):
             client = cl_factory.ClientFactory()
             cl_factory.sess.session.commit()
-            cl_factory.sess.session.closeREFRESH_TOKEN_USAGE
+            cl_factory.sess.session.close()
 
     @classmethod
     def populate_user_table(cls):
