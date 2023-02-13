@@ -43,6 +43,10 @@ build-and-test:
   variables:
     SERVICE: "${SERVICE_NAME}"
     ENV_FOR_DYNACONF: test
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh
+    - bash ./get-docker.sh
+    - docker info
   script:
     - apt-get update && pip install poetry
     - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
