@@ -1,14 +1,17 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
-from src.di.providers.services import provide_admin_group_service_stub
 from functools import wraps
-from src.business_logic.services.admin_api import AdminGroupService
-from src.presentation.admin_api.models.group import *
-from src.data_access.postgresql.errors.user import DuplicationError
 
-logger = logging.getLogger("is_app")
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+
+from src.business_logic.services.admin_api import AdminGroupService
+from src.data_access.postgresql.errors.user import DuplicationError
+from src.di.providers.services import provide_admin_group_service_stub
+from src.presentation.admin_api.models.group import *
+
+logger = logging.getLogger(__name__)
 
 admin_group_router = APIRouter(prefix="/group")
+
 
 def exceptions_wrapper(func):
     @wraps(func)
@@ -17,19 +20,18 @@ def exceptions_wrapper(func):
             return await func(*args, **kwargs)
         except ValueError:
             raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
+            )
         except DuplicationError:
             raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, 
-            detail="Duplication"
-        )
+                status_code=status.HTTP_409_CONFLICT, detail="Duplication"
+            )
         except:
             raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="INTERNAL_SERVER_ERROR"
-        )
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="INTERNAL_SERVER_ERROR",
+            )
+
     return inner
 
 
@@ -47,10 +49,10 @@ async def get_group(
     group_class = group_class
 
     result = await group_class.get_group(group_id=request_model.group_id)
-    return{
+    return {
         "id": result.id,
-        "name":result.name,
-        "parent_group":result.parent_group, 
+        "name": result.name,
+        "parent_group": result.parent_group,
     }
 
 
@@ -64,8 +66,8 @@ async def get_all_groups(
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    return { "all_groups" : await group_class.get_all_groups()}
-    
+    return {"all_groups": await group_class.get_all_groups()}
+
 
 @admin_group_router.get(
     "/get_subgroups", response_model=dict, tags=["Administration Group"]
@@ -78,7 +80,7 @@ async def get_subgroups(
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    result = await group_class.get_subgroups(group_id= request_model.group_id)
+    result = await group_class.get_subgroups(group_id=request_model.group_id)
     return result
 
 
@@ -93,11 +95,15 @@ async def create_group(
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    await group_class.create_group(name=request_model.name, parent_group=request_model.parent_group)
+    await group_class.create_group(
+        name=request_model.name, parent_group=request_model.parent_group
+    )
 
 
 @admin_group_router.put(
-    "/update_group", status_code=status.HTTP_200_OK, tags=["Administration Group"]
+    "/update_group",
+    status_code=status.HTTP_200_OK,
+    tags=["Administration Group"],
 )
 @exceptions_wrapper
 async def update_group(
@@ -107,11 +113,17 @@ async def update_group(
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    await group_class.update_group(group_id=request_model.group_id, name=request_model.name, parent_group=request_model.parent_group)
+    await group_class.update_group(
+        group_id=request_model.group_id,
+        name=request_model.name,
+        parent_group=request_model.parent_group,
+    )
 
 
 @admin_group_router.delete(
-    "/delete_group", status_code=status.HTTP_200_OK, tags=["Administration Group"]
+    "/delete_group",
+    status_code=status.HTTP_200_OK,
+    tags=["Administration Group"],
 )
 @exceptions_wrapper
 async def delete_group(
@@ -122,4 +134,3 @@ async def delete_group(
 ):
     group_class = group_class
     await group_class.delete_group(group_id=request_model.group_id)
-    

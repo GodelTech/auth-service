@@ -8,13 +8,16 @@ from fastapi_cache.decorator import cache
 from src.business_logic.cache.key_builders import builder_with_parametr
 from src.business_logic.services.well_known import WellKnownServies
 from src.config.settings.cache_time import CacheTimeSettings
-from src.presentation.api.models.well_known import ResponseOpenIdConfiguration, ResponseJWKS
+from src.presentation.api.models.well_known import (
+    ResponseJWKS,
+    ResponseOpenIdConfiguration,
+)
 
 well_known_router = APIRouter(
     prefix="/.well-known",
 )
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 @well_known_router.get(
@@ -50,6 +53,10 @@ async def get_jwks(
         logger.info("JWKS")
         well_known_info_class = well_known_info_class
         well_known_info_class.request = request
-        return {"keys" : [await well_known_info_class.get_jwks(),]}
+        return {
+            "keys": [
+                await well_known_info_class.get_jwks(),
+            ]
+        }
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

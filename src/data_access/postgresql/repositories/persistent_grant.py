@@ -12,7 +12,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 class PersistentGrantRepository(BaseRepository):
