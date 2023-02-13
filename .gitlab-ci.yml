@@ -23,8 +23,9 @@ stages:
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
+#  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  IMAGE: docker:20.10.16
 
 
 # Pip's cache doesn't store the python packages
@@ -43,6 +44,13 @@ build-and-test:
   variables:
     SERVICE: "${SERVICE_NAME}"
     ENV_FOR_DYNACONF: test
+    DOCKER_HOST: tcp://docker:2375
+    # This instructs Docker not to start over TLS.
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker info
   script:
     - apt-get update && pip install poetry
     - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
