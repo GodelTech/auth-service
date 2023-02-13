@@ -6,3 +6,9 @@ from .user import ClaimsNotFoundError, UserNotFoundError
 from .grant import GrantNotFoundError
 from .user import UserNotFoundError, ClaimsNotFoundError
 from .response_type import WrongResponseTypeError
+from .device import (
+    UserCodeNotFoundError,
+    DeviceRegistrationError,
+    DeviceCodeNotFoundError,
+    DeviceCodeExpirationTimeError
+)

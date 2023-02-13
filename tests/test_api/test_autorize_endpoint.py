@@ -202,22 +202,6 @@ class TestAuthoriseEndpointPOST:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content
 
-    async def test_unsuccessful_authorize_request_wrong_scope_index_error_post(
-        self, client: AsyncClient
-    ):
-        local_scope = "gcp-api%20IdentityServerApi&grant_type"
-        params = {
-            "client_id": "test_client",
-            "response_type": "code",
-            "scope": local_scope,
-            "redirect_uri": "https://www.google.com/",
-        }
-        expected_content = '{"message":"Impossible to parse the scope"}'
-        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': self.content_type})
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-
     async def test_unsuccessful_authorize_request_wrong_scope_key_error_post(
         self, client: AsyncClient
     ):

@@ -15,7 +15,8 @@ class PersistentGrant(BaseModel):
 
     TYPES_OF_GRANTS = [
         ("code", "code"),
-        ("refresh_token", "refresh_token")
+        ("refresh_token", "refresh_token"),
+        ("urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:device_code")
         ]
 
     key = Column(String(512), unique=True, nullable=False)
