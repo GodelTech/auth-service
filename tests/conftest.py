@@ -38,9 +38,13 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 @pytest_asyncio.fixture(scope="session")
 async def engine():
+    print("engine fixture starts.......................................")
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
     ).with_bind_ports(5432, 5463)
+    print(
+        "engine fixture before context......................................."
+    )
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")

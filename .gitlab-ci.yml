@@ -72,7 +72,7 @@ build-and-test:
     - echo ${IMAGE_NAME}
     - docker pull ${CONTAINER_IMAGE}
     - docker images
-    - docker run -d --name identity-server-provider -p 8000:8000 ${CONTAINER_IMAGE}
+    - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
     - docker ps
     - docker exec -i identity-server-provider sh -c "pytest -ra -s -cov tests"
   dependencies:
