@@ -56,10 +56,10 @@ async def engine():
             await conn.run_sync(Base.metadata.create_all)
 
         # populate database
-        #
-        # print(db_url, "  ::db_url before populate.......>>>>>>>>>")
-        # db_url1 = db_url.replace("172.17.0.1", "localhost")
-        # print(db_url1, "  ::db_url before populate.......>>>>>>>>>")
+
+        print(db_url, "  ::db_url before populate.......>>>>>>>>>")
+        db_url1 = db_url.replace("172.17.0.1", "localhost")
+        print(db_url1, "  ::db_url before populate.......>>>>>>>>>")
         DataBasePopulation.populate_database()
 
         yield engine
