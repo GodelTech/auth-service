@@ -14,7 +14,7 @@ from src.presentation.api.models.tokens import (
     ResponseTokenModel,
 )
 
-logger = logging.getLogger("is_app")
+logger = logging.getLogger(__name__)
 
 
 token_router = APIRouter(

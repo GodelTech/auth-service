@@ -5,7 +5,7 @@ from dynaconf import Dynaconf
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 settings = Dynaconf(
-    envvar_prefix="cinema",
+    envvar_prefix="identity_server_poc",
     preload=[os.path.join(APP_DIR, "default.toml")],
     includes=["../configs/*.toml"],
     environments=["local", "development", "docker", "test", "pipeline"],

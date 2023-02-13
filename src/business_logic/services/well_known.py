@@ -5,6 +5,14 @@ from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
 
+from jwkest import base64_to_long, long_to_base64
+
+from src.business_logic.services.jwt_token import JWTService
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.tables.users import UserClaim
+
+logger = logging.getLogger(__name__)
+
 
 class WellKnownServies:
     def get_list_of_types(
@@ -41,7 +49,7 @@ class WellKnownServies:
         result["response_types_supported"] = self.get_list_of_types()
 
         # may be REQUIRED
-        result["token_endpoint"] = urls_dict['get_tokens']
+        result["token_endpoint"] = urls_dict["get_tokens"]
         result["end_session_endpoint"] = urls_dict["false"]
         result["check_session_iframe"] = urls_dict["false"]
 
@@ -103,25 +111,26 @@ class WellKnownServies:
         # result[""] = urls_dict['false']
 
         return result
-    
+
     async def get_jwks(self) -> dict:
         jwt_service = JWTService()
-        kty = ''
+        kty = ""
         if "RS" in jwt_service.algorithm:
             kty = "RSA"
         elif "HS" in jwt_service.algorithm:
             kty = "HMAC"
         else:
-            raise ValueError 
+            raise ValueError
 
         result = {
-            "kty" : kty,
-            "alg" : jwt_service.algorithm,
-            "use" : "sig",
-            #"kid" : ... ,
-            "n" : long_to_base64(await jwt_service.get_module()),
-            "e" : long_to_base64(await jwt_service.get_pub_key_expanent()), 
+            "kty": kty,
+            "alg": jwt_service.algorithm,
+            "use": "sig",
+            # "kid" : ... ,
+            "n": long_to_base64(await jwt_service.get_module()),
+            "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
         }
-        logger = logging.getLogger("is_app")
-        logger.info(f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}")
+        logger.info(
+            f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"
+        )
         return result
