@@ -52,16 +52,9 @@ build-and-test:
   before_script:
     - docker info
   script:
-    - apt-get update && pip install poetry
-    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
-    - apt-get install dialog apt-utils -y
-    - apt-get install -y build-essential libpq-dev gettext make
-    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
-    - python -m venv .venv
-    - source .venv/bin/activate
-    - pip install --no-cache-dir --upgrade -r requirements.txt
+    - make docker
     - docker ps
-#    - make test
+    - make docker-test
   rules:
     - when: always
 
