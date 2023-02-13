@@ -13,28 +13,18 @@ include:
     file: '/ci-templates/.deployment-with-pact.yml'
 
 
-stages:          # List of stages for jobs, and their order of execution
-#  - build
-  - container
-  - deploy-to-dev
+stages:
+  - build
+#  - container
+#  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  IMAGE: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139286
-#  IMAGE: repository.godeltech.com:18443/python:3.10-slim-buster
-#  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#  PROJECT_NAME: innovation
-#  APP_NAME: identity-server-poc
-  CI_DEPLOY_USER: "a.shyrokau"
-  CI_DEPLOY_PASSWORD: "g6aW27ZneDEwgNSWrxps"
+  IMAGE: repository.godeltech.com:18443/python:3.9-slim-buster
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  CONTAINER_REGISTRY: repository.godeltech.com:18445
-  CONTAINER_REGISTRY_PROXY: repository.godeltech.com:18443
-
-
 
 
 # Pip's cache doesn't store the python packages
@@ -47,125 +37,60 @@ cache:
     - .cache/pip
     - .venv/
 
-
-##################
-## BUILD AND TEST
-##################
-#
-#build-and-test:
-#  stage: build
-#  image: docker
-#  services:
-#    - docker:dind
-#  before_script:
-#    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-#  script:
-#    - echo "Build and Test job is executed..."
-#    - echo ${CI_REGISTRY_USER}
-#    - echo ${CI_JOB_TOKEN}
-#    - echo ${CI_REGISTRY}
-#    - docker pull gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
-#    - docker run -p 8000:8000 gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:identity-server-poc-139308
-#  rules:
-#    - when: always
-
-
-#build-and-test:
-#  stage: build
-#  script:
-#    - echo "Build and Test job is executed..."
-#  image: ${IMAGE}
-#  variables:
-#    SERVICE: "${SERVICE_NAME}"
-#  script:
-#    - apt-get update && pip install poetry
-#    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
-#    - apt-get install dialog apt-utils -y
-#    - apt-get install postgresql -y
+build-and-test:
+  stage: build
+  image: ${IMAGE}
+  variables:
+    SERVICE: "${SERVICE_NAME}"
+    ENV_FOR_DYNACONF: development
+  script:
+    - apt-get update && pip install poetry
+    - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
+    - apt-get install dialog apt-utils -y
+    - apt-get install postgresql -y
 #    - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
 #    - runuser -l postgres -c "psql -c \"CREATE DATABASE is_db;\""
-#    - apt-get install -y build-essential libpq-dev gettext make
-#    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
-#    - python -m venv .venv
-#    - source .venv/bin/activate
-#    - pip install --no-cache-dir --upgrade -r requirements.txt
-#    - make migrate
-#    - make test
-#  rules:
-#    - when: always
+    - apt-get install -y build-essential libpq-dev gettext make
+    - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --no-cache-dir --upgrade -r requirements.txt
+    - make test
+  rules:
+    - when: always
 
 
 ##################
 ## CONTAINER
 ##################
 
-container:docker-build:
-  extends: .docker-build-artifact
-  only:
-    - Configure-CI-CD-pipeline
-
-
-##################
-## DEPLOY TO DEV
-##################
+#container:docker-build:
+#  extends: .docker-build-artifact
+#  only:
+#    - Configure-CI-CD-pipeline
 #
-#deploy-to-dev-manual:
+#
+#deploy-to-dev:
+#  extends: .deploy-to-dev-ext
 #  stage: deploy-to-dev
-#  variables:
-#    ENV_NAME: dev
-#    APP_DOMAIN: rnd-identityserver-dev.godeltech.com
-##  tags:
-##    - innovation
-##    - kubernetes
-#  image:
-#    name: alpine/helm1:3.10.2
-#    entrypoint: [""]
-#  environment:
-#    name: dev
 #  script:
 #    - echo ${STAGE_IMAGE_PATH}
 #    - echo ${CI_REGISTRY}
 #    - echo ${CI_DEPLOY_USER}
 #    - echo ${CI_DEPLOY_PASSWORD}
+#    - echo ${CI_JOB_TOKEN}
 #    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#    - echo ${CONTAINER_IMAGE}
+#    - echo ${CI_PIPELINE_ID}
+#    - echo ${SERVICE_NAME}
 #    - echo ${CI_ENVIRONMENT_NAME}
-#    - echo 'testing deploy-to-dev'
-#    - helm1 version
-#    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CONTAINER_IMAGE}"
-#    - helm1 upgrade ${APP_NAME} ./deploy/helm1 --install --values=./deploy/helm1/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --set applicationNamespace=${PROJECT_NAME}-${ENV_NAME} --set applicationName=${APP_NAME}-${ENV_NAME} --set applicationImage=${DOCKER_IMAGES_PATH} --set imagePullSecret.dockerServer=${CONTAINER_REGISTRY} --set applicationDomain=${APP_DOMAIN}
+#    - echo ${CI_PROJECT_PATH}
+#    - echo ${CONTAINER_REGISTRY_PROXY}
+#    - echo ${CI_PIPELINE_ID}
+#    - echo ${SERVICE_NAME}
+#    - echo ${CI_COMMIT_HASH}
+#  variables:
+#    ENV_FOR_DYNACONF: development
+#    SERVICE: "${SERVICE_NAME}"
+#    HELM_PATH: ./chart
 #  only:
 #    - Configure-CI-CD-pipeline
-
-deploy-to-dev:
-  extends: .deploy-to-dev-ext
-  stage: deploy-to-dev
-#  image: docker:19
-#  services:
-#    - name: docker:19-bind
-  environment:
-      name: development
-#  before_script:
-#    - docker login -u ${CI_DEPLOY_USER} -p ${CI_DEPLOY_PASSWORD} ${CI_REGISTRY}
-  script:
-    - echo ${STAGE_IMAGE_PATH}
-    - echo ${CI_REGISTRY}
-    - echo ${CI_DEPLOY_USER}
-    - echo ${CI_DEPLOY_PASSWORD}
-    - echo ${CI_JOB_TOKEN}
-    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CI_PIPELINE_ID}
-    - echo ${SERVICE_NAME}
-    - echo ${CI_ENVIRONMENT_NAME}
-    - echo ${CI_PROJECT_PATH}
-    - echo ${CONTAINER_REGISTRY_PROXY}
-    - echo ${CI_PIPELINE_ID}
-    - echo ${SERVICE_NAME}
-    - echo ${CI_COMMIT_HASH}
-#    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID} .
-
-  variables:
-    SERVICE: "${SERVICE_NAME}"
-    HELM_PATH: ./chart
-  only:
-    - Configure-CI-CD-pipeline

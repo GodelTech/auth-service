@@ -2,9 +2,8 @@
 
 set -e
 
-# Run migrations
-echo "Migrations"
-alembic upgrade head
+#export ENV_FOR_DYNACONF="test"
+#echo "Environment: $ENV_FOR_DYNACONF"
 
 echo "uvicorn src.main:app --host 0.0.0.0 --port 8000"
 uvicorn src.main:app --host 0.0.0.0 --port 8000

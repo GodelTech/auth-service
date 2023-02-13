@@ -4,8 +4,8 @@ from pydantic import BaseSettings
 
 
 class AppEnvTypes(Enum):
-    prod: str = "production"
-    dev: str = "development"
+    prod: str = "prod"
+    dev: str = "dev"
     test: str = "test"
     docker: str = "docker"
 
