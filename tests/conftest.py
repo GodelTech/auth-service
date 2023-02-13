@@ -48,11 +48,11 @@ async def engine():
     )
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
-        # db_url = db_url.replace("psycopg2", "asyncpg")
+        db_url = db_url.replace("psycopg2", "asyncpg")
         # db_url = db_url.replace("172.18.0.1", "localhost")
         print(db_url, "  ::db_url from container")
         print(DB_URL, "  ::db_url before engine.......>>>>>>>>>")
-        engine = create_async_engine(DB_URL, echo=True)
+        engine = create_async_engine(db_url, echo=True)
 
         # create all tables
         async with engine.begin() as conn:
