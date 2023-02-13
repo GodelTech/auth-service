@@ -34,6 +34,7 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 
 from sqlalchemy.orm import scoped_session, sessionmaker
+from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -46,20 +47,17 @@ async def engine():
         "engine fixture before context......................................."
     )
     with postgres_container as postgres:
-        db_url = postgres.get_connection_url()
-        db_url = db_url.replace("psycopg2", "asyncpg")
-        db_url = db_url.replace("172.18.0.1", "localhost")
-        engine = create_async_engine(db_url, echo=True)
+        # db_url = postgres.get_connection_url()
+        # db_url = db_url.replace("psycopg2", "asyncpg")
+        # db_url = db_url.replace("172.18.0.1", "localhost")
+        print(DB_URL, "  ::db_url before engine.......>>>>>>>>>")
+        engine = create_async_engine(DB_URL, echo=True)
 
         # create all tables
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
         # populate database
-
-        print(db_url, "  ::db_url before populate.......>>>>>>>>>")
-        db_url1 = db_url.replace("172.18.0.1", "localhost")
-        print(db_url1, "  ::db_url before populate.......>>>>>>>>>")
         DataBasePopulation.populate_database()
 
         yield engine
