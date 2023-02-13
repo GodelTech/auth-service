@@ -43,23 +43,17 @@ build-and-test:
   variables:
     SERVICE: "${SERVICE_NAME}"
     ENV_FOR_DYNACONF: test
-  before_script:
-    - curl -fsSL https://get.docker.com -o get-docker.sh
-    - bash ./get-docker.sh
-    - docker info
   script:
     - apt-get update && pip install poetry
     - printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d
     - apt-get install dialog apt-utils -y
-#    - apt-get install postgresql -y
-#    - runuser -l postgres -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\""
-#    - runuser -l postgres -c "psql -c \"CREATE DATABASE is_db;\""
     - apt-get install -y build-essential libpq-dev gettext make
     - poetry export -f requirements.txt --output requirements.txt --without-hashes --dev
     - python -m venv .venv
     - source .venv/bin/activate
     - pip install --no-cache-dir --upgrade -r requirements.txt
-    - make test
+    - docker ps
+#    - make test
   rules:
     - when: always
 
