@@ -23,7 +23,7 @@ stages:
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+#  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 
 # Pip's cache doesn't store the python packages
@@ -56,10 +56,9 @@ build-and-test:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
-    - docker ps
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
-  only:
-    - Configure-CI-CD-pipeline
+  when:
+    - always
 
 
 
