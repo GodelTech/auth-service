@@ -24,7 +24,7 @@ stages:
 variables:
   SERVICE_NAME: identity-server-poc
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+  DOCKER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 
 
 
@@ -58,7 +58,7 @@ build-and-test:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
+    - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${DOCKER_IMAGE_PATH}
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
   only:
     - Configure-CI-CD-pipeline
