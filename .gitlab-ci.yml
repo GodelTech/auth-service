@@ -62,8 +62,6 @@ build-and-test:
   image: docker:20
   services:
     - docker:20-dind
-  variables:
-    ENV_FOR_DYNACONF: pipeline
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
@@ -71,7 +69,7 @@ build-and-test:
     - echo ${IMAGE_NAME}
     - docker pull ${CONTAINER_IMAGE}
     - docker images
-    - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
+    - docker run -d --name identity-server-provider -p 8000:8000 --env ENV_FOR_DYNACONF=pipeline -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
     - docker ps
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
   only:
