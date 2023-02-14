@@ -50,6 +50,11 @@ container:docker-build:
     - Configure-CI-CD-pipeline
 
 
+
+#################
+# BUILD-AND-TEST
+#################
+
 build-and-test:
   stage: build
   image: docker:20
