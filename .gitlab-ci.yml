@@ -50,6 +50,10 @@ container:docker-build:
     - Configure-CI-CD-pipeline
 
 
+#################
+# BUILD
+#################
+
 build-and-test:
   stage: build
   image: docker:20
@@ -62,7 +66,6 @@ build-and-test:
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
   rules:
     - when: always
-
 
 
 #################
