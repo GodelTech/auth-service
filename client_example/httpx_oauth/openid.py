@@ -1,8 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import httpx
-from fastapi import Request
-from fastapi.responses import RedirectResponse
+from httpx import Response
 
 from .errors import GetIdError
 from .oauth2 import BaseOAuth2, OAuth2Error
@@ -63,12 +62,13 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
 
             return int(data["sub"])
 
+    # TODO change it when it'll be added to openid_configuration
     async def logout(
         self,
         id_token_hint: str,
         redirect_uri: Optional[str] = None,
         state: Optional[str] = None,
-    ) -> RedirectResponse:
+    ) -> Response:
         async with self.get_httpx_client() as client:
             params = {
                 "id_token_hint": id_token_hint,
@@ -85,3 +85,24 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
                 params=params,
             )
             return response
+
+    # TODO this one too
+    async def get_all_users_data(
+        self, auth_header: dict, group_id: int, role_id: int
+    ) -> dict:
+        async with self.get_httpx_client() as client:
+            params = {}
+
+            if group_id is not None:
+                params["group_id"] = group_id
+
+            if role_id is not None:
+                params["role_id"] = role_id
+
+            response = await client.get(
+                url="http://localhost:8000/administration/user/all_users",
+                headers=auth_header,
+                params=params,
+            )
+
+            return response.json()

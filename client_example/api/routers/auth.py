@@ -1,12 +1,11 @@
 import logging
-from urllib.parse import urlencode
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import RedirectResponse
 from jwt import PyJWTError
 
 from client_example.httpx_oauth.openid import OpenID
-from client_example.utils import AUTH_URL, CONFIG_URL, TokenValidator
+from client_example.utils import CONFIG_URL, TokenValidator
 
 client = OpenID(
     client_id="test_client",
@@ -48,20 +47,46 @@ async def get_login_form(request: Request):
 async def login_callback(code: str):
     # Exchange the auth code for an access token
     token = await client.get_access_token(
-        code=code, redirect_uri="http://localhost:8001/"
+        code=code, redirect_uri="http://localhost:8001/login-callback"
     )
     # TODO store it on the client side
     # Store both tokens on client side localStorage
     access_token, refresh_token = token["access_token"], token["refresh_token"]
-    print(access_token)
-    print()
-    print(refresh_token)
-    return RedirectResponse("/notes")
+    response = RedirectResponse('/test')
+    response.set_cookie(
+        key='access_token',
+        value=access_token,
+        domain='localhost',
+        path='/',
+    )
+    return response
+
+
+@router.get("/test2")
+async def test2():
+    response = RedirectResponse('/test')
+    response.set_cookie(
+        'with_samesite2',
+        'test',
+        domain='localhost',
+        path='/',
+    )
+    return response
+
+
+@router.get("/test")
+async def test(request: Request):
+    test_cookie = request.cookies.get('access_token')
+    if test_cookie:
+        return {
+            "message": f"The value of the 'test' cookie is '{test_cookie}'."
+        }
+    return {"message": "The 'test' cookie is not set."}
 
 
 @router.get("/logout")
 async def logout(request: Request):
-    token = request.headers['authorization']
+    token = request.headers['Authorization']
     response = await client.logout(
         id_token_hint=token, redirect_uri="http://localhost:8001/"
     )

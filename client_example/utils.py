@@ -35,3 +35,10 @@ class TokenValidator:
 
     async def is_token_valid(self, token: str) -> bool:
         return bool(await self.decode_token(token))
+
+
+# TODO
+# interact with administation/get_users -> how to get access token there
+# get users data from the endpoint above
+# store data in db
+# ! it needs to be done with celery, so the broker is also needed (create docker-compose?)

@@ -27,7 +27,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
             endpoint in request.url.path
             for endpoint in self.protected_endpoints
         ):
-            access_token = request.headers.get('authorization')
+            access_token = request.headers.get('Authorization')
+            # access_token = request.cookies.get('Authorization')
 
             try:
                 await self.token_validator.is_token_valid(access_token)
