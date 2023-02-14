@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import RedirectResponse
 from jwt import PyJWTError
 
@@ -44,44 +44,34 @@ async def get_login_form(request: Request):
 
 
 @router.get("/login-callback")
-async def login_callback(code: str):
+async def login_callback(code: str, request: Request):
     # Exchange the auth code for an access token
     token = await client.get_access_token(
         code=code, redirect_uri="http://localhost:8001/login-callback"
     )
     # TODO store it on the client side
-    # Store both tokens on client side localStorage
+    # Store both tokens on client side
     access_token, refresh_token = token["access_token"], token["refresh_token"]
-    response = RedirectResponse('/test')
-    response.set_cookie(
-        key='access_token',
-        value=access_token,
-        domain='localhost',
-        path='/',
-    )
-    return response
+    request.session['test101'] = access_token
+    return RedirectResponse('/test')
 
 
 @router.get("/test2")
-async def test2():
+async def test2(request: Request):
     response = RedirectResponse('/test')
-    response.set_cookie(
-        'with_samesite2',
-        'test',
-        domain='localhost',
-        path='/',
-    )
+    request.session['test'] = 'test'
+    request.session['tes2'] = 'test2'
     return response
 
 
 @router.get("/test")
 async def test(request: Request):
-    test_cookie = request.cookies.get('access_token')
+    test_cookie = request.session.get('test101')
     if test_cookie:
         return {
-            "message": f"The value of the 'test' cookie is '{test_cookie}'."
+            "message": f"The value of the 'test' session is '{test_cookie}'."
         }
-    return {"message": "The 'test' cookie is not set."}
+    return {"message": "The 'test' session is not set."}
 
 
 @router.get("/logout")

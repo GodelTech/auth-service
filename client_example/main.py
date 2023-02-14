@@ -2,6 +2,7 @@ from logging.config import dictConfig
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from client_example.api.middleware.auth_validation import (
     AuthorizationMiddleware,
@@ -26,4 +27,5 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
+app.add_middleware(SessionMiddleware, secret_key='312')
 # app.add_middleware(AuthorizationMiddleware)
