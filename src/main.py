@@ -40,6 +40,7 @@ from src.di.providers import (
     provide_group_repo,
     provide_role_repo,
     provide_persistent_grant_repo,
+    provide_device_repo,
     provide_jwt_service,
     provide_introspection_service_stub,
     provide_introspection_service,
@@ -56,6 +57,9 @@ from src.di.providers import (
     provide_admin_role_service_stub,
     provide_admin_role_service,
     provide_admin_auth_service,
+    provide_admin_auth_service,
+    provide_device_service_stub,
+    provide_device_service
 )
 
 import logging
@@ -123,6 +127,7 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         user_repo=provide_user_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+        device_repo=provide_device_repo(db_engine),
         password_service=provide_password_service(),
         jwt_service=provide_jwt_service(),
     )
@@ -156,6 +161,7 @@ def setup_di(app: FastAPI) -> None:
         user_repo=provide_user_repo(db_engine),
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+        device_repo=provide_device_repo(db_engine)
     )
     app.dependency_overrides[
         provide_token_service_stub
@@ -202,8 +208,20 @@ def setup_di(app: FastAPI) -> None:
         provide_admin_role_service_stub
     ] = nodepends_provide_admin_role_service
 
+    nodepends_provide_device_service = lambda: provide_device_service(
+        client_repo=provide_client_repo(db_engine),
+        device_repo=provide_device_repo(db_engine)
+    )
+    app.dependency_overrides[
+        provide_device_service_stub
+    ] = nodepends_provide_device_service
+
 
 app = get_application()
+
+
+# TODO: Move this code to setup_di() function.
+LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 
 
 # Redis activation

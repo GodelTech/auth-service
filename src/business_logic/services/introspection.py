@@ -31,28 +31,30 @@ class IntrospectionServies:
 
     async def analyze_token(self) -> dict:
         decoded_token = {}
-
+        response = {}
         try:
             decoded_token = await self.jwt.decode_token(token=self.request_body.token)
         except ExpiredSignatureError:
             return {"active": False}
         except:
             raise ValueError
-        
-        response = {}
-
-        if self.request_body.token_type_hint is None:
-
-            list_of_types = [token_type[0] for token_type in PersistentGrant.TYPES_OF_GRANTS]
-            
-            for token_type in list_of_types:
-                if await self.persistent_grant_repo.exists(grant_type = token_type, data=self.request_body.token):
-                    self.request_body.token_type_hint = token_type
-                    response = {"active": True}
-                    break
         else:
-            exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=self.request_body.token)
-            response = {"active": exists}
+            if self.request_body.token_type_hint in ("access-token","access_token", "access"):
+                response["active"] = True
+        
+        if response == {}:
+            if self.request_body.token_type_hint is None:
+
+                list_of_types = [token_type[0] for token_type in PersistentGrant.TYPES_OF_GRANTS] 
+                
+                for token_type in list_of_types:
+                    if await self.persistent_grant_repo.exists(grant_type = token_type, data=self.request_body.token):
+                        self.request_body.token_type_hint = token_type
+                        response = {"active": True}
+                        break
+            else:
+                exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=self.request_body.token)
+                response = {"active": exists}
         
         if response["active"]:
             response["sub"] = decoded_token["sub"]
@@ -65,17 +67,17 @@ class IntrospectionServies:
                 pass
 
             try:
-                response["exp"] = datetime.datetime.strptime(decoded_token["expire"], '%Y-%m-%d %H:%M:%S').timestamp()
+                response["exp"] = decoded_token["exp"]
             except:
                 pass
 
             try:
-                response["iat"] = decoded_token["token_issued"]
+                response["iat"] = decoded_token["iat"]
             except:
                 pass
             
             try:
-                response['client_id'] = await self.get_client_id()
+                response['client_id'] = decoded_token["client_id"]
             except:
                 pass
 

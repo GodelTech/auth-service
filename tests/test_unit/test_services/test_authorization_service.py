@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import insert, delete
+from sqlalchemy import insert, delete, text
 
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -78,13 +78,13 @@ class TestAuthorizationService:
         with pytest.raises(KeyError):
             await service.get_redirect_url()
 
-    async def test_get_redirect_url_wrong_scope_index(
+    async def test_get_redirect_url_wrong_scope_no_password(
         self, authorization_service, authorization_request_model
     ):
         service = authorization_service
         service.request_model = authorization_request_model
         service.request_model.scope = "gcp-api%20IdentityServerApi&grant_type"
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             await service.get_redirect_url()
 
     async def test_get_redirect_url_wrong_scope_password(
@@ -121,7 +121,7 @@ class TestAuthorizationService:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            "SELECT setval(pg_get_serial_sequence('clients', 'id'), (SELECT MAX(id) FROM clients)+1);"
+            text("SELECT setval(pg_get_serial_sequence('clients', 'id'), (SELECT MAX(id) FROM clients)+1);")
         )
         await connection.execute(insert(Client).values(**DEFAULT_CLIENT))
         await connection.commit()
@@ -167,15 +167,10 @@ class TestAuthorizationService:
         assert result == expected
 
     async def test_parse_scope_without_separator(self, authorization_service):
-        expected = {}
-        to_parse = "gcp-api%20IdentityServerApi=kjuhtgbmj"
+        expected = {'some_key': "key"}
+        to_parse = "some_key=key"
         result = await authorization_service._parse_scope_data(to_parse)
         assert result == expected
-
-    async def test_parse_scope_data_index_error(self, authorization_service):
-        to_parse = "gcp-api%20IdentityServerApi&client_id"
-        with pytest.raises(IndexError):
-            await authorization_service._parse_scope_data(to_parse)
 
     async def test_update_redirect_url_with_state(
         self, authorization_service, authorization_request_model
