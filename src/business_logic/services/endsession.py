@@ -17,7 +17,7 @@ class EndSessionService:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
-        self._request_model = ...
+        self._request_model = None
 
     async def end_session(self) -> Union[str, None]:
         decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
