@@ -51,10 +51,6 @@ container:docker-build:
 
 
 
-#################
-# BUILD
-#################
-
 build-and-test:
   stage: build
   image: docker:20
