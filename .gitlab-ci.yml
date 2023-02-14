@@ -27,8 +27,6 @@ variables:
   DOCKER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 
 
-
-
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
 #
