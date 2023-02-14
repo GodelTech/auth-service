@@ -13,10 +13,8 @@ class DataBasePopulation:
     @classmethod
     def populate_database(cls):
         # clean data from the tables in database
-        # cls.clean_data_from_database()
-        print(
-            "Factory Boy: populate_database )))))))))))))))#################::::::::::::::111"
-        )
+        cls.clean_data_from_database()
+
         # populate database
         cls.populate_client_table()
         cls.populate_user_table()
@@ -25,9 +23,6 @@ class DataBasePopulation:
         cls.populate_client_secrets()
         cls.populate_client_redirect_uri()
         cls.populate_roles()
-        print(
-            "Factory Boy: populate_database )))))))))))))))#################::::::::::::::222"
-        )
 
     @classmethod
     def clean_data_from_database(cls):
