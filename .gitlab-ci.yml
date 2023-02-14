@@ -60,8 +60,8 @@ build-and-test:
   script:
     - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
-  rules:
-    - when: always
+  only:
+    - Configure-CI-CD-pipeline
 
 
 
