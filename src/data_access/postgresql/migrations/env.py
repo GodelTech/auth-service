@@ -10,7 +10,8 @@ from src.data_access.postgresql.tables import (
     persistent_grant,
     users,
     resources_related,
-    client
+    client,
+    device
 )
 
 # this is the Alembic Config object, which provides

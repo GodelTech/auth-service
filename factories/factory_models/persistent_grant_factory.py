@@ -7,7 +7,7 @@ import src.data_access.postgresql.tables.persistent_grant as grant
 from factories.data.data_for_factories import TYPES_OF_GRANTS
 from factories.factory_models.client_factory import ClientFactory
 from factories.factory_models.user_factory import UserFactory
-
+import factories.data.data_for_factories as data
 
 class PersistentGrantFactory(SQLAlchemyModelFactory):
     class Meta:

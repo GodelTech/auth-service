@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import insert, delete
+from sqlalchemy import insert, delete, text
 
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
@@ -28,7 +28,7 @@ class TestUserRepository:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            "SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users)+1);"
+            text("SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users)+1);")
         )
 
         await connection.execute(insert(User).values(**DEFAULT_USER))

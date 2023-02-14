@@ -15,4 +15,7 @@ class UserClaimAdminController(ModelView, model=UserClaim):
 
 class TypesUserClaimAdminController(ModelView, model=UserClaimType):
     icon = "fa-solid fa-user"
-    column_list = [UserClaimType.type_of_claim,]
+    column_list = [
+        UserClaimType.id, 
+        UserClaimType.type_of_claim,
+        ]

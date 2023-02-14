@@ -23,7 +23,7 @@ class PersistentGrant(BaseModel):
     user = relationship("User", back_populates = "grants", foreign_keys = "PersistentGrant.user_id")
 
     persistent_grant_type_id = Column(Integer, ForeignKey("persistent_grant_types.id", ondelete='CASCADE'), nullable=False)
-    persistent_grant_type = relationship("PersistentGrantType",  backref="grants", foreign_keys="PersistentGrant.persistent_grant_type_id")
+    persistent_grant_type = relationship("PersistentGrantType",  backref="grants", foreign_keys="PersistentGrant.persistent_grant_type_id", lazy = "joined")
 
     def __str__(self) -> str:
         return f":{self.expiration}"
