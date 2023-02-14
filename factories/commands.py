@@ -4,6 +4,7 @@ from sqlalchemy import text
 import factories.data.data_for_factories as data
 import factories.factory_models.client_factory as cl_factory
 import factories.factory_models.user_factory as user_factory
+import factories.factory_models.persistent_grant_factory as grants_factory
 import factories.factory_session as sess
 
 
@@ -18,12 +19,13 @@ class DataBasePopulation:
 
         # populate database
         cls.populate_client_table()
-        # cls.populate_user_table()
+        cls.populate_user_table()
         # cls.populate_claims_table()
         # cls.populate_client_post_logout_redirect_uri()
         # cls.populate_client_secrets()
         # cls.populate_client_redirect_uri()
         # cls.populate_roles()
+        cls.populate_grants()
 
     @classmethod
     def clean_data_from_database(cls):
@@ -112,8 +114,21 @@ class DataBasePopulation:
     def populate_roles(cls):
         for role in data.ROLES:
             user_factory.RoleFactory(name=role)
-            cl_factory.sess.session.commit()
-            cl_factory.sess.session.close()
+            user_factory.sess.session.commit() # cl/user?
+            user_factory.sess.session.close()
+
+    @classmethod
+    def populate_grants(cls):
+
+        for grant_type in data.TYPES_OF_GRANTS:
+            grants_factory.PersistentGrantTypesFactory()
+            grants_factory.sess.session.commit()
+            grants_factory.sess.session.close()
+
+        for grant in data.TYPES_OF_GRANTS:
+            grants_factory.PersistentGrantFactory()
+            grants_factory.sess.session.commit()
+            grants_factory.sess.session.close()
 
 
 if __name__ == "__main__":
