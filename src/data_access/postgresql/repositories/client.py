@@ -160,5 +160,5 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> int:
         return "Client Repository"
