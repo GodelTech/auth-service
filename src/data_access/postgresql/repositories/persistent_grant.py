@@ -10,7 +10,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant, PersistentGrantType
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 class PersistentGrantRepository(BaseRepository):
     async def create(
         self,
-        client_id: str,
-        data: str,
+        client_id: int,
+        grant_data: str,
         user_id: int,
-        grant_type: str = "code",
+        persistent_grant_type_id: int = 1,
         expiration_time: int = 600,
     ) -> None:
         session_factory = sessionmaker(
@@ -34,10 +34,10 @@ class PersistentGrantRepository(BaseRepository):
             persistent_grant = {
                 "key": unique_key,
                 "client_id": client_id,
-                "data": data,
+                "grant_data": grant_data,
                 "expiration": expiration_time,
-                "subject_id": user_id,
-                "type": grant_type,
+                "user_id": user_id,
+                "persistent_grant_type_id": persistent_grant_type_id,
             }
             # The sequence id number is out of sync and raises duplicate key error
             # We manually bring it back in sync
@@ -49,7 +49,7 @@ class PersistentGrantRepository(BaseRepository):
             )
             await session.commit()
 
-    async def exists(self, grant_type: str, data: str) -> bool:
+    async def exists(self, persistent_grant_type_id: int, grant_data: str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -59,15 +59,15 @@ class PersistentGrantRepository(BaseRepository):
             result = await session.execute(
                 select(
                     exists().where(
-                        PersistentGrant.type == grant_type,
-                        PersistentGrant.data == data,
+                        PersistentGrant.persistent_grant_type_id == persistent_grant_type_id,
+                        PersistentGrant.grant_data == grant_data,
                     )
                 )
             )
             result = result.first()
             return result[0]
 
-    async def get(self, grant_type: str, data: str) -> PersistentGrant:
+    async def get(self, persistent_grant_type_id: int, grant_data: str) -> PersistentGrant:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -76,21 +76,21 @@ class PersistentGrantRepository(BaseRepository):
 
             result = await session.execute(
                 select(PersistentGrant).where(
-                    PersistentGrant.type == grant_type,
-                    PersistentGrant.data == data,
+                    PersistentGrant.persistent_grant_type_id == persistent_grant_type_id,
+                    PersistentGrant.grant_data == grant_data,
                 )
             )
             return result.first()[0]
 
-    async def delete(self, data: str, grant_type: str) -> int:
+    async def delete(self, grant_data: str, persistent_grant_type_id: int) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
-            if await self.exists(grant_type=grant_type, data=data):
+            if await self.exists(persistent_grant_type_id=persistent_grant_type_id, grant_data=grant_data):
                 grant_to_delete = await self.get(
-                    grant_type=grant_type, data=data
+                    persistent_grant_type_id=persistent_grant_type_id, grant_data=grant_data
                 )
                 await session.delete(grant_to_delete)
                 await session.commit()
@@ -99,7 +99,7 @@ class PersistentGrantRepository(BaseRepository):
                 return status.HTTP_404_NOT_FOUND
 
     async def delete_persistent_grant_by_client_and_user_id(
-        self, client_id: str, user_id: int
+        self, client_id: int, user_id: int
     ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -112,13 +112,13 @@ class PersistentGrantRepository(BaseRepository):
             await session.execute(
                 delete(PersistentGrant)
                 .where(PersistentGrant.client_id == client_id)
-                .where(PersistentGrant.subject_id == user_id)
+                .where(PersistentGrant.user_id == user_id)
             )
             await session.commit()
             return None
 
     async def check_grant_by_client_and_user_ids(
-        self, client_id: str, user_id: int
+        self, client_id: int, user_id: int
     ) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -129,7 +129,7 @@ class PersistentGrantRepository(BaseRepository):
                 select(
                     exists().where(
                         PersistentGrant.client_id == client_id,
-                        PersistentGrant.subject_id == user_id,
+                        PersistentGrant.user_id == user_id,
                     )
                 )
             )
@@ -140,7 +140,7 @@ class PersistentGrantRepository(BaseRepository):
                 )
             return grant[0]
 
-    async def get_client_id_by_data(self, data: str) -> int:
+    async def get_client_id_by_data(self, grant_data: str) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -148,7 +148,7 @@ class PersistentGrantRepository(BaseRepository):
             session = sess
             client_id = await session.execute(
                 select(PersistentGrant.client_id).where(
-                    PersistentGrant.data == data
+                    PersistentGrant.grant_data == grant_data
                 )
             )
             client_id = client_id.first()

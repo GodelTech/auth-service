@@ -11,21 +11,21 @@ class TestPersistentGrantRepository:
     async def test_create_new_grant(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
-            client_id='double_test',
-            data='iyuiyy',
+            client_id=2,
+            grant_data='iyuiyy',
             user_id=2,
-            grant_type='code'
+            persistent_grant_type_id=1
         )
 
-        grant = await persistent_grant_repo.get(grant_type='code', data='iyuiyy')
+        grant = await persistent_grant_repo.get(persistent_grant_type_id=1, grant_data='iyuiyy')
 
         await persistent_grant_repo.delete(
-            data=grant.data,
-            grant_type=grant.type
+            grant_data=grant.grant_data,
+            persistent_grant_type_id=grant.persistent_grant_type_id
         )
 
-        assert grant.subject_id == 2
-        assert grant.data == 'iyuiyy'
+        assert grant.user_id == 2
+        assert grant.grant_data == 'iyuiyy'
 
     async def test_create_new_grant_not_full_data(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
