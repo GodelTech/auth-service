@@ -73,6 +73,8 @@ class ClientRepository(BaseRepository):
             return secrete[0].value
 
     async def validate_post_logout_redirect_uri(self, client_id: str, logout_redirect_uri: str) -> bool:
+        
+        client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -80,17 +82,16 @@ class ClientRepository(BaseRepository):
             session = sess
 
             logout_redirect_uri = await session.execute(
-                select(
-                    exists().where(
-                            ClientPostLogoutRedirectUri.client_id == client_id,
+                select(ClientPostLogoutRedirectUri).where(
+                            ClientPostLogoutRedirectUri.client_id == client_id_int,
                             ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
                         )
                     )
-                )
+            
             result = logout_redirect_uri.first()
-            if not result[0]:
+            if not result:
                 raise ClientPostLogoutRedirectUriError("Post logout redirect uri you are looking for does not exist")
-            return result[0]
+            return True
 
     async def validate_client_redirect_uri(self, client_id: str, redirect_uri: str) -> bool:
         
@@ -103,9 +104,6 @@ class ClientRepository(BaseRepository):
             client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
             redirect_uri = await session.execute(
                 select(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int, ClientRedirectUri.redirect_uri == redirect_uri )
-                # .where(
-                #         ClientRedirectUri.redirect_uri == redirect_uri,
-                #     )
                 )
                 
             result = redirect_uri.first()
