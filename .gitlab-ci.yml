@@ -23,8 +23,8 @@ stages:
 # only cache local items.
 variables:
   SERVICE_NAME: identity-server-poc
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-#  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+#  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 
 
 
