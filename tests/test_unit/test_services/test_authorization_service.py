@@ -39,7 +39,7 @@ class TestAuthorizationService:
         redirect_url = redirect_url.split("?")[0]
         assert expected_url == redirect_url
         assert "access_token" in data
-        assert "id_token" in data
+        assert "id_token" not in data
         assert data["token_type"] in "Bearer"
 
     async def test_get_redirect_url_id_token_token(
