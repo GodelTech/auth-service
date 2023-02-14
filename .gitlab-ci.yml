@@ -50,7 +50,6 @@ container:docker-build:
     - Configure-CI-CD-pipeline
 
 
-
 #################
 # BUILD-AND-TEST
 #################
