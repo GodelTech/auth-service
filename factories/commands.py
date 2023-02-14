@@ -31,6 +31,7 @@ class DataBasePopulation:
         # cls.populate_client_secrets()
         # cls.populate_client_redirect_uri()
         # cls.populate_roles()
+        cls.populate_grants()
 
     @classmethod
     def clean_data_from_database(cls):
@@ -169,8 +170,21 @@ class DataBasePopulation:
     def populate_roles(cls):
         for role in data.ROLES:
             user_factory.RoleFactory(name=role)
-            cl_factory.sess.session.commit()
-            cl_factory.sess.session.close()
+            user_factory.sess.session.commit() # cl/user?
+            user_factory.sess.session.close()
+
+    @classmethod
+    def populate_grants(cls):
+
+        for grant_type in data.TYPES_OF_GRANTS:
+            grants_factory.PersistentGrantTypesFactory()
+            grants_factory.sess.session.commit()
+            grants_factory.sess.session.close()
+
+        for grant in data.TYPES_OF_GRANTS:
+            grants_factory.PersistentGrantFactory()
+            grants_factory.sess.session.commit()
+            grants_factory.sess.session.close()
 
 
 if __name__ == "__main__":

@@ -77,7 +77,7 @@ USER_CLAIM_TYPE = [
     ]
 
 TYPES_OF_GRANTS = [
-    "code",
+    "code", "refresh_token"
 ]
 
 API_SECRET_TYPE = [
