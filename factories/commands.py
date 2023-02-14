@@ -27,10 +27,10 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_table()
         cls.populate_user_claims_table()
-        # cls.populate_client_post_logout_redirect_uri()
-        # cls.populate_client_secrets()
-        # cls.populate_client_redirect_uri()
-        # cls.populate_roles()
+        cls.populate_client_post_logout_redirect_uri()
+        cls.populate_client_secrets()
+        cls.populate_client_redirect_uri()
+        cls.populate_roles()
         cls.populate_grants()
 
     @classmethod
@@ -147,8 +147,8 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls):
-        for item in data.CLIENT_IDS:
-            uri = cl_factory.ClientPostLogoutRedirectUriFactory(client_id=item)
+        for item in range(len(data.CLIENT_IDS)):
+            uri = cl_factory.ClientPostLogoutRedirectUriFactory(client_id=item + 1)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
@@ -161,8 +161,8 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_redirect_uri(cls):
-        for item in data.CLIENT_IDS:
-            uri = cl_factory.ClientRedirectUriFactory(client_id=item, redirect_uri="https://www.google.com/")
+        for item in range(len(data.CLIENT_IDS)):
+            uri = cl_factory.ClientRedirectUriFactory(client_id=item + 1, redirect_uri="https://www.google.com/")
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 

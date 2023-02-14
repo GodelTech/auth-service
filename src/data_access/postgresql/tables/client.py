@@ -58,7 +58,10 @@ class Client(BaseModel):
     update_access_token_claims_on_refresh = Column(
         Boolean, default=False, nullable=False
     )
+    
     grants = relationship("PersistentGrant", back_populates = "client", foreign_keys = "PersistentGrant.client_id")
+    # secrets = relationship("ClientSecret", back_populates = "client", lazy = "joined")
+    # redirect_uris = relationship("ClientRedirectUri", back_populates = "client", lazy = "joined")
 
     def __str__(self) -> str:
         return f"{self.id} id: {self.client_name}"
@@ -174,7 +177,7 @@ class ClientRedirectUri(BaseModel):
 
     redirect_uri = Column(String, nullable=False)
     client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
-    client = relationship("Client", backref = "redirect_uris",)
+    client = relationship("Client", backref = "redirect_uris", lazy = "joined")
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}: {self.id}"
 

@@ -128,16 +128,16 @@ DEFAULT_USER_CLAIMS = {
 }
 
 CLIENT_SECRETS = {
-    "test_client": "past",
-    "double_test": "play",
-    "santa": "health",
-    "krampus": "address",
-    "frodo": "their",
-    "aragorn": "line",
-    "iron_man": "film",
-    "spider_man": "light",
-    "thor": "position",
-    "samuel": "themselves",
+    1: "past",
+    2: "play",
+    3: "health",
+    4: "address",
+    5: "their",
+    6: "line",
+    7: "film",
+    8: "light",
+    9: "position",
+    10: "themselves",
 }
 
 ROLES = [
