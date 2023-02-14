@@ -9,7 +9,7 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
 
 
-def params_to_dict(**kwargs):
+def params_to_dict(**kwargs) -> dict:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:

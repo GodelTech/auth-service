@@ -34,6 +34,7 @@ pytest-postgresql = "^4.1.1"
 psycopg = "^3.1.8"
 testcontainers = "^3.7.1"
 sqladmin = "^0.8.0"
+mypy = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"

@@ -25,6 +25,7 @@ class TestIntrospectionEndpoint:
         grant_type = "code"
         payload = {
             "sub": 1,
+            "client_id": "test_client",
             "exp": time.time() + 3600,
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
@@ -72,6 +73,7 @@ class TestIntrospectionEndpoint:
         response_content = json.loads(response.content.decode('utf-8'))
         assert response.status_code == status.HTTP_200_OK
         response_content["exp"] = 0
+        print("11111111111111111111", response_content)
         assert response_content == answer
 
         await persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(user_id=1, client_id="test_client")

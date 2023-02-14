@@ -30,5 +30,5 @@ class LogConfig(BaseModel):
     }
 
     @property
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return self.dict()

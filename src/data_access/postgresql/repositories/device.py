@@ -41,7 +41,7 @@ class DeviceRepository(BaseRepository):
             )
             await session.commit()
 
-    async def delete_by_user_code(self, user_code: str):
+    async def delete_by_user_code(self, user_code: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -52,7 +52,7 @@ class DeviceRepository(BaseRepository):
             )
             await session.commit()
 
-    async def delete_by_device_code(self, device_code: str):
+    async def delete_by_device_code(self, device_code: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -103,7 +103,7 @@ class DeviceRepository(BaseRepository):
             result = device.first()
             return result[0]
 
-    async def get_expiration_time(self, device_code: str):
+    async def get_expiration_time(self, device_code: str) -> float:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

@@ -64,7 +64,8 @@ class User(BaseModel):
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
-    def __str__(self):
+
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"
 
 
@@ -79,7 +80,7 @@ class Role(BaseModel):
         "Permission", secondary= permissions_roles, back_populates="roles"
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Role {self.name} - {self.id}"
 
 
@@ -111,5 +112,5 @@ class UserClaim(BaseModel):
     claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
     claim_value = Column(String, nullable=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"

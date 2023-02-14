@@ -44,7 +44,8 @@ class Group(BaseModel):
     users = relationship(
         "User", secondary=users_groups, cascade="all,delete", back_populates ="groups"
     )
-    def __str__(self):
+
+    def __str__(self) -> str:
         answer = "group " + self.name
         if self.parent_group is not None:
             answer = "sub-" + answer
@@ -58,10 +59,11 @@ class Group(BaseModel):
     
     def dictionary(self) -> dict:
         return{
-            "id":self.id,
+            "id": self.id,
             "name": self.name,
             "parent_group": self.parent_group
         }
+
 
 class Permission(BaseModel):
     __tablename__ = "permissions"
@@ -74,7 +76,7 @@ class Permission(BaseModel):
         "Role", secondary=permissions_roles, cascade="all,delete", back_populates="permissions"
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.namee   
 
     def __repr__(self) -> str:

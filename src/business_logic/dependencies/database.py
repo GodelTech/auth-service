@@ -1,6 +1,7 @@
 from typing import Callable, Type
 
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import Session
 
 from src.data_access.postgresql.repositories.base import BaseRepository
@@ -20,9 +21,9 @@ def get_repository(
 
 def get_repository_no_depends(
         repo_type: Type[BaseRepository],
-):
+) -> BaseRepository:
     def _get_repo(
-            engine=Container.db().engine
+            engine: AsyncEngine = Container.db().engine
     ) -> BaseRepository:
         repo = repo_type(engine)
         return repo

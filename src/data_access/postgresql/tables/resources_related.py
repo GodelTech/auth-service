@@ -12,7 +12,7 @@ class ApiResource(BaseModel):
     enabled = Column(Boolean, default=True, nullable=True)
     name = Column(String, nullable=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"
 
 
@@ -26,7 +26,7 @@ class ApiSecret(BaseModel):
     type = Column(ChoiceType(API_SECRET_TYPE))
     value = Column(String, nullable=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"
 
 
@@ -37,7 +37,7 @@ class ApiClaim(BaseModel):
     api_resources_id = Column(Integer, ForeignKey("api_resources.id", ondelete='CASCADE'))
     type = Column(ChoiceType(API_CLAIM_TYPE))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"
 
 
@@ -52,7 +52,7 @@ class ApiScope(BaseModel):
     required = Column(Boolean, default=False, nullable=True)
     show_in_discovery_document = Column(Boolean, default=False, nullable=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"
 
 
@@ -76,5 +76,5 @@ class ApiScopeClaim(BaseModel):
     api_scopes_id = Column(Integer, ForeignKey("api_scopes.id", ondelete='CASCADE'))
     type = Column(ChoiceType(API_SCOPE_CLAIM_TYPE))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Model {self.__tablename__}: {self.id}"

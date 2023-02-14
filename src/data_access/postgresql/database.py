@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -19,14 +19,14 @@ class Database:
         )
 
     @property
-    def session_factory(self):
+    def session_factory(self) -> sessionmaker:
         return self.__session_factory
 
     @property
-    def engine(self):
+    def engine(self) -> AsyncEngine:
         return self.__engine
 
-    def _create_connection_pool(self, db_url: str, max_connection_count: int):
+    def _create_connection_pool(self, db_url: str, max_connection_count: int) -> AsyncEngine:
         logger.info("Creating PostgreSQL connection pool.")
 
         connection_pool = create_async_engine(db_url, poolclass=NullPool)
@@ -35,6 +35,6 @@ class Database:
 
         return connection_pool
 
-    async def get_connection(self):
+    async def get_connection(self) -> AsyncSession:
         async with self.__session_factory() as session:
             yield session
