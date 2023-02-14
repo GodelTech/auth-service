@@ -10,6 +10,7 @@ class TestPersistentGrantRepository:
 
     async def test_create_new_grant(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
+
         await persistent_grant_repo.create(
             client_id=2,
             grant_data='iyuiyy',
