@@ -1,8 +1,0 @@
-[test]
-dynaconf_merge = true
-
-
-[test.db]
-echo = true
-url = "postgresql+asyncpg://test:test@172.18.0.1:5463/test"
-max_connection_count = 10
