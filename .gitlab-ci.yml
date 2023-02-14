@@ -51,8 +51,8 @@ cache:
 
 container:docker-build:
   extends: .docker-build-artifact
-  variables:
-    LABEL_NAME: "identity-server-provider"
+#  variables:
+#    LABEL_NAME: "identity-server-provider"
   only:
     - Configure-CI-CD-pipeline
 
