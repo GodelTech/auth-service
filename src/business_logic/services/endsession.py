@@ -1,7 +1,6 @@
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 
 from typing import Union
@@ -18,13 +17,14 @@ class EndSessionService:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
-        self._request_model = None
+        self._request_model = ...
 
     async def end_session(self) -> Union[str, None]:
         decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
+        sub = decoded_id_token_hint['sub']
         await self._logout(
             client_id=decoded_id_token_hint['client_id'],
-            user_id=decoded_id_token_hint['sub']
+            user_id=int(sub)
         )
         if self.request_model.post_logout_redirect_uri:
             if await self._validate_logout_redirect_uri(
@@ -37,7 +37,7 @@ class EndSessionService:
                 return logout_redirect_uri
         return None
 
-    async def _decode_id_token_hint(self, id_token_hint: str) -> dict:
+    async def _decode_id_token_hint(self, id_token_hint: str) -> dict[str, str]:
         decoded_data = await self.jwt_service.decode_token(token=id_token_hint)
         return decoded_data
 
