@@ -93,7 +93,7 @@ class DataBasePopulation:
     @classmethod
     def populate_persistent_grant_types_table(cls):
         for val in data.TYPES_OF_GRANTS:
-            type_of_grant = grant_factory.PersistentGrantTypeFactory(type_of_grant=val)
+            type_of_grant = grant_factory.PersistentGrantTypesFactory(type_of_grant=val)
             grant_factory.sess.session.commit()
             grant_factory.sess.session.close()
 
@@ -177,14 +177,14 @@ class DataBasePopulation:
     def populate_grants(cls):
 
         for grant_type in data.TYPES_OF_GRANTS:
-            grants_factory.PersistentGrantTypesFactory()
-            grants_factory.sess.session.commit()
-            grants_factory.sess.session.close()
+            grant_factory.PersistentGrantTypesFactory()
+            grant_factory.sess.session.commit()
+            grant_factory.sess.session.close()
 
         for grant in data.TYPES_OF_GRANTS:
-            grants_factory.PersistentGrantFactory()
-            grants_factory.sess.session.commit()
-            grants_factory.sess.session.close()
+            grant_factory.PersistentGrantFactory()
+            grant_factory.sess.session.commit
+            grant_factory.sess.session.close()
 
 
 if __name__ == "__main__":
