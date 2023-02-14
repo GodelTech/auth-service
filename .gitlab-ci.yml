@@ -63,7 +63,6 @@ build-and-test:
   services:
     - docker:20-dind
   variables:
-    SERVICE: "${SERVICE_NAME}"
     ENV_FOR_DYNACONF: development
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -75,8 +74,8 @@ build-and-test:
     - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${CONTAINER_IMAGE}
     - docker ps
     - docker exec -i identity-server-provider sh -c "pytest -ra -cov tests"
-  dependencies:
-    - container:docker-build
+#  dependencies:
+#    - container:docker-build
   only:
     - Configure-CI-CD-pipeline
 
