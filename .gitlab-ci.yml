@@ -16,7 +16,7 @@ include:
 stages:
   - container
   - build
-#  - deploy-to-dev
+  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
@@ -68,27 +68,27 @@ build-and-test:
 # DEPLOY-TO-DEV
 #################
 
-#deploy-to-dev:
-#  extends: .deploy-to-dev-ext
-#  stage: deploy-to-dev
-#  script:
-#    - echo ${STAGE_IMAGE_PATH}
-#    - echo ${CI_REGISTRY}
-#    - echo ${CI_DEPLOY_USER}
-#    - echo ${CI_DEPLOY_PASSWORD}
-#    - echo ${CI_JOB_TOKEN}
-#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#    - echo ${CI_PIPELINE_ID}
-#    - echo ${SERVICE_NAME}
-#    - echo ${CI_ENVIRONMENT_NAME}
-#    - echo ${CI_PROJECT_PATH}
-#    - echo ${CONTAINER_REGISTRY_PROXY}
-#    - echo ${CI_PIPELINE_ID}
-#    - echo ${SERVICE_NAME}
-#    - echo ${CI_COMMIT_HASH}
+deploy-to-dev:
+  extends: .deploy-to-dev-ext
+  stage: deploy-to-dev
+  script:
+    - echo ${STAGE_IMAGE_PATH}
+    - echo ${CI_REGISTRY}
+    - echo ${CI_DEPLOY_USER}
+    - echo ${CI_DEPLOY_PASSWORD}
+    - echo ${CI_JOB_TOKEN}
+    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
+    - echo ${CI_PIPELINE_ID}
+    - echo ${SERVICE_NAME}
+    - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${CI_PROJECT_PATH}
+    - echo ${CONTAINER_REGISTRY_PROXY}
+    - echo ${CI_PIPELINE_ID}
+    - echo ${SERVICE_NAME}
+    - echo ${CI_COMMIT_HASH}
 #  variables:
 #    ENV_FOR_DYNACONF: development
 #    SERVICE: "${SERVICE_NAME}"
 #    HELM_PATH: ./chart
-#  only:
-#    - Configure-CI-CD-pipeline
+  only:
+    - Configure-CI-CD-pipeline
