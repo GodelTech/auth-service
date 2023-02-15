@@ -127,7 +127,6 @@ class TokenService:
                         grant_type=self.request_model.grant_type,
                         grant_data=self.request_model.code,
                     )
-
                     # checks if client provided in request is the same that in the db have provided grants
                     if grant.client.client_id != self.request_model.client_id:
                         raise WrongGrantsError(

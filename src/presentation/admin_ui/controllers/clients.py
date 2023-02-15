@@ -40,7 +40,8 @@ class ClientClaimController(ModelView, model=ClientClaim):
 class ClientPostLogoutRedirectUriController(ModelView, model=ClientPostLogoutRedirectUri):
     icon = "fa-solid fa-mobile-screen-button"
     column_list = [ClientPostLogoutRedirectUri.id, 
-                   ClientPostLogoutRedirectUri.post_logout_redirect_uri]
+                   ClientPostLogoutRedirectUri.post_logout_redirect_uri,
+                   ClientPostLogoutRedirectUri.client]
 
 class ClientCorsOriginController(ModelView, model=ClientCorsOrigin):
     icon = "fa-solid fa-mobile-screen-button"
