@@ -1,16 +1,19 @@
 from datetime import datetime
+from typing import Optional, Union
 
-from sqlalchemy import select, exists, insert, delete
+from sqlalchemy import delete, exists, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+from src.data_access.postgresql.errors import (
+    DeviceCodeNotFoundError,
+    UserCodeNotFoundError,
+)
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.device import Device
-from src.data_access.postgresql.errors import UserCodeNotFoundError, DeviceCodeNotFoundError
 
 
 class DeviceRepository(BaseRepository):
-
     async def create(
         self,
         client_id: str,
@@ -36,9 +39,7 @@ class DeviceRepository(BaseRepository):
                 "expires_in": expires_in,
                 "interval": interval,
             }
-            await session.execute(
-                insert(Device).values(**device_data)
-            )
+            await session.execute(insert(Device).values(**device_data))
             await session.commit()
 
     async def delete_by_user_code(self, user_code: str) -> None:
@@ -72,12 +73,11 @@ class DeviceRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
             result = await session.execute(
-                select(
-                    exists().where(Device.user_code == user_code))
-                )
+                select(exists().where(Device.user_code == user_code))
+            )
             result = result.first()
             if not result[0]:
-                raise UserCodeNotFoundError('Wrong User Code')
+                raise UserCodeNotFoundError("Wrong User Code")
 
             return result[0]
 
@@ -88,16 +88,15 @@ class DeviceRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
             result = await session.execute(
-                select(
-                    exists().where(Device.device_code == device_code))
-                )
+                select(exists().where(Device.device_code == device_code))
+            )
             result = result.first()
             if not result[0]:
-                raise DeviceCodeNotFoundError('Wrong Device Code')
+                raise DeviceCodeNotFoundError("Wrong Device Code")
 
             return result[0]
 
-    async def get_device_by_user_code(self, user_code: str) -> Device:
+    async def get_device_by_user_code(self, user_code: str) -> Optional[Device]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -108,6 +107,7 @@ class DeviceRepository(BaseRepository):
                     select(Device).where(Device.user_code == user_code)
                 )
                 return device.first()[0]
+        return None
 
     async def get_expiration_time(self, device_code: str) -> float:
         session_factory = sessionmaker(
@@ -124,4 +124,3 @@ class DeviceRepository(BaseRepository):
             time = datetime.timestamp(created_at) + expires_in
 
             return time
-
