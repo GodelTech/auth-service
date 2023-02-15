@@ -3,10 +3,9 @@ import secrets
 
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
-from jwt import PyJWTError
 
 from client_example.httpx_oauth.openid import OpenID
-from client_example.utils import CONFIG_URL, TokenValidator
+from client_example.utils import CONFIG_URL
 
 client = OpenID(
     client_id="test_client",
@@ -19,28 +18,14 @@ logger = logging.getLogger("example_app")
 
 
 @router.get("/")
-async def index(request: Request):
-    # TODO add it to middleware <-------------------------------
-    token = request.headers.get("Authorization")
-    try:
-        if token and await TokenValidator().is_token_valid(token):
-            return RedirectResponse("/notes")
-    except PyJWTError as e:
-        logger.exception(e)
+async def index():
     return RedirectResponse("/login")
 
 
 @router.get("/login")
 async def get_login_form(request: Request):
     state = secrets.token_urlsafe(16)
-    request.session['state'] = state
-    token = request.headers.get("Authorization")
-    # TODO add it to middleware <---------------------------------
-    try:
-        if token and await TokenValidator().is_token_valid(token):
-            return RedirectResponse("/notes")
-    except PyJWTError as e:
-        logger.exception(e)
+    request.session["state"] = state
     auth_url = await client.get_authorization_url(
         redirect_uri="http://localhost:8001/login-callback",
         state=state,
@@ -51,23 +36,40 @@ async def get_login_form(request: Request):
 @router.get("/login-callback")
 async def login_callback(code: str, request: Request):
     # Exchange auth code for an access token
-    if request.session.get('state') != request.query_params.get('state'):
-        return {'error': 'Invalid state'}
+    if request.session.get("state") != request.query_params.get("state"):
+        return {"error": "Invalid state"}
+
     token = await client.get_access_token(
         code=code, redirect_uri="http://localhost:8001/login-callback"
     )
     access_token, refresh_token = token["access_token"], token["refresh_token"]
-    print(access_token)
-    request.session['access_token'] = access_token
-    request.session['refresh_token'] = refresh_token
-    return RedirectResponse('/notes')
+    response = RedirectResponse("/notes")
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        domain=request.url.hostname,
+        path="/",
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        domain=request.url.hostname,
+        path="/",
+    )
+    return response
 
 
 @router.get("/logout")
 async def logout(request: Request):
-    token = request.session['access_token']
+    token = request.headers.get("access_token") or request.cookies.get(
+        "access_token"
+    )
     response = await client.logout(
         id_token_hint=token, redirect_uri="http://localhost:8001/"
     )
     request.session.clear()
-    return RedirectResponse(response.headers['location'])
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    return response

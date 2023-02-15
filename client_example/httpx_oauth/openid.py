@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 import httpx
+from fastapi.responses import RedirectResponse
 from httpx import Response
 
 from .errors import GetIdError
@@ -68,7 +69,7 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
         id_token_hint: str,
         redirect_uri: Optional[str] = None,
         state: Optional[str] = None,
-    ) -> Response:
+    ) -> RedirectResponse:
         async with self.get_httpx_client() as client:
             params = {
                 "id_token_hint": id_token_hint,
@@ -84,7 +85,7 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
                 url="http://localhost:8000/endsession/",
                 params=params,
             )
-            return response
+            return RedirectResponse(response.headers["location"])
 
     # TODO this one too
     async def get_all_users_data(

@@ -2,7 +2,7 @@ import logging
 from json import JSONDecodeError
 
 from fastapi import Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from jwt import ExpiredSignatureError, PyJWTError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
@@ -20,15 +20,17 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
     ):
         self.app = app
         self.token_validator = token_validator
-        self.protected_endpoints = ('/notes', '/logout')
+        self.protected_endpoints = ("/notes", "/logout")
+        self.auth_endpoints = ("/login",)
 
     async def dispatch_func(self, request: Request, call_next):
+        access_token = request.cookies.get(
+            "access_token"
+        ) or request.headers.get("authorization")
         if any(
             endpoint in request.url.path
             for endpoint in self.protected_endpoints
         ):
-            access_token = request.session.get("access_token")
-
             try:
                 await self.token_validator.is_token_valid(access_token)
                 logger.info("Authorization passed")
@@ -44,6 +46,16 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 logger.exception("Authorization failed", e)
                 return self._get_unauthorized_response()
 
+        elif any(
+            endpoint in request.url.path for endpoint in self.auth_endpoints
+        ):
+            try:
+                await self.token_validator.is_token_valid(access_token)
+                logger.info("Already logged in")
+                return RedirectResponse("/notes")
+            except (PyJWTError, AttributeError) as e:
+                logger.exception(e)
+
         response = await call_next(request)
         return response
 
@@ -51,14 +63,14 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         # ! probably will need to change it in a future - due to token service modifications
         # TODO catch when refresh token is expired and logout the user?
         try:
-            refresh_token = request.session.get('refresh_token')
+            refresh_token = request.session.get("refresh_token")
 
             if refresh_token is not None:
                 new_token = await client.refresh_token(refresh_token)
                 # if expired return 401
-                new_access_token = new_token['access_token']
+                new_access_token = new_token["access_token"]
                 # save new token on client side
-                request.session['access_token'] = new_access_token
+                request.session["access_token"] = new_access_token
                 logger.info("New acces token saved in session")
                 return await self._validate_new_token(
                     new_access_token, request, call_next
