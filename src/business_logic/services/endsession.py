@@ -20,7 +20,7 @@ class EndSessionService:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
-        self._request_model = None  # type: Optional[RequestEndSessionModel]
+        self._request_model: Optional[RequestEndSessionModel] = None
 
     async def end_session(self) -> Union[str, None]:
         if self.request_model is not None:
