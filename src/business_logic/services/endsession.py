@@ -65,7 +65,7 @@ class EndSessionService:
         return result
 
     @property
-    def request_model(self) -> Union[RequestEndSessionModel, None]:
+    def request_model(self) -> Optional[RequestEndSessionModel]:
         return self._request_model
 
     @request_model.setter

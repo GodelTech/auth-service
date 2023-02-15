@@ -139,7 +139,7 @@ class WellKnownServies:
             "use": "sig",
             # "kid" : ... ,
             "n": long_to_base64(await jwt_service.get_module()),
-            "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
+            "e": long_to_base64(await jwt_service.get_pub_key_exponent()),
         }
         logger.info(
             f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"

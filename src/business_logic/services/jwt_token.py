@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, Optional, Union
 
 import jwt
 
@@ -14,7 +15,9 @@ class JWTService:
         self.algorithms = ["RS256"]
         self.keys = keys
 
-    async def encode_jwt(self, payload: dict = {}, secret: None = None) -> str:
+    async def encode_jwt(
+        self, payload: Optional[Dict[str, Any]] = {}, secret: None = None
+    ) -> str:
         token = jwt.encode(
             payload=payload, key=self.keys.private_key, algorithm=self.algorithm
         )
@@ -23,8 +26,7 @@ class JWTService:
 
         return token
 
-    async def decode_token(self, token: str, **kwargs) -> dict:
-
+    async def decode_token(self, token: str, **kwargs: Any) -> Dict[str, Any]:
         token = token.replace("Bearer ", "")
         decoded = jwt.decode(
             token,
@@ -37,8 +39,8 @@ class JWTService:
     async def verify_token(self, token: str) -> bool:
         return bool(await self.decode_token(token))
 
-    async def get_module(self):
+    async def get_module(self) -> Union[int, float]:
         return self.keys.n
 
-    async def get_pub_key_expanent(self):
+    async def get_pub_key_exponent(self) -> float:
         return self.keys.e
