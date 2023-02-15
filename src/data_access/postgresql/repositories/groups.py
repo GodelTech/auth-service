@@ -153,25 +153,25 @@ class GroupRepository(BaseRepository):
     def recursion(
         self, main_group: Dict[str, Any], all_groups: List[Any]
     ) -> Optional[List[Dict[str, Any]]]:
-        result: Optional[List[Any]] = []
+        result = []
         groups_remove = []
-        if result is not None:
-            for group in all_groups:
-                if main_group["id"] == group.parent_group:
-                    result.append(group.dictionary() | {"subgroups": ...})
-                    groups_remove.append(group)
+        # if result is not None:
+        for group in all_groups:
+            if main_group["id"] == group.parent_group:
+                result.append(group.dictionary() | {"subgroups": ...})
+                groups_remove.append(group)
 
-            for group in groups_remove:
-                all_groups.remove(group)
+        for group in groups_remove:
+            all_groups.remove(group)
 
-            if len(result) == 0:
-                result = None
-                return result
+        if len(result) == 0:
+            # result = None
+            return result
 
-            for group in result:
-                group["subgroups"] = self.recursion(
-                    main_group=group, all_groups=all_groups
-                )
+        for group in result:
+            group["subgroups"] = self.recursion(
+                main_group=group, all_groups=all_groups
+            )
 
         return result
 
