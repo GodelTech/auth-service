@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional
-from typing import Union
+from typing import Any, List, Optional, Union
+
 from fastapi import Form
 from pydantic import BaseModel
 
@@ -25,15 +25,14 @@ class BodyRequestTokenModel:
 
 
 class ResponseTokenModel(BaseModel):
-
     access_token: Optional[str]
     token_type: Optional[str]
     refresh_token: Optional[str]
     expires_in: Optional[int]
     id_token: Optional[str]
-    refresh_expires_in : Optional[int]
-    not_before_policy : Optional[int]
-    scope : Optional[Union[list, str]]
-    
+    refresh_expires_in: Optional[int]
+    not_before_policy: Optional[int]
+    scope: Optional[Union[List[Any], str]]
+
     class Config:
         orm_mode = True

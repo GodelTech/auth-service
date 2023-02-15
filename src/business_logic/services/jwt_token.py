@@ -16,7 +16,7 @@ class JWTService:
         self.keys = keys
 
     async def encode_jwt(
-        self, payload: Optional[Dict[str, Any]] = {}, secret: None = None
+        self, payload: Dict[str, Any] = {}, secret: None = None
     ) -> str:
         token = jwt.encode(
             payload=payload, key=self.keys.private_key, algorithm=self.algorithm
