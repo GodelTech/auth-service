@@ -9,6 +9,7 @@ class Device(BaseModel):
     __tablename__ = "devices"
 
     client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
+    client = relationship("Client", backref="devices")
     device_code = Column(String(80), nullable=False, unique=True)
     user_code = Column(String(10), nullable=False, unique=True)
     verification_uri = Column(String, nullable=False)

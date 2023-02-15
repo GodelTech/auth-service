@@ -26,7 +26,7 @@ class LoginFormService:
                     "code",
                     "token",
                     "id_token token",
-                    "urn:ietf:params:oauth:grant-type:device_code",
+                    "urn:ietf:params:oauth:grant-type:device_code"
                 ]:
                     return True
                 else:

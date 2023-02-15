@@ -98,5 +98,5 @@ class IntrospectionServies:
         result = str(self.request.url).rsplit('/', 2)
         return result[0]
 
-    def time_diff_in_seconds(self, finish: datetime.datetime = datetime.datetime.now(), start: datetime.datetime = datetime.datetime(1970, 1, 1)) -> int:
+    def time_diff_in_seconds(self, finish: datetime.datetime = datetime.datetime.utcnow(), start: datetime.datetime = datetime.datetime(1970, 1, 1)) -> int:
         return int((finish - start).total_seconds())
