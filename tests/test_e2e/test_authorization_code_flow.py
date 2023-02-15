@@ -46,9 +46,7 @@ class TestAuthorizationCodeFlow:
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
         secret_code = await connection.execute(
             select(PersistentGrant.grant_data)
-            .where(PersistentGrant.client_id == 8)
-            # .where(PersistentGrant.client_id == "spider_man")
-        )
+            .where(PersistentGrant.client_id == 8))
 
         secret_code = secret_code.first()[0]
 
