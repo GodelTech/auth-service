@@ -29,9 +29,10 @@ class TestIntrospectionEndpoint:
             "client_id": "test_client"
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
-        access_token = await jwt.encode_jwt(payload={"sub": "1"})
+        access_token = await jwt.encode_jwt(payload={"sub": "1", "client_id": "test_client"})
 
         await persistent_grant_repo.delete(
+            grant_type = "refresh_token", 
             grant_data=introspection_token
         )
 

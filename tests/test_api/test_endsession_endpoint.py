@@ -33,10 +33,10 @@ class TestEndSessionEndpoint:
             grant = await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
-                    client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["sub"],
-                    data=TOKEN_HINT_DATA["data"],
-                    type=TOKEN_HINT_DATA["type"],
+                    client_id=3,
+                    user_id=3,
+                    grant_data="test_successful_authorize_request",
+                    persistent_grant_type_id=1,
                     expiration=False
                 )
             )
@@ -45,14 +45,14 @@ class TestEndSessionEndpoint:
             token_hint = await hint.get_token_hint()
             params = {
                 "id_token_hint": token_hint,
-                "post_logout_redirect_uri": "http://www.jones.com/",
+                "post_logout_redirect_uri": "https://carroll-taylor.com/",
                 "state": "test_state",
             }
             response = await client.request("GET", "/endsession/", params=params)
             assert response.status_code == status.HTTP_302_FOUND
 
             await session.execute(
-                delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
+                delete(PersistentGrant).where(PersistentGrant.client_id == 3)
             )
             await session.commit()
 
@@ -73,10 +73,10 @@ class TestEndSessionEndpoint:
             grant = await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
-                    client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["sub"],
-                    data=TOKEN_HINT_DATA["data"],
-                    type=TOKEN_HINT_DATA["type"],
+                    client_id=3,
+                    user_id=3,
+                    grant_data="test_successful_authorize_request_without_uri",
+                    persistent_grant_type_id = 1,
                     expiration=False
                 )
             )
@@ -107,10 +107,10 @@ class TestEndSessionEndpoint:
             grant = await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
-                    client_id=TOKEN_HINT_DATA["client_id"],
-                    subject_id=TOKEN_HINT_DATA["sub"],
-                    data=TOKEN_HINT_DATA["data"],
-                    type=TOKEN_HINT_DATA["type"],
+                    client_id=3,
+                    user_id=3,
+                    grant_data="test_successful_authorize_request_wrong_uri",
+                    persistent_grant_type_id=1,
                     expiration=False
                 )
             )

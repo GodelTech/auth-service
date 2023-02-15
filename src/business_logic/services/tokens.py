@@ -127,9 +127,8 @@ class TokenService:
                         grant_type=self.request_model.grant_type,
                         grant_data=self.request_model.code,
                     )
-                    client_id_from_request = await self.persistent_grant_repo.get_client_id(self.request_model.client_id)
                     # checks if client provided in request is the same that in the db have provided grants
-                    if grant.client_id != client_id_from_request:
+                    if grant.client.client_id != self.request_model.client_id:
                         raise WrongGrantsError(
                             "Client from request has been found in the database\
                             but don't have provided grants"
@@ -194,7 +193,7 @@ class TokenService:
 
                 refresh_token = self.request_model.refresh_token
                 if await self.persistent_grant_repo.exists(
-                    grant_type="refresh_token", data=refresh_token
+                    grant_type="refresh_token", grant_data=refresh_token
                 ):
                     grant = await self.persistent_grant_repo.get(
                         grant_type="refresh_token",
@@ -319,7 +318,7 @@ class TokenService:
                     )
 
                     # checks if client provided in request is the same that in the db have provided grants
-                    if grant.client_id != self.request_model.client_id:
+                    if grant.client.client_id != self.request_model.client_id:
                         raise WrongGrantsError(
                             "Client from request has been found in the database\
                             but don't have provided grants"
@@ -391,7 +390,7 @@ class TokenService:
             raise ClientNotFoundError
 
         scopes = await self.client_repo.get_client_scopes(
-            client_id=client_from_db.client_id
+            client_id=client_from_db.id
         )
         if len(scopes) == 1:
             scopes = scopes[0]
@@ -399,7 +398,7 @@ class TokenService:
             scopes = "No scope"
 
         audience = await self.client_repo.get_client_claims(
-            client_id=client_from_db.client_id
+            client_id=client_from_db.id
         )
         access_token = await self.jwt_service.encode_jwt(
             {
@@ -441,7 +440,7 @@ class TokenService:
             logger.info(f"{token_type_hint}")
             logger.info(f"{self.request_body.token}")
             if await self.persistent_grant_repo.exists(
-                grant_type=token_type_hint, data=self.request_body.token
+                grant_type=token_type_hint, grant_data=self.request_body.token
             ):
                 await self.persistent_grant_repo.delete(
                     grant_type=token_type_hint, 
