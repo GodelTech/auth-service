@@ -71,11 +71,22 @@ class TestPersistentGrantRepository:
 
     async def test_check_grant_by_client_and_user_ids(self, engine):
         self.persistent_grant_repo = PersistentGrantRepository(engine)
+        await self.persistent_grant_repo.create(
+            client_id="frodo",
+            data="some_data",
+            user_id=5,
+            grant_type="code",
+            expiration_time=600,
+        )
         grant = await self.persistent_grant_repo.check_grant_by_client_and_user_ids(
-            client_id='test_client',
-            user_id=1
+            client_id="frodo",
+            user_id=5
         )
         assert grant is True
+        await self.persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(
+            client_id="frodo",
+            user_id=5
+        )
 
     async def test_check_grant_by_client_and_user_ids_wrong_client(self, engine):
         self.persistent_grant_repo = PersistentGrantRepository(engine)

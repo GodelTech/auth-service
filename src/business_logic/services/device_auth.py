@@ -23,7 +23,7 @@ class DeviceService:
         self.client_repo = client_repo
         self.device_repo = device_repo
 
-    async def get_response(self):
+    async def get_response(self) -> dict:
         device_code = secrets.token_urlsafe(32)
         user_code = "".join(random.sample(ascii_uppercase, k=8))
         verification_uri = "http://127.0.0.1:8000/device/auth"
