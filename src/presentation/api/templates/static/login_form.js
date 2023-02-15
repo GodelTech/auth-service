@@ -95,13 +95,13 @@ async function redirect(data){
     })
 }
 async function clearDeviceData(data){
-    await fetch("http://127.0.0.1:8000/device/auth/cancel", {
-        method: "POST",
+    response = await fetch("http://127.0.0.1:8000/device/auth/cancel", {
+        method: "DELETE",
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: data
     })
-    window.location = "http://127.0.0.1:8000/device/auth/cancel"
-
+    let new_location = response.url
+    window.location = new_location
 }
 
 async function redirectToPost(event) {

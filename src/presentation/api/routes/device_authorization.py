@@ -90,8 +90,8 @@ async def get_device_login_confirm(
     )
 
 
-@device_auth_router.post("/auth/cancel", status_code=status.HTTP_302_FOUND, tags=["Device"])
-async def post_device_cancel(
+@device_auth_router.delete("/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"])
+async def delete_device(
     request_model: DeviceCancelModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
 ):
@@ -100,11 +100,7 @@ async def post_device_cancel(
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.clean_device_data()
 
-        # response = RedirectResponse(
-        #     firmed_redirect_uri, status_code=status.HTTP_302_FOUND
-        # )
-        # return response
-        return
+        return firmed_redirect_uri
 
     except UserCodeNotFoundError as exception:
         logger.exception(exception)
@@ -121,7 +117,7 @@ async def post_device_cancel(
 
 
 @device_auth_router.get("/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
-async def get_device_cancel(
+async def get_device_cancel_form(
     request: Request,
 ):
     return templates.TemplateResponse(
