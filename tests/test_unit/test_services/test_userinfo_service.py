@@ -27,9 +27,7 @@ class TestUserInfoService:
 
         token = await service.jwt.encode_jwt(payload=data_to_code)
         service.authorization = token
-        # await service.persistent_grant_repo.create(
-        #     client_id="santa", grant_data=token, user_id=3
-        # )
+
         expected_part_one = {"sub": "1"}
         expected_part_two = data_to_code
         expected = expected_part_one | expected_part_two

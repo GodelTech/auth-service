@@ -25,7 +25,7 @@ class TestTokenEndpoint:
         service = token_service
         await service.persistent_grant_repo.create(
             client_id='double_test',
-            data='secret_code',
+            grant_data='secret_code',
             user_id=1,
             grant_type='code',
             expiration_time=3600,
@@ -75,7 +75,7 @@ class TestTokenEndpoint:
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
             client_id='test_client',
-            data=test_token,
+            grant_data=test_token,
             user_id=1,
             grant_type='refresh_token',
         )
@@ -110,7 +110,7 @@ class TestTokenEndpoint:
 
         await self.persistent_grant_repo.create(
             client_id='double_test',
-            data='secret_code',
+            grant_data='secret_code',
             user_id=2,
             grant_type='code',
             expiration_time=3600,

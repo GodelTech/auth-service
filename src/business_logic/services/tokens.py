@@ -159,7 +159,7 @@ class TokenService:
 
                     # deleting old grant because now it won't be used anywhere aand...
                     await self.persistent_grant_repo.delete(
-                        data=self.request_model.code,
+                        grant_data=self.request_model.code,
                         grant_type=self.request_model.grant_type,
                     )
 
@@ -174,7 +174,7 @@ class TokenService:
 
                     await self.persistent_grant_repo.create(
                         client_id=self.request_model.client_id,
-                        data=refresh_token,
+                        grant_data=refresh_token,
                         expiration_time=expiration_time,
                         user_id=user_id,
                         grant_type="refresh_token",
@@ -210,7 +210,7 @@ class TokenService:
                     if old_expiration < time.time():
                         # If token expired
                         await self.persistent_grant_repo.delete(
-                            data=refresh_token,
+                            grant_data=refresh_token,
                             grant_type=self.request_model.grant_type,
                         )
 
@@ -226,7 +226,7 @@ class TokenService:
 
                         await self.persistent_grant_repo.create(
                             client_id=client_id,
-                            data=new_refresh_token,
+                            grant_data=new_refresh_token,
                             expiration_time=expiration_time,
                             user_id=user_id,
                             grant_type="refresh_token",
@@ -339,7 +339,7 @@ class TokenService:
 
                     # deleting old grant because now it won't be used anywhere and...
                     await self.persistent_grant_repo.delete(
-                        data=self.request_model.device_code,
+                        grant_data=self.request_model.device_code,
                         grant_type=self.request_model.grant_type,
                     )
 
@@ -354,7 +354,7 @@ class TokenService:
 
                     await self.persistent_grant_repo.create(
                         client_id=self.request_model.client_id,
-                        data=refresh_token,
+                        grant_data=refresh_token,
                         expiration_time=expiration_time,
                         user_id=user_id,
                         grant_type="refresh_token",
@@ -444,7 +444,8 @@ class TokenService:
                 grant_type=token_type_hint, data=self.request_body.token
             ):
                 await self.persistent_grant_repo.delete(
-                    grant_type=token_type_hint, data=self.request_body.token
+                    grant_type=token_type_hint, 
+                    grant_data=self.request_body.token
                 )
             else:
                 raise GrantNotFoundError

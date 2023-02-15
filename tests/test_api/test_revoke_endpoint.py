@@ -21,12 +21,12 @@ class TestRevokationEndpoint:
         if await persistent_grant_repo.exists(grant_type=grant_type, data=revoke_token):
             await persistent_grant_repo.delete(
                 grant_type=grant_type,
-                data=revoke_token
+                grant_data=revoke_token
             )
 
         await persistent_grant_repo.create(
             grant_type=grant_type,
-            data=revoke_token,
+            grant_data=revoke_token,
             user_id=1,
             client_id="test_client",
             expiration_time=3600,
@@ -58,7 +58,7 @@ class TestRevokationEndpoint:
 
         await self.persistent_grant_repo.delete(
             grant_type=grant_type,
-            data=revoke_token
+            grant_data=revoke_token
         )
 
         headers = {

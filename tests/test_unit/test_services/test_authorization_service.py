@@ -221,7 +221,7 @@ class TestAuthorizationService:
         assert "code" in data
 
         await authorization_service.persistent_grant_repo.delete(
-            data=data["code"], grant_type="code"
+            grant_data=data["code"], grant_type="code"
         )
 
     async def test_get_redirect_url_token_response_type(

@@ -71,7 +71,7 @@ class AuthorizationService:
         secret_code = secrets.token_urlsafe(32)
         await self.persistent_grant_repo.create(
             client_id=self.request_model.client_id,
-            data=secret_code,
+            grant_data=secret_code,
             user_id=user_id,
         )
 
@@ -88,7 +88,7 @@ class AuthorizationService:
         secret_code = device.device_code
         await self.persistent_grant_repo.create(
             client_id=self.request_model.client_id,
-            data=secret_code,
+            grant_data=secret_code,
             user_id=user_id,
             grant_type="urn:ietf:params:oauth:grant-type:device_code"
         )
