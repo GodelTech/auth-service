@@ -27,5 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-app.add_middleware(SessionMiddleware, secret_key='312')
-# app.add_middleware(AuthorizationMiddleware)
+
+# TODO set secret_key in env
+app.add_middleware(AuthorizationMiddleware)
+app.add_middleware(SessionMiddleware, secret_key='random-string')

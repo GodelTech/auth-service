@@ -27,8 +27,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
             endpoint in request.url.path
             for endpoint in self.protected_endpoints
         ):
-            access_token = request.headers.get('Authorization')
-            # access_token = request.cookies.get('Authorization')
+            access_token = request.session.get("access_token")
 
             try:
                 await self.token_validator.is_token_valid(access_token)
@@ -52,15 +51,15 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         # ! probably will need to change it in a future - due to token service modifications
         # TODO catch when refresh token is expired and logout the user?
         try:
-            refresh_token = await request.json()
-            refresh_token = refresh_token.get("refresh_token")
+            refresh_token = request.session.get('refresh_token')
 
             if refresh_token is not None:
                 new_token = await client.refresh_token(refresh_token)
                 # if expired return 401
-                new_access_token = new_token.get("access_token")
+                new_access_token = new_token['access_token']
                 # save new token on client side
-                logger.info("New token created")
+                request.session['access_token'] = new_access_token
+                logger.info("New acces token saved in session")
                 return await self._validate_new_token(
                     new_access_token, request, call_next
                 )

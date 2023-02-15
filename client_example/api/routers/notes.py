@@ -18,7 +18,7 @@ async def get_notes(
     skip: int = 0,
     db: Session = Depends(get_db),
 ):
-    token = request.headers['authorization']
+    token = request.session['access_token']
     user_id = await client.get_id(token)
     notes = crud.get_notes(db, skip, limit, user_id)
     if notes is None:
@@ -36,7 +36,7 @@ async def create_notes(
     request_body: RequestNoteCreate,
     db: Session = Depends(get_db),
 ):
-    token = request.headers['authorization']
+    token = request.session['access_token']
     user_id = await client.get_id(token)
     return crud.create_user_note(db=db, item=request_body, user_id=user_id)
 
@@ -47,7 +47,7 @@ async def get_note(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    token = request.headers['authorization']
+    token = request.session['access_token']
     user_id = await client.get_id(token)
     note = crud.get_note(db, id)
 
