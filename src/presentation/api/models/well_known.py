@@ -1,18 +1,20 @@
-from typing import Optional
 import logging
+from typing import List, Optional
+
 from pydantic import BaseModel
+
 
 class ResponseOpenIdConfiguration(BaseModel):
     issuer: str
     jwks_uri: str
     authorization_endpoint: str
     token_endpoint: str
-    id_token_signing_alg_values_supported: list
-    subject_types_supported: list
-    response_types_supported: list
+    id_token_signing_alg_values_supported: List[str]
+    subject_types_supported: List[str]
+    response_types_supported: List[str]
 
-    claims_supported: Optional[list]
-    scopes_supported: Optional[list]
+    claims_supported: Optional[List[str]]
+    scopes_supported: Optional[List[str]]
     registration_endpoint: Optional[str]
     userinfo_endpoint: Optional[str]
     frontchannel_logout_session_supported: Optional[bool]
@@ -25,24 +27,24 @@ class ResponseOpenIdConfiguration(BaseModel):
     request_uri_parameter_supported: Optional[bool]
     request_parameter_supported: Optional[bool]
     claims_parameter_supported: Optional[bool]
-    ui_locales_supported: Optional[list]
-    claims_locales_supported: Optional[list]
-    service_documentation: Optional[list]
-    claim_types_supported: Optional[list]
-    display_values_supported: Optional[list]
-    token_endpoint_auth_signing_alg_values_supported: Optional[list]
-    token_endpoint_auth_methods_supported: Optional[list]
-    request_object_encryption_enc_values_supported: Optional[list]
-    request_object_encryption_alg_values_supported: Optional[list]
-    request_object_signing_alg_values_supported: Optional[list]
-    userinfo_encryption_enc_values_supported: Optional[list]
-    userinfo_encryption_alg_values_supported: Optional[list]
-    userinfo_signing_alg_values_supported: Optional[list]
-    id_token_encryption_enc_values_supported: Optional[list]
-    id_token_encryption_alg_values_supported: Optional[list]
-    acr_values_supported: Optional[list]
-    grant_types_supported: Optional[list]
-    response_modes_supported: Optional[list]
+    ui_locales_supported: Optional[List[str]]
+    claims_locales_supported: Optional[List[str]]
+    service_documentation: Optional[List[str]]
+    claim_types_supported: Optional[List[str]]
+    display_values_supported: Optional[List[str]]
+    token_endpoint_auth_signing_alg_values_supported: Optional[List[str]]
+    token_endpoint_auth_methods_supported: Optional[List[str]]
+    request_object_encryption_enc_values_supported: Optional[List[str]]
+    request_object_encryption_alg_values_supported: Optional[List[str]]
+    request_object_signing_alg_values_supported: Optional[List[str]]
+    userinfo_encryption_enc_values_supported: Optional[List[str]]
+    userinfo_encryption_alg_values_supported: Optional[List[str]]
+    userinfo_signing_alg_values_supported: Optional[List[str]]
+    id_token_encryption_enc_values_supported: Optional[List[str]]
+    id_token_encryption_alg_values_supported: Optional[List[str]]
+    acr_values_supported: Optional[List[str]]
+    grant_types_supported: Optional[List[str]]
+    response_modes_supported: Optional[List[str]]
 
     class Config:
         orm_mode = True
@@ -50,8 +52,9 @@ class ResponseOpenIdConfiguration(BaseModel):
     def __repr__(self) -> str:
         return f"Model {self.__class__.__name__}"
 
+
 class ResponseJWKS(BaseModel):
-    keys: list
+    keys: List[str]
 
     # kty: str # RS256
     # kid : Optional[str]  # key id in case we have more than one keyy
