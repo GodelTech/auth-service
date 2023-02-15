@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from pydantic import BaseModel
 
 
@@ -30,5 +32,5 @@ class LogConfig(BaseModel):
     }
 
     @property
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[Any, Any]:
         return self.dict()
