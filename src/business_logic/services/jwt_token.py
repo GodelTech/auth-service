@@ -39,8 +39,8 @@ class JWTService:
     async def verify_token(self, token: str) -> bool:
         return bool(await self.decode_token(token))
 
-    async def get_module(self) -> Union[int, float]:
+    async def get_module(self) -> int:
         return self.keys.n
 
-    async def get_pub_key_exponent(self) -> float:
+    async def get_pub_key_exponent(self) -> int:
         return self.keys.e
