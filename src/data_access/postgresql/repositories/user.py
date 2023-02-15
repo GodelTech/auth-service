@@ -1,18 +1,21 @@
-from sqlalchemy import select, exists, update, insert, text
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from sqlalchemy import exists, insert, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from src.data_access.postgresql.tables.group import Group
+
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
+    DuplicationError,
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables import User, UserClaim, Role
-from src.data_access.postgresql.tables.users import users_roles, users_groups
-from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union
+from src.data_access.postgresql.tables import Role, User, UserClaim
+from src.data_access.postgresql.tables.group import Group
+from src.data_access.postgresql.tables.users import users_groups, users_roles
 
-def params_to_dict(**kwargs):
+
+def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:
@@ -34,7 +37,7 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
 
-    async def delete(self, user_id: int):
+    async def delete(self, user_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -63,7 +66,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_hash_password(self, user_name: str) -> tuple:
+    async def get_hash_password(self, user_name: str) -> Tuple[str, int]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -76,12 +79,13 @@ class UserRepository(BaseRepository):
 
             if user is None:
                 raise UserNotFoundError(
-                    "User you are looking for does not exist")
+                    "User you are looking for does not exist"
+                )
 
             user = user[0]
             return user.password_hash, user.id
 
-    async def get_claims(self, id: int) -> dict:
+    async def get_claims(self, id: int) -> Dict[str, str]:
         claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
@@ -95,7 +99,7 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def request_DB_for_claims(self, id: int):
+    async def request_DB_for_claims(self, id: int) -> List[UserClaim]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -116,7 +120,7 @@ class UserRepository(BaseRepository):
             result = result[0].username
             return result
 
-    async def get_user_by_username(self, username:str) -> User:
+    async def get_user_by_username(self, username: str) -> User:
         try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
@@ -132,7 +136,9 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_all_users(self, group_id: int = None, role_id: int = None) -> list[User]:
+    async def get_all_users(
+        self, group_id: Optional[int] = None, role_id: Optional[int] = None
+    ) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -140,28 +146,20 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 if group_id is None and role_id is None:
-                    query = await session.execute(
-                        select(User)
-                    )
+                    query = await session.execute(select(User))
                     query = query.all()
                     return [user[0] for user in query]
                 elif group_id is None and role_id is not None:
                     iterator = await session.execute(
                         select(User)
-                        .join(
-                            Role,
-                            User.roles
-                        )
+                        .join(Role, User.roles)
                         .where(Role.id == role_id)
                     )
                     return [user[0] for user in iterator.all()]
                 elif group_id is not None and role_id is None:
                     iterator = await session.execute(
                         select(User)
-                        .join(
-                            Group,
-                            User.groups
-                        )
+                        .join(Group, User.groups)
                         .where(Group.id == group_id)
                     )
                     return [user[0] for user in iterator.all()]
@@ -170,52 +168,52 @@ class UserRepository(BaseRepository):
                         select(User)
                         .join(Group, User.groups)
                         .join(Role, User.roles)
-                        .where(
-                            Group.id == group_id,
-                            Role.id == role_id
-                        )
+                        .where(Group.id == group_id, Role.id == role_id)
                     )
                     return [user[0] for user in iterator.all()]
         except:
             raise ValueError
 
     async def update(
-            self, 
-            user_id: int,
-            id: Union[None, str] = None,
-            username: Union[None, str] = None,
-            security_stamp: Union[None, str] = None,
-            email: Union[None, str] = None,
-            email_confirmed: Union[None, bool] = None,
-            phone_number: Union[None, str] = None,
-            phone_number_confirmed: Union[None, bool] = None,
-            two_factors_enabled: Union[None, bool] = None,
-            lockout_end_date_utc: Union[None, str] = None,
-            password_hash: Union[None, str] = None,
-            lockout_enabled: Union[None, bool] = False,
-            access_failed_count: Union[None, int] = None,
-        ):
+        self,
+        user_id: int,
+        id: Union[None, str] = None,
+        username: Union[None, str] = None,
+        security_stamp: Union[None, str] = None,
+        email: Union[None, str] = None,
+        email_confirmed: Union[None, bool] = None,
+        phone_number: Union[None, str] = None,
+        phone_number_confirmed: Union[None, bool] = None,
+        two_factors_enabled: Union[None, bool] = None,
+        lockout_end_date_utc: Union[None, str] = None,
+        password_hash: Union[None, str] = None,
+        lockout_enabled: Union[None, bool] = False,
+        access_failed_count: Union[None, int] = None,
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
-            kwargs = params_to_dict(id = id, 
-                                username = username, 
-                                security_stamp = security_stamp,
-                                email = email, 
-                                email_confirmed = email_confirmed, 
-                                phone_number = phone_number, 
-                                phone_number_confirmed = phone_number_confirmed, 
-                                two_factors_enabled = two_factors_enabled, 
-                                lockout_end_date_utc = lockout_end_date_utc, 
-                                lockout_enabled = lockout_enabled,
-                                password_hash = password_hash,
-                                access_failed_count = access_failed_count)
+            kwargs = params_to_dict(
+                id=id,
+                username=username,
+                security_stamp=security_stamp,
+                email=email,
+                email_confirmed=email_confirmed,
+                phone_number=phone_number,
+                phone_number_confirmed=phone_number_confirmed,
+                two_factors_enabled=two_factors_enabled,
+                lockout_end_date_utc=lockout_end_date_utc,
+                lockout_enabled=lockout_enabled,
+                password_hash=password_hash,
+                access_failed_count=access_failed_count,
+            )
             async with session_factory() as sess:
                 session = sess
                 if await self.exists(user_id=user_id):
-                    updates = update(User).values(
-                        **kwargs).where(User.id == user_id)
+                    updates = (
+                        update(User).values(**kwargs).where(User.id == user_id)
+                    )
                     await session.execute(updates)
                     await session.commit()
                 else:
@@ -237,47 +235,59 @@ class UserRepository(BaseRepository):
         password_hash: Union[None, str] = None,
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = 0,
-        ) -> bool:
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
-            kwargs = params_to_dict(id = id, 
-                                    username = username, 
-                                    security_stamp = security_stamp,
-                                    email = email, 
-                                    email_confirmed = email_confirmed, 
-                                    phone_number = phone_number, 
-                                    phone_number_confirmed = phone_number_confirmed, 
-                                    two_factors_enabled = two_factors_enabled, 
-                                    lockout_end_date_utc = lockout_end_date_utc, 
-                                    lockout_enabled = lockout_enabled,
-                                    password_hash = password_hash,
-                                    access_failed_count = access_failed_count)
+            kwargs = params_to_dict(
+                id=id,
+                username=username,
+                security_stamp=security_stamp,
+                email=email,
+                email_confirmed=email_confirmed,
+                phone_number=phone_number,
+                phone_number_confirmed=phone_number_confirmed,
+                two_factors_enabled=two_factors_enabled,
+                lockout_end_date_utc=lockout_end_date_utc,
+                lockout_enabled=lockout_enabled,
+                password_hash=password_hash,
+                access_failed_count=access_failed_count,
+            )
             async with session_factory() as sess:
                 session = sess
 
-                await session.execute(
-                    insert(User).values(**kwargs)
-                )
+                await session.execute(insert(User).values(**kwargs))
                 await session.commit()
         except:
             raise DuplicationError
 
-    async def add_group(self, user_id:int, group_id:int):
+    async def add_group(self, user_id: int, group_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         try:
-                async with session_factory() as sess:
-                    session = sess
-                    flag_one = (await session.execute(select(exists().where(Group.id == group_id)))).first()[0]
-                    flag_two = (await session.execute(select(exists().where(User.id == user_id)))).first()[0]
-                    if flag_one and flag_two:
-                        await session.execute(insert(users_groups).values(user_id = user_id, group_id = group_id))
-                        await session.commit()
-                    elif not flag_two or not flag_one:
-                        raise ValueError
+            async with session_factory() as sess:
+                session = sess
+                flag_one = (
+                    await session.execute(
+                        select(exists().where(Group.id == group_id))
+                    )
+                ).first()[0]
+                flag_two = (
+                    await session.execute(
+                        select(exists().where(User.id == user_id))
+                    )
+                ).first()[0]
+                if flag_one and flag_two:
+                    await session.execute(
+                        insert(users_groups).values(
+                            user_id=user_id, group_id=group_id
+                        )
+                    )
+                    await session.commit()
+                elif not flag_two or not flag_one:
+                    raise ValueError
         except ValueError:
             raise ValueError
         except:
@@ -287,22 +297,24 @@ class UserRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        try: 
+        try:
             async with session_factory() as sess:
                 session = sess
                 await session.execute(
                     insert(users_roles).values(user_id=user_id, role_id=role_id)
-                    )
+                )
                 await session.commit()
                 return True
         except:
             raise DuplicationError
 
-    async def remove_user_groups(self, user_id: int, group_ids: list) -> bool:
+    async def remove_user_groups(
+        self, user_id: int, group_ids: List[int]
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        try: 
+        try:
             async with session_factory() as sess:
                 session = sess
                 sql = f"DELETE FROM users_groups WHERE user_id = {user_id} AND group_id IN ({group_ids})"
@@ -311,11 +323,11 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def remove_user_roles(self, user_id:int, role_ids:str) -> bool:
+    async def remove_user_roles(self, user_id: int, role_ids: str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        try: 
+        try:
             async with session_factory() as sess:
                 session = sess
                 sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND role_id IN ({role_ids})"
@@ -325,7 +337,7 @@ class UserRepository(BaseRepository):
         except:
             return False
 
-    async def get_roles(self, user_id: int) -> list[Role]:
+    async def get_roles(self, user_id: int) -> List[Role]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -333,18 +345,15 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 iterator = await session.execute(
-                        select(Role)
-                        .join(
-                            User,
-                            Role.users
-                        )
-                        .where(User.id == user_id)
-                    )
+                    select(Role)
+                    .join(User, Role.users)
+                    .where(User.id == user_id)
+                )
                 return [role[0] for role in iterator.all()]
         except:
             raise ValueError
 
-    async def get_groups(self, user_id: int):
+    async def get_groups(self, user_id: int) -> List[Group]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -352,13 +361,10 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 iterator = await session.execute(
-                        select(Group)
-                        .join(
-                            User,
-                            Group.users
-                        )
-                        .where(User.id == user_id)
-                    )
+                    select(Group)
+                    .join(User, Group.users)
+                    .where(User.id == user_id)
+                )
                 return [group[0] for group in iterator.all()]
         except:
             raise ValueError
