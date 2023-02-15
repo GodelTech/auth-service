@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -54,7 +54,7 @@ class ResponseOpenIdConfiguration(BaseModel):
 
 
 class ResponseJWKS(BaseModel):
-    keys: List[str]
+    keys: List[Any]
 
     # kty: str # RS256
     # kid : Optional[str]  # key id in case we have more than one keyy
