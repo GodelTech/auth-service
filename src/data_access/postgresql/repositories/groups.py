@@ -164,7 +164,7 @@ class GroupRepository(BaseRepository):
             all_groups.remove(group)
 
         if len(result) == 0:
-            return result
+            return None
 
         for group in result:
             group["subgroups"] = self.recursion(
