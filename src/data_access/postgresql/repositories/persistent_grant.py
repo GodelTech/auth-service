@@ -10,7 +10,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant, PersistentGrantType
+from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantType, Client
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class PersistentGrantRepository(BaseRepository):
     async def create(
         self,
-        client_id: int,
+        client_id: str,
         grant_data: str,
         user_id: int,
         grant_type: str = 'code',
@@ -33,10 +33,11 @@ class PersistentGrantRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
 
+            client_id_int = await self.get_client_id_int(client_id=client_id, session=session)
             unique_key = str(uuid.uuid4())
             persistent_grant = {
                 "key": unique_key,
-                "client_id": client_id,
+                "client_id": client_id_int,
                 "grant_data": grant_data,
                 "expiration": expiration_time,
                 "user_id": user_id,
@@ -113,16 +114,18 @@ class PersistentGrantRepository(BaseRepository):
                 return status.HTTP_404_NOT_FOUND
 
     async def delete_persistent_grant_by_client_and_user_id(
-        self, client_id: int, user_id: int
+        self, client_id: str, user_id: int
     ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
+            
             await self.check_grant_by_client_and_user_ids(
                 client_id=client_id, user_id=user_id
             )
+            client_id = await self.get_client_id_int(client_id = client_id, session=session)
             await session.execute(
                 delete(PersistentGrant)
                 .where(PersistentGrant.client_id == client_id,
@@ -139,6 +142,7 @@ class PersistentGrantRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
+            client_id = await self.get_client_id_int(client_id = client_id, session=session)
             grant = await session.execute(
                 select(
                     exists().where(
@@ -171,4 +175,26 @@ class PersistentGrantRepository(BaseRepository):
                 raise PersistentGrantNotFoundError(
                     "Persistent grant you are looking for does not exist"
                 )
+            else:
+                client_id = client_id[0]
+
+            client_id_str = await session.execute(select(Client.client_id).where(
+                    Client.id == client_id,
+                ))
+            client_id_str = client_id_str.first()
+
+            if client_id_str is None:
+                raise PersistentGrantNotFoundError
+            else:
+                return client_id_str[0]
+
+    async def get_client_id_int(self, client_id:str, session) -> int:
+        client_id = await session.execute(select(Client.id).where(
+                    Client.client_id == client_id,
+                ))
+        client_id= client_id.first()
+
+        if client_id is None:
+            raise PersistentGrantNotFoundError
+        else:
             return client_id[0]

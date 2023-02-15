@@ -11,7 +11,7 @@ class TestPersistentGrantRepository:
     async def test_create_new_grant(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
-            client_id=1,
+            client_id="test_client",
             grant_data='iyuiyy',
             user_id=2,
             grant_type='code',
@@ -37,13 +37,13 @@ class TestPersistentGrantRepository:
     async def test_delete_persistent_grant_by_client_and_user_id(self, engine, connection):
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
-            client_id=2,
+            client_id="test_client",
             grant_data='santa_brings_presents',
             user_id=3,
             grant_type='code'
         )
         await persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(
-            client_id=2,
+            client_id="test_client",
             user_id=3
         )
         grant = await persistent_grant_repo.exists(grant_type="code", grant_data="santa_brings_presents")
@@ -54,7 +54,7 @@ class TestPersistentGrantRepository:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         with pytest.raises(PersistentGrantNotFoundError):
             await self.persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(
-                client_id=-1,
+                client_id="-1None",
                 user_id=-1
             )
 
@@ -73,14 +73,14 @@ class TestPersistentGrantRepository:
     async def test_check_grant_by_client_and_user_ids(self, engine):
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         await self.persistent_grant_repo.create(
-            client_id=1,
+            client_id="test_client",
             grant_data='test_check_grant_by_client_and_user_ids',
             user_id=1,
             grant_type='code'
         )
         
         grant = await self.persistent_grant_repo.check_grant_by_client_and_user_ids(
-            client_id=1,
+            client_id="test_client",
             user_id=1
         )
         assert grant is True
@@ -89,7 +89,7 @@ class TestPersistentGrantRepository:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         with pytest.raises(PersistentGrantNotFoundError):
             await self.persistent_grant_repo.check_grant_by_client_and_user_ids(
-                client_id=-1,
+                client_id="-1None",
                 user_id=1
             )
 
@@ -97,7 +97,7 @@ class TestPersistentGrantRepository:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         with pytest.raises(PersistentGrantNotFoundError):
             await self.persistent_grant_repo.check_grant_by_client_and_user_ids(
-                client_id=1,
+                client_id="test_client",
                 user_id=-1
             )
 
@@ -105,14 +105,14 @@ class TestPersistentGrantRepository:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         with pytest.raises(PersistentGrantNotFoundError):
             await self.persistent_grant_repo.check_grant_by_client_and_user_ids(
-                client_id=-1,
+                client_id="-1None",
                 user_id=-1
             )
 
     async def test_deleting_grants(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
-            client_id=1,
+            client_id="test_client",
             grant_data='elekltklkte',
             user_id=2,
             grant_type='code'
@@ -142,7 +142,7 @@ class TestPersistentGrantRepository:
     async def test_creating_grant_without_providing_type(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
-            client_id=2,
+            client_id="test_client",
             grant_data='secret_code',
             user_id=2)
 
@@ -161,11 +161,11 @@ class TestPersistentGrantRepository:
         persistent_grant_repo = PersistentGrantRepository(engine)
 
         await persistent_grant_repo.create(
-            client_id=2, grant_data="test_get_client_id_by_data", user_id=6
+            client_id="test_client", grant_data="test_get_client_id_by_data", user_id=6
         )
         client_id = await persistent_grant_repo.get_client_id_by_data(grant_data="test_get_client_id_by_data")
 
-        assert client_id == 2
+        assert client_id == "test_client"
 
         grant = await persistent_grant_repo.get(grant_type='code', grant_data='test_get_client_id_by_data')
         await persistent_grant_repo.delete(
@@ -175,7 +175,6 @@ class TestPersistentGrantRepository:
 
     async def test_get_client_id_by_wrong_data(self, engine):
         persistent_grant_repo = PersistentGrantRepository(engine)
-
 
         with pytest.raises(Exception):
             await persistent_grant_repo.get_client_id_by_data(grant_data="test_get_client_id_by_wrong_data")
