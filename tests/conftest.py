@@ -18,6 +18,8 @@ from src.main import get_application
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
+from src.business_logic.services import DeviceService
+
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     UserRepository,
@@ -151,3 +153,12 @@ async def login_form_service(engine) -> LoginFormService:
         client_repo=ClientRepository(engine),
     )
     return login_service
+
+
+@pytest_asyncio.fixture
+async def device_service(engine) -> DeviceService:
+    dev_service = DeviceService(
+        client_repo=ClientRepository(engine),
+        device_repo=DeviceRepository(engine),
+    )
+    return dev_service

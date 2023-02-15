@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.device import Device
-from src.data_access.postgresql.errors import UserCodeNotFoundError
+from src.data_access.postgresql.errors import UserCodeNotFoundError, DeviceCodeNotFoundError
 
 
 class DeviceRepository(BaseRepository):
@@ -47,10 +47,11 @@ class DeviceRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            await session.execute(
-                delete(Device).where(Device.user_code == user_code)
-            )
-            await session.commit()
+            if await self.validate_user_code(user_code=user_code):
+                await session.execute(
+                    delete(Device).where(Device.user_code == user_code)
+                )
+                await session.commit()
 
     async def delete_by_device_code(self, device_code: str) -> None:
         session_factory = sessionmaker(
@@ -58,10 +59,11 @@ class DeviceRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            await session.execute(
-                delete(Device).where(Device.device_code == device_code)
-            )
-            await session.commit()
+            if await self.validate_device_code(device_code=device_code):
+                await session.execute(
+                    delete(Device).where(Device.device_code == device_code)
+                )
+                await session.commit()
 
     async def validate_user_code(self, user_code: str) -> bool:
         session_factory = sessionmaker(
@@ -79,6 +81,22 @@ class DeviceRepository(BaseRepository):
 
             return result[0]
 
+    async def validate_device_code(self, device_code: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                select(
+                    exists().where(Device.device_code == device_code))
+                )
+            result = result.first()
+            if not result[0]:
+                raise DeviceCodeNotFoundError('Wrong Device Code')
+
+            return result[0]
+
     async def get_device_by_user_code(self, user_code: str) -> Device:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -90,18 +108,6 @@ class DeviceRepository(BaseRepository):
                     select(Device).where(Device.user_code == user_code)
                 )
                 return device.first()[0]
-
-    async def validate_device_code(self, device_code: str) -> Device:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            device = await session.execute(
-                select(exists().where(Device.device_code == device_code))
-            )
-            result = device.first()
-            return result[0]
 
     async def get_expiration_time(self, device_code: str) -> float:
         session_factory = sessionmaker(
