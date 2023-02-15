@@ -136,7 +136,8 @@ async def end_session_request_model() -> RequestEndSessionModel:
     token_hint = await tk_hint.get_token_hint()
     request_model = RequestEndSessionModel(
         id_token_hint=token_hint,
-        post_logout_redirect_uri='https://www.scott.org/',
+        post_logout_redirect_uri='http://campbell-taylor.net/',
         state='test_state'
     )
     return request_model
+a =1 

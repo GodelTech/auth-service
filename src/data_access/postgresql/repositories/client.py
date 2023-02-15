@@ -74,7 +74,6 @@ class ClientRepository(BaseRepository):
 
     async def validate_post_logout_redirect_uri(self, client_id: str, logout_redirect_uri: str) -> bool:
         
-        client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -82,9 +81,11 @@ class ClientRepository(BaseRepository):
             session = sess
 
             logout_redirect_uri = await session.execute(
-                select(ClientPostLogoutRedirectUri).where(
-                            ClientPostLogoutRedirectUri.client_id == client_id_int,
-                            ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
+                select(ClientPostLogoutRedirectUri)
+                .join(Client, ClientPostLogoutRedirectUri.client_id == Client.id)
+                .where(
+                        Client.client_id == client_id,
+                        ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
                         )
                     )
             

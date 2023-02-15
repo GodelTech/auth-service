@@ -26,6 +26,7 @@ class TestIntrospectionEndpoint:
         payload = {
             "sub": 1,
             "exp": time.time() + 3600,
+            "client_id": "test_client"
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
         access_token = await jwt.encode_jwt(payload={"sub": "1"})

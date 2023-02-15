@@ -46,7 +46,7 @@ class EndSessionService:
             client_id=client_id,
             user_id=user_id
         )
-        return
+
 
     async def _validate_logout_redirect_uri(self, client_id: str, logout_redirect_uri: str) -> bool:
         result = await self.client_repo.validate_post_logout_redirect_uri(client_id, logout_redirect_uri)
