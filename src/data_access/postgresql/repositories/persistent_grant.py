@@ -58,11 +58,11 @@ class PersistentGrantRepository(BaseRepository):
 
             result = await session.execute(
                 select(PersistentGrantType).where(
-                
                     PersistentGrantType.type_of_grant == type_of_grant,
                 )
             )
-            return result.first()[0].id
+            result = result.first()[0].id
+            return result 
         
     async def exists(self, grant_data: str, grant_type:str) -> bool:
         session_factory = sessionmaker(
@@ -92,7 +92,9 @@ class PersistentGrantRepository(BaseRepository):
             session = sess
 
             result = await session.execute(
-                select(PersistentGrant).where(
+                select(PersistentGrant)
+                .join(Client, PersistentGrant.client_id == Client.id)
+                .where(
                     PersistentGrant.persistent_grant_type_id == grant_type_id,
                     PersistentGrant.grant_data == grant_data,
                 )

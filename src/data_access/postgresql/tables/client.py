@@ -59,7 +59,7 @@ class Client(BaseModel):
         Boolean, default=False, nullable=False
     )
     
-    grants = relationship("PersistentGrant", back_populates = "client", foreign_keys = "PersistentGrant.client_id")
+    grants = relationship("PersistentGrant", back_populates = "client", foreign_keys = "PersistentGrant.client_id", lazy = "joined")
     # secrets = relationship("ClientSecret", back_populates = "client", lazy = "joined")
     # redirect_uris = relationship("ClientRedirectUri", back_populates = "client", lazy = "joined")
 

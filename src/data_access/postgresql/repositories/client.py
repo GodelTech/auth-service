@@ -94,7 +94,7 @@ class ClientRepository(BaseRepository):
                 raise ClientPostLogoutRedirectUriError("Post logout redirect uri you are looking for does not exist")
             return True
 
-    async def validate_client_redirect_uri(self, client_id: str, redirect_uri: str) -> bool:
+    async def validate_client_redirect_uri(self, client_id: int, redirect_uri: str) -> bool:
         
         client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
         session_factory = sessionmaker(
@@ -113,7 +113,7 @@ class ClientRepository(BaseRepository):
             else:
                 return True
 
-    async def get_client_scopes(self, client_id: str) -> list:
+    async def get_client_scopes(self, client_id: int) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -129,7 +129,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_redirect_uris(self, client_id: str) -> list:
+    async def get_client_redirect_uris(self, client_id: int) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -146,7 +146,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_claims(self, client_id: str) -> list:
+    async def get_client_claims(self, client_id: int) -> list:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
