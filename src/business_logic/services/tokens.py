@@ -121,20 +121,20 @@ class TokenService:
             if self.request_model.grant_type == "code":
                 if await self.persistent_grant_repo.exists(
                     grant_type=self.request_model.grant_type,
-                    data=self.request_model.code,
+                    grant_data=self.request_model.code,
                 ):
                     grant = await self.persistent_grant_repo.get(
                         grant_type=self.request_model.grant_type,
-                        data=self.request_model.code,
+                        grant_data=self.request_model.code,
                     )
-
+                    client_id_from_request = await self.persistent_grant_repo.get_client_id(self.request_model.client_id)
                     # checks if client provided in request is the same that in the db have provided grants
-                    if grant.client_id != self.request_model.client_id:
+                    if grant.client_id != client_id_from_request:
                         raise WrongGrantsError(
                             "Client from request has been found in the database\
                             but don't have provided grants"
                         )
-                    user_id = grant.subject_id
+                    user_id = grant.user_id
                     client_id = self.request_model.client_id
 
                     # ACCESS TOKEN
@@ -198,10 +198,10 @@ class TokenService:
                 ):
                     grant = await self.persistent_grant_repo.get(
                         grant_type="refresh_token",
-                        data=refresh_token,
+                        grant_data=refresh_token,
                     )
 
-                    user_id = grant.subject_id
+                    user_id = grant.user_id
                     client_id = self.request_model.client_id
 
                     decoded = await self.jwt_service.decode_token(refresh_token)
@@ -296,7 +296,7 @@ class TokenService:
             if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
                 if not await self.persistent_grant_repo.exists(
                     grant_type=self.request_model.grant_type,
-                    data=self.request_model.device_code,
+                    grant_data=self.request_model.device_code,
                 ):
                     if await self.device_repo.validate_device_code(device_code=self.request_model.device_code):
                         # add check for expire time
@@ -311,11 +311,11 @@ class TokenService:
                         raise DeviceCodeNotFoundError("Such device code does not exist")
                 elif await self.persistent_grant_repo.exists(
                     grant_type=self.request_model.grant_type,
-                    data=self.request_model.device_code,
+                    grant_data=self.request_model.device_code,
                 ):
                     grant = await self.persistent_grant_repo.get(
                         grant_type=self.request_model.grant_type,
-                        data=self.request_model.device_code,
+                        grant_data=self.request_model.device_code,
                     )
 
                     # checks if client provided in request is the same that in the db have provided grants
@@ -324,7 +324,7 @@ class TokenService:
                             "Client from request has been found in the database\
                             but don't have provided grants"
                         )
-                    user_id = grant.subject_id
+                    user_id = grant.user_id
                     client_id = self.request_model.client_id
 
                     # ACCESS TOKEN

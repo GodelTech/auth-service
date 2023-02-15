@@ -63,7 +63,21 @@ class PersistentGrantRepository(BaseRepository):
                 )
             )
             return result.first()[0].id
-        
+            
+    async def get_client_id(self, client_id_str: str) -> PersistentGrant:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+
+            result = await session.execute(
+                select(Client).where(
+                    Client.client_id == client_id_str,
+                )
+            )
+            return result.first()[0].id
+    
     async def exists(self, grant_data: str, grant_type:str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
