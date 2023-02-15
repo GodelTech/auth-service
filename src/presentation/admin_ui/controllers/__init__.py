@@ -32,7 +32,7 @@ from .resources_related import (
 )
 from .identity_resource import IdentityResourceAdminController, IdentityClaimAdminController
 from .group import PermissionAdminController, GroupAdminController
-
+from .device import DeviceAdminController
 
 
 

@@ -53,6 +53,7 @@ from src.presentation.admin_ui.controllers import (
     ClientPostLogoutRedirectUriController,
     ClientClaimController,
     ClientIdRestrictionController,
+    DeviceAdminController,
 )
 from src.di.providers import (
     provide_config,
@@ -158,6 +159,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ClientPostLogoutRedirectUriController)
     admin.add_view(ClientClaimController)
     admin.add_view(ClientIdRestrictionController)
+    admin.add_view(DeviceAdminController)
     admin.add_view(SeparationLine)
 
     # User/UserClaim
