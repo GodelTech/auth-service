@@ -20,9 +20,7 @@ class WellKnownServies:
     ) -> List[str]:
         return [claim[0] for claim in list_of_types]
 
-    def get_all_urls(
-        self, result: Dict[str, str]
-    ) -> Union[Dict[str, str], None]:
+    def get_all_urls(self, result: Dict[str, str]) -> Optional[Dict[str, str]]:
         if self.request is not None:
             return {
                 route.name: result["issuer"] + route.path
