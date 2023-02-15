@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import delete, exists, insert, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,7 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
 
 
-def params_to_dict(**kwargs) -> dict:
+def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:
@@ -19,10 +19,15 @@ def params_to_dict(**kwargs) -> dict:
 
 class GroupRepository(BaseRepository):
     async def create(
-        self, name: str = None, parent_group: int = None, id: int = None
+        self,
+        name: Optional[str] = None,
+        parent_group: Optional[int] = None,
+        id: Optional[int] = None,
     ) -> None:
+        # if (name, parent_group, id) is not None:
+        params = {"name": name, "parent_group": parent_group, "id": id}
         try:
-            kwargs = params_to_dict(name=name, parent_group=parent_group, id=id)
+            kwargs = params_to_dict(**params)
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -34,7 +39,7 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def delete(self, group_id: int = None) -> None:
+    async def delete(self, group_id: Optional[int] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -81,7 +86,6 @@ class GroupRepository(BaseRepository):
             raise ValueError
 
     async def get_group_by_name(self, name: str) -> Group:
-
         try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
@@ -97,7 +101,7 @@ class GroupRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_all_groups(self) -> list:
+    async def get_all_groups(self) -> List[Group]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -109,7 +113,10 @@ class GroupRepository(BaseRepository):
             return result
 
     async def update(
-        self, group_id: int, name: str = None, parent_group: int = None
+        self,
+        group_id: int,
+        name: Optional[str] = None,
+        parent_group: Optional[int] = None,
     ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -133,7 +140,7 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def get_all_subgroups(self, main_group: Group) -> dict:
+    async def get_all_subgroups(self, main_group: Group) -> Dict[str, Any]:
         all_groups = await self.get_all_groups()
 
         result = {
@@ -144,26 +151,27 @@ class GroupRepository(BaseRepository):
         return result
 
     def recursion(
-        self, main_group: dict, all_groups: list
-    ) -> Union[list, None]:
-        result = []
+        self, main_group: Dict[str, Any], all_groups: List[Any]
+    ) -> Optional[List[Dict[str, Any]]]:
+        result: Optional[List[Any]] = []
         groups_remove = []
-        for group in all_groups:
-            if main_group["id"] == group.parent_group:
-                result.append(group.dictionary() | {"subgroups": ...})
-                groups_remove.append(group)
+        if result is not None:
+            for group in all_groups:
+                if main_group["id"] == group.parent_group:
+                    result.append(group.dictionary() | {"subgroups": ...})
+                    groups_remove.append(group)
 
-        for group in groups_remove:
-            all_groups.remove(group)
+            for group in groups_remove:
+                all_groups.remove(group)
 
-        if len(result) == 0:
-            result = None
-            return result
+            if len(result) == 0:
+                result = None
+                return result
 
-        for group in result:
-            group["subgroups"] = self.recursion(
-                main_group=group, all_groups=all_groups
-            )
+            for group in result:
+                group["subgroups"] = self.recursion(
+                    main_group=group, all_groups=all_groups
+                )
 
         return result
 
