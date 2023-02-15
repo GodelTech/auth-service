@@ -1,6 +1,7 @@
 import datetime
 import pytest_asyncio
 
+from src.presentation.api.models import DeviceCancelModel, DeviceUserCodeModel, DeviceRequestModel
 from src.presentation.api.models.authorization import RequestModel
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.business_logic.services.jwt_token import JWTService
@@ -64,7 +65,7 @@ DEFAULT_USER = {
     "phone_number": "4567736574",
     "phone_number_confirmed": False,
     "two_factors_enabled": True,
-    "lockout_end_date_utc": datetime.datetime.now(),
+    "lockout_end_date_utc": datetime.datetime.utcnow(),
     "lockout_enabled": True,
     "access_failed_count": 0,
     "username": "DefaultTestClient",
@@ -97,6 +98,33 @@ def authorization_request_model() -> RequestModel:
         acr_values="test_data",
     )
 
+    return request_model
+
+
+@pytest_asyncio.fixture
+def device_cancel_model() -> DeviceCancelModel:
+    cancel_model = DeviceCancelModel(
+        client_id="test_client",
+        scope="gcp-api%20IdentityServerApi&grant_type=urn:ietf:params:oauth:grant-type:device_code&"
+              "client_id=test_client&client_secret=65015c5e-c865-d3d4-3ba1-3abcb4e65500&"
+              "password=test_password&username=TestClient&user_code=user_code",
+    )
+    return cancel_model
+
+
+@pytest_asyncio.fixture
+def device_user_code_model() -> DeviceUserCodeModel:
+    user_code_model = DeviceUserCodeModel(
+        user_code="GHJKTYUI"
+    )
+    return user_code_model
+
+
+@pytest_asyncio.fixture
+def device_request_model() -> DeviceRequestModel:
+    request_model = DeviceRequestModel(
+        client_id="test_client"
+    )
     return request_model
 
 

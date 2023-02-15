@@ -300,15 +300,13 @@ class TokenService:
                 ):
                     if await self.device_repo.validate_device_code(device_code=self.request_model.device_code):
                         # add check for expire time
-                        now = datetime.datetime.now()
+                        now = datetime.datetime.utcnow()
                         check_time = datetime.datetime.timestamp(now)
                         expire_in = await self.device_repo.get_expiration_time(device_code=self.request_model.device_code)
                         if check_time > expire_in:
                             await self.device_repo.delete_by_device_code(device_code=self.request_model.device_code)
                             raise DeviceCodeExpirationTimeError("Device code expired")
                         raise DeviceRegistrationError("Device registration in progress")
-                    else:
-                        raise DeviceCodeNotFoundError("Such device code does not exist")
                 elif await self.persistent_grant_repo.exists(
                     grant_type=self.request_model.grant_type,
                     data=self.request_model.device_code,
