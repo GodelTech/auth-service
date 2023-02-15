@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Callable
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -15,8 +16,9 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
         self.app = app
         self.jwt_service = jwt_service
 
-    async def dispatch_func(self, request: Request, call_next):
-
+    async def dispatch_func(
+        self, request: Request, call_next: Callable[[Request], Any]
+    ) -> JSONResponse:
         if "/administration/" in request.url.path:
             token = request.headers.get("access-token")
 

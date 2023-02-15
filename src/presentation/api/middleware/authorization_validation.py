@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Callable
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -22,8 +23,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         self.app = app
         self.jwt_service = jwt_service
 
-    async def dispatch_func(self, request: Request, call_next):
-
+    async def dispatch_func(
+        self, request: Request, call_next: Callable[[Request], Any]
+    ) -> JSONResponse:
         for request_with_auth in REQUESTS_WITH_AUTH:
             if (
                 request_with_auth["path"] == request.url.path
