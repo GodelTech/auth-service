@@ -51,7 +51,7 @@ class IntrospectionServies:
                     response = {"active": True}
                     break
         else:
-            exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=self.request_body.token)
+            exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, grant_data=self.request_body.token)
             response = {"active": exists}
         
         if response["active"]:
@@ -86,8 +86,8 @@ class IntrospectionServies:
         return response
 
     async def get_client_id(self) -> str:
-        grant = await self.persistent_grant_repo.get(data=self.request_body.token, grant_type=self.request_body.token_type_hint)
-        return grant.client_id
+        grant = await self.persistent_grant_repo.get(grant_data=self.request_body.token, grant_type=self.request_body.token_type_hint)
+        return grant.client.client_id
 
     def get_token_type(self) -> str:
         return 'Bearer'
