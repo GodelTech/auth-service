@@ -155,7 +155,6 @@ class GroupRepository(BaseRepository):
     ) -> Optional[List[Dict[str, Any]]]:
         result = []
         groups_remove = []
-        # if result is not None:
         for group in all_groups:
             if main_group["id"] == group.parent_group:
                 result.append(group.dictionary() | {"subgroups": ...})
@@ -165,7 +164,6 @@ class GroupRepository(BaseRepository):
             all_groups.remove(group)
 
         if len(result) == 0:
-            # result = None
             return result
 
         for group in result:
