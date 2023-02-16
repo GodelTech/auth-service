@@ -1,4 +1,4 @@
-from sqlalchemy import select, exists, update, insert, text
+from sqlalchemy import select, exists, update, insert, text, join
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables.group import Group
@@ -7,7 +7,7 @@ from src.data_access.postgresql.errors.user import (
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables import User, UserClaim, Role
+from src.data_access.postgresql.tables import User, UserClaim, Role, UserClaimType
 from src.data_access.postgresql.tables.users import users_roles, users_groups
 from src.data_access.postgresql.errors.user import DuplicationError
 from typing import Union
@@ -86,7 +86,7 @@ class UserRepository(BaseRepository):
         result = {}
 
         for claim in claims_of_user:
-            result[claim[0].claim_type.code] = claim[0].claim_value
+            result[claim[0].claim_type.type_of_claim] = claim[0].claim_value
 
         if not result:
             raise ClaimsNotFoundError(
@@ -95,15 +95,14 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def request_DB_for_claims(self, id: int):
+    async def request_DB_for_claims(self, sub: int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
-            return await session.execute(
-                select(UserClaim).where(UserClaim.user_id == id)
-            )
+            result = await session.execute(select(UserClaim).where(UserClaim.user_id == sub).join(UserClaimType, UserClaimType.id == UserClaim.claim_type_id))
+            return result
 
     async def get_username_by_id(self, id: int) -> str:
         session_factory = sessionmaker(

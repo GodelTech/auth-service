@@ -1,8 +1,8 @@
-"""device table
+"""Devices
 
-Revision ID: 0a847d114082
-Revises: d17157d6167d
-Create Date: 2023-02-07 07:50:11.472572
+Revision ID: ccf9fffc92bc
+Revises: 4feaa6506b2e
+Create Date: 2023-02-15 17:13:06.427979
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0a847d114082'
-down_revision = 'd17157d6167d'
+revision = 'ccf9fffc92bc'
+down_revision = '4feaa6506b2e'
 branch_labels = None
 depends_on = None
 
@@ -28,7 +28,9 @@ def upgrade() -> None:
     sa.Column('verification_uri_complete', sa.String(), nullable=False),
     sa.Column('expires_in', sa.Integer(), nullable=False),
     sa.Column('interval', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('device_code'),
+    sa.UniqueConstraint('user_code')
     )
     # ### end Alembic commands ###
 

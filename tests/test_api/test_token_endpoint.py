@@ -25,7 +25,7 @@ class TestTokenEndpoint:
         service = token_service
         await service.persistent_grant_repo.create(
             client_id='double_test',
-            data='secret_code',
+            grant_data='secret_code',
             user_id=1,
             grant_type='code',
             expiration_time=3600,
@@ -36,7 +36,7 @@ class TestTokenEndpoint:
             'grant_type': 'code',
             'code': 'secret_code',
             'scope': 'test',
-            'redirect_uri': 'https://www.arnold-mann.net/',
+            'redirect_uri':"http://www.sosa-stephens.com/",
         }
 
         response = await client.request(
@@ -52,7 +52,7 @@ class TestTokenEndpoint:
         pytest.refresh_token = response_json['refresh_token']
         assert (
             await service.persistent_grant_repo.exists(
-                grant_type='refresh_token', data=pytest.refresh_token
+                grant_type='refresh_token', grant_data=pytest.refresh_token
             )
             is True
         )
@@ -75,7 +75,7 @@ class TestTokenEndpoint:
         persistent_grant_repo = PersistentGrantRepository(engine)
         await persistent_grant_repo.create(
             client_id='test_client',
-            data=test_token,
+            grant_data=test_token,
             user_id=1,
             grant_type='refresh_token',
         )
@@ -98,7 +98,7 @@ class TestTokenEndpoint:
         data = response_json['refresh_token']
         assert (
             await persistent_grant_repo.exists(
-                grant_type='refresh_token', data=data
+                grant_type='refresh_token', grant_data=data
             )
             is True
         )
@@ -110,7 +110,7 @@ class TestTokenEndpoint:
 
         await self.persistent_grant_repo.create(
             client_id='double_test',
-            data='secret_code',
+            grant_data='secret_code',
             user_id=2,
             grant_type='code',
             expiration_time=3600,

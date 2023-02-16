@@ -19,12 +19,12 @@ class TestDeviceEndpoint:
         response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is True
         await connection.execute(
-            delete(Device).where(Device.client_id == "test_client")
+            delete(Device).where(Device.client_id == 1)
         )
         await connection.commit()
 
@@ -52,7 +52,7 @@ class TestDeviceEndpoint:
         response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(Device).where(Device.client_id == "test_client")
+            select(Device).where(Device.client_id == 1)
         )
         device = device.first()[0]
         user_code = device.user_code
@@ -63,7 +63,7 @@ class TestDeviceEndpoint:
 
         assert response.status_code == status.HTTP_302_FOUND
         await connection.execute(
-            delete(Device).where(Device.client_id == "test_client")
+            delete(Device).where(Device.client_id == 1)
         )
         await connection.commit()
 
@@ -93,13 +93,13 @@ class TestDeviceEndpoint:
         assert response.status_code == status.HTTP_200_OK
 
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is True
 
         device = await connection.execute(
-            select(Device).where(Device.client_id == "test_client")
+            select(Device).where(Device.client_id == 1)
         )
         device = device.first()[0]
         user_code = device.user_code
@@ -113,7 +113,7 @@ class TestDeviceEndpoint:
 
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is False

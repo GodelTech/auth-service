@@ -45,7 +45,7 @@ class IntrospectionServies:
         if response == {}:
             if self.request_body.token_type_hint is None:
 
-                list_of_types = [token_type[0] for token_type in PersistentGrant.TYPES_OF_GRANTS] 
+                list_of_types = [token_type[0] for token_type in await self.persistent_grant_repo.get_all_types()] 
                 
                 for token_type in list_of_types:
                     if await self.persistent_grant_repo.exists(grant_type = token_type, data=self.request_body.token):
@@ -53,7 +53,7 @@ class IntrospectionServies:
                         response = {"active": True}
                         break
             else:
-                exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, data=self.request_body.token)
+                exists = await self.persistent_grant_repo.exists(grant_type = self.request_body.token_type_hint, grant_data=self.request_body.token)
                 response = {"active": exists}
         
         if response["active"]:
@@ -88,7 +88,7 @@ class IntrospectionServies:
         return response
 
     async def get_client_id(self) -> str:
-        grant = await self.persistent_grant_repo.get(data=self.request_body.token, grant_type=self.request_body.token_type_hint)
+        grant = await self.persistent_grant_repo.get(grant_data=self.request_body.token, grant_type=self.request_body.token_type_hint)
         return grant.client_id
 
     def get_token_type(self) -> str:
@@ -98,5 +98,5 @@ class IntrospectionServies:
         result = str(self.request.url).rsplit('/', 2)
         return result[0]
 
-    def time_diff_in_seconds(self, finish: datetime.datetime = datetime.datetime.utcnow(), start: datetime.datetime = datetime.datetime(1970, 1, 1)) -> int:
+    def time_diff_in_seconds(self, finish: datetime.datetime = datetime.datetime.now(), start: datetime.datetime = datetime.datetime(1970, 1, 1)) -> int:
         return int((finish - start).total_seconds())

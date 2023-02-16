@@ -46,8 +46,8 @@ class TestAuthorizationTokenFlow:
         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
         await connection.execute(
             insert(UserClaim).values(
-                User=8,
-                claim_type="name",
+                user_id=8, 
+                claim_type_id=1, 
                 claim_value="Peter"
             )
          )
@@ -56,7 +56,7 @@ class TestAuthorizationTokenFlow:
         assert response.status_code == status.HTTP_200_OK
         await connection.execute(
             delete(UserClaim).where(UserClaim.user_id == 8).
-            where(UserClaim.claim_type == "name")
+            where(UserClaim.claim_type_id == 1)
          )
         await connection.commit()
 
@@ -98,8 +98,8 @@ class TestAuthorizationTokenFlow:
         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
         await connection.execute(
             insert(UserClaim).values(
-                User=8,
-                claim_type="name",
+                user_id=8, 
+                claim_type_id=1, 
                 claim_value="Peter"
             )
         )
@@ -107,7 +107,7 @@ class TestAuthorizationTokenFlow:
         response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
         assert response.status_code == status.HTTP_200_OK
         await connection.execute(
-            delete(UserClaim).where(UserClaim.user_id == 8).where(UserClaim.claim_type == "name")
+            delete(UserClaim).where(UserClaim.user_id == 8).where(UserClaim.claim_type_id == 1)
         )
         await connection.commit()
 

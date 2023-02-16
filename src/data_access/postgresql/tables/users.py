@@ -9,11 +9,34 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    CheckConstraint,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import ChoiceType
 from src.data_access.postgresql.tables.group import users_groups, permissions_roles
 from .base import Base, BaseModel
+
+
+USER_CLAIM_TYPE = [
+        "name", 
+        "given_name",
+        "family_name",
+        "middle_name",
+        "nickname", 
+        "preferred_username", 
+        "profile",
+        "picture",
+        "website",
+        "email", 
+        "email_verified",
+        "gender", 
+        "birthdate",
+        "zoneinfo",
+        "locale", 
+        "phone_number", 
+        "phone_number_verified",
+        "address", 
+        "updated_at", 
+    ]
 
 users_roles = Table(
     "users_roles",
@@ -26,7 +49,8 @@ users_roles = Table(
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    # user = relationship("User", backref = "login",)
     login_provider = Column(
         String,
         primary_key=True,
@@ -39,9 +63,11 @@ class UserLogin(BaseModel):
         nullable=False,
         unique=True,
     )
-
+    def __str__(self) -> str:
+        return f"{self.login_provider}: {self.provider_key}"
+    
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_name}"
+        return f"{self.login_provider}: {self.provider_key}"
 
 
 class User(BaseModel):
@@ -58,14 +84,12 @@ class User(BaseModel):
     lockout_enabled = Column(Boolean, default=True, nullable=True)
     access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
-    roles = relationship(
-        "Role", secondary="users_roles", back_populates="users"
-    )
-    groups = relationship(
-        "Group", secondary="users_groups", back_populates="users"
-    )
+    roles = relationship("Role", secondary="users_roles", back_populates="users")
+    groups = relationship("Group", secondary="users_groups", back_populates="users")
+    claims = relationship("UserClaim", back_populates = "user", foreign_keys="UserClaim.user_id")
+    grants = relationship("PersistentGrant", back_populates = "user", foreign_keys = "PersistentGrant.user_id")
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"id {self.id}\t{self.username}"
 
 
 class Role(BaseModel):
@@ -80,36 +104,28 @@ class Role(BaseModel):
     )
 
     def __str__(self):
-        return f"Role {self.name} - {self.id}"
+        return f"{self.id}: {self.name}"
 
 
 class UserClaim(BaseModel):
-    USER_CLAIM_TYPE = [
-        ("name", "Name"),
-        ("given_name", "Given name"),
-        ("family_name", "Family name"),
-        ("middle_name", "Middle name"),
-        ("nickname", "Nickname"),
-        ("preferred_username", "Preferred username"),
-        ("profile", "Profile"),
-        ("picture", "Picture"),
-        ("website", "Website"),
-        ("email", "Email"),
-        ("email_verified", "Email verified"),
-        ("gender", "Gender"),
-        ("birthdate", "Birthdate"),
-        ("zoneinfo", "Zoneinfo"),
-        ("locale", "Locale"),
-        ("phone_number", "Phone number"),
-        ("phone_number_verified", "Phone number verified"),
-        ("address", "Address"),
-        ("updated_at", "Updated at"),
-    ]
+   
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user = relationship("User",  back_populates="claims")
+
+    claim_type_id = Column(Integer, ForeignKey("user_claim_types.id", ondelete='CASCADE'), nullable=False)
+    claim_type = relationship("UserClaimType", backref = "claim", lazy = "joined") 
     claim_value = Column(String, nullable=False)
 
     def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+        return f"{self.claim_type_id}: {self.claim_value}"
+
+class UserClaimType(Base):
+   
+    __tablename__ = "user_claim_types"
+    id = Column(Integer, primary_key=True)
+    type_of_claim = Column(String, unique=True)
+    
+    def __str__(self):
+        return f"{self.type_of_claim}"

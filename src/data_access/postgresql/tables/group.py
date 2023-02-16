@@ -75,7 +75,7 @@ class Permission(BaseModel):
     )
 
     def __str__(self):
-        return self.namee   
+        return self.name  
 
     def __repr__(self) -> str:
         return self.name

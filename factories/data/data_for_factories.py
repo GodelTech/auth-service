@@ -55,29 +55,32 @@ CLIENT_USERNAMES = {
 }
 
 USER_CLAIM_TYPE = [
-    "name",
-    "given_name",
-    "family_name",
-    "middle_name",
-    "nickname",
-    "preferred_username",
-    "profile",
-    "picture",
-    "website",
-    "email",
-    "email_verified",
-    "gender",
-    "birthdate",
-    "zoneinfo",
-    "locale",
-    "phone_number",
-    "phone_number_verified",
-    "address",
-    "updated_at",
-]
+        "name", 
+        "given_name",
+        "family_name",
+        "middle_name",
+        "nickname", 
+        "preferred_username", 
+        "profile",
+        "picture",
+        "website",
+        "email", 
+        "email_verified",
+        "gender", 
+        "birthdate",
+        "zoneinfo",
+        "locale", 
+        "phone_number", 
+        "phone_number_verified",
+        "address", 
+        "updated_at", 
+    ]
 
 TYPES_OF_GRANTS = [
-    "code",
+    "code", 
+    "refresh_token",
+    "password",
+    'urn:ietf:params:oauth:grant-type:device_code',
 ]
 
 API_SECRET_TYPE = [
@@ -104,39 +107,40 @@ API_SCOPE_CLAIM_TYPE = [
     "updated_at",
 ]
 
+
 DEFAULT_USER_CLAIMS = {
-    "name": "Daniil",
-    "given_name": "Ibragim",
-    "family_name": "Krats",
-    "middle_name": "-el-",
-    "nickname": "Nagibator2000",
-    "preferred_username": "Graf",
-    "profile": "werni_stenu",
-    "picture": "https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg",
-    "website": "https://www.instagram.com/daniilkrats/",
-    "email": "danya.krats87@gmail.com",
-    "email_verified": True,
-    "gender": "Attack Helicopter",
-    "birthdate": "02/01/2000",
-    "zoneinfo": "GMT+1",
-    "locale": "Warsaw",
-    "phone_number": "+48510143314",
-    "phone_number_verified": False,
-    "address": "5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania",
-    "updated_at": 1234567890,
+    1: "Daniil",
+    2: "Ibragim",
+    3: "Krats",
+    4: "-el-",
+    5: "Nagibator2000",
+    6: "Graf",
+    7: "werni_stenu",
+    8: "https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg",
+    9: "https://www.instagram.com/daniilkrats/",
+    10: "danya.krats87@gmail.com",
+    11: True,
+    12: "Attack Helicopter",
+    13: "02/01/2000",
+    14: "GMT+1",
+    15: "Warsaw",
+    16: "+48510143314",
+    17: False,
+    18: "5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania",
+    19: 1234567890,
 }
 
 CLIENT_SECRETS = {
-    "test_client": "past",
-    "double_test": "play",
-    "santa": "health",
-    "krampus": "address",
-    "frodo": "their",
-    "aragorn": "line",
-    "iron_man": "film",
-    "spider_man": "light",
-    "thor": "position",
-    "samuel": "themselves",
+    1: "past",
+    2: "play",
+    3: "health",
+    4: "address",
+    5: "their",
+    6: "line",
+    7: "film",
+    8: "light",
+    9: "position",
+    10: "themselves",
 }
 
 ROLES = [
@@ -146,3 +150,23 @@ ROLES = [
     "Air cabin crew",
     "Scientist, research (maths)"
 ]
+
+
+ACCESS_TOKEN_TYPES = [
+    "jwt", 
+    "reference"
+    ]
+
+PROTOCOL_TYPES = [
+    "open_id_connect",
+    ]
+
+REFRESH_TOKEN_EXPIRATION_TYPES = [
+    "absolute",
+    "sliding",
+    ]
+
+REFRESH_TOKEN_USAGE = [
+    "one_time_only", 
+    "reuse"
+    ]
