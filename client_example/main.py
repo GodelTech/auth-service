@@ -15,11 +15,16 @@ from client_example.db.database import engine
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
+
 dictConfig(LogConfig().to_dict)
 
 app.include_router(notes.router)
 app.include_router(auth.router)
 
+
+# TODO set secret_key in env
+app.add_middleware(AuthorizationMiddleware)
+app.add_middleware(SessionMiddleware, secret_key="random-string")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +32,3 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-
-# TODO set secret_key in env
-app.add_middleware(AuthorizationMiddleware)
-app.add_middleware(SessionMiddleware, secret_key='random-string')

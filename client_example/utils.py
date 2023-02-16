@@ -3,6 +3,8 @@ import requests
 from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 
+from client_example.httpx_oauth.openid import OpenID
+
 # Identity Server endpoints
 AUTH_URL = "http://localhost:8000/authorize/"
 TOKEN_URL = "http://localhost:8000/token/"
@@ -11,6 +13,13 @@ JWKS_URL = "http://localhost:8000/.well-known/jwks"
 USERINFO_URL = "http://localhost:8000/userinfo/"
 INTROSPECTION_URL = "http://localhost:8000/introspection/"
 ENDSESSION_URL = "http://localhost:8000/endsession/"
+
+
+client = OpenID(
+    client_id="test_client",
+    client_secret="past",
+    openid_configuration_endpoint=CONFIG_URL,
+)
 
 
 class TokenValidator:

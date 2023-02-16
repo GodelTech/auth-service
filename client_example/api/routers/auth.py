@@ -4,14 +4,9 @@ import secrets
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
-from client_example.httpx_oauth.openid import OpenID
-from client_example.utils import CONFIG_URL
+from client_example.tasks import add_users_from_identity_server
+from client_example.utils import client
 
-client = OpenID(
-    client_id="test_client",
-    client_secret="past",
-    openid_configuration_endpoint=CONFIG_URL,
-)
 router = APIRouter(tags=["Authentication"])
 
 logger = logging.getLogger("example_app")
@@ -43,6 +38,7 @@ async def login_callback(code: str, request: Request):
         code=code, redirect_uri="http://localhost:8001/login-callback"
     )
     access_token, refresh_token = token["access_token"], token["refresh_token"]
+    add_users_from_identity_server.delay(access_token=access_token)
     response = RedirectResponse("/notes")
     response.set_cookie(
         key="access_token",

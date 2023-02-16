@@ -87,23 +87,43 @@ class OpenID(BaseOAuth2[Dict[str, Any]]):
             )
             return RedirectResponse(response.headers["location"])
 
-    # TODO this one too
-    async def get_all_users_data(
-        self, auth_header: dict, group_id: int, role_id: int
-    ) -> dict:
-        async with self.get_httpx_client() as client:
-            params = {}
-
-            if group_id is not None:
-                params["group_id"] = group_id
-
-            if role_id is not None:
-                params["role_id"] = role_id
-
-            response = await client.get(
-                url="http://localhost:8000/administration/user/all_users",
-                headers=auth_header,
-                params=params,
+    # # TODO this one too
+    def get_user_info(self, token: str) -> dict:
+        with httpx.Client() as client:
+            response = client.get(
+                self.openid_configuration["userinfo_endpoint"],
+                headers={
+                    **self.request_headers,
+                    "Authorization": f"Bearer {token}",
+                },
             )
 
-            return response.json()
+            if response.status_code >= 400:
+                raise GetIdError(response.json())
+
+            data: Dict[str, Any] = response.json()
+
+            return data
+
+    # def get_all_users_data(
+    #     self,
+    #     access_token: str,
+    #     group_id: Optional[int] = None,
+    #     role_id: Optional[int] = None,
+    # ) -> dict:
+    #     with httpx.Client() as client:
+    #         params = {}
+    #         headers = {"Authorization": f"Bearer {access_token}"}
+    #         if group_id is not None:
+    #             params["group_id"] = group_id
+
+    #         if role_id is not None:
+    #             params["role_id"] = role_id
+
+    #         response = client.get(
+    #             url="http://localhost:8000/userinfo",
+    #             headers=headers,
+    #             params=params,
+    #         )
+
+    #         return response.json()
