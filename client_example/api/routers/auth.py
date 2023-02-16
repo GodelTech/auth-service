@@ -63,13 +63,13 @@ async def login_callback(code: str, request: Request):
 
 @router.get("/logout")
 async def logout(request: Request):
-    access_token = request.headers.get("access_token")
-    await client.revoke_token(
-        token=access_token, token_type_hint="access_token"
-    )
+    access_token = request.headers.get("authorization")
     response = await client.logout(
         id_token_hint=access_token, redirect_uri="http://localhost:8001/"
     )
+    # await client.revoke_token(
+    #     token=access_token, token_type_hint="access_token"
+    # )
     request.session.clear()
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
