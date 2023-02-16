@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import ClientRepository
@@ -12,27 +13,28 @@ class LoginFormService:
         self,
         client_repo: ClientRepository,
     ) -> None:
-        self._request_model = None
+        self._request_model: Optional[RequestModel] = None
         self.client_repo = client_repo
 
-    async def get_html_form(self) -> bool:
-        if await self._validate_client(self.request_model.client_id):
-
-            if await self._validate_client_redirect_uri(
-                client_id=self.request_model.client_id,
-                redirect_uri=self.request_model.redirect_uri,
-            ):
-                if self.request_model.response_type in [
-                    "code",
-                    "token",
-                    "id_token token",
-                    "urn:ietf:params:oauth:grant-type:device_code"
-                ]:
-                    return True
-                else:
-                    raise WrongResponseTypeError(
-                        "You try to pass unprocessable response type"
-                    )
+    async def get_html_form(self) -> Optional[bool]:
+        if self.request_model is not None:
+            if await self._validate_client(self.request_model.client_id):
+                if await self._validate_client_redirect_uri(
+                    client_id=self.request_model.client_id,
+                    redirect_uri=self.request_model.redirect_uri,
+                ):
+                    if self.request_model.response_type in [
+                        "code",
+                        "token",
+                        "id_token token",
+                        "urn:ietf:params:oauth:grant-type:device_code",
+                    ]:
+                        return True
+                    else:
+                        raise WrongResponseTypeError(
+                            "You try to pass unprocessable response type"
+                        )
+        return None
 
     async def _validate_client(self, client_id: str) -> bool:
         """
@@ -55,7 +57,7 @@ class LoginFormService:
         return client
 
     @property
-    def request_model(self) -> None:
+    def request_model(self) -> Optional[RequestModel]:
         return self._request_model
 
     @request_model.setter
