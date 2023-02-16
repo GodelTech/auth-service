@@ -170,3 +170,21 @@ REFRESH_TOKEN_USAGE = [
     "one_time_only", 
     "reuse"
     ]
+
+IDENTITY_PROVIDERS=[
+        {   
+        "name":"git",
+        "auth_endpoint_link":"git_auth_endpoint_link",
+        "token_endpoint_link":"git_token_endpoint_link",
+        "userinfo_link":"git_userinfo_link",
+        "internal_redirect_uri":"git_internal_redirect_uri", 
+        },
+        {   
+        "name":"facebook",
+        "auth_endpoint_link":"facebook_auth_endpoint_link",
+        "token_endpoint_link":"facebook_token_endpoint_link",
+        "userinfo_link":"facebook_userinfo_link",
+        "internal_redirect_uri":"facebook_internal_redirect_uri", 
+        },
+    ]
+

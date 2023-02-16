@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from src.data_access.postgresql.tables import IdentityClaim, IdentityResource
+from src.data_access.postgresql.tables import IdentityClaim, IdentityResource, IdentityProviderMapped
 
 
 class IdentityResourceAdminController(ModelView, model=IdentityResource):
@@ -22,3 +22,12 @@ class IdentityClaimAdminController(ModelView, model=IdentityClaim):
                    IdentityClaim.identity_resource, 
                    ]
 
+class IdentityProviderMappedAdminController(ModelView, model = IdentityProviderMapped):
+    icon = "fa-solid fa-fingerprint"
+    name_plural = "Identity Providers"
+    column_list  = [
+        IdentityProviderMapped.id,
+        IdentityProviderMapped.identity_provider,
+        IdentityProviderMapped.provider_client_id,
+        IdentityProviderMapped.enabled,
+    ]

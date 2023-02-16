@@ -30,7 +30,11 @@ from .resources_related import (
     ApiScopeClaimAdminController,
     ApiScopeClaimTypeAdminController,
 )
-from .identity_resource import IdentityResourceAdminController, IdentityClaimAdminController
+from .identity_resource import (
+    IdentityResourceAdminController, 
+    IdentityClaimAdminController, 
+    IdentityProviderMappedAdminController,
+    )
 from .group import PermissionAdminController, GroupAdminController
 from .device import DeviceAdminController
 
