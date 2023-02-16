@@ -34,6 +34,7 @@ from .identity_resource import (
     IdentityResourceAdminController, 
     IdentityClaimAdminController, 
     IdentityProviderMappedAdminController,
+    IdentityProviderAdminController,
     )
 from .group import PermissionAdminController, GroupAdminController
 from .device import DeviceAdminController

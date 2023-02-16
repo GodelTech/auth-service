@@ -45,9 +45,9 @@ class IdentityProviderMapped(BaseModel):
 
     def __str__(self) -> str:
         if self.enabled:
-            return f"{self.identity_provider} {self.provider_client_id}: ON"
+            return f"id: {self.id} | Client_id : {self.provider_client_id} | Status : ON"
         else:
-            return f"{self.identity_provider} {self.provider_client_id}: OFF"
+            return f"id: {self.id} | Client_id : {self.provider_client_id} | Status : OFF"
 
 
 class IdentityProvider(BaseModel):

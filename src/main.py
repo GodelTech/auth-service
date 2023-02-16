@@ -55,6 +55,7 @@ from src.presentation.admin_ui.controllers import (
     ClientIdRestrictionController,
     DeviceAdminController,
     IdentityProviderMappedAdminController,
+    IdentityProviderAdminController,
 )
 from src.di.providers import (
     provide_config,
@@ -148,6 +149,7 @@ def setup_di(app: FastAPI) -> None:
         ),
     )
     #Identity Resourses
+    admin.add_view(IdentityProviderAdminController)
     admin.add_view(IdentityProviderMappedAdminController)
     admin.add_view(IdentityResourceAdminController)
     admin.add_view(IdentityClaimAdminController)

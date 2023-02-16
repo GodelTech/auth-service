@@ -36,7 +36,7 @@ from .resources_related import (
     ApiSecret, 
     ApiSecretType,  
 )
-from .identity_resource import IdentityClaim, IdentityResource, IdentityProviderMapped
+from .identity_resource import IdentityClaim, IdentityResource, IdentityProviderMapped, IdentityProvider
 from .group import Group, Permission
 __all__ = [
     Client,
