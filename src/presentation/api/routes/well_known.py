@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_cache.decorator import cache
 
-from src.business_logic.cache.key_builders import builder_with_parametr
+from src.business_logic.cache.key_builders import builder_with_parameter
 from src.business_logic.services.well_known import WellKnownServies
 from src.config.settings.cache_time import CacheTimeSettings
 from src.presentation.api.models.well_known import (
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 )
 @cache(
     expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG,
-    key_builder=builder_with_parametr,
+    key_builder=builder_with_parameter,
 )
 async def get_openid_configuration(
     request: Request, well_known_info_class: WellKnownServies = Depends()

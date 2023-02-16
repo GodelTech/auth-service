@@ -24,7 +24,6 @@ class GroupRepository(BaseRepository):
         parent_group: Optional[int] = None,
         id: Optional[int] = None,
     ) -> None:
-        # if (name, parent_group, id) is not None:
         params = {"name": name, "parent_group": parent_group, "id": id}
         try:
             kwargs = params_to_dict(**params)

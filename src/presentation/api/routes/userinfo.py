@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
 
-from src.business_logic.cache.key_builders import builder_with_parametr
+from src.business_logic.cache.key_builders import builder_with_parameter
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
@@ -26,7 +26,7 @@ userinfo_router = APIRouter(
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
-    key_builder=builder_with_parametr,
+    key_builder=builder_with_parameter,
 )
 async def get_userinfo(
     request: Request,
@@ -70,7 +70,7 @@ async def get_userinfo(
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
-    key_builder=builder_with_parametr,
+    key_builder=builder_with_parameter,
 )
 async def post_userinfo(
     request: Request,
@@ -112,7 +112,7 @@ async def post_userinfo(
 @cache(
     expire=CacheTimeSettings.USERINFO_JWT,
     coder=JsonCoder,
-    key_builder=builder_with_parametr,
+    key_builder=builder_with_parameter,
 )
 async def get_userinfo_jwt(
     request: Request,
@@ -121,7 +121,6 @@ async def get_userinfo_jwt(
     ),
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ):
-
     try:
         userinfo_class = userinfo_class
         jwt_service = JWTService()

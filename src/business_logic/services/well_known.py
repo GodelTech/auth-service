@@ -147,7 +147,7 @@ class WellKnownServies:
         return result
 
     @property
-    def request(self) -> Request:
+    def request(self) -> Optional[Request]:
         return self._request
 
     @request.setter
