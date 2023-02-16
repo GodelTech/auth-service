@@ -2,6 +2,7 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyChoice
 
+import factories.data.data_for_factories as data
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.resources_related as resource
 from factories.data.data_for_factories import (
@@ -9,6 +10,28 @@ from factories.data.data_for_factories import (
     API_SCOPE_CLAIM_TYPE,
     API_SECRET_TYPE,
 )
+
+
+class ApiClaimTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = resource.ApiClaimType
+        sqlalchemy_session = sess.session
+
+    claim_type = FuzzyChoice(data.API_CLAIM_TYPE)
+
+class ApiScopeClaimTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = resource.ApiScopeClaimType
+        sqlalchemy_session = sess.session
+
+    scope_claim_type = FuzzyChoice(data.API_SCOPE_CLAIM_TYPE)
+
+class ApiSecretsTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = resource.ApiSecretType
+        sqlalchemy_session = sess.session
+
+    secret_type = FuzzyChoice(data.API_SECRET_TYPE)
 
 
 class ApiResourceFactory(SQLAlchemyModelFactory):

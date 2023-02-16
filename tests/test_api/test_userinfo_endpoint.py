@@ -20,15 +20,15 @@ ANSWER_USER_INFO = {'sub': '1',
                     'picture': 'https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg',
                     'website': 'https://www.instagram.com/daniilkrats/',
                     'email': 'danya.krats87@gmail.com',
-                    'email_verified': True,
+                    'email_verified': 'true',
                     'gender': 'Attack Helicopter',
                     'birthdate': '02/01/2000',
                     'zoneinfo': 'GMT+1',
                     'locale': 'Warsaw',
                     'phone_number': '+48510143314',
-                    'phone_number_verified': False,
+                    'phone_number_verified': "false",
                     'address': '5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania',
-                    'updated_at': 1234567890,
+                    'updated_at': "1234567890",
                     }
 
 
@@ -83,7 +83,7 @@ class TestUserInfoEndpoint:
     ):
         uis = user_info_service
         uis.client_id = "santa"
-        secret = await uis.client_repo.get_client_secrete_by_client_id(client_id=uis.client_id)
+        
         token = await uis.jwt.encode_jwt(payload={"blablabla": "blablabla"})
 
         for url in ('/userinfo/', '/userinfo/jwt'):

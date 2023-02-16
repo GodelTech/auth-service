@@ -45,10 +45,8 @@ class TestAuthorizationCodeFlow:
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
         secret_code = await connection.execute(
-            select(PersistentGrant.data)
-            .where(PersistentGrant.client_id == "spider_man")
-            .where(PersistentGrant.subject_id == 8)
-        )
+            select(PersistentGrant.grant_data)
+            .where(PersistentGrant.client_id == 8))
 
         secret_code = secret_code.first()[0]
 
@@ -83,7 +81,7 @@ class TestAuthorizationCodeFlow:
 
         await connection.execute(
             insert(UserClaim).values(
-                User=8, claim_type="name", claim_value="Peter"
+                user_id=8, claim_type_id=1, claim_value="Peter"
             )
         )
         await connection.commit()
@@ -94,7 +92,7 @@ class TestAuthorizationCodeFlow:
         await connection.execute(
             delete(UserClaim)
             .where(UserClaim.user_id == 8)
-            .where(UserClaim.claim_type == "name")
+            .where(UserClaim.claim_type_id == 1)
         )
         await connection.commit()
 
@@ -105,7 +103,7 @@ class TestAuthorizationCodeFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "http://garza-taylor.com/",
+            "post_logout_redirect_uri": "http://www.avery.com/",
             "state": "test_state",
         }
         response = await client.request("GET", "/endsession/", params=params)

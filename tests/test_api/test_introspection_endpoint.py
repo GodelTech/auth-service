@@ -26,18 +26,19 @@ class TestIntrospectionEndpoint:
         payload = {
             "sub": 1,
             "exp": time.time() + 3600,
+            "client_id": "test_client"
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
-        access_token = await jwt.encode_jwt(payload={"sub": "1"})
+        access_token = await jwt.encode_jwt(payload={"sub": "1", "client_id": "test_client"})
 
         await persistent_grant_repo.delete(
-            grant_type=grant_type,
-            data=introspection_token
+            grant_type = "refresh_token", 
+            grant_data=introspection_token
         )
 
         await persistent_grant_repo.create(
-            grant_type=grant_type,
-            data=introspection_token,
+            grant_type='code',
+            grant_data=introspection_token,
             user_id=1,
             client_id="test_client",
             expiration_time=3600,
@@ -91,12 +92,12 @@ class TestIntrospectionEndpoint:
 
         await persistent_grant_repo.delete(
             grant_type=grant_type,
-            data=introspection_token
+            grant_data=introspection_token
         )
 
         await persistent_grant_repo.create(
             grant_type=grant_type,
-            data=introspection_token,
+            grant_data=introspection_token,
             user_id=1,
             client_id="test_client",
             expiration_time=1,
@@ -121,5 +122,5 @@ class TestIntrospectionEndpoint:
 
         await persistent_grant_repo.delete(
             grant_type=grant_type,
-            data=introspection_token
+            grant_data=introspection_token
         )

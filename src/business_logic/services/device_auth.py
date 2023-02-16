@@ -45,7 +45,7 @@ class DeviceService:
         uri_start = "http://127.0.0.1:8000/authorize/?"
         redirect_uri = "https://www.google.com/"
         device = await self.device_repo.get_device_by_user_code(user_code=self.request_model.user_code)
-        final_uri = uri_start + f"client_id={device.client_id}" \
+        final_uri = uri_start + f"client_id={device.client.client_id}" \
                                 f"&response_type=urn:ietf:params:oauth:grant-type:device_code" \
                                 f"&redirect_uri={redirect_uri}&scope=user_code={self.request_model.user_code}"
 

@@ -29,7 +29,7 @@ DEFAULT_CLIENT = {
     "client_id": "default_test_client",
     "absolute_refresh_token_lifetime": 3600,
     "access_token_lifetime": 3600,
-    "access_token_type": "reference",
+    "access_token_type_id": 1,
     "allow_access_token_via_browser": False,
     "allow_offline_access": False,
     "allow_plain_text_pkce": False,
@@ -47,9 +47,9 @@ DEFAULT_CLIENT = {
     "logout_session_required": False,
     "logout_uri": "test_logout_uri",
     "prefix_client_claims": "test_",
-    "protocol_type": "open_id_connect",
-    "refresh_token_expiration": "absolute",
-    "refresh_token_usage": "one_time_only",
+    "protocol_type_id": 1,
+    "refresh_token_expiration_type_id": 1,
+    "refresh_token_usage_type_id": 2,
     "require_client_secret": False,
     "require_consent": False,
     "require_pkce": False,
@@ -164,7 +164,8 @@ async def end_session_request_model() -> RequestEndSessionModel:
     token_hint = await tk_hint.get_token_hint()
     request_model = RequestEndSessionModel(
         id_token_hint=token_hint,
-        post_logout_redirect_uri='https://www.scott.org/',
+        post_logout_redirect_uri='http://campbell-taylor.net/',
         state='test_state'
     )
     return request_model
+a =1 
