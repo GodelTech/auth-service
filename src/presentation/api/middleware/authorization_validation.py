@@ -18,7 +18,7 @@ REQUESTS_WITH_AUTH = [
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp, jwt_service: JWTService = JWTService()):
+    def __init__(self, app: ASGIApp, jwt_service: JWTService):
         self.app = app
         self.jwt_service = jwt_service
 
