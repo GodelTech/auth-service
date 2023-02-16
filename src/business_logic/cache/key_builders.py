@@ -15,7 +15,11 @@ def builder_with_parameter(
     args: Optional[Tuple[Any]] = None,
     kwargs: Optional[Dict[str, Any]] = None,
 ) -> Optional[str]:
-    if request is not None and kwargs is not None:
+    if (
+        request is not None
+        and kwargs is not None
+        and request.client is not None
+    ):
         prefix = f"client-{request.client.host}"
         dict_to_encode = {
             k: kwargs[k]
