@@ -78,12 +78,12 @@ class DeviceService:
         return None
 
     async def clean_device_data(self) -> Optional[str]:
-        if self.request_model is not None:
+        if self.request_cancel_model is not None:
             if await self._validate_client(
-                client_id=self.request_model.client_id
+                client_id=self.request_cancel_model.client_id
             ):
                 scope_data = await self._parse_scope_data(
-                    scope=self.request_model.scope
+                    scope=self.request_cancel_model.scope
                 )
                 user_code = scope_data["user_code"]
                 if await self._validate_user_code(user_code=user_code):

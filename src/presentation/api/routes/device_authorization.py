@@ -1,7 +1,8 @@
 import logging
+from typing import Union
 
-from fastapi import APIRouter, Depends, status, Request
-from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from src.business_logic.services import DeviceService
@@ -9,9 +10,12 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
 )
-from src.presentation.api.models import DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel
 from src.di.providers import provide_device_service_stub
-
+from src.presentation.api.models import (
+    DeviceCancelModel,
+    DeviceRequestModel,
+    DeviceUserCodeModel,
+)
 
 logger = logging.getLogger("is_app")
 
@@ -22,11 +26,16 @@ device_auth_router = APIRouter(
 )
 
 
-@device_auth_router.post("/", status_code=status.HTTP_200_OK, tags=["Device"], response_class=JSONResponse)
+@device_auth_router.post(
+    "/",
+    status_code=status.HTTP_200_OK,
+    tags=["Device"],
+    response_class=JSONResponse,
+)
 async def post_device_authorize(
     request_model: DeviceRequestModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
-):
+) -> JSONResponse:
     try:
         auth_service = auth_service
         auth_service.request_model = request_model
@@ -44,26 +53,30 @@ async def post_device_authorize(
         )
 
 
-@device_auth_router.get("/auth", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
+@device_auth_router.get(
+    "/auth",
+    status_code=status.HTTP_200_OK,
+    tags=["Device"],
+    response_class=HTMLResponse,
+)
 async def get_device_user_code(
     request: Request,
-):
+) -> HTMLResponse:
     return templates.TemplateResponse(
-        "device_login_form.html",
-        {"request": request},
-        status_code=200
+        "device_login_form.html", {"request": request}, status_code=200
     )
 
 
-@device_auth_router.post("/auth", status_code=status.HTTP_302_FOUND, tags=["Device"])
+@device_auth_router.post(
+    "/auth", status_code=status.HTTP_302_FOUND, tags=["Device"]
+)
 async def post_device_user_code(
     request_model: DeviceUserCodeModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
-
-):
+) -> Union[RedirectResponse, JSONResponse]:
     try:
         auth_service = auth_service
-        auth_service.request_model = request_model
+        auth_service.request_user_code_model = request_model
         firmed_redirect_uri = await auth_service.get_redirect_uri()
 
         response = RedirectResponse(
@@ -79,25 +92,30 @@ async def post_device_user_code(
         )
 
 
-@device_auth_router.get("/auth/success", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
+@device_auth_router.get(
+    "/auth/success",
+    status_code=status.HTTP_200_OK,
+    tags=["Device"],
+    response_class=HTMLResponse,
+)
 async def get_device_login_confirm(
     request: Request,
-):
+) -> HTMLResponse:
     return templates.TemplateResponse(
-        "device_confirmed_form.html",
-        {"request": request},
-        status_code=200
+        "device_confirmed_form.html", {"request": request}, status_code=200
     )
 
 
-@device_auth_router.delete("/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"])
+@device_auth_router.delete(
+    "/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"]
+)
 async def delete_device(
     request_model: DeviceCancelModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
-):
+) -> Union[str, JSONResponse]:
     try:
         auth_service = auth_service
-        auth_service.request_model = request_model
+        auth_service.request_cancel_model = request_model
         firmed_redirect_uri = await auth_service.clean_device_data()
 
         return firmed_redirect_uri
@@ -116,12 +134,15 @@ async def delete_device(
         )
 
 
-@device_auth_router.get("/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
+@device_auth_router.get(
+    "/auth/cancel",
+    status_code=status.HTTP_200_OK,
+    tags=["Device"],
+    response_class=HTMLResponse,
+)
 async def get_device_cancel_form(
     request: Request,
-):
+) -> HTMLResponse:
     return templates.TemplateResponse(
-        "cancel_device_form.html",
-        {"request": request},
-        status_code=200
+        "cancel_device_form.html", {"request": request}, status_code=200
     )

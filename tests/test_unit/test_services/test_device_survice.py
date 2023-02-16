@@ -4,12 +4,15 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
 )
-from tests.test_unit.fixtures import device_cancel_model, device_user_code_model, device_request_model
+from tests.test_unit.fixtures import (
+    device_cancel_model,
+    device_user_code_model,
+    device_request_model,
+)
 
 
 @pytest.mark.asyncio
 class TestDeviceService:
-
     async def test_validate_client(self, device_service):
         service = device_service
         client = await service._validate_client(client_id="test_client")
@@ -18,9 +21,7 @@ class TestDeviceService:
     async def test_validate_client_not_exist(self, device_service):
         service = device_service
         with pytest.raises(ClientNotFoundError):
-            await service._validate_client(
-                client_id="bla1bla_io"
-            )
+            await service._validate_client(client_id="bla1bla_io")
 
     async def test_validate_user_code(self, device_service):
         service = device_service
@@ -59,7 +60,7 @@ class TestDeviceService:
         assert result == {}
 
     async def test_parse_scope_without_separator(self, device_service):
-        expected = {'some_key': "key"}
+        expected = {"some_key": "key"}
         to_parse = "some_key=key"
         result = await device_service._parse_scope_data(to_parse)
         assert result == expected
@@ -72,7 +73,7 @@ class TestDeviceService:
 
     async def test_clean_device_data(self, device_service, device_cancel_model):
         service = device_service
-        service.request_model = device_cancel_model
+        service.request_cancel_model = device_cancel_model
         expected = "http://127.0.0.1:8000/device/auth/cancel"
         await service.device_repo.create(
             client_id="test_client",
@@ -88,26 +89,36 @@ class TestDeviceService:
         with pytest.raises(UserCodeNotFoundError):
             await service._validate_user_code(user_code="user_code")
 
-    async def test_clean_device_data_client_not_exist(self, device_service, device_cancel_model):
+    async def test_clean_device_data_client_not_exist(
+        self, device_service, device_cancel_model
+    ):
         service = device_service
-        service.request_model = device_cancel_model
-        service.request_model.client_id = "bla1bla_io"
+        service.request_cancel_model = device_cancel_model
+        service.request_cancel_model.client_id = "bla1bla_io"
         with pytest.raises(ClientNotFoundError):
             await service.clean_device_data()
 
-    async def test_clean_device_data_device_not_exist(self, device_service, device_cancel_model):
+    async def test_clean_device_data_device_not_exist(
+        self, device_service, device_cancel_model
+    ):
         service = device_service
-        service.request_model = device_cancel_model
-        service.request_model.scope = "password=test_password&username=TestClient&user_code=blaBlabla"
+        service.request_cancel_model = device_cancel_model
+        service.request_cancel_model.scope = (
+            "password=test_password&username=TestClient&user_code=blaBlabla"
+        )
         with pytest.raises(UserCodeNotFoundError):
             await service.clean_device_data()
 
-    async def test_get_redirect_uri(self, device_service, device_user_code_model):
+    async def test_get_redirect_uri(
+        self, device_service, device_user_code_model
+    ):
         service = device_service
-        service.request_model = device_user_code_model
-        expected_uri = "http://127.0.0.1:8000/authorize/?client_id=test_client&" \
-                       "response_type=urn:ietf:params:oauth:grant-type:device_code&" \
-                       "redirect_uri=https://www.google.com/&scope=user_code=GHJKTYUI"
+        service.request_user_code_model = device_user_code_model
+        expected_uri = (
+            "http://127.0.0.1:8000/authorize/?client_id=test_client&"
+            "response_type=urn:ietf:params:oauth:grant-type:device_code&"
+            "redirect_uri=https://www.google.com/&scope=user_code=GHJKTYUI"
+        )
         await service.device_repo.create(
             client_id="test_client",
             device_code="urn:ietf:params:oauth:grant-type:device_code",
@@ -123,9 +134,11 @@ class TestDeviceService:
         with pytest.raises(UserCodeNotFoundError):
             await service._validate_user_code(user_code="GHJKTYUI")
 
-    async def test_get_redirect_uri_wrong_user_code(self, device_service, device_user_code_model):
+    async def test_get_redirect_uri_wrong_user_code(
+        self, device_service, device_user_code_model
+    ):
         service = device_service
-        service.request_model = device_user_code_model
+        service.request_user_code_model = device_user_code_model
         with pytest.raises(UserCodeNotFoundError):
             await service.get_redirect_uri()
 
@@ -144,7 +157,9 @@ class TestDeviceService:
         with pytest.raises(UserCodeNotFoundError):
             await service._validate_user_code(user_code="user_code")
 
-    async def test_get_response_wrong_client(self, device_service, device_request_model):
+    async def test_get_response_wrong_client(
+        self, device_service, device_request_model
+    ):
         service = device_service
         service.request_model = device_request_model
         service.request_model.client_id = "gnYth8OP"
