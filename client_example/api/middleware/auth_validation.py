@@ -1,7 +1,7 @@
 import logging
 from json import JSONDecodeError
 
-from fastapi import Request, status
+from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from jwt import ExpiredSignatureError, PyJWTError
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -69,8 +69,6 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 new_token = await client.refresh_token(refresh_token)
                 # if expired return 401
                 new_access_token = new_token["access_token"]
-                # save new token on client side
-                request.session["access_token"] = new_access_token
                 logger.info("New acces token saved in session")
                 return await self._validate_new_token(
                     new_access_token, request, call_next
@@ -87,7 +85,14 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         try:
             await self.token_validator.is_token_valid(new_token)
             logger.info("New token validated")
-            response = await call_next(request)
+            response: Response = await call_next(request)
+            response.set_cookie(
+                key="access_token",
+                value=new_token,
+                httponly=True,
+                domain=request.url.hostname,
+                path="/",
+            )
             return response
 
         except PyJWTError as e:
