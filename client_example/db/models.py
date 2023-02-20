@@ -19,7 +19,7 @@ from .database import Base
 class BaseModel(Base):
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(
         DateTime, server_default=func.now(), onupdate=datetime.datetime.now
@@ -31,16 +31,16 @@ class Note(BaseModel):
 
     title = Column(String, nullable=False, index=True)
     content = Column(String, index=True)
-    user_id = Column(
-        Integer,
-    )  # ForeignKey("xyz"))
-    # user = relationship("xyz")
+    user_id = Column(Integer, ForeignKey("users_info.sub", ondelete="CASCADE"))
+    user = relationship("UserInfo", backref="notes")
 
 
 class UserInfo(Base):
     __tablename__ = "users_info"
 
-    id = Column(Integer, primary_key=True)
+    # ! There are wrong column types, because it's provided like that in data_for_factories.py
+    id = Column(Integer, primary_key=True, index=True)
+    # sub is an user id
     sub = Column(String, nullable=False, unique=True)
     name = Column(String, nullable=False)
     middle_name = Column(String, nullable=False)
@@ -60,4 +60,4 @@ class UserInfo(Base):
     phone_number = Column(String, nullable=False, unique=True)
     phone_number_verified = Column(String, nullable=False)
     address = Column(Text, nullable=False)
-    updated_at = Column(Integer, nullable=False)  # TODO change to timestamp
+    updated_at = Column(Integer, nullable=False)
