@@ -54,7 +54,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                 logger.info("Already logged in")
                 return RedirectResponse("/notes")
             except (PyJWTError, AttributeError) as e:
-                logger.exception(e)
+                logger.exception(
+                    "Token not provided, user must be logged in first.", e
+                )
 
         response = await call_next(request)
         return response

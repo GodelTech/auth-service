@@ -1,6 +1,7 @@
 import jwt
 import requests
 from Crypto.PublicKey.RSA import construct
+from fastapi import Request
 from jwkest import base64_to_long
 
 from client_example.httpx_oauth.openid import OpenID
@@ -44,3 +45,7 @@ class TokenValidator:
 
     async def is_token_valid(self, token: str) -> bool:
         return bool(await self.decode_token(token))
+
+
+async def get_user_id(request: Request):
+    return request.state.user_id

@@ -7,6 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from client_example.api.middleware.auth_validation import (
     AuthorizationMiddleware,
 )
+from client_example.api.middleware.user_id import UserIdMiddleware
 from client_example.api.routers import auth, notes
 from client_example.config.logging import LogConfig
 from client_example.db import models
@@ -23,7 +24,6 @@ app.include_router(auth.router)
 
 
 # TODO set secret_key in env
-app.add_middleware(AuthorizationMiddleware)
 app.add_middleware(SessionMiddleware, secret_key="random-string")
 app.add_middleware(
     CORSMiddleware,
@@ -32,3 +32,5 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
+app.add_middleware(AuthorizationMiddleware)
+app.add_middleware(UserIdMiddleware)
