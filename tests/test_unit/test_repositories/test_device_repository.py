@@ -24,7 +24,13 @@ TEST_DEVICE_DATA = {
 class TestClientRepository:
     async def test_create_delete_by_device_code(self, engine):
         device_repo = DeviceRepository(engine=engine)
-        await device_repo.create(**TEST_DEVICE_DATA)
+        await device_repo.create(
+            client_id= TEST_DEVICE_DATA["client_id"], 
+            device_code=TEST_DEVICE_DATA["device_code"],
+            user_code=TEST_DEVICE_DATA["user_code"],
+            verification_uri=TEST_DEVICE_DATA["verification_uri"],
+            verification_uri_complete=TEST_DEVICE_DATA["verification_uri_complete"],
+            expires_in=TEST_DEVICE_DATA["expires_in"])
 
         created = await device_repo.validate_device_code(device_code="device_code")
         assert created is True
@@ -97,7 +103,7 @@ class TestClientRepository:
         await device_repo.create(**TEST_DEVICE_DATA)
 
         device = await device_repo.get_device_by_user_code(user_code="user_code")
-        assert device.client_id == "test_client"
+        assert device.client.client_id == "test_client"
         assert device.device_code == "device_code"
 
         await device_repo.delete_by_user_code(user_code="user_code")

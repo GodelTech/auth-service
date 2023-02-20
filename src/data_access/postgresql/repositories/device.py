@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import select, exists, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-
+from .client import Client
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.device import Device
 from src.data_access.postgresql.errors import UserCodeNotFoundError, DeviceCodeNotFoundError
@@ -26,7 +26,7 @@ class DeviceRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-
+            client_id = await self.get_client_id_int(client_id=client_id, session=session)
             device_data = {
                 "client_id": client_id,
                 "device_code": device_code,
@@ -105,7 +105,7 @@ class DeviceRepository(BaseRepository):
             session = sess
             if await self.validate_user_code(user_code=user_code):
                 device = await session.execute(
-                    select(Device).where(Device.user_code == user_code)
+                    select(Device).join(Client, Device.client_id == Client.id).where(Device.user_code == user_code)
                 )
                 return device.first()[0]
 
@@ -125,3 +125,14 @@ class DeviceRepository(BaseRepository):
 
             return time
 
+    async def get_client_id_int(self, client_id:str, session) -> int:
+        client_id = await session.execute(select(Client)
+                .where(
+                    Client.client_id == client_id,
+                ))
+        client_id= client_id.first()
+
+        if client_id is None:
+            raise ValueError
+        else:
+            return client_id[0].id

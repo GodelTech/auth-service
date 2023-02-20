@@ -8,8 +8,9 @@ from .base import BaseModel
 class Device(BaseModel):
     __tablename__ = "devices"
 
-    client_id = Column(String(80), ForeignKey("clients.client_id", ondelete='CASCADE'))
-    client = relationship("Client", backref="devices")
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete='CASCADE'))
+    client = relationship("Client", backref = "device", foreign_keys = "Device.client_id", lazy ="joined")
+    
     device_code = Column(String(80), nullable=False, unique=True)
     user_code = Column(String(10), nullable=False, unique=True)
     verification_uri = Column(String, nullable=False)
@@ -17,4 +18,6 @@ class Device(BaseModel):
     expires_in = Column(Integer, default=600, nullable=False)
     interval = Column(Integer, default=5, nullable=False)
 
+    def __str__(self) -> str:
+        return f"Device: {self.device_code}"
     

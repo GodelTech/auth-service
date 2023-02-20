@@ -39,7 +39,7 @@ class TestDeviceFlow:
                                         headers={'Content-Type': self.content_type})
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is True
@@ -52,7 +52,7 @@ class TestDeviceFlow:
 
         # 3rd stage: Check the user_code and make redirect to the authorization endpoint with GET
         device = await connection.execute(
-            select(Device).where(Device.client_id == "test_client")
+            select(Device).where(Device.client_id == 1)
         )
         device = device.first()[0]
         user_code = device.user_code
@@ -91,12 +91,12 @@ class TestDeviceFlow:
         )
         assert response.status_code == status.HTTP_302_FOUND
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is False
         device = await connection.execute(
-            select(exists().where(PersistentGrant.data == device_code))
+            select(exists().where(PersistentGrant.grant_data == device_code))
         )
         device = device.first()
         assert device[0] is True
@@ -139,7 +139,7 @@ class TestDeviceFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "https://www.scott.org/",
+            "post_logout_redirect_uri": 'http://campbell-taylor.net/',
             "state": "test_state",
         }
         response = await client.request("GET", "/endsession/", params=params)
@@ -167,7 +167,7 @@ class TestDeviceFlow:
         )
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is True
@@ -180,7 +180,7 @@ class TestDeviceFlow:
 
         # 3rd stage: Check the user_code and make redirect to the authorization endpoint with GET
         device = await connection.execute(
-            select(Device).where(Device.client_id == "test_client")
+            select(Device).where(Device.client_id == 1)
         )
         device = device.first()[0]
         user_code = device.user_code
@@ -212,7 +212,7 @@ class TestDeviceFlow:
 
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
-            select(exists().where(Device.client_id == "test_client"))
+            select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is False

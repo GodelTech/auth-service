@@ -65,13 +65,21 @@ class RoleFactory(SQLAlchemyModelFactory):
                 self.users.append(user)
 
 
+class UserClaimTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = users.UserClaimType
+        sqlalchemy_session = sess.session
+
+    type_of_claim = FuzzyChoice(data.USER_CLAIM_TYPE)
+
+
 class UserClaimFactory(SQLAlchemyModelFactory):
     class Meta:
         model = users.UserClaim
         sqlalchemy_session = sess.session
 
     user_id = factory.SubFactory(UserFactory)
-    claim_type = FuzzyChoice(data.USER_CLAIM_TYPE)
+    claim_type_id = factory.SubFactory(UserClaimTypeFactory)
     claim_value = factory.Faker("word")
 
 

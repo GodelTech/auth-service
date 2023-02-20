@@ -21,11 +21,39 @@ from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 from src.presentation.admin_ui.controllers import (
+    SeparationLine,
     AdminAuthController,
     ClientAdminController,
     UserAdminController,
     PersistentGrantAdminController,
     RoleAdminController,
+    UserClaimAdminController,
+    TypesUserClaimAdminController,
+    PersistentGrantTypeAdminController,
+    AccessTokenTypeAdminController,
+    ProtocolTypeController,
+    RefreshTokenUsageTypeController,
+    RefreshTokenExpirationTypeController,
+    ApiResourceAdminController,
+    ApiSecretAdminController,
+    ApiSecretTypeAdminController,
+    ApiClaimAdminController,
+    ApiClaimTypeAdminController,
+    ApiScopeAdminController,
+    ApiScopeClaimAdminController,
+    ApiScopeClaimTypeAdminController,
+    IdentityResourceAdminController, 
+    IdentityClaimAdminController,
+    PermissionAdminController, 
+    GroupAdminController,
+    ClientSecretController,
+    ClientGrantTypeController,
+    ClientRedirectUriController,
+    ClientCorsOriginController,
+    ClientPostLogoutRedirectUriController,
+    ClientClaimController,
+    ClientIdRestrictionController,
+    DeviceAdminController,
 )
 from src.di.providers import (
     provide_config,
@@ -118,10 +146,57 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
+    # Client 
     admin.add_view(ClientAdminController)
+    admin.add_view(AccessTokenTypeAdminController)
+    admin.add_view(ProtocolTypeController)
+    admin.add_view(RefreshTokenUsageTypeController)
+    admin.add_view(RefreshTokenExpirationTypeController)
+    admin.add_view(ClientSecretController)
+    admin.add_view(ClientGrantTypeController)
+    admin.add_view(ClientRedirectUriController)
+    admin.add_view(ClientCorsOriginController)
+    admin.add_view(ClientPostLogoutRedirectUriController)
+    admin.add_view(ClientClaimController)
+    admin.add_view(ClientIdRestrictionController)
+    admin.add_view(DeviceAdminController)
+    admin.add_view(SeparationLine)
+
+    # User/UserClaim
     admin.add_view(UserAdminController)
-    admin.add_view(PersistentGrantAdminController)
+    admin.add_view(UserClaimAdminController)
+    admin.add_view(TypesUserClaimAdminController)
+    admin.add_view(SeparationLine)
+    
+    # Other
     admin.add_view(RoleAdminController)
+    admin.add_view(GroupAdminController)
+    admin.add_view(PermissionAdminController)
+    admin.add_view(SeparationLine)
+
+    #Grants
+    admin.add_view(PersistentGrantAdminController)
+    admin.add_view(PersistentGrantTypeAdminController)
+    admin.add_view(SeparationLine)
+
+    #ApiResourses
+    admin.add_view(ApiResourceAdminController)
+    admin.add_view(ApiSecretAdminController)
+    admin.add_view(ApiSecretTypeAdminController)
+    admin.add_view(ApiClaimAdminController)
+    admin.add_view(ApiClaimTypeAdminController)
+    admin.add_view(ApiScopeAdminController)
+    admin.add_view(ApiScopeClaimAdminController)
+    admin.add_view(ApiScopeClaimTypeAdminController)
+    admin.add_view(SeparationLine)
+    
+    #Identity Resourses
+    admin.add_view(IdentityResourceAdminController)
+    admin.add_view(IdentityClaimAdminController)
+    admin.add_view(SeparationLine)
+    
+    
+
 
     nodepends_provide_auth_service = lambda: provide_auth_service(
         client_repo=provide_client_repo(db_engine),

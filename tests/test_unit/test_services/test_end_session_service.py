@@ -33,15 +33,28 @@ class TestEndSessionService:
                 client_id='client_not_exist',
                 logout_redirect_uri=service.request_model.post_logout_redirect_uri
             )
+            a =1
 
     async def test_logout(self, end_session_service, end_session_request_model, connection):
         service = end_session_service
         service.request_model = end_session_request_model
-        await service._logout(client_id='double_test', user_id=2)
+        await connection.execute(
+            insert(PersistentGrant).values(
+                key="test_key",
+                client_id=1,
+                user_id=2,
+                grant_data="test_logout",
+                persistent_grant_type_id=1,
+                expiration=False
+            )
+        )
+        await connection.commit()
+
+        await service._logout(client_id='test_client', user_id=2)
         grant = await connection.execute(
             select(PersistentGrant).
-            where(PersistentGrant.client_id == 'double_test').
-            where(PersistentGrant.subject_id == 2)
+            where(PersistentGrant.client_id == 1).
+            where(PersistentGrant.user_id == 2)
         )
         await connection.commit()
         assert grant.first() is None
@@ -71,47 +84,47 @@ class TestEndSessionService:
     async def test_end_session(self, end_session_service, end_session_request_model, connection):
         service = end_session_service
         service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "http://www.jones.com/"
+        service.request_model.post_logout_redirect_uri = "https://carroll-taylor.com/"
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["sub"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
+                client_id=3,
+                user_id=3,
+                grant_data="test_end_session",
+                persistent_grant_type_id=1,
                 expiration=False
             )
         )
         await connection.commit()
         redirect_uri = await service.end_session()
-        assert redirect_uri == 'http://www.jones.com/&state=test_state'
+        assert redirect_uri == 'https://carroll-taylor.com/&state=test_state'
 
         await connection.execute(
-            delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
+            delete(PersistentGrant).where(PersistentGrant.client_id == 1)
         )
         await connection.commit()
 
     async def test_end_session_without_state(self, end_session_service, end_session_request_model, connection):
         service = end_session_service
         service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "http://www.jones.com/"
+        service.request_model.post_logout_redirect_uri = "https://carroll-taylor.com/"
         service.request_model.state = None
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["sub"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
+                client_id=3,
+                user_id=3,
+                grant_data="test_end_session_without_state",
+                persistent_grant_type_id=1,
                 expiration=False
             )
         )
         await connection.commit()
         redirect_uri = await service.end_session()
-        assert redirect_uri == 'http://www.jones.com/'
+        assert redirect_uri == "https://carroll-taylor.com/"
 
         await connection.execute(
-            delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
+            delete(PersistentGrant).where(PersistentGrant.client_id == 3)
         )
         await connection.commit()
 
@@ -121,10 +134,10 @@ class TestEndSessionService:
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
-                client_id=TOKEN_HINT_DATA["client_id"],
-                subject_id=TOKEN_HINT_DATA["sub"],
-                data=TOKEN_HINT_DATA["data"],
-                type=TOKEN_HINT_DATA["type"],
+                client_id=3,
+                user_id=3,
+                grant_data="test_end_session_wrong_uri",
+                persistent_grant_type_id=1,
                 expiration=False
             )
         )
@@ -134,6 +147,6 @@ class TestEndSessionService:
             await service.end_session()
 
         await connection.execute(
-            delete(PersistentGrant).where(PersistentGrant.client_id == TOKEN_HINT_DATA["client_id"])
+            delete(PersistentGrant).where(PersistentGrant.client_id == 3)
         )
         await connection.commit()
