@@ -10,7 +10,7 @@ from src.presentation.admin_api.models.role import *
 
 logger = logging.getLogger(__name__)
 
-admin_role_router = APIRouter(prefix="/role")
+admin_role_router = APIRouter(prefix="/roles")
 
 
 def exceptions_wrapper(func):
@@ -36,24 +36,24 @@ def exceptions_wrapper(func):
 
 
 @admin_role_router.get(
-    "/get_role", response_model=dict, tags=["Administration Role"]
+    "/{role_id}", response_model=dict, tags=["Administration Role"], description="Get the Role"
 )
 @exceptions_wrapper
 async def get_role(
     request: Request,
+    role_id:int,
     access_token: str = Header(description="Access token"),
-    request_model: RequestRoleBaseModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ):
 
     role_class = role_class
 
-    result = await role_class.get_role(role_id=request_model.role_id)
+    result = await role_class.get_role(role_id=role_id)
     return {"role": result}
 
 
 @admin_role_router.get(
-    "/get_all_roles", response_model=dict, tags=["Administration Role"]
+    "", response_model=dict, tags=["Administration Role"], description="Get All Roles"
 )
 @exceptions_wrapper
 async def get_all_roles(
@@ -65,26 +65,8 @@ async def get_all_roles(
     return {"all_roles": await role_class.get_all_roles()}
 
 
-@admin_role_router.get(
-    "/get_roles", response_model=dict, tags=["Administration Role"]
-)
-@exceptions_wrapper
-async def get_roles(
-    request: Request,
-    access_token: str = Header(description="Access token"),
-    request_model: RequestListRoleModel = Depends(),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
-    role_class = role_class
-    return {
-        "list_roles": await role_class.get_roles(
-            role_ids=request_model.role_ids
-        )
-    }
-
-
 @admin_role_router.post(
-    "/new_role", status_code=status.HTTP_200_OK, tags=["Administration Role"]
+    "", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Create a New Role"
 )
 @exceptions_wrapper
 async def create_role(
@@ -98,30 +80,31 @@ async def create_role(
 
 
 @admin_role_router.put(
-    "/update_role", status_code=status.HTTP_200_OK, tags=["Administration Role"]
+    "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Update the Role"
 )
 @exceptions_wrapper
 async def update_role(
     request: Request,
+    role_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ):
     role_class = role_class
     await role_class.update_role(
-        role_id=request_model.role_id, name=request_model.name
+        role_id=role_id, name=request_model.name
     )
 
 
 @admin_role_router.delete(
-    "/delete_role", status_code=status.HTTP_200_OK, tags=["Administration Role"]
+    "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
 )
 @exceptions_wrapper
 async def delete_group(
     request: Request,
+    role_id:int,
     access_token: str = Header(description="Access token"),
-    request_model: RequestRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ):
     role_class = role_class
-    await role_class.delete_role(role_id=request_model.role_id)
+    await role_class.delete_role(role_id=role_id)
