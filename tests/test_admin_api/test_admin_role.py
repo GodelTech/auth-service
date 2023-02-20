@@ -72,15 +72,13 @@ class TestAdminRoleEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_id": (await self.role_repo.get_role_by_name("Standuser")).id
-        }
+        role_id = (await self.role_repo.get_role_by_name("Standuser")).id
+        
 
         response = await client.request(
             "GET",
-            "/administration/role/get_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -99,39 +97,13 @@ class TestAdminRoleEndpoint:
         }
 
         response = await client.request(
-            "GET", "/administration/role/get_all_roles", headers=headers
+            "GET", "/administration/roles", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
         logger.info(response_content)
         assert len(response_content["all_roles"])
 
-    async def test_get_roles(self, engine, client: AsyncClient):
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_roles(engine)
-
-        headers = {
-            "access-token": self.access_token,
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-        params = {
-            "role_ids": f'{(await self.role_repo.get_role_by_name(name = "Standuser")).id},{(await self.role_repo.get_role_by_name(name = "Vampire")).id}'
-        }
-
-        response = await client.request(
-            "GET",
-            "/administration/role/get_roles",
-            headers=headers,
-            params=params,
-        )
-        assert response.status_code == status.HTTP_200_OK
-        response_content = json.loads(response.content.decode("utf-8"))
-        logger.info(response_content)
-        for role in list(response_content.values())[0]:
-            if role["name"] not in ("Standuser", "Vampire"):
-                raise AssertionError
 
     async def test_delete_role(self, engine, client: AsyncClient):
         await self.setup_base(
@@ -143,25 +115,19 @@ class TestAdminRoleEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_id": (
-                await self.role_repo.get_role_by_name(name="Standuser")
-            ).id
-        }
+        role_id=(await self.role_repo.get_role_by_name(name="Standuser")).id
 
         response = await client.request(
             "DELETE",
-            "/administration/role/delete_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            "/administration/role/get_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -190,7 +156,7 @@ class TestAdminRoleEndpoint:
 
         response = await client.request(
             "POST",
-            "/administration/role/new_role",
+            "/administration/roles",
             headers=headers,
             data=params,
         )
@@ -200,14 +166,11 @@ class TestAdminRoleEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_id": (await self.role_repo.get_role_by_name("Pillar Man")).id,
-            "name": "Ultimate Life Form",
-        }
-
+        params = {"name": "Ultimate Life Form",}
+        role_id = (await self.role_repo.get_role_by_name("Pillar Man")).id
         response = await client.request(
             "PUT",
-            "/administration/role/update_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
             data=params,
         )
