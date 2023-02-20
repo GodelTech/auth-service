@@ -24,6 +24,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         self.auth_endpoints = ("/login",)
 
     async def dispatch_func(self, request: Request, call_next):
+        # TODO how to avoid using request.cookies?
         access_token = request.cookies.get(
             "access_token"
         ) or request.headers.get("authorization")
