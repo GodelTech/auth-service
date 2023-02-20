@@ -22,7 +22,7 @@ async def get_notes(
     if notes is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id: {user_id} does not have any notes",
+            detail=f"User with id: {user_id} does not have any notes.",
         )
 
     return notes
@@ -48,7 +48,7 @@ async def get_note(
     if note is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id: {id} was not found.",
+            detail=f"Note with id: {id} was not found.",
         )
     if note.user_id != user_id:
         raise HTTPException(

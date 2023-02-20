@@ -2,7 +2,6 @@ from celery import Celery
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import sessionmaker
 
-# from client_example.api.routers.auth import client
 from client_example.db.database import engine
 from client_example.db.models import UserInfo
 from client_example.utils import client
