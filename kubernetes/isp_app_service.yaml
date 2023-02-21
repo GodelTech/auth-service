@@ -1,10 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: isp
+  name: isp-app
 spec:
   type: ClusterIP
   ports:
     - port: 8000
+      targetPort: 8000
   selector:
     app: isp

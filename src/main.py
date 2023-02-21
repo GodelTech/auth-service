@@ -101,7 +101,7 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
-    # Register admin-ui controllers on application start-up.
+    # Register admin-ui controllers on application start.sh-up.
     admin = Admin(
         app,
         db_engine,

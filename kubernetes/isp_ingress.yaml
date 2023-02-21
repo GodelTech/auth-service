@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: isp
+  name: isp-app
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/ssl-redirect: "false"
@@ -11,7 +11,7 @@ spec:
         paths:
           - backend:
               service:
-                name: isp
+                name: isp-app
                 port:
                   number: 8000
             path: /

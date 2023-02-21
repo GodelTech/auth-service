@@ -28,7 +28,7 @@ RUN apt-get update \
 
 COPY . /Identity
 
-RUN chmod +x /Identity/start.sh
+RUN chmod +x /Identity/start.sh.sh
 
 EXPOSE 8000
 
