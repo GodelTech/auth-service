@@ -15,7 +15,7 @@ include:
 
 stages:
   - container
-  - test
+  - build
   - deploy-to-dev
 
 
@@ -53,7 +53,7 @@ container:docker-build:
 #################
 
 build-and-test:
-  stage: test
+  stage: build
   image: docker:20
   services:
     - docker:20-dind
