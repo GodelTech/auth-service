@@ -11,6 +11,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantType, Client
+from sqlalchemy.engine.result import ChunkedIteratorResult
 
 logger = logging.getLogger(__name__)
 
@@ -127,10 +128,10 @@ class PersistentGrantRepository(BaseRepository):
             await self.check_grant_by_client_and_user_ids(
                 client_id=client_id, user_id=user_id
             )
-            client_id = await self.get_client_id_int(client_id = client_id, session=session)
+            client_id_int = await self.get_client_id_int(client_id = client_id, session=session)
             await session.execute(
                 delete(PersistentGrant)
-                .where(PersistentGrant.client_id == client_id,
+                .where(PersistentGrant.client_id == client_id_int,
                        PersistentGrant.user_id == user_id)
             )
             await session.commit()
@@ -144,11 +145,11 @@ class PersistentGrantRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            client_id = await self.get_client_id_int(client_id = client_id, session=session)
+            client_id_int = await self.get_client_id_int(client_id = client_id, session=session)
             grant = await session.execute(
                 select(
                     exists().where(
-                        PersistentGrant.client_id == client_id,
+                        PersistentGrant.client_id == client_id_int,
                         PersistentGrant.user_id == user_id,
                     )
                 )
@@ -190,18 +191,18 @@ class PersistentGrantRepository(BaseRepository):
             else:
                 return client_id_str[0]
 
-    async def get_client_id_int(self, client_id:str, session) -> int:
-        client_id = await session.execute(select(Client.id).where(
+    async def get_client_id_int(self, client_id:str, session: AsyncSession) -> int:
+        client_id_int = await session.execute(select(Client.id).where(
                     Client.client_id == client_id,
                 ))
-        client_id= client_id.first()
+        client_id_int = client_id_int.first()
 
-        if client_id is None:
+        if client_id_int is None:
             raise PersistentGrantNotFoundError
         else:
-            return client_id[0]
+            return client_id_int[0]
         
-    async def get_all_types(self):
+    async def get_all_types(self) -> ChunkedIteratorResult:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

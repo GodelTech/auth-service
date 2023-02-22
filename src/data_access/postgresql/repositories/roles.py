@@ -4,10 +4,11 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
 from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union
+from typing import Union, Dict, Any
 
 
-def params_to_dict(**kwargs):
+
+def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:
@@ -29,7 +30,7 @@ class RoleRepository(BaseRepository):
             result = result.first()
             return result[0]
 
-    async def delete(self, role_id: int) -> bool:
+    async def delete(self, role_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -39,7 +40,6 @@ class RoleRepository(BaseRepository):
                 role_to_delete = await self.get_role_by_id(role_id=role_id)
                 await session.delete(role_to_delete)
                 await session.commit()
-                return True
             else:
                 raise ValueError
     
@@ -75,7 +75,7 @@ class RoleRepository(BaseRepository):
         except:
             raise ValueError
             
-    async def update(self, role_id: int, name: str):
+    async def update(self, role_id: int, name: str) -> None:
 
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -94,7 +94,7 @@ class RoleRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def create(self, name: str, id: int = None) -> bool:
+    async def create(self, name: str, id: Union[int, None] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
