@@ -52,7 +52,7 @@ async def engine():
         # db_url = db_url.replace("172.18.0.1", "localhost")
         print(db_url, "  ::db_url from container")
         print(DB_URL, "  ::db_url before engine.......>>>>>>>>>")
-        engine = create_async_engine(db_url, echo=True)
+        engine = create_async_engine(DB_URL, echo=True)
 
         # create all tables
         async with engine.begin() as conn:
