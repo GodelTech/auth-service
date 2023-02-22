@@ -62,6 +62,7 @@ build-and-test:
   script:
     - docker run -d --name identity-server-provider -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock ${DOCKER_IMAGE_PATH}
     - docker exec -i identity-server-provider sh -c "pytest -ra --cov"
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   only:
     - Configure-CI-CD-pipeline
 
