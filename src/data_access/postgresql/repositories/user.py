@@ -1,5 +1,6 @@
 from sqlalchemy import select, exists, update, insert, text, join
 from sqlalchemy.engine.result import ChunkedIteratorResult
+from sqlalchemy.engine.result import ChunkedIteratorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables.group import Group
@@ -14,7 +15,9 @@ from src.data_access.postgresql.tables import User, UserClaim, Role, UserClaimTy
 from src.data_access.postgresql.tables.users import users_roles, users_groups
 from src.data_access.postgresql.errors.user import DuplicationError
 from typing import Union, Any, Dict, Tuple, Optional
+from typing import Union, Any, Dict, Tuple, Optional
 
+def params_to_dict(**kwargs:Any)-> Dict[str, Any]:
 def params_to_dict(**kwargs:Any)-> Dict[str, Any]:
     result = {}
     for key in kwargs:
@@ -37,6 +40,7 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
 
+    async def delete(self, user_id: int) -> None:
     async def delete(self, user_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -70,6 +74,7 @@ class UserRepository(BaseRepository):
             raise ValueError
 
     async def get_hash_password(self, user_name: str) -> Tuple[str, int]:
+    async def get_hash_password(self, user_name: str) -> Tuple[str, int]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -90,6 +95,7 @@ class UserRepository(BaseRepository):
             return user[0].password_hash.value, user[0].id
 
     async def get_claims(self, id: int) -> Dict[str, Any]:
+    async def get_claims(self, id: int) -> Dict[str, Any]:
         claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
@@ -103,6 +109,7 @@ class UserRepository(BaseRepository):
 
         return result
 
+    async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -148,6 +155,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
+    async def get_all_users(self, group_id: Optional[int] = None, role_id: Optional[int] = None) -> list[User]:
     async def get_all_users(self, group_id: Optional[int] = None, role_id: Optional[int] = None) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -200,6 +208,7 @@ class UserRepository(BaseRepository):
             lockout_enabled: Union[None, bool] = False,
             access_failed_count: Union[None, int] = None,
         ) -> None:
+        ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -247,6 +256,7 @@ class UserRepository(BaseRepository):
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = 0,
         ) -> None:
+        ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -274,6 +284,7 @@ class UserRepository(BaseRepository):
         except:
             raise DuplicationError
 
+    async def add_group(self, user_id:int, group_id:int) -> None:
     async def add_group(self, user_id:int, group_id:int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -306,6 +317,7 @@ class UserRepository(BaseRepository):
             raise DuplicationError
 
     async def add_role(self, user_id: int, role_id: int) -> None:
+    async def add_role(self, user_id: int, role_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -320,6 +332,7 @@ class UserRepository(BaseRepository):
             raise DuplicationError
 
     async def remove_user_groups(self, user_id: int, group_ids: list[int]) -> None:
+    async def remove_user_groups(self, user_id: int, group_ids: list[int]) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -333,6 +346,7 @@ class UserRepository(BaseRepository):
             raise ValueError
 
     async def remove_user_roles(self, user_id:int, role_ids:str) -> None:
+    async def remove_user_roles(self, user_id:int, role_ids:str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -343,6 +357,7 @@ class UserRepository(BaseRepository):
                 await session.execute(text(sql))
                 await session.commit()
         except:
+            raise ValueError
             raise ValueError
 
     async def get_roles(self, user_id: int) -> list[Role]:
@@ -362,9 +377,12 @@ class UserRepository(BaseRepository):
                     )
                 result = [role[0] for role in iterator.all()]
                 return result
+                result = [role[0] for role in iterator.all()]
+                return result
         except:
             raise ValueError
 
+    async def get_groups(self, user_id: int) -> list[Group]:
     async def get_groups(self, user_id: int) -> list[Group]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession

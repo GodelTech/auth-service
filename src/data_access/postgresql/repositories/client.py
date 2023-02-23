@@ -107,6 +107,7 @@ class ClientRepository(BaseRepository):
             session = sess
 
             logout_redirect_uri_obj = await session.execute(
+            logout_redirect_uri_obj = await session.execute(
                 select(ClientPostLogoutRedirectUri)
                 .join(
                     Client, ClientPostLogoutRedirectUri.client_id == Client.id
@@ -155,6 +156,7 @@ class ClientRepository(BaseRepository):
                 return True
 
     async def get_client_scopes(self, client_id: int) -> list[str]:
+    async def get_client_scopes(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -170,6 +172,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
+    async def get_client_redirect_uris(self, client_id: int) -> list[str]:
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -189,6 +192,7 @@ class ClientRepository(BaseRepository):
             return result
 
     async def get_client_claims(self, client_id: int) -> list[str]:
+    async def get_client_claims(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -204,5 +208,6 @@ class ClientRepository(BaseRepository):
 
             return result
 
+    def __repr__(self) -> str:
     def __repr__(self) -> str:
         return "Client Repository"
