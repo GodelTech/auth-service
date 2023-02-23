@@ -13,7 +13,7 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import User, UserClaim, Role, UserClaimType, UserPassword, IdentityProvider
 from src.data_access.postgresql.tables.users import users_roles, users_groups
 from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union, Any, Dict, Tuple
+from typing import Union, Any, Dict, Tuple, Optional
 
 def params_to_dict(**kwargs:Any)-> Dict[str, Any]:
     result = {}
@@ -386,8 +386,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def change_password(self, user_id: int, password:str = None):
-
+    async def change_password(self, user_id: int, password: Optional[str] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
