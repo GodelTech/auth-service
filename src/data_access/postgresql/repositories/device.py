@@ -26,9 +26,9 @@ class DeviceRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            client_id = await self.get_client_id_int(client_id=client_id, session=session)
+            client_id_int = await self.get_client_id_int(client_id=client_id, session=session)
             device_data = {
-                "client_id": client_id,
+                "client_id": client_id_int,
                 "device_code": device_code,
                 "user_code": user_code,
                 "verification_uri": verification_uri,
@@ -41,7 +41,7 @@ class DeviceRepository(BaseRepository):
             )
             await session.commit()
 
-    async def delete_by_user_code(self, user_code: str):
+    async def delete_by_user_code(self, user_code: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -53,7 +53,7 @@ class DeviceRepository(BaseRepository):
                 )
                 await session.commit()
 
-    async def delete_by_device_code(self, device_code: str):
+    async def delete_by_device_code(self, device_code: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -108,8 +108,10 @@ class DeviceRepository(BaseRepository):
                     select(Device).join(Client, Device.client_id == Client.id).where(Device.user_code == user_code)
                 )
                 return device.first()[0]
+            else:
+                raise UserCodeNotFoundError
 
-    async def get_expiration_time(self, device_code: str):
+    async def get_expiration_time(self, device_code: str) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -125,14 +127,14 @@ class DeviceRepository(BaseRepository):
 
             return time
 
-    async def get_client_id_int(self, client_id:str, session) -> int:
-        client_id = await session.execute(select(Client)
+    async def get_client_id_int(self, client_id:str, session: AsyncSession) -> int:
+        client_id_int = await session.execute(select(Client)
                 .where(
                     Client.client_id == client_id,
                 ))
-        client_id= client_id.first()
+        client_id_int= client_id_int.first()
 
-        if client_id is None:
+        if client_id_int is None:
             raise ValueError
         else:
-            return client_id[0].id
+            return client_id_int[0].id
