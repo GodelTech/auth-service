@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.staticfiles import StaticFiles
+from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from pathlib import Path
@@ -28,6 +29,7 @@ from src.presentation.admin_ui.controllers import (
     PersistentGrantAdminController,
     RoleAdminController,
     UserClaimAdminController,
+    PasswordAdminController,
     TypesUserClaimAdminController,
     PersistentGrantTypeAdminController,
     AccessTokenTypeAdminController,
@@ -42,9 +44,9 @@ from src.presentation.admin_ui.controllers import (
     ApiScopeAdminController,
     ApiScopeClaimAdminController,
     ApiScopeClaimTypeAdminController,
-    IdentityResourceAdminController, 
+    IdentityResourceAdminController,
     IdentityClaimAdminController,
-    PermissionAdminController, 
+    PermissionAdminController,
     GroupAdminController,
     ClientSecretController,
     ClientGrantTypeController,
@@ -54,6 +56,9 @@ from src.presentation.admin_ui.controllers import (
     ClientClaimController,
     ClientIdRestrictionController,
     DeviceAdminController,
+    IdentityProviderMappedAdminController,
+    IdentityProviderAdminController,
+    CustomAdmin,
 )
 from src.di.providers import (
     provide_config,
@@ -87,7 +92,11 @@ from src.di.providers import (
     provide_admin_auth_service,
     provide_admin_auth_service,
     provide_device_service_stub,
-    provide_device_service
+    provide_device_service,
+    provide_third_party_oidc_repo,
+    provide_third_party_oidc_repo_stub,
+    provide_auth_third_party_oidc_service_stub,
+    provide_auth_third_party_oidc_service,
 )
 
 import logging
@@ -134,7 +143,7 @@ def setup_di(app: FastAPI) -> None:
     )
 
     # Register admin-ui controllers on application start-up.
-    admin = Admin(
+    admin = CustomAdmin(
         app,
         db_engine,
         authentication_backend=AdminAuthController(
@@ -146,7 +155,14 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
-    # Client 
+    # Identity Resourses
+    admin.add_view(IdentityProviderAdminController)
+    admin.add_view(IdentityProviderMappedAdminController)
+    admin.add_view(IdentityResourceAdminController)
+    admin.add_view(IdentityClaimAdminController)
+    admin.add_base_view(SeparationLine)
+
+    # Client
     admin.add_view(ClientAdminController)
     admin.add_view(AccessTokenTypeAdminController)
     admin.add_view(ProtocolTypeController)
@@ -160,26 +176,28 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ClientClaimController)
     admin.add_view(ClientIdRestrictionController)
     admin.add_view(DeviceAdminController)
-    admin.add_view(SeparationLine)
+    admin.add_base_view(SeparationLine)
 
     # User/UserClaim
+
     admin.add_view(UserAdminController)
+    admin.add_view(PasswordAdminController)
     admin.add_view(UserClaimAdminController)
     admin.add_view(TypesUserClaimAdminController)
-    admin.add_view(SeparationLine)
-    
+    admin.add_base_view(SeparationLine)
+
     # Other
     admin.add_view(RoleAdminController)
     admin.add_view(GroupAdminController)
     admin.add_view(PermissionAdminController)
-    admin.add_view(SeparationLine)
+    admin.add_base_view(SeparationLine)
 
-    #Grants
+    # Grants
     admin.add_view(PersistentGrantAdminController)
     admin.add_view(PersistentGrantTypeAdminController)
-    admin.add_view(SeparationLine)
+    admin.add_base_view(SeparationLine)
 
-    #ApiResourses
+    # ApiResourses
     admin.add_view(ApiResourceAdminController)
     admin.add_view(ApiSecretAdminController)
     admin.add_view(ApiSecretTypeAdminController)
@@ -188,15 +206,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ApiScopeAdminController)
     admin.add_view(ApiScopeClaimAdminController)
     admin.add_view(ApiScopeClaimTypeAdminController)
-    admin.add_view(SeparationLine)
-    
-    #Identity Resourses
-    admin.add_view(IdentityResourceAdminController)
-    admin.add_view(IdentityClaimAdminController)
-    admin.add_view(SeparationLine)
-    
-    
-
+    admin.add_base_view(SeparationLine)
 
     nodepends_provide_auth_service = lambda: provide_auth_service(
         client_repo=provide_client_repo(db_engine),
@@ -236,7 +246,7 @@ def setup_di(app: FastAPI) -> None:
         user_repo=provide_user_repo(db_engine),
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
-        device_repo=provide_device_repo(db_engine)
+        device_repo=provide_device_repo(db_engine),
     )
     app.dependency_overrides[
         provide_token_service_stub
@@ -253,7 +263,8 @@ def setup_di(app: FastAPI) -> None:
     ] = nodepends_provide_userinfo_service
 
     nodepends_provide_login_form_service = lambda: provide_login_form_service(
-        client_repo=provide_client_repo(db_engine)
+        client_repo=provide_client_repo(db_engine),
+        oidc_repo=provide_third_party_oidc_repo(db_engine),
     )
 
     app.dependency_overrides[
@@ -285,11 +296,25 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_device_service = lambda: provide_device_service(
         client_repo=provide_client_repo(db_engine),
-        device_repo=provide_device_repo(db_engine)
+        device_repo=provide_device_repo(db_engine),
     )
     app.dependency_overrides[
         provide_device_service_stub
     ] = nodepends_provide_device_service
+
+    nodepends_provide_auth_third_party_oidc_service = (
+        lambda: provide_auth_third_party_oidc_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_auth_third_party_oidc_service_stub
+    ] = nodepends_provide_auth_third_party_oidc_service
 
 
 app = get_application()

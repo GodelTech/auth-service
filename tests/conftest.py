@@ -25,13 +25,18 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     PersistentGrantRepository,
     DeviceRepository,
+    ThirdPartyOIDCRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.introspection import IntrospectionServies
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
+from src.business_logic.services.third_party_oidc_service import (
+    AuthThirdPartyOIDCService,
+)
 from src.data_access.postgresql.tables.base import Base
+
 
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
@@ -151,6 +156,7 @@ async def token_service(engine) -> TokenService:
 async def login_form_service(engine) -> LoginFormService:
     login_service = LoginFormService(
         client_repo=ClientRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
     )
     return login_service
 
@@ -162,3 +168,15 @@ async def device_service(engine) -> DeviceService:
         device_repo=DeviceRepository(engine),
     )
     return dev_service
+
+
+@pytest_asyncio.fixture
+async def auth_third_party_service(engine) -> AuthThirdPartyOIDCService:
+    third_party_service = AuthThirdPartyOIDCService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return third_party_service

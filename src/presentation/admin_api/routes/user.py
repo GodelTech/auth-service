@@ -11,7 +11,7 @@ from src.presentation.admin_api.models.user import *
 
 logger = logging.getLogger(__name__)
 
-admin_user_router = APIRouter(prefix="/users")
+admin_user_router = APIRouter(prefix="/user")
 
 
 def exceptions_wrapper(func):
@@ -37,19 +37,19 @@ def exceptions_wrapper(func):
 
 
 @admin_user_router.get(
-    "/{user_id}", response_model=dict, tags=["Administration User"]
+    "/get_user", response_model=dict, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def get_user(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
+    request_model: RequestUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ):
 
     user_class = user_class
 
-    result = await user_class.get_user(user_id=user_id)
+    result = await user_class.get_user(user_id=request_model.user_id)
     return {
         "username": result.username,
         "id": result.id,
@@ -64,7 +64,7 @@ async def get_user(
 
 
 @admin_user_router.get(
-    "", status_code=status.HTTP_200_OK, tags=["Administration User"]
+    "/all_users", status_code=status.HTTP_200_OK, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def get_all_users(
@@ -83,12 +83,11 @@ async def get_all_users(
 
 
 @admin_user_router.put(
-    "/{user_id}", status_code=200, tags=["Administration User"], description="update_user"
+    "/update_user", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def update_user(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -109,29 +108,29 @@ async def update_user(
             data_to_change[param] = getattr(request_model, param)
 
     await user_class.update_user(
-        user_id=user_id, kwargs=data_to_change
+        user_id=request_model.user_id, kwargs=data_to_change
     )
 
+
 @admin_user_router.delete(
-    "/{user_id}", status_code=200, tags=["Administration User"], description= "Delete User by ID"
+    "/delete_user", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def delete_user(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ):
 
     user_class = user_class
-    await user_class.delete_user(user_id=user_id)
+    await user_class.delete_user(user_id=request_model.user_id)
 
 
 @admin_user_router.post(
-    "", status_code=200, tags=["Administration User"], description="Create a New User"
+    "/new_user", status_code=200, tags=["Administration User"]
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def create_user(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -142,18 +141,16 @@ async def create_user(
     user_class = user_class
     data = request_body.dictionary()
     data["access_failed_count"] = 0
-    data["password_hash"] = data.pop("password")
 
     await user_class.create_user(kwargs=data)
 
 
 @admin_user_router.post(
-    "/{user_id}/groups", status_code=200, tags=["Administration User"], description= "Add New Groups to the User"
+    "/add_groups", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def add_groups(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_body: RequestGroupsUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -162,17 +159,16 @@ async def add_groups(
     user_class = user_class
 
     await user_class.add_user_groups(
-        user_id=user_id, group_ids=request_body.group_ids
+        user_id=request_body.user_id, group_ids=request_body.group_ids
     )
 
 
 @admin_user_router.post(
-    "/{user_id}/roles", status_code=200, tags=["Administration User"]
+    "/add_roles", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def add_roles(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -180,18 +176,17 @@ async def add_roles(
 
     user_class = user_class
     await user_class.add_user_roles(
-        user_id=user_id, role_ids=request_model.role_ids
+        user_id=request_model.user_id, role_ids=request_model.role_ids
     )
     return
 
 
 @admin_user_router.get(
-    "/{user_id}/groups", status_code=200, tags=["Administration User"]
+    "/show_groups", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def get_user_groups(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -201,18 +196,17 @@ async def get_user_groups(
 
     return {
         "groups": await user_class.get_user_groups(
-            user_id=user_id
+            user_id=request_model.user_id
         )
     }
 
 
 @admin_user_router.get(
-    "/{user_id}/roles", status_code=200, tags=["Administration User"], description= "Get Roles of User"
+    "/show_roles", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def get_user_roles(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -220,17 +214,16 @@ async def get_user_roles(
     user_class = user_class
 
     return {
-        "roles": await user_class.get_user_roles(user_id=user_id)
+        "roles": await user_class.get_user_roles(user_id=request_model.user_id)
     }
 
 
 @admin_user_router.delete(
-    "/{user_id}/roles", status_code=200, tags=["Administration User"], description="Delete Roles of the User"
+    "/delete_user_roles", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def delete_roles(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -238,17 +231,16 @@ async def delete_roles(
     user_class = user_class
 
     await user_class.remove_user_roles(
-        user_id=user_id, role_ids=request_model.role_ids
+        user_id=request_model.user_id, role_ids=request_model.role_ids
     )
 
 
 @admin_user_router.delete(
-    "/{user_id}/groups", status_code=200, tags=["Administration User"], description="Delete Groups of the User"
+    "/delete_user_groups", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def delete_groups(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestGroupsUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -257,17 +249,16 @@ async def delete_groups(
     user_class = user_class
 
     await user_class.remove_user_groups(
-        user_id=user_id, group_ids=request_model.group_ids
+        user_id=request_model.user_id, group_ids=request_model.group_ids
     )
 
 
 @admin_user_router.put(
-    "/{user_id}/password", status_code=200, tags=["Administration User"], description="Change User Password"
+    "/change_user_password", status_code=200, tags=["Administration User"]
 )
 @exceptions_wrapper
 async def change_user_password(
     request: Request,
-    user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestPasswordUserModel = Depends(),
     user_class: AdminUserService = Depends(provide_admin_user_service_stub),
@@ -276,5 +267,5 @@ async def change_user_password(
     user_class = user_class
 
     await user_class.change_password(
-        user_id=user_id, new_password=request_model.new_password
+        user_id=request_model.user_id, new_password=request_model.new_password
     )
