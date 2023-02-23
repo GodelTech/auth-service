@@ -166,7 +166,8 @@ class AdminUserService():
         
     async def change_password(self, user_id:int, new_password:str):
         new_password = PasswordHash.hash_password(password=new_password)
-        await self.user_repo.update(user_id=user_id, password_hash = new_password)
+        await self.user_repo.change_password(user_id=user_id, password = new_password)
+    
 
     async def send_email_verification():
         pass

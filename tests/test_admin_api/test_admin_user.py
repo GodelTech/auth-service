@@ -48,10 +48,13 @@ class TestAdminUserEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
-            "password_hash": "1",
+            #  "password_hash": "1",
             "two_factors_enabled": False,
         }
         await self.user_repo.create(**data)
+        await self.user_repo.change_password(
+            user_id=user_id, password="WalkLikeAnEgiptian"
+        )
 
     async def setup_groups_roles(self, engine):
         await self.setup_base(engine)
@@ -127,7 +130,7 @@ class TestAdminUserEndpoint:
             "Content-Type": "application/x-www-form-urlencoded",
         }
         response = await client.request(
-            "GET", "/administration/users", headers=headers
+            "GET", "/administration/user/all_users", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -135,11 +138,12 @@ class TestAdminUserEndpoint:
         user_id = 1000
         await self.setup_base(engine, user_id)
         headers = {"access-token": self.access_token}
-        user_id = user_id
+        params = {"user_id": user_id}
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}",
+            "/administration/user/get_user",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -161,21 +165,22 @@ class TestAdminUserEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        
-        params = {"username": "DiegoBrando"}
+        params = {"user_id": user_id, "username": "DiegoBrando"}
         response = await client.request(
             "PUT",
-            f"/administration/users/{user_id}",
+            "/administration/user/update_user",
             headers=headers,
             data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
+        params = {"user_id": user_id}
 
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}",
+            "/administration/user/get_user",
             headers=headers,
+            params=params,
         )
         response_content = json.loads(response.content.decode("utf-8"))
         assert response_content["username"] == "DiegoBrando"
@@ -190,17 +195,20 @@ class TestAdminUserEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
+        params = {"user_id": user_id}
         response = await client.request(
             "DELETE",
-            f"/administration/users/{user_id}",
+            "/administration/user/delete_user",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
 
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}",
+            "/administration/user/get_user",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -209,7 +217,6 @@ class TestAdminUserEndpoint:
             "security_stamp": "123",
             "email": "theworld@timestop.com",
             "phone_number": "+20-123-123-123",
-            "password": "1",
             "two_factors_enabled": False,
         }
         headers = {
@@ -219,14 +226,14 @@ class TestAdminUserEndpoint:
         }
         response = await client.request(
             "POST",
-            "/administration/users",
+            "/administration/user/new_user",
             headers=headers,
             data=kwargs,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
-            "GET", "/administration/users", headers=headers
+            "GET", "/administration/user/all_users", headers=headers
         )
 
         response_content = json.loads(response.content.decode("utf-8"))
@@ -235,7 +242,7 @@ class TestAdminUserEndpoint:
                 params = {"user_id": user["id"]}
                 response = await client.request(
                     "DELETE",
-                    "/administration/users/user_id",
+                    "/administration/user/delete_user",
                     headers=headers,
                     params=params,
                 )
@@ -246,28 +253,31 @@ class TestAdminUserEndpoint:
     async def test_successful_groups_users(self, engine, client: AsyncClient):
         await self.setup_base(engine)
         await self.setup_groups_roles(engine)
-        user_id = 1000
+
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
         data = {
+            "user_id": 1000,
             "group_ids": f'{(await self.group_repo.get_group_by_name(name = "Polnareff")).id},{(await self.group_repo.get_group_by_name(name = "Silver")).id}',
         }
 
         response = await client.request(
             "POST",
-            f"/administration/users/{user_id}/groups",
+            "/administration/user/add_groups",
             headers=headers,
             data=data,
         )
         assert response.status_code == status.HTTP_200_OK
 
+        params = {"user_id": 1000}
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}/groups",
+            "/administration/user/show_groups",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -280,7 +290,7 @@ class TestAdminUserEndpoint:
         }
         response = await client.request(
             "DELETE",
-            f"/administration/users/{user_id}/groups",
+            "/administration/user/delete_user_groups",
             headers=headers,
             data=data,
         )
@@ -288,8 +298,9 @@ class TestAdminUserEndpoint:
 
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}/groups",
+            "/administration/user/show_groups",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -300,25 +311,28 @@ class TestAdminUserEndpoint:
     async def test_successful_roles_users(self, engine, client: AsyncClient):
         await self.setup_base(engine)
         await self.setup_groups_roles(engine)
-        user_id = 1000
+
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
         data = {
+            "user_id": 1000,
             "role_ids": f'{(await self.role_repo.get_role_by_name(name = "Standuser")).id},{(await self.role_repo.get_role_by_name(name = "Vampire")).id}',
         }
 
         response = await client.request(
-            "POST", f"/administration/users/{user_id}/roles", headers=headers, data=data
+            "POST", "/administration/user/add_roles", headers=headers, data=data
         )
         assert response.status_code == status.HTTP_200_OK
 
         headers = {"access-token": self.access_token}
+        params = {"user_id": 1000}
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}/roles",
+            "/administration/user/show_roles",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -331,7 +345,7 @@ class TestAdminUserEndpoint:
         }
         response = await client.request(
             "DELETE",
-            f"/administration/users/{user_id}/roles",
+            "/administration/user/delete_user_roles",
             headers=headers,
             data=data,
         )
@@ -340,8 +354,9 @@ class TestAdminUserEndpoint:
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            f"/administration/users/{user_id}/roles",
+            "/administration/user/show_roles",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -354,20 +369,23 @@ class TestAdminUserEndpoint:
         self, engine, client: AsyncClient
     ):
         await self.setup_base(engine)
-        user_id = 1000
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        data = {"new_password": "muda_muda_muda"}
-        password_one = (await self.user_repo.get_user_by_id(1000)).password_hash
+        data = {"user_id": 1000, "new_password": "muda_muda_muda"}
+        password_one = (
+            await self.user_repo.get_user_by_id(1000)
+        ).password_hash.value
 
         response = await client.request(
             "PUT",
-            f"/administration/users/{user_id}/password",
+            "/administration/user/change_user_password",
             headers=headers,
             data=data,
         )
         assert response.status_code == 200
-        password_two = (await self.user_repo.get_user_by_id(1000)).password_hash
+        password_two = (
+            await self.user_repo.get_user_by_id(1000)
+        ).password_hash.value
         assert password_two != password_one

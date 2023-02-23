@@ -10,7 +10,7 @@ from src.presentation.admin_api.models.group import *
 
 logger = logging.getLogger(__name__)
 
-admin_group_router = APIRouter(prefix="/groups")
+admin_group_router = APIRouter(prefix="/group")
 
 
 def exceptions_wrapper(func):
@@ -36,19 +36,19 @@ def exceptions_wrapper(func):
 
 
 @admin_group_router.get(
-    "/{group_id}", response_model=dict, tags=["Administration Group"], description="Get the Group"
+    "/get_group", response_model=dict, tags=["Administration Group"]
 )
 @exceptions_wrapper
 async def get_group(
     request: Request,
-    group_id:int,
     access_token: str = Header(description="Access token"),
+    request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
 
     group_class = group_class
 
-    result = await group_class.get_group(group_id=group_id)
+    result = await group_class.get_group(group_id=request_model.group_id)
     return {
         "id": result.id,
         "name": result.name,
@@ -57,7 +57,7 @@ async def get_group(
 
 
 @admin_group_router.get(
-    "", response_model=dict, tags=["Administration Group"], description="Get All Groups"
+    "/get_all_groups", response_model=dict, tags=["Administration Group"]
 )
 @exceptions_wrapper
 async def get_all_groups(
@@ -70,22 +70,22 @@ async def get_all_groups(
 
 
 @admin_group_router.get(
-    "/{group_id}/subgroups", response_model=dict, tags=["Administration Group"], description="Get Subgroups of the Group"
+    "/get_subgroups", response_model=dict, tags=["Administration Group"]
 )
 @exceptions_wrapper
 async def get_subgroups(
     request: Request,
-    group_id:int,
     access_token: str = Header(description="Access token"),
+    request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    result = await group_class.get_subgroups(group_id=group_id)
+    result = await group_class.get_subgroups(group_id=request_model.group_id)
     return result
 
 
 @admin_group_router.post(
-    "", status_code=status.HTTP_200_OK, tags=["Administration Group"], description="Create a New Group"
+    "/new_group", status_code=status.HTTP_200_OK, tags=["Administration Group"]
 )
 @exceptions_wrapper
 async def create_group(
@@ -101,39 +101,36 @@ async def create_group(
 
 
 @admin_group_router.put(
-    "/{group_id}",
+    "/update_group",
     status_code=status.HTTP_200_OK,
     tags=["Administration Group"],
-    description="Update the Group"
 )
 @exceptions_wrapper
 async def update_group(
     request: Request,
-    group_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
     await group_class.update_group(
-        group_id=group_id,
+        group_id=request_model.group_id,
         name=request_model.name,
         parent_group=request_model.parent_group,
     )
 
 
 @admin_group_router.delete(
-    "/{group_id}",
+    "/delete_group",
     status_code=status.HTTP_200_OK,
     tags=["Administration Group"],
-    description="Delete the Group"
 )
 @exceptions_wrapper
 async def delete_group(
     request: Request,
-    group_id:int,
     access_token: str = Header(description="Access token"),
+    request_model: RequestGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
 ):
     group_class = group_class
-    await group_class.delete_group(group_id=group_id)
+    await group_class.delete_group(group_id=request_model.group_id)
