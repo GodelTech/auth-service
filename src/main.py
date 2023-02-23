@@ -8,8 +8,6 @@ from fastapi.staticfiles import StaticFiles
 from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
-from pathlib import Path
-from sqladmin import Admin
 
 from src.presentation.api.middleware.authorization_validation import (
     AuthorizationMiddleware,
