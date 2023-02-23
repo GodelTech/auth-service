@@ -158,3 +158,43 @@ class ThirdPartyOIDCRepository(BaseRepository):
                 return link_list[0][0]
             else:
                 return None
+    
+    async def exists(self, name: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+
+            result = await session.execute(
+                select(exists().where(IdentityProvider.name == name))
+            )
+            result = result.first()
+            return result[0]
+
+    async def create(
+        self, 
+        name: str,
+        auth_endpoint_link: str,
+        token_endpoint_link: str,
+        userinfo_link: str,
+        internal_redirect_uri: str,
+        provider_icon: str 
+    ) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+
+            await session.execute(
+                insert(IdentityProvider).values(
+                    name=name,
+                    auth_endpoint_link=auth_endpoint_link,
+                    token_endpoint_link=token_endpoint_link,
+                    userinfo_link=userinfo_link,
+                    internal_redirect_uri=internal_redirect_uri,
+                    provider_icon=provider_icon
+                )
+            )
+            await session.commit()

@@ -98,9 +98,11 @@ from src.di.providers import (
     provide_auth_third_party_oidc_service_stub,
     provide_auth_third_party_oidc_service,
 )
+from src.scripts import CreateIndentityProvidersFromConfig
 
 import logging
 from src.log import LOGGING_CONFIG
+
 
 
 logger = logging.getLogger(__name__)
@@ -141,6 +143,10 @@ def setup_di(app: FastAPI) -> None:
     db_engine = provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
+
+    CreateIndentityProvidersFromConfig(
+        providers_repo=provide_third_party_oidc_repo(db_engine)
+    ).execute()
 
     # Register admin-ui controllers on application start-up.
     admin = CustomAdmin(
