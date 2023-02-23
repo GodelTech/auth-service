@@ -1,7 +1,7 @@
 import logging
 
 import jwt
-
+from typing import Any
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
 
@@ -14,7 +14,7 @@ class JWTService:
         self.algorithms = ["RS256"]
         self.keys = keys
 
-    async def encode_jwt(self, payload: dict = {}, secret: None = None) -> str:
+    async def encode_jwt(self, payload: dict[str, Any] = {}, secret: None = None) -> str:
         token = jwt.encode(
             payload=payload, key=self.keys.private_key, algorithm=self.algorithm
         )
@@ -23,7 +23,7 @@ class JWTService:
 
         return token
 
-    async def decode_token(self, token: str, **kwargs) -> dict:
+    async def decode_token(self, token: str, **kwargs:Any) -> dict[str, Any]:
 
         token = token.replace("Bearer ", "")
         decoded = jwt.decode(
@@ -37,8 +37,8 @@ class JWTService:
     async def verify_token(self, token: str) -> bool:
         return bool(await self.decode_token(token))
 
-    async def get_module(self):
+    async def get_module(self) -> int:
         return self.keys.n
 
-    async def get_pub_key_expanent(self):
+    async def get_pub_key_expanent(self) -> int:
         return self.keys.e

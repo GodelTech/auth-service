@@ -12,6 +12,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import RequestModel
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

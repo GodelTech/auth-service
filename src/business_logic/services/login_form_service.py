@@ -8,6 +8,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class LoginFormService:
         client_repo: ClientRepository,
         oidc_repo: ThirdPartyOIDCRepository,
     ) -> None:
+        self._request_model:Optional[RequestModel] = None
         self._request_model: Optional[RequestModel] = None
         self.client_repo = client_repo
         self.oidc_repo = oidc_repo
@@ -91,6 +93,7 @@ class LoginFormService:
         return client
 
     @property
+    def request_model(self) -> Optional[RequestModel]:
     def request_model(self) -> Optional[RequestModel]:
         return self._request_model
 

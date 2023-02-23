@@ -22,7 +22,7 @@ class AdminAuthService:
 
     async def authorize(
         self, credentials: AdminCredentialsDTO
-    ) -> Optional[Union[str, Exception]]:
+    ) -> Union[str, None]:
         user_hash_password, user_id = await self.user_repo.get_hash_password(
             credentials.username
         )
@@ -31,7 +31,8 @@ class AdminAuthService:
         ):
             # TODO: Implement admin token generation.
             return "Test Token"
-        return None
+        else:
+            return None
 
     async def authenticate(self, token: str) -> bool:
         if token is None:

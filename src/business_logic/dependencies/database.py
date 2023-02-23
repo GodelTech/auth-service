@@ -20,7 +20,7 @@ def get_repository(
 
 def get_repository_no_depends(
         repo_type: Type[BaseRepository],
-):
+) -> Callable:
     def _get_repo(
             engine=Container.db().engine
     ) -> BaseRepository:

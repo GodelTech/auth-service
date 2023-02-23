@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 from pydantic import BaseModel
 from dataclasses import dataclass
 from fastapi import Form
@@ -17,10 +17,10 @@ class RequestUserModel(BaseModel):
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestAllUserModel:
-    group_id: Union[int, None] = Form(None)
-    role_id: Union[int, None] = Form(None)
+
+class RequestAllUserModel(BaseModel):
+    group_id: Optional[int] 
+    role_id: Optional[int]
 
     class Config:
         orm_mode = True

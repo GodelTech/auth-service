@@ -13,7 +13,7 @@ from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import User, UserClaim, Role, UserClaimType, UserPassword, IdentityProvider
 from src.data_access.postgresql.tables.users import users_roles, users_groups
 from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union, Any, Dict, Tuple
+from typing import Union, Any, Dict, Tuple, Optional
 
 def params_to_dict(**kwargs:Any)-> Dict[str, Any]:
     result = {}
@@ -148,7 +148,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_all_users(self, group_id: Union[int, None] = None, role_id: Union[int, None] = None) -> list[User]:
+    async def get_all_users(self, group_id: Optional[int] = None, role_id: Optional[int] = None) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

@@ -14,7 +14,7 @@ def builder_with_parametr(
     response: Optional[Response] = None,
     args: Optional[tuple] = None,
     kwargs: Optional[dict] = None,
-):
+) -> str:
 
     prefix = f"client-{request.client.host}"
     dict_to_encode = {
