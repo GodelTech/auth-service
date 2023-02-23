@@ -13,7 +13,7 @@ class TestClientRepository:
         redirect = await client_logout_redirect_repo. \
             validate_post_logout_redirect_uri(
                 client_id='test_client',
-                logout_redirect_uri='http://campbell-taylor.net/'
+                logout_redirect_uri='http://thompson-chung.com/'
             )
         assert redirect is True
 
