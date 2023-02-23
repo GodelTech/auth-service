@@ -11,7 +11,7 @@ class CreateIndentityProvidersFromConfig:
         self.config_data = config_data
         self._providers_repo = providers_repo
 
-    def execute(self):
+    def execute(self) -> None:
         for row in self.config_data:
             provider_name = row.get("name")
             if not self._providers_repo.exists(name=provider_name):
