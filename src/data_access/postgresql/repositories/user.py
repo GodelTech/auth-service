@@ -200,21 +200,7 @@ class UserRepository(BaseRepository):
             lockout_enabled: Union[None, bool] = False,
             access_failed_count: Union[None, int] = None,
         ) -> None:
-        self,
-        user_id: int,
-        id: Union[None, str] = None,
-        username: Union[None, str] = None,
-        security_stamp: Union[None, str] = None,
-        email: Union[None, str] = None,
-        email_confirmed: Union[None, bool] = None,
-        phone_number: Union[None, str] = None,
-        phone_number_confirmed: Union[None, bool] = None,
-        two_factors_enabled: Union[None, bool] = None,
-        lockout_end_date_utc: Union[None, str] = None,
-        password_hash: Union[None, int] = None,
-        lockout_enabled: Union[None, bool] = False,
-        access_failed_count: Union[None, int] = None,
-    ):
+
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
