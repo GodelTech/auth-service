@@ -48,7 +48,6 @@ class TestAdminGroupEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
-            "password_hash": "1",
             "two_factors_enabled": False,
         }
         await self.user_repo.create(**data)
@@ -121,13 +120,17 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-       
-        group_id=(await self.group_repo.get_group_by_name("Polnareff")).id
-        
+        params = {
+            "group_id": (
+                await self.group_repo.get_group_by_name("Polnareff")
+            ).id
+        }
+
         response = await client.request(
             "GET",
-            f"/administration/groups/{group_id}",
+            "/administration/group/get_group",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -146,7 +149,7 @@ class TestAdminGroupEndpoint:
         }
 
         response = await client.request(
-            "GET", "/administration/groups", headers=headers
+            "GET", "/administration/group/get_all_groups", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -163,13 +166,17 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        
-        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
+        params = {
+            "group_id": (
+                await self.group_repo.get_group_by_name(name="Giorno")
+            ).id
+        }
 
         response = await client.request(
             "GET",
-            f"/administration/groups/{group_id}/subgroups",
+            "/administration/group/get_subgroups",
             headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -190,19 +197,25 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
+        params = {
+            "group_id": (
+                await self.group_repo.get_group_by_name(name="Giorno")
+            ).id
+        }
 
         response = await client.request(
             "DELETE",
-            f"/administration/groups/{group_id}",
+            "/administration/group/delete_group",
             headers=headers,
+            data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            f"/administration/groups/{group_id}",
-            headers=headers
+            "/administration/group/get_group",
+            headers=headers,
+            params=params,
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -224,7 +237,7 @@ class TestAdminGroupEndpoint:
 
         response = await client.request(
             "POST",
-            "/administration/groups",
+            "/administration/group/new_group",
             headers=headers,
             data=params,
         )
@@ -235,12 +248,13 @@ class TestAdminGroupEndpoint:
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {
+            "group_id": (await self.group_repo.get_group_by_name("Diavolo")).id,
             "name": "Doppio",
         }
-        group_id = (await self.group_repo.get_group_by_name("Diavolo")).id
+
         response = await client.request(
             "PUT",
-            f"/administration/groups/{group_id}",
+            "/administration/group/update_group",
             headers=headers,
             data=params,
         )

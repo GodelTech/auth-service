@@ -55,32 +55,32 @@ CLIENT_USERNAMES = {
 }
 
 USER_CLAIM_TYPE = [
-        "name", 
-        "given_name",
-        "family_name",
-        "middle_name",
-        "nickname", 
-        "preferred_username", 
-        "profile",
-        "picture",
-        "website",
-        "email", 
-        "email_verified",
-        "gender", 
-        "birthdate",
-        "zoneinfo",
-        "locale", 
-        "phone_number", 
-        "phone_number_verified",
-        "address", 
-        "updated_at", 
-    ]
+    "name",
+    "given_name",
+    "family_name",
+    "middle_name",
+    "nickname",
+    "preferred_username",
+    "profile",
+    "picture",
+    "website",
+    "email",
+    "email_verified",
+    "gender",
+    "birthdate",
+    "zoneinfo",
+    "locale",
+    "phone_number",
+    "phone_number_verified",
+    "address",
+    "updated_at",
+]
 
 TYPES_OF_GRANTS = [
-    "code", 
+    "code",
     "refresh_token",
     "password",
-    'urn:ietf:params:oauth:grant-type:device_code',
+    "urn:ietf:params:oauth:grant-type:device_code",
 ]
 
 API_SECRET_TYPE = [
@@ -148,25 +148,38 @@ ROLES = [
     "Journalist, broadcasting",
     "Freight forwarder",
     "Air cabin crew",
-    "Scientist, research (maths)"
+    "Scientist, research (maths)",
 ]
 
 
-ACCESS_TOKEN_TYPES = [
-    "jwt", 
-    "reference"
-    ]
+ACCESS_TOKEN_TYPES = ["jwt", "reference"]
 
 PROTOCOL_TYPES = [
     "open_id_connect",
-    ]
+]
 
 REFRESH_TOKEN_EXPIRATION_TYPES = [
     "absolute",
     "sliding",
-    ]
+]
 
-REFRESH_TOKEN_USAGE = [
-    "one_time_only", 
-    "reuse"
-    ]
+REFRESH_TOKEN_USAGE = ["one_time_only", "reuse"]
+
+IDENTITY_PROVIDERS = [
+    {
+        "name": "GitHub",
+        "auth_endpoint_link": "https://github.com/login/oauth/authorize",
+        "token_endpoint_link": "https://github.com/login/oauth/access_token",
+        "userinfo_link": "https://api.github.com/user",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/github",
+        "provider_icon": "fa-github",
+    },
+    {
+        "name": "facebook",
+        "auth_endpoint_link": "facebook_auth_endpoint_link",
+        "token_endpoint_link": "facebook_token_endpoint_link",
+        "userinfo_link": "facebook_userinfo_link",
+        "internal_redirect_uri": "facebook_internal_redirect_uri",
+        "provider_icon": "fa-facebook",
+    },
+]

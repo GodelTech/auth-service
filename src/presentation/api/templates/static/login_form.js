@@ -18,11 +18,8 @@ let credentialsModalWindow = document.querySelector('#credentials_modal_window')
 
 // external services variables
 
-let google = document.getElementById('Google')
-let github = document.getElementById('GitHub')
-let facebook = document.getElementById('FaceBook')
-let linkedin = document.getElementById('LinkedIn')
-let twitter = document.getElementById('Twitter')
+let deviceButtons = document.getElementsByClassName('device_button')
+let deviceButtonsArray = [...deviceButtons]
 
 
 function formRequestModel(){
@@ -37,7 +34,7 @@ function formRequestModel(){
 function updateScope() {
     let user_name = username.value
     let user_password = password.value
-    return "&username="+user_name+"&password="+user_password    
+    return "&username="+user_name+"&password="+user_password
 }
 
 function formBody(){
@@ -127,34 +124,43 @@ async function redirectToPost(event) {
     }
 }
 
+function parseLink(link){
+    arr_data = link.split("&")
+    console.log(arr_data)
+    let bodyData = new URLSearchParams()
+    data = {}
+    arr_data.forEach(function(item, index, array){
+        console.log(item)
+
+        small_arr = item.split("=")
+        data[small_arr[0]] = small_arr[1]
+    })
+    bodyData.append("state", data["state"])
+    return bodyData
+}
+
+
 // External service functions
 
-function handleGitHub(){
-    window.location.href = 'https://github.com/';
+deviceButtonsArray.forEach((item) => {
+    item.addEventListener('click', async function() {
+        let device_link = item.name
+        state = parseLink(device_link)
+        await fetch("http://127.0.0.1:8000/authorize/oidc/state", {
+            method: "POST",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: state
+        })
+        window.location.href = device_link;
+    })
+})
+
+function handleDeviceButton(butt){
+    let device_link = butt.name
+    window.location.href = device_link;
 }
 
-function handleGoogle(){
-    window.location.href = 'https://www.google.com/';
-}
-
-function handleFacebook(){
-    window.location.href = 'https://www.facebook.com/';
-}
-
-function handleLinkedIn(){
-    window.location.href = 'https://www.linkedin.com/';
-}
-
-function handleTwitter(){
-    window.location.href = 'https://twitter.com/';
-}
 
 // EventListeners
 
 auth_form.addEventListener('submit', redirectToPost)
-
-github.addEventListener('click', handleGitHub)
-google.addEventListener('click', handleGoogle)
-facebook.addEventListener('click', handleFacebook)
-linkedin.addEventListener('click', handleLinkedIn)
-twitter.addEventListener('click', handleTwitter)

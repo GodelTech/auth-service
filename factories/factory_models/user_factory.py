@@ -6,6 +6,13 @@ import factories.data.data_for_factories as data
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.users as users
 
+class UserPasswordFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = users.UserPassword
+        sqlalchemy_session = sess.session
+        
+    value = factory.Iterator(data.CLIENT_HASH_PASSWORDS.values())
+
 
 class UserFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -15,7 +22,7 @@ class UserFactory(SQLAlchemyModelFactory):
 
     email = factory.Faker("ascii_email")
     email_confirmed = factory.Faker("pybool")
-    password_hash = factory.Iterator(data.CLIENT_HASH_PASSWORDS.values())
+    password_hash_id = factory.SubFactory(UserPasswordFactory)
     security_stamp = factory.Faker("word")
     phone_number = factory.Faker("phone_number")
     phone_number_confirmed = factory.Faker("pybool")
@@ -34,6 +41,7 @@ class UserFactory(SQLAlchemyModelFactory):
             # A list of roles were passed in, use them
             for role in extracted:
                 self.roles.append(role)
+
 
 
 class UserLoginFactory(SQLAlchemyModelFactory):
