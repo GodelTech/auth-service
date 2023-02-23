@@ -103,7 +103,7 @@ class TestAuthorizationCodeFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "http://www.avery.com/",
+            "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
         response = await client.request("GET", "/endsession/", params=params)
