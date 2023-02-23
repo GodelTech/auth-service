@@ -3,6 +3,7 @@ import logging
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import ClientRepository
 from src.presentation.api.models import RequestModel
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -12,10 +13,14 @@ class LoginFormService:
         self,
         client_repo: ClientRepository,
     ) -> None:
-        self._request_model = None
+        self._request_model:Optional[RequestModel] = None
         self.client_repo = client_repo
 
     async def get_html_form(self) -> bool:
+        if self.request_model is None:
+            raise WrongResponseTypeError(
+                "You try to pass unprocessable response type"
+            )
         if await self._validate_client(self.request_model.client_id):
 
             if await self._validate_client_redirect_uri(
@@ -33,6 +38,14 @@ class LoginFormService:
                     raise WrongResponseTypeError(
                         "You try to pass unprocessable response type"
                     )
+            else:
+                raise WrongResponseTypeError(
+                    "You try to pass unprocessable response type"
+                )
+        else:
+            raise WrongResponseTypeError(
+                "You try to pass unprocessable response type"
+            )
 
     async def _validate_client(self, client_id: str) -> bool:
         """
@@ -55,7 +68,7 @@ class LoginFormService:
         return client
 
     @property
-    def request_model(self) -> None:
+    def request_model(self) -> Optional[RequestModel]:
         return self._request_model
 
     @request_model.setter

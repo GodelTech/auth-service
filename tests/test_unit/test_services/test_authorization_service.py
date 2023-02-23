@@ -125,6 +125,7 @@ class TestAuthorizationService:
         )
         await connection.execute(insert(Client).values(**DEFAULT_CLIENT))
         await connection.commit()
+        authorization_service.request_model = 1
         client = await authorization_service._validate_client(
             client_id="default_test_client"
         )
@@ -136,6 +137,7 @@ class TestAuthorizationService:
 
     async def test_validate_client_error(self, authorization_service):
         with pytest.raises(ClientNotFoundError):
+            authorization_service.request_model = 1
             await authorization_service._validate_client(
                 client_id="test_client_not_exist"
             )

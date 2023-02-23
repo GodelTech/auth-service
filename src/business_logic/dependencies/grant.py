@@ -12,7 +12,7 @@ def get_grant_service(service_type: BaseGrantService) -> Callable:
         persistent_grant_repo: PersistentGrantRepository = Depends(
             get_repository(PersistentGrantRepository)
         ),
-    ):
+    ) -> BaseGrantService:
         return service_type(persistent_grant_repo=persistent_grant_repo)
 
     return _get_grant_service

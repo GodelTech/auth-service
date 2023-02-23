@@ -6,21 +6,27 @@ from jwkest import long_to_base64, base64_to_long
 import logging
 
 from jwkest import base64_to_long, long_to_base64
-
+from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class WellKnownServies:
+    def __init__(self) -> None:
+        self.request:Optional[Request] =None
+        
     def get_list_of_types(
-        self, list_of_types: list = [("Not ready yet", "")]
-    ) -> list:
+        self, list_of_types: list[Any] = [("Not ready yet", "")]
+    ) -> list[str]:
         return [claim[0] for claim in list_of_types]
 
-    def get_all_urls(self, result):
+    def get_all_urls(self, result:dict[str, Any]) -> dict[str, Any]:
+        if self.request is None:
+            raise ValueError
         return {
             route.name: result["issuer"] + route.path
             for route in self.request.app.routes
@@ -28,15 +34,18 @@ class WellKnownServies:
 
     async def get_openid_configuration(
         self,
-    ) -> dict:
-
+    ) -> dict[str, Any]:
+        if self.request is None:
+            raise ValueError
+       
         # For key description: https://ldapwiki.com/wiki/Openid-configuration
+        
         # REQUIRED
-        result = {
-            "issuer": str(self.request.url).replace(
+        result:dict[str, Any] ={}
+        result["issuer"] = str(self.request.url).replace(
                 "/.well-known/openid-configuration", ""
             )
-        }
+        
 
         urls_dict = self.get_all_urls(result)
 
@@ -112,7 +121,7 @@ class WellKnownServies:
 
         return result
 
-    async def get_jwks(self) -> dict:
+    async def get_jwks(self) -> dict[str, Any]:
         jwt_service = JWTService()
         kty = ""
         if "RS" in jwt_service.algorithm:

@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 import uuid
-from typing import Union
+from typing import Union, Any, Optional
 
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
@@ -21,11 +21,12 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
 )
 from src.presentation.api.models import BodyRequestTokenModel
+from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
 
-def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
+def get_base_payload(client_id: str, expiration_time: int, **kwargs:Any) -> dict[str, Any]:
 
     if kwargs.get("user_id") and kwargs["user_id"] != "":
         kwargs["sub"] = kwargs.get("user_id")
@@ -44,10 +45,10 @@ def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
 
 async def get_single_token(
     client_id: str,
-    additional_data: dict,
+    additional_data: dict[str, Any],
     jwt_service: JWTService,
     expiration_time: int,
-    **kwargs,
+    **kwargs: Any,
 ) -> str:
     """
     It can be used for id, access and refresh token.
@@ -73,16 +74,19 @@ class TokenService:
         device_repo: DeviceRepository,
         jwt_service: JWTService,
     ) -> None:
-        self.request = ...
-        self.request_model = ...
-        self.authorization = ...
+        self.request:Optional[Request] = None
+        self.request_model = None
+        self.request_body = None
+        self.authorization = None
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.user_repo = user_repo
         self.device_repo = device_repo
         self.jwt_service = jwt_service
 
-    async def get_tokens(self) -> dict:
+    async def get_tokens(self) -> dict[str, Any]:
+        if self.request_model is None:
+            raise ValueError
         if self.request_model.grant_type == "code" and (
             self.request_model.redirect_uri is None
             or self.request_model.code is None
@@ -366,10 +370,11 @@ class TokenService:
                 else:
                     raise GrantNotFoundError
 
-    async def get_client_credentials(self) -> dict:
+    async def get_client_credentials(self) -> dict[str, Any]:
         expiration_time = 600
         client_from_db = ...
-
+        if self.request_model is None:
+            raise ValueError
         try:
             client_from_db = await self.client_repo.get_client_by_client_id(
                 client_id=self.request_model.client_id
@@ -431,7 +436,8 @@ class TokenService:
         return response
 
     async def revoke_token(self) -> None:
-
+        if self.request_body is None:
+            raise ValueError
         token_type_hint = self.request_body.token_type_hint
         if token_type_hint == "refresh_token":
             logger.info("I am here")
