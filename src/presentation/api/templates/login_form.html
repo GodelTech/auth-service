@@ -25,7 +25,7 @@
       <p class="sing_in">Sign in with</p>
 <!--          <div class="externals">-->
         {% for b in external_logins -%}
-          <button id={{ b }} class="form_auth_button" name="login_with_external_serv"> {{ b }} <i class="fa {{ external_logins[b] }}"></i></button>
+          <button id={{ b }} class="form_auth_button device_button" name="{{ external_logins[b]['provider_link'] }}"> {{ b }} <i class="fa {{ external_logins[b]['provider_icon'] }}"></i></button>
         {% endfor %}
 <!--          </div>-->
     {% endif -%}
@@ -55,7 +55,7 @@
 
   <div class="overlay" id="overlay_modal"></div>
 
-  
+
 <!-- <div id="rq_model">
     <div class="model_elem" id="client_id">santa</div>
     <div class="model_elem" id="response_type">code</div>

@@ -1,7 +1,13 @@
 import datetime
 import pytest_asyncio
 
-from src.presentation.api.models import DeviceCancelModel, DeviceUserCodeModel, DeviceRequestModel
+from src.presentation.api.models import (
+    DeviceCancelModel,
+    DeviceUserCodeModel,
+    DeviceRequestModel,
+    ThirdPartyOIDCRequestModel,
+    StateRequestModel,
+)
 from src.presentation.api.models.authorization import RequestModel
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.business_logic.services.jwt_token import JWTService
@@ -60,7 +66,7 @@ DEFAULT_CLIENT = {
 DEFAULT_USER = {
     "email": "test_user@tes.com",
     "email_confirmed": True,
-    "password_hash": "$2b$12$RAC7jWdNn8Fudxc4OhudkOPK0eeBBWjGd5Iyfzma5F8uv9xD.jx/6",
+    "password_hash_id": 1,
     "security_stamp": "security_stamp",
     "phone_number": "4567736574",
     "phone_number_confirmed": False,
@@ -106,25 +112,21 @@ def device_cancel_model() -> DeviceCancelModel:
     cancel_model = DeviceCancelModel(
         client_id="test_client",
         scope="gcp-api%20IdentityServerApi&grant_type=urn:ietf:params:oauth:grant-type:device_code&"
-              "client_id=test_client&client_secret=65015c5e-c865-d3d4-3ba1-3abcb4e65500&"
-              "password=test_password&username=TestClient&user_code=user_code",
+        "client_id=test_client&client_secret=65015c5e-c865-d3d4-3ba1-3abcb4e65500&"
+        "password=test_password&username=TestClient&user_code=user_code",
     )
     return cancel_model
 
 
 @pytest_asyncio.fixture
 def device_user_code_model() -> DeviceUserCodeModel:
-    user_code_model = DeviceUserCodeModel(
-        user_code="GHJKTYUI"
-    )
+    user_code_model = DeviceUserCodeModel(user_code="GHJKTYUI")
     return user_code_model
 
 
 @pytest_asyncio.fixture
 def device_request_model() -> DeviceRequestModel:
-    request_model = DeviceRequestModel(
-        client_id="test_client"
-    )
+    request_model = DeviceRequestModel(client_id="test_client")
     return request_model
 
 
@@ -134,14 +136,10 @@ TOKEN_HINT_DATA = {
     "sub": 3,
     "client_id": "santa",
     "data": "secret_code",
-    "type": "code"
+    "type": "code",
 }
 
-SHORT_TOKEN_HINT_DATA = {
-    "sub": 3,
-    "data": "secret_code",
-    "type": "code"
-}
+SHORT_TOKEN_HINT_DATA = {"sub": 3, "data": "secret_code", "type": "code"}
 
 
 class TokenHint:
@@ -154,7 +152,9 @@ class TokenHint:
 
     @classmethod
     async def get_short_token_hint(cls):
-        short_token_hint = await cls.sv.encode_jwt(payload=SHORT_TOKEN_HINT_DATA)
+        short_token_hint = await cls.sv.encode_jwt(
+            payload=SHORT_TOKEN_HINT_DATA
+        )
         return short_token_hint
 
 
@@ -164,8 +164,21 @@ async def end_session_request_model() -> RequestEndSessionModel:
     token_hint = await tk_hint.get_token_hint()
     request_model = RequestEndSessionModel(
         id_token_hint=token_hint,
-        post_logout_redirect_uri='http://campbell-taylor.net/',
-        state='test_state'
+        post_logout_redirect_uri="http://campbell-taylor.net/",
+        state="test_state",
     )
     return request_model
-a =1 
+
+
+@pytest_asyncio.fixture
+async def third_party_oidc_request_model() -> ThirdPartyOIDCRequestModel:
+    oidc_request_model = ThirdPartyOIDCRequestModel(
+        code="test_code", state="test_state"
+    )
+    return oidc_request_model
+
+
+@pytest_asyncio.fixture
+async def state_request_model() -> StateRequestModel:
+    request_model = StateRequestModel(state="some_crazy_state")
+    return request_model
