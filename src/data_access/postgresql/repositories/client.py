@@ -124,9 +124,6 @@ class ClientRepository(BaseRepository):
                 )
             return True
 
-    async def validate_client_redirect_uri(self, client_id: str, redirect_uri: str) -> bool:
-        
-        client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
     async def validate_client_redirect_uri(
         self, client_id: str, redirect_uri: str
     ) -> bool:
@@ -144,17 +141,6 @@ class ClientRepository(BaseRepository):
                 )
                 
             result = redirect_uri_obj.first()
-            client_id_int = (
-                await self.get_client_by_client_id(client_id=client_id)
-            ).id
-            redirect_uri = await session.execute(
-                select(ClientRedirectUri).where(
-                    ClientRedirectUri.client_id == client_id_int,
-                    ClientRedirectUri.redirect_uri == redirect_uri,
-                )
-            )
-
-            result = redirect_uri.first()
             if not result:
                 raise ClientRedirectUriError(
                     "Redirect uri you are looking for does not exist"
