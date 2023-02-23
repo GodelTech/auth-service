@@ -1,9 +1,10 @@
 import logging
 
-import jwt
-from typing import Any
+from typing import Any, no_type_check
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
+import jwt
+
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,8 @@ class JWTService:
         self.algorithms = ["RS256"]
         self.keys = keys
 
+    @no_type_check
+    #TODO: remove @no_type_check after new jwt lib release on PYPI
     async def encode_jwt(self, payload: dict[str, Any] = {}, secret: None = None) -> str:
         token = jwt.encode(
             payload=payload, key=self.keys.private_key, algorithm=self.algorithm
@@ -22,7 +25,9 @@ class JWTService:
         logger.info(f"Created token.")
 
         return token
-
+    
+    @no_type_check
+    #TODO: remove @no_type_check after new jwt lib release on PYPI
     async def decode_token(self, token: str, **kwargs:Any) -> dict[str, Any]:
 
         token = token.replace("Bearer ", "")
