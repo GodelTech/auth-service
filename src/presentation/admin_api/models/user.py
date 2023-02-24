@@ -54,7 +54,7 @@ class RequestCreateUserModel:
     phone_number:str = Form(...)
     two_factors_enabled:bool = Form(...)
     username:str = Form(...)
-    password:str = Form(...)
+    # password:str = Form(...)
 
     def dictionary(self):
         return{
@@ -63,7 +63,6 @@ class RequestCreateUserModel:
             "phone_number":self.phone_number,
             "two_factors_enabled":self.two_factors_enabled,
             "username":self.username,
-            "password":self.password
         }
 
     class Config:

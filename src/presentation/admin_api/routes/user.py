@@ -141,7 +141,6 @@ async def create_user(
     user_class = user_class
     data = request_body.dictionary()
     data["access_failed_count"] = 0
-    data["password_hash"] = data.pop("password")
 
     await user_class.create_user(kwargs=data)
 

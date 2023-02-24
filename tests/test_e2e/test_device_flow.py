@@ -139,7 +139,7 @@ class TestDeviceFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": 'http://campbell-taylor.net/',
+            "post_logout_redirect_uri": 'http://thompson-chung.com/',
             "state": "test_state",
         }
         response = await client.request("GET", "/endsession/", params=params)

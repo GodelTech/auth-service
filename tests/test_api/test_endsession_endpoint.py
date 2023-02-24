@@ -45,7 +45,7 @@ class TestEndSessionEndpoint:
             token_hint = await hint.get_token_hint()
             params = {
                 "id_token_hint": token_hint,
-                "post_logout_redirect_uri": "https://carroll-taylor.com/",
+                "post_logout_redirect_uri": "https://www.cole.com/",
                 "state": "test_state",
             }
             response = await client.request("GET", "/endsession/", params=params)

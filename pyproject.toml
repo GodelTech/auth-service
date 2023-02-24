@@ -36,6 +36,7 @@ testcontainers = "^3.7.1"
 sqladmin = "^0.8.0"
 fontawesomefree = "^6.3.0"
 celery = "^5.2.7"
+pytest-mock = "^3.10.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"

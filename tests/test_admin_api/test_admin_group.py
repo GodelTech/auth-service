@@ -48,7 +48,6 @@ class TestAdminGroupEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
-            "password_hash": "1",
             "two_factors_enabled": False,
         }
         await self.user_repo.create(**data)

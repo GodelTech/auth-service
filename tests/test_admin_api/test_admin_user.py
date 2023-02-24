@@ -48,10 +48,13 @@ class TestAdminUserEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
-            "password_hash": "1",
+            #  "password_hash": "1",
             "two_factors_enabled": False,
         }
         await self.user_repo.create(**data)
+        await self.user_repo.change_password(
+            user_id=user_id, password="WalkLikeAnEgiptian"
+        )
 
     async def setup_groups_roles(self, engine):
         await self.setup_base(engine)
@@ -214,7 +217,6 @@ class TestAdminUserEndpoint:
             "security_stamp": "123",
             "email": "theworld@timestop.com",
             "phone_number": "+20-123-123-123",
-            "password": "1",
             "two_factors_enabled": False,
         }
         headers = {
@@ -372,7 +374,9 @@ class TestAdminUserEndpoint:
             "Content-Type": "application/x-www-form-urlencoded",
         }
         data = {"user_id": 1000, "new_password": "muda_muda_muda"}
-        password_one = (await self.user_repo.get_user_by_id(1000)).password_hash
+        password_one = (
+            await self.user_repo.get_user_by_id(1000)
+        ).password_hash.value
 
         response = await client.request(
             "PUT",
@@ -381,5 +385,7 @@ class TestAdminUserEndpoint:
             data=data,
         )
         assert response.status_code == 200
-        password_two = (await self.user_repo.get_user_by_id(1000)).password_hash
+        password_two = (
+            await self.user_repo.get_user_by_id(1000)
+        ).password_hash.value
         assert password_two != password_one

@@ -1,8 +1,9 @@
 import logging
-from typing import Union
+from typing import Optional, Union
 
 from src.business_logic.dto import AdminCredentialsDTO
-from src.business_logic.services import JWTService, PasswordHash
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import UserRepository
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class AdminAuthService:
 
     async def authorize(
         self, credentials: AdminCredentialsDTO
-    ) -> Union[str, Exception]:
+    ) -> Optional[Union[str, Exception]]:
         user_hash_password, user_id = await self.user_repo.get_hash_password(
             credentials.username
         )
@@ -30,6 +31,7 @@ class AdminAuthService:
         ):
             # TODO: Implement admin token generation.
             return "Test Token"
+        return None
 
     async def authenticate(self, token: str) -> bool:
         if token is None:
