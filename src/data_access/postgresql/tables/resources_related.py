@@ -27,7 +27,7 @@ class ApiResource(BaseModel):
     enabled = Column(Boolean, default=True, nullable=True)
     name = Column(String, nullable=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Resource {self.id}: {self.name}"
 
 
@@ -44,13 +44,13 @@ class ApiSecret(BaseModel):
     
     value = Column(String, nullable=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Secret {self.id}: {self.description} {self.secret_type}"
 
 class ApiSecretType(BaseModel):
     __tablename__ = "api_secrets_types"
     secret_type = Column(String, unique = True, nullable=False)
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.secret_type}"
 
 class ApiClaim(BaseModel):
@@ -63,14 +63,14 @@ class ApiClaim(BaseModel):
     claim_type_id = Column(Integer, ForeignKey("api_claim_types.id", ondelete='CASCADE'), nullable=False)
     claim_type = relationship("ApiClaimType", backref = "api_claim", foreign_keys = "ApiClaim.claim_type_id") 
     claim_value =  Column(String(30))
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Claim {self.api_resources} - {self.id}"
 
 class ApiClaimType(BaseModel):
     __tablename__ = "api_claim_types"
     claim_type = Column(String, unique = True, nullable=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Claim Type: {self.claim_type}"
 
 class ApiScope(BaseModel):
@@ -85,7 +85,7 @@ class ApiScope(BaseModel):
     required = Column(Boolean, default=False, nullable=True)
     show_in_discovery_document = Column(Boolean, default=False, nullable=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Scope {self.id}: {self.name}"
 
 
@@ -99,7 +99,7 @@ class ApiScopeClaim(BaseModel):
     scope_claim_type_id =  Column(Integer, ForeignKey("api_scope_claim_types.id", ondelete='CASCADE'), nullable=False)
     scope_claim_type = relationship("ApiScopeClaimType", backref = "api_claim", foreign_keys = "ApiScopeClaim.scope_claim_type_id") 
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Scope-Claim {self.api_scopes}: {self.scope_claim_type}"
 
 
@@ -107,5 +107,5 @@ class ApiScopeClaimType(BaseModel):
     __tablename__ = "api_scope_claim_types"
     scope_claim_type = Column(String, unique = True, nullable=False)
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Scope-Claim Type: {self.scope_claim_type}"

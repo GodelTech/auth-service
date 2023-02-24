@@ -11,7 +11,8 @@ from src.data_access.postgresql.errors import (
 )
 from src.presentation.api.models import DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel
 from src.di.providers import provide_device_service_stub
-
+from starlette.templating import _TemplateResponse
+from typing import Union
 
 logger = logging.getLogger("is_app")
 
@@ -26,7 +27,7 @@ device_auth_router = APIRouter(
 async def post_device_authorize(
     request_model: DeviceRequestModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
-):
+) -> JSONResponse:
     try:
         auth_service = auth_service
         auth_service.request_model = request_model
@@ -47,7 +48,7 @@ async def post_device_authorize(
 @device_auth_router.get("/auth", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
 async def get_device_user_code(
     request: Request,
-):
+) -> _TemplateResponse:
     return templates.TemplateResponse(
         "device_login_form.html",
         {"request": request},
@@ -60,7 +61,7 @@ async def post_device_user_code(
     request_model: DeviceUserCodeModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
 
-):
+) -> Union[RedirectResponse, JSONResponse]:
     try:
         auth_service = auth_service
         auth_service.request_model = request_model
@@ -82,7 +83,7 @@ async def post_device_user_code(
 @device_auth_router.get("/auth/success", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
 async def get_device_login_confirm(
     request: Request,
-):
+) -> _TemplateResponse:
     return templates.TemplateResponse(
         "device_confirmed_form.html",
         {"request": request},
@@ -94,7 +95,7 @@ async def get_device_login_confirm(
 async def delete_device(
     request_model: DeviceCancelModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
-):
+) -> Union[str, JSONResponse]:
     try:
         auth_service = auth_service
         auth_service.request_model = request_model
@@ -119,7 +120,7 @@ async def delete_device(
 @device_auth_router.get("/auth/cancel", status_code=status.HTTP_200_OK, tags=["Device"], response_class=HTMLResponse)
 async def get_device_cancel_form(
     request: Request,
-):
+) -> _TemplateResponse:
     return templates.TemplateResponse(
         "cancel_device_form.html",
         {"request": request},

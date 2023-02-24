@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, Union
-
+from starlette.templating import _TemplateResponse
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -38,7 +38,7 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> HTMLResponse:
+) -> Union[JSONResponse, _TemplateResponse] :
     try:
         auth_class = auth_class
         auth_class.request_model = request_model
@@ -57,6 +57,8 @@ async def get_authorize(
                 },
                 status_code=200,
             )
+        else:
+            raise ValueError
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -96,6 +98,10 @@ async def post_authorize(
         auth_class.request_model = request_model
         await auth_class.save_code_challenge_data()
         firmed_redirect_uri = await auth_class.get_redirect_url()
+        
+        if not firmed_redirect_uri:
+            raise UserNotFoundError
+        
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )

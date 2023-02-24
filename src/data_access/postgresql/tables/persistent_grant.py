@@ -35,5 +35,5 @@ class PersistentGrantType(Base):
     id = Column(Integer, primary_key=True)
     type_of_grant = Column(String, nullable=False)
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.type_of_grant}"

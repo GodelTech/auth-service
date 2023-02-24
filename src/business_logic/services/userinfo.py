@@ -4,7 +4,7 @@ from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-
+from typing import Any, Optional
 
 class UserInfoServices:
     def __init__(
@@ -15,16 +15,19 @@ class UserInfoServices:
             persistent_grant_repo: PersistentGrantRepository,
     ) -> None:
         self.jwt = jwt
-        self.authorization = ...
+        self.authorization: Optional[str] = None
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
-        self.client_id = None
-        self.secret = None
+
 
     async def get_user_info(
         self,
-    ) -> dict:
+    ) -> dict[str, Any]:
+        
+        if self.authorization is None:
+            raise ValueError
+        
         token = self.authorization
         try:
             decoded_token = await self.jwt.decode_token(token=token)
