@@ -95,8 +95,8 @@ async def post_authorize(
 ):
     try:
         request_model = RequestModel(**request_body.__dict__)
-        auth_class = auth_class
         auth_class.request_model = request_model
+        await auth_class.save_code_challenge_data()
         firmed_redirect_uri = await auth_class.get_redirect_url()
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND

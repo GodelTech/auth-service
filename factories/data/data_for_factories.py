@@ -81,6 +81,7 @@ TYPES_OF_GRANTS = [
     "refresh_token",
     "password",
     'urn:ietf:params:oauth:grant-type:device_code',
+    "code_challenge"
 ]
 
 API_SECRET_TYPE = [

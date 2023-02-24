@@ -33,6 +33,25 @@ class AuthorizationService:
         self.password_service = password_service
         self.jwt_service = jwt_service
 
+    async def save_code_challenge_data(self) -> dict:
+        code_challenge = self.request_model.code_challenge
+        if code_challenge:
+            scope_data = await self._parse_scope_data(
+                    scope=self.request_model.scope
+                )
+            user_name = scope_data["username"]
+            
+            (
+                user_hash_password,
+                user_id,
+            ) = await self.user_repo.get_hash_password(user_name)
+
+            await self.persistent_grant_repo.create(
+                client_id=self.request_model.client_id,
+                grant_data=code_challenge,
+                user_id=user_id,
+                grant_type="code_challenge")
+
     async def get_redirect_url(self) -> str:
         if await self._validate_client(self.request_model.client_id):
             scope_data = await self._parse_scope_data(

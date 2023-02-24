@@ -20,7 +20,9 @@ class RequestModel(BaseModel):
     id_token_hint: Optional[str]
     login_hint: Optional[str]
     acr_values: Optional[str]
-
+    code_challenge: Optional[str]
+    code_challenge_method: Optional[str]
+    
     class Config:
         orm_mode = True
 
@@ -52,3 +54,6 @@ class DataRequestModel:
     id_token_hint: str = Form(None)
     login_hint: str = Form(None)
     acr_values: str = Form(None)
+    code_challenge: str = Form(None)
+    code_challenge_method: str = Form(None)
+    

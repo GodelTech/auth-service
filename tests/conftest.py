@@ -43,7 +43,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 async def engine():
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
-    ).with_bind_ports(5432, 5465)
+    ).with_bind_ports(5432, 5463)
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")

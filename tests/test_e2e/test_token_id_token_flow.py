@@ -68,7 +68,7 @@ class TestAuthorizationTokenFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "http://garza-taylor.com/",
+            "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
         expected_content = '{"message":"You are not logged in"}'

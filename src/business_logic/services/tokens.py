@@ -2,7 +2,11 @@ import datetime
 import logging
 import time
 import uuid
+
 from typing import Union
+from jwt import ExpiredSignatureError
+from hashlib import sha256
+from fastapi import status
 
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
@@ -13,6 +17,7 @@ from src.data_access.postgresql.errors import (
     DeviceRegistrationError,
     DeviceCodeNotFoundError,
     DeviceCodeExpirationTimeError,
+    PKCEError
 )
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -24,6 +29,15 @@ from src.presentation.api.models import BodyRequestTokenModel
 
 logger = logging.getLogger(__name__)
 
+async def check_code_challenge(repo: PersistentGrantRepository, user_id: int, code_verifier: str) -> bool:
+    saved_code_challenge = await repo.get_code_challenge(
+        user_id=user_id
+    )
+    encoded_code_challenge = sha256(saved_code_challenge.encode("utf-8")).hexdigest()
+
+    if code_verifier != encoded_code_challenge:
+        return False
+    return True
 
 def get_base_payload(client_id: str, expiration_time: int, **kwargs) -> dict:
 
@@ -136,6 +150,14 @@ class TokenService:
                     user_id = grant.user_id
                     client_id = self.request_model.client_id
 
+                    if self.request_model.code_verifier is not None:
+                        if not await check_code_challenge(
+                            repo = self.persistent_grant_repo,
+                            user_id=user_id,
+                            code_verifier=self.request_model.code_verifier
+                        ):
+                            raise PKCEError
+                        
                     # ACCESS TOKEN
                     scopes = {"scopes": self.request_model.scope}
                     access_token = await get_single_token(

@@ -1,4 +1,5 @@
 import logging
+import psycopg2
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -34,7 +35,7 @@ class Database:
         logger.info("Connection pool created.")
 
         return connection_pool
-
+    
     async def get_connection(self):
         async with self.__session_factory() as session:
             yield session

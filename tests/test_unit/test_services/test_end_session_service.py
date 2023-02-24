@@ -84,7 +84,7 @@ class TestEndSessionService:
     async def test_end_session(self, end_session_service, end_session_request_model, connection):
         service = end_session_service
         service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "https://carroll-taylor.com/"
+        service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
@@ -97,7 +97,7 @@ class TestEndSessionService:
         )
         await connection.commit()
         redirect_uri = await service.end_session()
-        assert redirect_uri == 'https://carroll-taylor.com/&state=test_state'
+        assert redirect_uri == 'https://www.cole.com/&state=test_state'
 
         await connection.execute(
             delete(PersistentGrant).where(PersistentGrant.client_id == 1)
@@ -107,7 +107,7 @@ class TestEndSessionService:
     async def test_end_session_without_state(self, end_session_service, end_session_request_model, connection):
         service = end_session_service
         service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "https://carroll-taylor.com/"
+        service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
         service.request_model.state = None
         await connection.execute(
             insert(PersistentGrant).values(
@@ -121,7 +121,7 @@ class TestEndSessionService:
         )
         await connection.commit()
         redirect_uri = await service.end_session()
-        assert redirect_uri == "https://carroll-taylor.com/"
+        assert redirect_uri == "https://www.cole.com/"
 
         await connection.execute(
             delete(PersistentGrant).where(PersistentGrant.client_id == 3)
