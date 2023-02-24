@@ -40,7 +40,7 @@ class AuthorizationService:
         if code_challenge:
             scope_data = await self._parse_scope_data(
                 )
-                    scope=self.request_model.scope
+            scope=self.request_model.scope
             user_name = scope_data["username"]
             
             (
