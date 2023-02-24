@@ -4,7 +4,7 @@ from src.data_access.postgresql.repositories.persistent_grant import PersistentG
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 
-from typing import Union
+from typing import Union, Optional, Any
 
 
 class EndSessionService:
@@ -18,26 +18,27 @@ class EndSessionService:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
-        self._request_model = None
+        self._request_model: Optional[RequestEndSessionModel]= None
 
-    async def end_session(self) -> Union[str, None]:
-        decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
-        await self._logout(
-            client_id=decoded_id_token_hint['client_id'],
-            user_id=decoded_id_token_hint['sub']
-        )
-        if self.request_model.post_logout_redirect_uri:
-            if await self._validate_logout_redirect_uri(
-                logout_redirect_uri=self.request_model.post_logout_redirect_uri,
-                client_id=decoded_id_token_hint["client_id"]
-            ):
-                logout_redirect_uri = self.request_model.post_logout_redirect_uri
-                if self.request_model.state:
-                    logout_redirect_uri += f"&state={self.request_model.state}"
-                return logout_redirect_uri
+    async def end_session(self) -> Optional[str]:
+        if self.request_model is not None:
+            decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=self.request_model.id_token_hint)
+            await self._logout(
+                client_id=decoded_id_token_hint['client_id'],
+                user_id=decoded_id_token_hint['sub']
+            )
+            if self.request_model.post_logout_redirect_uri:
+                if await self._validate_logout_redirect_uri(
+                    logout_redirect_uri=self.request_model.post_logout_redirect_uri,
+                    client_id=decoded_id_token_hint["client_id"]
+                ):
+                    logout_redirect_uri = self.request_model.post_logout_redirect_uri
+                    if self.request_model.state:
+                        logout_redirect_uri += f"&state={self.request_model.state}"
+                    return logout_redirect_uri
         return None
 
-    async def _decode_id_token_hint(self, id_token_hint: str) -> dict:
+    async def _decode_id_token_hint(self, id_token_hint: str) -> dict[str, Any]:
         decoded_data = await self.jwt_service.decode_token(token=id_token_hint)
         return decoded_data
 
@@ -53,9 +54,10 @@ class EndSessionService:
         return result
 
     @property
-    def request_model(self) -> Union[RequestEndSessionModel, None]:
+    def request_model(self) -> Optional[RequestEndSessionModel]:
         return self._request_model
 
     @request_model.setter
     def request_model(self, request_model: RequestEndSessionModel) -> None:
         self._request_model = request_model
+

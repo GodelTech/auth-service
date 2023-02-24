@@ -2,7 +2,7 @@ import logging
 from functools import wraps
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-
+from typing import Callable, Any
 from src.business_logic.services.admin_api import AdminRoleService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_role_service_stub
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 admin_role_router = APIRouter(prefix="/role")
 
 
-def exceptions_wrapper(func):
+def exceptions_wrapper(func:Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
-    async def inner(*args, **kwargs):
+    async def inner(*args:Any, **kwargs:Any) -> Any:
         try:
             return await func(*args, **kwargs)
         except ValueError:
@@ -44,7 +44,7 @@ async def get_role(
     access_token: str = Header(description="Access token"),
     request_model: RequestRoleBaseModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+) -> dict[str, Any]:
 
     role_class = role_class
 
@@ -60,7 +60,7 @@ async def get_all_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+)-> dict[str, Any]:
     role_class = role_class
     return {"all_roles": await role_class.get_all_roles()}
 
@@ -74,7 +74,7 @@ async def get_roles(
     access_token: str = Header(description="Access token"),
     request_model: RequestListRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+) -> dict[str, Any]:
     role_class = role_class
     return {
         "list_roles": await role_class.get_roles(
@@ -92,7 +92,7 @@ async def create_role(
     access_token: str = Header(description="Access token"),
     request_model: RequestNewRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+) -> None:
     role_class = role_class
     await role_class.create_role(name=request_model.name)
 
@@ -106,7 +106,7 @@ async def update_role(
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+) -> None:
     role_class = role_class
     await role_class.update_role(
         role_id=request_model.role_id, name=request_model.name
@@ -122,6 +122,6 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestRoleModel = Depends(),
     role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-):
+) -> None:
     role_class = role_class
     await role_class.delete_role(role_id=request_model.role_id)

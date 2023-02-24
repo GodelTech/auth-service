@@ -1,10 +1,10 @@
 import datetime
 
 from sqlalchemy import Column, DateTime, Integer
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, DeclarativeMeta
 from sqlalchemy.sql import func
 
-Base = declarative_base()
+Base: DeclarativeMeta = declarative_base()
 
 
 class BaseModel(Base):

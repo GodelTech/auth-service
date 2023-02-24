@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from src.data_access.postgresql import Database
 
 
-def provide_db_stub():
+def provide_db_stub() -> None:
     ...
 
 

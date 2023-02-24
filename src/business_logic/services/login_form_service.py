@@ -8,6 +8,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
