@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Optional
+from typing import Optional, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_cache.decorator import cache
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 )
 async def get_openid_configuration(
     request: Request, well_known_info_class: WellKnownServies = Depends()
-):
+) -> dict[str, Any]:
     try:
         logger.info("Collecting Data for OpenID Configuration.")
         well_known_info_class = well_known_info_class
@@ -48,7 +48,7 @@ async def get_openid_configuration(
 )
 async def get_jwks(
     request: Request, well_known_info_class: WellKnownServies = Depends()
-):
+) -> dict[str, Any]:
     try:
         logger.info("JWKS")
         well_known_info_class = well_known_info_class

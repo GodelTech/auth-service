@@ -1,10 +1,11 @@
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyChoice
-
+from typing import Any
 import factories.data.data_for_factories as data
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.users as users
+from src.data_access.postgresql.tables import Role, User
 
 class UserPasswordFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -33,7 +34,7 @@ class UserFactory(SQLAlchemyModelFactory):
     username = factory.Iterator(data.CLIENT_USERNAMES.values())
 
     @factory.post_generation
-    def roles(self, create, extracted, **kwargs):
+    def roles(self, create:Any, extracted:list[Role], **kwargs:Any) -> None:
         if not create:
             # Simple build, do nothing.
             return
@@ -63,7 +64,7 @@ class RoleFactory(SQLAlchemyModelFactory):
     name = factory.Faker("job")
 
     @factory.post_generation
-    def users(self, create, extracted, **kwargs):
+    def users(self, create: Any, extracted:list[User], **kwargs:Any) -> Any:
         if not create:
             # Simple build, do nothing.
             return

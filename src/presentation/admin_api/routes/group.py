@@ -2,7 +2,7 @@ import logging
 from functools import wraps
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-
+from typing import Callable, Any
 from src.business_logic.services.admin_api import AdminGroupService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_group_service_stub
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 admin_group_router = APIRouter(prefix="/group")
 
 
-def exceptions_wrapper(func):
+def exceptions_wrapper(func:Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
-    async def inner(*args, **kwargs):
+    async def inner(*args:Any, **kwargs:Any) -> Any:
         try:
             return await func(*args, **kwargs)
         except ValueError:
@@ -44,7 +44,7 @@ async def get_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> dict[str, Any]:
 
     group_class = group_class
 
@@ -64,7 +64,7 @@ async def get_all_groups(
     request: Request,
     access_token: str = Header(description="Access token"),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> dict[str, Any]:
     group_class = group_class
     return {"all_groups": await group_class.get_all_groups()}
 
@@ -78,7 +78,7 @@ async def get_subgroups(
     access_token: str = Header(description="Access token"),
     request_model: RequestDefaultGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> dict[str, Any]:
     group_class = group_class
     result = await group_class.get_subgroups(group_id=request_model.group_id)
     return result
@@ -93,7 +93,7 @@ async def create_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestNewGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> None:
     group_class = group_class
     await group_class.create_group(
         name=request_model.name, parent_group=request_model.parent_group
@@ -111,7 +111,7 @@ async def update_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> None:
     group_class = group_class
     await group_class.update_group(
         group_id=request_model.group_id,
@@ -131,6 +131,6 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
-):
+) -> None:
     group_class = group_class
     await group_class.delete_group(group_id=request_model.group_id)

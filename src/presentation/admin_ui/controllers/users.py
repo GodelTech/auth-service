@@ -1,6 +1,6 @@
 from sqladmin import ModelView
 from sqladmin.forms import get_model_form
-
+from typing import Type, no_type_check
 from src.data_access.postgresql.tables import (
     User,
     UserClaim,
@@ -8,7 +8,7 @@ from src.data_access.postgresql.tables import (
     UserLogin,
     UserPassword,
 )
-
+from wtforms import Form
 
 class UserAdminController(
     ModelView,
@@ -37,8 +37,9 @@ class UserAdminController(
         User.two_factors_enabled,
         User.phone_number_confirmed,
     ]
-
-    async def scaffold_form(self, task=None):  # -> Type[Form]:
+    
+    @no_type_check
+    async def scaffold_form(self, task=None) -> Type[Form]:
         if self.form is not None:
             return self.form
 

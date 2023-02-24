@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
 from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union, Dict, Any
+from typing import Union, Dict, Any, Optional
 
 
 
@@ -94,7 +94,7 @@ class RoleRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def create(self, name: str, id: Union[int, None] = None) -> None:
+    async def create(self, name: str, id: Optional[int] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

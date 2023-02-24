@@ -9,3 +9,4 @@ from .third_party_oidc_authorization import (
     StateRequestModel,
 )
 from .tokens import BodyRequestTokenModel, ResponseTokenModel
+from .revoke import BodyRequestRevokeModel

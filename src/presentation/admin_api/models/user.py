@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional, Any
 from pydantic import BaseModel
 from dataclasses import dataclass
 from fastapi import Form
@@ -56,7 +56,7 @@ class RequestCreateUserModel:
     username:str = Form(...)
     # password:str = Form(...)
 
-    def dictionary(self):
+    def dictionary(self) -> dict[str, Any]:
         return{
             "email":self.email,
             "security_stamp":self.security_stamp,

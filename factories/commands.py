@@ -37,7 +37,7 @@ class DataBasePopulation:
         cls.populate_grants()
 
     @classmethod
-    def populate_user_password_table(cls):
+    def populate_user_password_table(cls) -> None:
         # from src.business_logic.services.password import PasswordHash
     
         for i in range(len(data.CLIENT_USERNAMES)):

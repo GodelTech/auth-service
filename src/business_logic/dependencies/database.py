@@ -1,4 +1,4 @@
-from typing import Callable, Type
+from typing import Callable, Type, no_type_check
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -17,10 +17,10 @@ def get_repository(
 
     return _get_repo
 
-
+@no_type_check
 def get_repository_no_depends(
         repo_type: Type[BaseRepository],
-):
+) -> BaseRepository:
     def _get_repo(
             engine=Container.db().engine
     ) -> BaseRepository:

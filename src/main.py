@@ -1,6 +1,6 @@
 import logging
 from logging.config import dictConfig
-
+from typing import Optional, Any
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -105,12 +105,16 @@ from src.log import LOGGING_CONFIG
 
 logger = logging.getLogger(__name__)
 
+class NewFastApi(FastAPI):
+    def __init__(self, *args:Any, **kwargs:Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.container:Optional[Container] = None
 
-def get_application(test=False) -> FastAPI:
+def get_application(test:bool = False) -> NewFastApi:
     # configure logging
     dictConfig(LOGGING_CONFIG)
-
-    application = FastAPI()
+    
+    application = NewFastApi()
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -326,7 +330,7 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 
 # Redis activation
 @app.on_event("startup")
-async def startup():
+async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
     redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")

@@ -22,7 +22,7 @@ class AdminAuthService:
 
     async def authorize(
         self, credentials: AdminCredentialsDTO
-    ) -> Optional[Union[str, Exception]]:
+    ) -> Union[str, None]:
         user_hash_password, user_id = await self.user_repo.get_hash_password(
             credentials.username
         )
