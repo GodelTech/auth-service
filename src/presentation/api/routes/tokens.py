@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-
+from typing import Any
 from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -30,7 +30,7 @@ async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-):
+) -> dict[str, Any]:
     try:
         token_class = token_class
         token_class.request = request

@@ -33,7 +33,7 @@ class ResponseTokenModel(BaseModel):
     id_token: Optional[str]
     refresh_expires_in : Optional[int]
     not_before_policy : Optional[int]
-    scope : Optional[Union[list, str]]
+    scope : Optional[Union[list[str], str]]
     
     class Config:
         orm_mode = True

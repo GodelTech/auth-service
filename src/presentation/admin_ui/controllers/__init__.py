@@ -55,20 +55,21 @@ from .users import (
     UserClaimAdminController,
     PasswordAdminController,
 )
-
+from typing import no_type_check
 Base = declarative_base()
 
 
 class SeparationLine(BaseView):
     name = " "
     # icon = "fa-solid fa-chart-line"
-
+    @no_type_check
     @expose("/", methods=["GET"])
     def test_page(self, request) -> None:
         return None
 
 
 class CustomAdmin(Admin):
+    @no_type_check
     async def create(self, request: Request) -> _TemplateResponse:
         # Create model endpoint.
         try:

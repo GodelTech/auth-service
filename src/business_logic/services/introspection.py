@@ -1,7 +1,7 @@
 import datetime
 
 from jwt.exceptions import ExpiredSignatureError
-
+from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.user import UserRepository
@@ -9,29 +9,30 @@ from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.business_logic.dependencies.database import get_repository_no_depends
-
+from src.presentation.api.models.introspection import BodyRequestIntrospectionModel
+from typing import Any, Optional
 
 class IntrospectionServies:
     def __init__(
         self,
         jwt: JWTService,
-        # token_service: TokenService,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository
     ) -> None:
         self.jwt = jwt
-        self.request = ...
-        self.authorization = ...
-        self.request_body = ...
-        # self.token_service = token_service
+        self.request:Optional[Request] = None
+        self.authorization:Optional[str] = None
+        self.request_body:Optional[BodyRequestIntrospectionModel] = None
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
 
-    async def analyze_token(self) -> dict:
+    async def analyze_token(self) -> dict[str, Any]:
+        if self.request_body is None:
+            raise ValueError
         decoded_token = {}
-        response = {}
+        response:dict[str, Any] = {}
         try:
             decoded_token = await self.jwt.decode_token(token=self.request_body.token)
         except ExpiredSignatureError:
@@ -48,7 +49,7 @@ class IntrospectionServies:
                 list_of_types = [token_type[0] for token_type in await self.persistent_grant_repo.get_all_types()] 
                 
                 for token_type in list_of_types:
-                    if await self.persistent_grant_repo.exists(grant_type = token_type, data=self.request_body.token):
+                    if await self.persistent_grant_repo.exists(grant_type = token_type, grant_data=self.request_body.token):
                         self.request_body.token_type_hint = token_type
                         response = {"active": True}
                         break
@@ -88,6 +89,8 @@ class IntrospectionServies:
         return response
 
     async def get_client_id(self) -> str:
+        if self.request_body is None:
+            raise ValueError
         grant = await self.persistent_grant_repo.get(grant_data=self.request_body.token, grant_type=self.request_body.token_type_hint)
         return grant.client_id
 
@@ -95,6 +98,8 @@ class IntrospectionServies:
         return 'Bearer'
 
     def slice_url(self) -> str:
+        if self.request is None:
+            raise ValueError
         result = str(self.request.url).rsplit('/', 2)
         return result[0]
 

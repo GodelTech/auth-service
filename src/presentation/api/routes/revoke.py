@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
@@ -23,13 +23,13 @@ async def post_revoke_token(
     ),  # crutch for swagger
     request_body: BodyRequestRevokeModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-):
+) -> None:
 
     try:
         token_class = token_class
         token_class.request = request
-
-        token = request.headers.get("authorization")
+        
+        token: Optional[str] = request.headers.get("authorization")
 
         if token != None:
             token_class.authorization = token
@@ -56,5 +56,5 @@ async def post_revoke_token(
 
 
 @revoke_router.get("/test_token", status_code=200, tags=["Revoke"])
-async def get_test_token(request: Request):
+async def get_test_token(request: Request) -> str:
     return await JWTService().encode_jwt(payload={"sub": "1"})

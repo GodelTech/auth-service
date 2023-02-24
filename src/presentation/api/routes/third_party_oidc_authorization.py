@@ -40,6 +40,9 @@ async def get_github_authorize(
         auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_github_redirect_uri()
+        
+        if github_redirect_uri is None:
+            raise ValueError
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
@@ -74,7 +77,7 @@ async def post_create_state(
     auth_class: AuthThirdPartyOIDCService = Depends(
         provide_auth_third_party_oidc_service_stub
     ),
-) -> Union[None, JSONResponse]:
+) -> Union[None, JSONResponse, int]:
     try:
         auth_class = auth_class
         auth_class.state_request_model = state_request_model

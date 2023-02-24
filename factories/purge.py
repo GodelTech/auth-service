@@ -12,12 +12,12 @@ factory.random.reseed_random(0)
 
 class DataBasePurge:
     @classmethod
-    def populate_database(cls):
+    def populate_database(cls) -> None:
         # clean data from the tables in database
         cls.clean_data_from_database()
 
     @classmethod
-    def clean_data_from_database(cls):
+    def clean_data_from_database(cls) -> None:
         sess.session.execute(text("DROP TABLE api_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_scope_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_secrets_types CASCADE"))

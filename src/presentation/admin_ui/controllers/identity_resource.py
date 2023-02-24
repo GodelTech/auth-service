@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-
+from typing import no_type_check
 from src.data_access.postgresql.tables import (
     IdentityClaim,
     IdentityProvider,
@@ -36,11 +36,9 @@ class IdentityProviderMappedAdminController(
 ):
     icon = "fa-solid fa-fingerprint"
     name_plural = "Identity Providers Mapped"
-    column_formatters = {
-        IdentityProviderMapped.identity_provider: lambda m, a: str(
-            m.identity_provider
-        )[: str(m.identity_provider).find("|")]
-    }
+    # column_formatters = {
+    #     IdentityProviderMapped.identity_provider: lambda m: str(m.identity_provider)[: str(m.identity_provider).find("|")]
+    # }
 
     column_list = [
         IdentityProviderMapped.id,
