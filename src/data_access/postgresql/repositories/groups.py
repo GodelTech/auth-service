@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional
 
 def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
@@ -19,7 +19,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
 
 class GroupRepository(BaseRepository):
     async def create(
-        self, name: str, parent_group: Union[int, None] = None, id: Union[int, None] = None
+        self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:
         try:
             kwargs = params_to_dict(name=name, parent_group=parent_group, id=id)
@@ -34,7 +34,7 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def delete(self, group_id: Union[int, None] = None) -> None:
+    async def delete(self, group_id: Optional[int] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -109,7 +109,7 @@ class GroupRepository(BaseRepository):
             return result
 
     async def update(
-        self, group_id: int, name: Union[str, None] = None, parent_group: Union[int, None] = None
+        self, group_id: int, name: Optional[str] = None, parent_group: Optional[int] = None
     ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession

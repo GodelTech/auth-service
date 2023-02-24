@@ -148,7 +148,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_all_users(self, group_id: Union[int, None] = None, role_id: Union[int, None] = None) -> list[User]:
+    async def get_all_users(self, group_id: Optional[int] = None, role_id: Optional[int] = None) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -320,7 +320,7 @@ class UserRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def remove_user_groups(self, user_id: int, group_ids: list[int]) -> None:
+    async def remove_user_groups(self, user_id: int, group_ids: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
