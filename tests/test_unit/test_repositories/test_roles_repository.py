@@ -86,7 +86,7 @@ class TestRoleRepository:
         roles_id.sort()
         deleted = await role_repo.delete(role_id=roles_id[-1])
 
-        assert deleted is True
+        assert deleted is None
 
     async def test_delete_not_exist(self, engine):
         role_repo = RoleRepository(engine)

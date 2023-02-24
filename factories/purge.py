@@ -22,6 +22,8 @@ class DataBasePurge:
         sess.session.execute(text("DROP TABLE api_scope_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_secrets_types CASCADE"))
         sess.session.execute(text("DROP TABLE persistent_grant_types CASCADE"))
+        sess.session.execute(text("DROP TABLE identity_providers CASCADE"))
+        sess.session.execute(text("DROP TABLE identity_providers_mapped CASCADE"))
 
         sess.session.execute(text("DROP TABLE devices CASCADE"))
         sess.session.execute(text("DROP TABLE access_token_types CASCADE"))
