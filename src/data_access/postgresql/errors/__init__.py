@@ -6,7 +6,7 @@ from .client import (
 )
 from .password import WrongPasswordError, WrongPasswordFormatError
 from .user import UserNotFoundError, ClaimsNotFoundError
-from .grant import GrantNotFoundError, PKCEError
+from .grant import GrantNotFoundError, PKCEError, NoScopeError
 from .response_type import WrongResponseTypeError
 from .device import (
     DeviceCodeExpirationTimeError,
@@ -14,11 +14,8 @@ from .device import (
     DeviceRegistrationError,
     UserCodeNotFoundError,
 )
-from .grant import GrantNotFoundError
-from .password import WrongPasswordError, WrongPasswordFormatError
 from .response_type import WrongResponseTypeError
 from .third_party_oidc import (
     ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
 )
-from .user import ClaimsNotFoundError, UserNotFoundError

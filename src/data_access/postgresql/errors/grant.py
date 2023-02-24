@@ -3,4 +3,6 @@ class GrantNotFoundError(Exception):
 
 class PKCEError(Exception):
     """Wrong code challenge"""
-    
+
+class NoScopeError(Exception):
+    """PKCE flow needs scope to work"""

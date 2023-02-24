@@ -1,6 +1,7 @@
 import logging
 import secrets
 from typing import Any, Dict, Optional
+from fastapi import HTTPException, status
 
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
@@ -11,6 +12,8 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
+
+from src.data_access.postgresql.errors import NoScopeError
 from src.presentation.api.models import RequestModel
 from typing import Optional
 
@@ -35,24 +38,34 @@ class AuthorizationService:
         self.password_service = password_service
         self.jwt_service = jwt_service
 
-    async def save_code_challenge_data(self) -> dict:
+    async def save_code_challenge_data(self) -> None:
+        if not self.request_model or not self.request_model.code_challenge:
+            return None
         code_challenge = self.request_model.code_challenge
-        if code_challenge:
-            scope_data = await self._parse_scope_data(
-                )
-            scope=self.request_model.scope
-            user_name = scope_data["username"]
-            
-            (
-                user_hash_password,
-                user_id,
-            ) = await self.user_repo.get_hash_password(user_name)
+        try:
+            if self.request_model.scope:
+                scope_data = await self._parse_scope_data(
+                    scope=self.request_model.scope
+                    )
+                
+                user_name = scope_data["username"]
+                
+                (
+                    user_hash_password,
+                    user_id,
+                ) = await self.user_repo.get_hash_password(user_name)
 
-            await self.persistent_grant_repo.create(
-                grant_data=code_challenge,
-                client_id=self.request_model.client_id,
-                user_id=user_id,
-                grant_type="code_challenge")
+                await self.persistent_grant_repo.create(
+                    grant_data=code_challenge,
+                    client_id=self.request_model.client_id,
+                    user_id=user_id,
+                    grant_type="code_challenge")
+                return None
+            raise NoScopeError
+        except NoScopeError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="PKCE flow needs scope which wasn't provided"
+            )
 
     async def get_redirect_url(self) -> Optional[str]:
         if self.request_model is not None:
