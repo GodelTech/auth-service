@@ -3,7 +3,7 @@
 set -e
 
 # Environment
-export ENV_FOR_DYNACONF=$CI_ENVIRONMENT_NAME
+export ENV_FOR_DYNACONF=$NAME
 echo "Environment: $ENV_FOR_DYNACONF"
 
 
