@@ -57,7 +57,7 @@ build-and-test:
   image: docker:20
   services:
     - docker:20-dind
-  environment:
+  variables:
     ENV_FOR_DYNACONF: pipeline
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
