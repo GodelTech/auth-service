@@ -22,6 +22,7 @@ from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 from src.presentation.admin_ui.controllers import (
+    CreateProviderMapped,
     SeparationLine,
     AdminAuthController,
     ClientAdminController,
@@ -150,6 +151,7 @@ def setup_di(app: FastAPI) -> None:
     admin = CustomAdmin(
         app,
         db_engine,
+        templates_dir="templates",
         authentication_backend=AdminAuthController(
             secret_key="1234",
             auth_service=provide_admin_auth_service(
@@ -164,6 +166,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(IdentityProviderMappedAdminController)
     admin.add_view(IdentityResourceAdminController)
     admin.add_view(IdentityClaimAdminController)
+    admin.add_base_view(CreateProviderMapped)
     admin.add_base_view(SeparationLine)
 
     # Client
