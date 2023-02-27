@@ -71,8 +71,11 @@ build-and-test:
 #    - docker ps
 #    - docker exec -i identity-server-provider sh -c "pytest --cov=src"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  dependencies:
+    - container
   only:
     - Configure-CI-CD-pipeline
+
 
 
 #################
