@@ -6,8 +6,6 @@ from src.data_access.postgresql.tables import (
     IdentityProviderMapped,
     IdentityResource,
 )
-text = 'qwerwrqre'
-text =text[text.find("e"):]
 
 class IdentityResourceAdminController(ModelView, model=IdentityResource):
     icon = "fa-solid fa-fingerprint"

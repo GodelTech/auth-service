@@ -68,32 +68,6 @@ class SeparationLine(BaseView):
         return None
 
 
-class CreateProviderMapped(BaseView):
-    name = "Create Provider Mapped"
-    icon = "fa-chart-line"
-
-    @expose("/report", methods=["GET"])
-    async def report_page(self, request):
-        model_view = IdentityProviderMappedAdminController()
-        Form = await model_view.scaffold_form()
-        form_data = await request.form()
-
-        form = Form(form_data)
-        context={
-            "request": request,
-            "model_view": model_view,
-            "form": form
-                }
-        # if not form.validate():
-        #         return self.templates.TemplateResponse(
-        #             model_view.create_template, context, status_code=400
-        #         )
-        return self.templates.TemplateResponse(
-            "test.html",
-            context=context
-        )
-
-
 class CustomAdmin(Admin):
     @no_type_check
     async def create(self, request: Request) -> _TemplateResponse:

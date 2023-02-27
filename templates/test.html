@@ -18,10 +18,22 @@
               {{ field() }}
               {% endif %}
               {% if "Identity Provider Mapped" == model_view.name and field.name == "identity_provider"%}
-              {% for data in field._select_data %}
- 
-              {% endfor %}
-              
+              <p></p>
+              <button onclick="myFunction()"  style="background-color:rgb(159, 196, 156);color:rgb(0, 0, 0);" class="btn">Copy URI</button>
+                <script>
+                    function myFunction() {
+                    // Get the text field
+                    var copyText = document.getElementById("identity_provider");
+                    console.log(copyText)
+                    // Select the text field
+                    a = copyText.options[copyText.selectedIndex].text
+                    const words = a.split(' | ')
+                    // Copy the text inside the text field
+                    navigator.clipboard.writeText(words[1]);
+                    // Alert the copied text
+                    alert("Copied the text: " + words[1]);
+                    }
+                    </script>
               {% endif %}
               {% for error in field.errors %}
               <div class="invalid-feedback">{{ error }}</div>
@@ -39,31 +51,13 @@
               Cancel
             </a>
           </div>
-          <div class="col-md-5">
-            <button onclick="myFunction()">Copy text</button>
-                <script>
-                    function myFunction() {
-                    // Get the text field
-                    var copyText = document.getElementById("identity_provider");
-                    console.log(copyText)
-                    // Select the text field
-                    index = copyText.value
-                    a = copyText.options[copyText.selectedIndex].text
-                    const words = a.split(' | ')
-                    console.log(copyText.options[index - 1].text)
-                    // Copy the text inside the text field
-                    navigator.clipboard.writeText(words[1]);
-                    // Alert the copied text
-                    alert("Copied the text: " + words[1]);
-                    }
-                    </script>
-          </div>
           <div class="col-md-6">
             <div class="btn-group flex-wrap" data-toggle="buttons">           
               <input type="submit" name="save" value="Save" class="btn">
               <input type="submit" name="save" value="Save and continue editing" class="btn">
               <input type="submit" name="save" value="Save and add another" class="btn">
             </div>
+          </div>
           </div>
         </div>
       </form>
