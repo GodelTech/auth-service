@@ -13,7 +13,7 @@ class TestClientRepository:
         redirect = await client_logout_redirect_repo. \
             validate_post_logout_redirect_uri(
                 client_id='test_client',
-                logout_redirect_uri='https://www.scott.org/'
+                logout_redirect_uri='http://thompson-chung.com/'
             )
         assert redirect is True
 
@@ -21,6 +21,6 @@ class TestClientRepository:
         client_repo_error = ClientRepository(engine)
         with pytest.raises(ClientPostLogoutRedirectUriError):
             await client_repo_error.validate_post_logout_redirect_uri(
-                client_id='client_not_exist',
+                client_id='test_client',
                 logout_redirect_uri='test_uri_not_exist'
             )

@@ -7,18 +7,24 @@ let auth_form = document.getElementById('auth_form')
 let request_model = document.getElementById('rq_model')
 let div_elements = document.getElementsByClassName('model_elem')
 
+let yesButton = document.getElementById('yes_butt')
+let noButton = document.getElementById('no_butt')
+let tryAgainButt = document.getElementById('try_again_butt')
+let overlay = document.querySelector('#overlay_modal')
+let modalWindow = document.querySelector('#modal_window')
+let credentialsModalWindow = document.querySelector('#credentials_modal_window')
+
+
+
 // external services variables
 
-let google = document.getElementById('Google')
-let github = document.getElementById('GitHub')
-let facebook = document.getElementById('FaceBook')
-let linkedin = document.getElementById('LinkedIn')
-let twitter = document.getElementById('Twitter')
+let deviceButtons = document.getElementsByClassName('device_button')
+let deviceButtonsArray = [...deviceButtons]
 
 
 function formRequestModel(){
     let model = {}
-    for (i=0; i < div_elements.length; ++i) {
+    for (let i=0; i < div_elements.length; ++i) {
         model[div_elements[i].id] = div_elements[i].innerHTML
     }
 
@@ -28,7 +34,7 @@ function formRequestModel(){
 function updateScope() {
     let user_name = username.value
     let user_password = password.value
-    return "&username="+user_name+"&password="+user_password    
+    return "&username="+user_name+"&password="+user_password
 }
 
 function formBody(){
@@ -51,45 +57,110 @@ function formBody(){
     return bodyData
 }
 
-async function redirectToPost(event) {
-    event.preventDefault();
-    let data = formBody()
+// async function redirect(data){
+//     return await fetch("http://127.0.0.1:8000/authorize/", {
+//         method: "POST",
+//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+//         body: data
+//     })
+// }
 
-    return await fetch("http://127.0.0.1:8000/authorize/", {
+async function redirect(data){
+    await fetch("http://127.0.0.1:8000/authorize/", {
         method: "POST",
-        headers: headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: data
+    }).then ((response) => {
+        if (!response.ok) {
+            throw new Error("Wrong credentials")
+        } else {
+            let new_location = response.url
+            // window.location = "http://127.0.0.1:8000/device/auth/success"
+            window.location = new_location
+        }
+    }).catch((err) => {
+        if (data.get("response_type") == "urn:ietf:params:oauth:grant-type:device_code") {
+            credentialsModalWindow.classList.add('active');
+            overlay.classList.add('active');
+            tryAgainButt.addEventListener("click", async () => {
+                credentialsModalWindow.classList.remove('active');
+                overlay.classList.remove('active');
+                window.location.reload()
+            })
+        }
+        console.log(err)
     })
 }
+async function clearDeviceData(data){
+    response = await fetch("http://127.0.0.1:8000/device/auth/cancel", {
+        method: "DELETE",
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: data
+    })
+    let new_location = response.url
+    window.location = new_location
+}
+
+async function redirectToPost(event) {
+    event.preventDefault();
+    let data = formBody();
+
+    if (data.get("response_type") == "urn:ietf:params:oauth:grant-type:device_code") {
+        modalWindow.classList.add('active');
+        overlay.classList.add('active');
+        yesButton.addEventListener("click", async () => {
+            modalWindow.classList.remove('active');
+            overlay.classList.remove('active');
+            return await redirect(data)
+        })
+        noButton.addEventListener("click", async () => {
+            modalWindow.classList.remove('active');
+            overlay.classList.remove('active');
+            return await clearDeviceData(data)
+        })
+
+    } else {
+        return await redirect(data)
+    }
+}
+
+function parseLink(link){
+    arr_data = link.split("&")
+    console.log(arr_data)
+    let bodyData = new URLSearchParams()
+    data = {}
+    arr_data.forEach(function(item, index, array){
+        console.log(item)
+
+        small_arr = item.split("=")
+        data[small_arr[0]] = small_arr[1]
+    })
+    bodyData.append("state", data["state"])
+    return bodyData
+}
+
 
 // External service functions
 
-function handleGitHub(){
-    window.location.href = 'https://github.com/';
+deviceButtonsArray.forEach((item) => {
+    item.addEventListener('click', async function() {
+        let device_link = item.name
+        state = parseLink(device_link)
+        await fetch("http://127.0.0.1:8000/authorize/oidc/state", {
+            method: "POST",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: state
+        })
+        window.location.href = device_link;
+    })
+})
+
+function handleDeviceButton(butt){
+    let device_link = butt.name
+    window.location.href = device_link;
 }
 
-function handleGoogle(){
-    window.location.href = 'https://www.google.com/';
-}
-
-function handleFacebook(){
-    window.location.href = 'https://www.facebook.com/';
-}
-
-function handleLinkedIn(){
-    window.location.href = 'https://www.linkedin.com/';
-}
-
-function handleTwitter(){
-    window.location.href = 'https://twitter.com/';
-}
 
 // EventListeners
 
 auth_form.addEventListener('submit', redirectToPost)
-
-github.addEventListener('click', handleGitHub)
-google.addEventListener('click', handleGoogle)
-facebook.addEventListener('click', handleFacebook)
-linkedin.addEventListener('click', handleLinkedIn)
-twitter.addEventListener('click', handleTwitter)

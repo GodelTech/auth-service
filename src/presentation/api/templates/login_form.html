@@ -25,7 +25,7 @@
       <p class="sing_in">Sign in with</p>
 <!--          <div class="externals">-->
         {% for b in external_logins -%}
-          <button id={{ b }} class="form_auth_button" name="login_with_external_serv"> {{ b }} <i class="fa {{ external_logins[b] }}"></i></button>
+          <button id={{ b }} class="form_auth_button device_button" name="{{ external_logins[b]['provider_link'] }}"> {{ b }} <i class="fa {{ external_logins[b]['provider_icon'] }}"></i></button>
         {% endfor %}
 <!--          </div>-->
     {% endif -%}
@@ -37,6 +37,24 @@
       <div class="model_elem" id="{{ req[0] }}">{{ req[1] }}</div>
     {% endfor %}
   </div>
+
+  <div class="modal" id="modal_window">
+    <p class="form_auth_block_head_text">Confirm Device Login</p>
+    <div class="buttons">
+      <button id="yes_butt" class="form_device_button" name="form_auth_submit">Confirm</button>
+      <button id="no_butt" class="form_device_button" name="form_auth_submit">Cancel</button>
+    </div>
+  </div>
+
+  <div class="modal" id="credentials_modal_window">
+    <p class="form_auth_block_head_text credentials_note">You have entered incorrect user credentials</p>
+    <div class="buttons credentials_button">
+      <button id="try_again_butt" class="form_device_button" name="credentials_overload">Try again</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay_modal"></div>
+
 
 <!-- <div id="rq_model">
     <div class="model_elem" id="client_id">santa</div>

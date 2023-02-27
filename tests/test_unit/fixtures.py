@@ -1,6 +1,13 @@
 import datetime
 import pytest_asyncio
 
+from src.presentation.api.models import (
+    DeviceCancelModel,
+    DeviceUserCodeModel,
+    DeviceRequestModel,
+    ThirdPartyOIDCRequestModel,
+    StateRequestModel,
+)
 from src.presentation.api.models.authorization import RequestModel
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.business_logic.services.jwt_token import JWTService
@@ -28,7 +35,7 @@ DEFAULT_CLIENT = {
     "client_id": "default_test_client",
     "absolute_refresh_token_lifetime": 3600,
     "access_token_lifetime": 3600,
-    "access_token_type": "reference",
+    "access_token_type_id": 1,
     "allow_access_token_via_browser": False,
     "allow_offline_access": False,
     "allow_plain_text_pkce": False,
@@ -46,9 +53,9 @@ DEFAULT_CLIENT = {
     "logout_session_required": False,
     "logout_uri": "test_logout_uri",
     "prefix_client_claims": "test_",
-    "protocol_type": "open_id_connect",
-    "refresh_token_expiration": "absolute",
-    "refresh_token_usage": "one_time_only",
+    "protocol_type_id": 1,
+    "refresh_token_expiration_type_id": 1,
+    "refresh_token_usage_type_id": 2,
     "require_client_secret": False,
     "require_consent": False,
     "require_pkce": False,
@@ -59,12 +66,12 @@ DEFAULT_CLIENT = {
 DEFAULT_USER = {
     "email": "test_user@tes.com",
     "email_confirmed": True,
-    "password_hash": "$2b$12$RAC7jWdNn8Fudxc4OhudkOPK0eeBBWjGd5Iyfzma5F8uv9xD.jx/6",
+    "password_hash_id": 1,
     "security_stamp": "security_stamp",
     "phone_number": "4567736574",
     "phone_number_confirmed": False,
     "two_factors_enabled": True,
-    "lockout_end_date_utc": datetime.datetime.now(),
+    "lockout_end_date_utc": datetime.datetime.utcnow(),
     "lockout_enabled": True,
     "access_failed_count": 0,
     "username": "DefaultTestClient",
@@ -100,20 +107,39 @@ def authorization_request_model() -> RequestModel:
     return request_model
 
 
+@pytest_asyncio.fixture
+def device_cancel_model() -> DeviceCancelModel:
+    cancel_model = DeviceCancelModel(
+        client_id="test_client",
+        scope="gcp-api%20IdentityServerApi&grant_type=urn:ietf:params:oauth:grant-type:device_code&"
+        "client_id=test_client&client_secret=65015c5e-c865-d3d4-3ba1-3abcb4e65500&"
+        "password=test_password&username=TestClient&user_code=user_code",
+    )
+    return cancel_model
+
+
+@pytest_asyncio.fixture
+def device_user_code_model() -> DeviceUserCodeModel:
+    user_code_model = DeviceUserCodeModel(user_code="GHJKTYUI")
+    return user_code_model
+
+
+@pytest_asyncio.fixture
+def device_request_model() -> DeviceRequestModel:
+    request_model = DeviceRequestModel(client_id="test_client")
+    return request_model
+
+
 service = JWTService()
 
 TOKEN_HINT_DATA = {
     "sub": 3,
     "client_id": "santa",
     "data": "secret_code",
-    "type": "code"
+    "type": "code",
 }
 
-SHORT_TOKEN_HINT_DATA = {
-    "sub": 3,
-    "data": "secret_code",
-    "type": "code"
-}
+SHORT_TOKEN_HINT_DATA = {"sub": 3, "data": "secret_code", "type": "code"}
 
 
 class TokenHint:
@@ -126,7 +152,9 @@ class TokenHint:
 
     @classmethod
     async def get_short_token_hint(cls):
-        short_token_hint = await cls.sv.encode_jwt(payload=SHORT_TOKEN_HINT_DATA)
+        short_token_hint = await cls.sv.encode_jwt(
+            payload=SHORT_TOKEN_HINT_DATA
+        )
         return short_token_hint
 
 
@@ -136,7 +164,21 @@ async def end_session_request_model() -> RequestEndSessionModel:
     token_hint = await tk_hint.get_token_hint()
     request_model = RequestEndSessionModel(
         id_token_hint=token_hint,
-        post_logout_redirect_uri='https://www.scott.org/',
-        state='test_state'
+        post_logout_redirect_uri="http://thompson-chung.com/",
+        state="test_state",
     )
+    return request_model
+
+
+@pytest_asyncio.fixture
+async def third_party_oidc_request_model() -> ThirdPartyOIDCRequestModel:
+    oidc_request_model = ThirdPartyOIDCRequestModel(
+        code="test_code", state="test_state"
+    )
+    return oidc_request_model
+
+
+@pytest_asyncio.fixture
+async def state_request_model() -> StateRequestModel:
+    request_model = StateRequestModel(state="some_crazy_state")
     return request_model

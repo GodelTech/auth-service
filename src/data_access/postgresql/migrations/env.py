@@ -10,8 +10,10 @@ from src.data_access.postgresql.tables import (
     persistent_grant,
     users,
     resources_related,
-    client
+    client,
+    device
 )
+from typing import Any
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -64,8 +66,9 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+# EnvironmentContext.configure.compare_type = True
 
-def do_run_migrations(connection):
+def do_run_migrations(connection:Any) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():

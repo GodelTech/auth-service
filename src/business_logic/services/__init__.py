@@ -1,12 +1,13 @@
 from src.business_logic.services.authorization import AuthorizationService
 
-from .tokens import TokenService
-from .jwt_token import JWTService
-from .password import PasswordHash
-from .endsession import EndSessionService
-from .tokens import TokenService
-from .introspection import IntrospectionServies
-from .userinfo import UserInfoServices
-from .login_form_service import LoginFormService
-from .admin_api import AdminUserService, AdminGroupService, AdminRoleService
+from .admin_api import AdminGroupService, AdminRoleService, AdminUserService
 from .admin_auth import AdminAuthService
+from .device_auth import DeviceService
+from .endsession import EndSessionService
+from .introspection import IntrospectionServies
+from .jwt_token import JWTService
+from .login_form_service import LoginFormService
+from .password import PasswordHash
+from .third_party_oidc_service import AuthThirdPartyOIDCService
+from .tokens import TokenService
+from .userinfo import UserInfoServices

@@ -12,8 +12,8 @@ class BaseGrantService:
     ) -> None:
         self.persistent_grant_repo = persistent_grant_repo
 
-    def exists(self):
-        logger.info(self.grant_type, self.data)
+    def exists(self) -> bool:
+        # logger.info(self.grant_type, self.data)
         return True
 
 

@@ -10,6 +10,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from .base import Base, BaseModel
+from typing import Any
+
 
 users_groups = Table(
     "users_groups",
@@ -44,7 +46,7 @@ class Group(BaseModel):
     users = relationship(
         "User", secondary=users_groups, cascade="all,delete", back_populates ="groups"
     )
-    def __str__(self):
+    def __str__(self) -> str:
         answer = "group " + self.name
         if self.parent_group is not None:
             answer = "sub-" + answer
@@ -56,7 +58,7 @@ class Group(BaseModel):
     def __hash__(self) -> int:
         return self.id
     
-    def dictionary(self) -> dict:
+    def dictionary(self) -> dict[str, Any]:
         return{
             "id":self.id,
             "name": self.name,
@@ -74,8 +76,8 @@ class Permission(BaseModel):
         "Role", secondary=permissions_roles, cascade="all,delete", back_populates="permissions"
     )
 
-    def __str__(self):
-        return self.namee   
+    def __str__(self) -> str:
+        return self.name  
 
     def __repr__(self) -> str:
         return self.name

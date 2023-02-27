@@ -9,24 +9,55 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    CheckConstraint,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import ChoiceType
-from src.data_access.postgresql.tables.group import users_groups, permissions_roles
+from src.data_access.postgresql.tables.group import (
+    users_groups,
+    permissions_roles,
+)
 from .base import Base, BaseModel
+
+
+USER_CLAIM_TYPE = [
+    "name",
+    "given_name",
+    "family_name",
+    "middle_name",
+    "nickname",
+    "preferred_username",
+    "profile",
+    "picture",
+    "website",
+    "email",
+    "email_verified",
+    "gender",
+    "birthdate",
+    "zoneinfo",
+    "locale",
+    "phone_number",
+    "phone_number_verified",
+    "address",
+    "updated_at",
+]
 
 users_roles = Table(
     "users_roles",
     BaseModel.metadata,
-    Column("role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
-    Column("user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    ),
 )
 
 
 class UserLogin(BaseModel):
     __tablename__ = "user_logins"
 
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    # user = relationship("User", backref = "login",)
     login_provider = Column(
         String,
         primary_key=True,
@@ -40,8 +71,11 @@ class UserLogin(BaseModel):
         unique=True,
     )
 
+    def __str__(self) -> str:
+        return f"{self.login_provider}: {self.provider_key}"
+
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_name}"
+        return f"{self.login_provider}: {self.provider_key}"
 
 
 class User(BaseModel):
@@ -49,13 +83,37 @@ class User(BaseModel):
 
     email = Column(String, nullable=True, unique=True)
     email_confirmed = Column(Boolean, default=False, nullable=True)
-    password_hash = Column(String, nullable=False)
+
+    password_hash_id = Column(
+        Integer,
+        ForeignKey("user_passwords.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    password_hash = relationship(
+        "UserPassword",
+        back_populates="user",
+        foreign_keys="User.password_hash_id",
+        lazy="joined",
+    )
+
+    identity_provider_id = Column(
+        Integer,
+        ForeignKey("identity_providers.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    identity_provider = relationship(
+        "IdentityProvider",
+        back_populates="users",
+        foreign_keys="User.identity_provider_id",
+        lazy="joined",
+    )
+
     security_stamp = Column(String, nullable=True)
-    phone_number = Column(String, nullable=False, unique=True)
-    phone_number_confirmed = Column(Boolean, default=False, nullable=True)
-    two_factors_enabled = Column(Boolean, default=True, nullable=True)
+    phone_number = Column(String, nullable=True, unique=True)
+    phone_number_confirmed = Column(Boolean, default=False, nullable=False)
+    two_factors_enabled = Column(Boolean, default=False, nullable=False)
     lockout_end_date_utc = Column(Date, nullable=True)
-    lockout_enabled = Column(Boolean, default=True, nullable=True)
+    lockout_enabled = Column(Boolean, default=False, nullable=True)
     access_failed_count = Column(Integer, default=0, nullable=False)
     username = Column(String, nullable=False, unique=True)
     roles = relationship(
@@ -64,52 +122,69 @@ class User(BaseModel):
     groups = relationship(
         "Group", secondary="users_groups", back_populates="users"
     )
-    def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+    claims = relationship(
+        "UserClaim", back_populates="user", foreign_keys="UserClaim.user_id"
+    )
+    grants = relationship(
+        "PersistentGrant",
+        back_populates="user",
+        foreign_keys="PersistentGrant.user_id",
+    )
+
+    def __str__(self) -> str:
+        return f"id {self.id}\t{self.username}"
+
+
+class UserPassword(BaseModel):
+    __tablename__ = "user_passwords"
+    value = Column(String, nullable=False)
+    user = relationship(
+        "User",
+        back_populates="password_hash",
+        foreign_keys="User.password_hash_id",
+    )
+
+    def __str__(self) -> str:
+        return f"{self.value}"
 
 
 class Role(BaseModel):
     __tablename__ = "roles"
 
     name = Column(String, nullable=False, unique=True)
-    users = relationship(
-        "User", secondary= users_roles, back_populates="roles"
-    )
+    users = relationship("User", secondary=users_roles, back_populates="roles")
     permissions = relationship(
-        "Permission", secondary= permissions_roles, back_populates="roles"
+        "Permission", secondary=permissions_roles, back_populates="roles"
     )
 
-    def __str__(self):
-        return f"Role {self.name} - {self.id}"
+    def __str__(self) -> str:
+        return f"{self.id}: {self.name}"
 
 
 class UserClaim(BaseModel):
-    USER_CLAIM_TYPE = [
-        ("name", "Name"),
-        ("given_name", "Given name"),
-        ("family_name", "Family name"),
-        ("middle_name", "Middle name"),
-        ("nickname", "Nickname"),
-        ("preferred_username", "Preferred username"),
-        ("profile", "Profile"),
-        ("picture", "Picture"),
-        ("website", "Website"),
-        ("email", "Email"),
-        ("email_verified", "Email verified"),
-        ("gender", "Gender"),
-        ("birthdate", "Birthdate"),
-        ("zoneinfo", "Zoneinfo"),
-        ("locale", "Locale"),
-        ("phone_number", "Phone number"),
-        ("phone_number_verified", "Phone number verified"),
-        ("address", "Address"),
-        ("updated_at", "Updated at"),
-    ]
     __tablename__ = "user_claims"
 
-    user_id = Column("User", Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    claim_type = Column(ChoiceType(USER_CLAIM_TYPE))
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    user = relationship("User", back_populates="claims")
+
+    claim_type_id = Column(
+        Integer,
+        ForeignKey("user_claim_types.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    claim_type = relationship("UserClaimType", backref="claim", lazy="joined")
     claim_value = Column(String, nullable=False)
 
-    def __str__(self):
-        return f"Model {self.__tablename__}: {self.id}"
+    def __str__(self) -> str:
+        return f"{self.claim_type_id}: {self.claim_value}"
+
+
+class UserClaimType(Base):
+    __tablename__ = "user_claim_types"
+    id = Column(Integer, primary_key=True)
+    type_of_claim = Column(String, unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.type_of_claim}"

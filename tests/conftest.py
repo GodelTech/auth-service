@@ -18,17 +18,25 @@ from src.main import get_application
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
+from src.business_logic.services import DeviceService
+
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     UserRepository,
     PersistentGrantRepository,
+    DeviceRepository,
+    ThirdPartyOIDCRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.introspection import IntrospectionServies
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
+from src.business_logic.services.third_party_oidc_service import (
+    AuthThirdPartyOIDCService,
+)
 from src.data_access.postgresql.tables.base import Base
+
 
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
@@ -42,10 +50,8 @@ async def engine():
     print("engine fixture starts.......................................")
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
-    ).with_bind_ports(5432, 5463)
-    print(
-        "engine fixture before context......................................."
-    )
+    ).with_bind_ports(5432, 5465)
+
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")
@@ -101,6 +107,7 @@ async def authorization_service(engine) -> AuthorizationService:
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
+        device_repo=DeviceRepository(engine),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
     )
@@ -145,6 +152,7 @@ async def token_service(engine) -> TokenService:
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
         user_repo=UserRepository(engine),
+        device_repo=DeviceRepository(engine),
         jwt_service=JWTService(),
     )
     return tk_service
@@ -154,5 +162,27 @@ async def token_service(engine) -> TokenService:
 async def login_form_service(engine) -> LoginFormService:
     login_service = LoginFormService(
         client_repo=ClientRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
     )
     return login_service
+
+
+@pytest_asyncio.fixture
+async def device_service(engine) -> DeviceService:
+    dev_service = DeviceService(
+        client_repo=ClientRepository(engine),
+        device_repo=DeviceRepository(engine),
+    )
+    return dev_service
+
+
+@pytest_asyncio.fixture
+async def auth_third_party_service(engine) -> AuthThirdPartyOIDCService:
+    third_party_service = AuthThirdPartyOIDCService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return third_party_service

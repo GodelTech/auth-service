@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Any, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
@@ -21,7 +21,7 @@ userinfo_router = APIRouter(
 
 
 @userinfo_router.get(
-    "/", response_model=ResponseUserInfoModel, tags=["UserInfo"]
+    "/", response_model=dict, tags=["UserInfo"]
 )
 @cache(
     expire=CacheTimeSettings.USERINFO,
@@ -34,7 +34,7 @@ async def get_userinfo(
         default=None, description="Authorization"
     ),  # crutch for swagger
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
         token = request.headers.get("authorization")
@@ -78,7 +78,7 @@ async def post_userinfo(
         default=None, description="Authorization"
     ),  # crutch for swagger
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
         token = request.headers.get("authorization")
@@ -120,7 +120,7 @@ async def get_userinfo_jwt(
         default=None, description="Authorization"
     ),
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> str:
 
     try:
         userinfo_class = userinfo_class
@@ -158,13 +158,13 @@ async def get_userinfo_jwt(
     "/get_default_token", response_model=str, tags=["UserInfo"]
 )
 async def get_default_token(
-    with_iss_me: bool = None,
-    with_aud_facebook: bool = None,
+    with_iss_me: Optional[bool] = None,
+    with_aud_facebook: Optional[bool] = None,
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> str:
     try:
         uis = userinfo_class
-        payload = {"sub": "1"}
+        payload: dict[str, Any] = {"sub": "1"}
         if with_iss_me:
             payload["iss"] = "me"
         if with_aud_facebook:
@@ -177,11 +177,11 @@ async def get_default_token(
 @userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
 async def get_decode_token(
     token: str,
-    issuer: str = None,
-    audience: str = None,
+    issuer: Optional[str] = None,
+    audience: Optional[str] = None,
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
-    # try:
+) -> dict[str, Any]:
+
     uis = userinfo_class
     kwargs = {}
     if issuer is not None:
@@ -190,5 +190,4 @@ async def get_decode_token(
         kwargs["audience"] = audience
 
     return await uis.jwt.decode_token(token, **kwargs)
-    # except:
-    raise HTTPException(status_code=500)
+
