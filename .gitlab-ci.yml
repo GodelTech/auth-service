@@ -44,8 +44,8 @@ cache:
 
 container:docker-build:
   extends: .docker-build-artifact
-  environment:
-    name: pipeline
+  script:
+    - echo ${CI_ENVIRONMENT_NAME}
   only:
     - Configure-CI-CD-pipeline
 
@@ -60,7 +60,7 @@ build-and-test:
   services:
     - docker:20-dind
   environment:
-    name: pipeline
+    name : pipeline
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
