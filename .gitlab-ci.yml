@@ -44,6 +44,8 @@ cache:
 
 container:docker-build:
   extends: .docker-build-artifact
+  environment:
+    name: pipeline
   only:
     - Configure-CI-CD-pipeline
 
@@ -59,8 +61,6 @@ build-and-test:
     - docker:20-dind
   environment:
     name: pipeline
-  variables:
-    ENV_FOR_DYNACONF: pipeline
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
