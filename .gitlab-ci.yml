@@ -44,8 +44,6 @@ cache:
 
 container:docker-build:
   extends: .docker-build-artifact
-  script:
-    - echo ${CI_ENVIRONMENT_NAME}
   only:
     - Configure-CI-CD-pipeline
 
