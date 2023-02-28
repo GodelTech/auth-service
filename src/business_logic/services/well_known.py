@@ -10,14 +10,14 @@ from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
-from typing import Any, Optional
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
 
 class WellKnownServies:
     def __init__(self) -> None:
-        self.request:Optional[Request] =None
+        self.request:Union[Request, Any] =None
         
     def get_list_of_types(
         self, list_of_types: list[Any] = [("Not ready yet", "")]

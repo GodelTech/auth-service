@@ -2,8 +2,9 @@ import mock
 import pytest
 from sqlalchemy import delete
 
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-# from src.business_logic.services.tokens import TokenService
+from src.business_logic.services.userinfo import UserInfoServices
+from src.presentation.api.models.userinfo import ResponseUserInfoModel
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 
 class RequestMock:
@@ -13,7 +14,7 @@ class RequestMock:
 @pytest.mark.asyncio
 class TestUserInfoService:
 
-    async def test_get_user_info_and_get_user_info_jwt(self, user_info_service, connection):
+    async def test_get_user_info_and_get_user_info_jwt(self, user_info_service: UserInfoServices, connection:AsyncEngine) -> None:
         service = user_info_service
         # service.client_id = "santa"
         data_to_code = {

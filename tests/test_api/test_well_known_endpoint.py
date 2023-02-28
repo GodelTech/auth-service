@@ -11,7 +11,7 @@ from Crypto.PublicKey.RSA import construct
 @pytest.mark.asyncio
 class TestWellKnown:
     
-    async def test_successful_openid_config_request(self, client: AsyncClient):
+    async def test_successful_openid_config_request(self, client: AsyncClient) -> None:
 
         KEYS_REQUIRED = ('issuer', 'jwks_uri', 'authorization_endpoint', 'token_endpoint',
                         'id_token_signing_alg_values_supported', 'subject_types_supported', 'response_types_supported')
@@ -36,7 +36,7 @@ class TestWellKnown:
         for key in response_content.keys():
             assert key in KEYS_OPTIONAL
 
-    async def test_successful_jwks_request(self, client: AsyncClient):
+    async def test_successful_jwks_request(self, client: AsyncClient) -> None:
 
         response = await client.request(method="GET", url='/.well-known/jwks')
         response_content = json.loads(response.content.decode('utf-8'))
@@ -56,10 +56,10 @@ class TestWellKnown:
 
             assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
             assert response_content["kty"] == "RSA"
-            assert bool(jwt.decode(
-                jwt = test_token,
-                key=test_key.public_key().export_key('PEM'),
-                algorithms=["RS256",]
+            assert bool(await jwt_service.decode_token(
+                token = test_token,
+                # key=test_key.public_key().export_key('PEM'),
+                # algorithms=["RS256",]
             )
             )
             assert response_content["use"] == "sig"
