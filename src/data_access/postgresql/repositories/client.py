@@ -1,6 +1,7 @@
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
