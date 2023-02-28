@@ -332,7 +332,7 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 # Redis activation
 @app.on_event("startup")
 async def startup() -> None:
-    logger.warning("Creating Redis connection with DataBase.")
+    logger.info("Creating Redis connection with DataBase.")
     redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
@@ -347,7 +347,7 @@ async def remove_expired_tokens_task() -> None:
     db_engine = provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-    token_class:PersistentGrantRepository = PersistentGrantRepository(db_engine)
+    token_class: PersistentGrantRepository = PersistentGrantRepository(db_engine)
     try:
         await token_class.delete_expired()
     except:
