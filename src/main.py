@@ -101,7 +101,7 @@ from src.di.providers import (
 
 import logging
 from src.log import LOGGING_CONFIG
-
+from fastapi_utils.tasks import repeat_every
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ def setup_di(app: FastAPI) -> None:
     admin = CustomAdmin(
         app,
         db_engine,
-        templates_dir="templates",
+        templates_dir="templates_admin_ui",
         authentication_backend=AdminAuthController(
             secret_key="1234",
             auth_service=provide_admin_auth_service(
@@ -336,3 +336,19 @@ async def startup() -> None:
     redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
+
+
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+
+@app.on_event("startup")
+@repeat_every(seconds=10 * 60)
+async def remove_expired_tokens_task() -> None:
+    logger.info("Started to remove expired tokens")
+    db_engine = provide_db(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    )
+    token_class: PersistentGrantRepository = PersistentGrantRepository(db_engine)
+    try:
+        await token_class.delete_expired()
+    except:
+        logger.error("Removing of grants doesn't work")

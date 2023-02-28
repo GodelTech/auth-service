@@ -36,17 +36,17 @@ async def get_tokens(
         result = await token_class.get_tokens()
         return result
 
-    except ClientNotFoundError as e:
-        logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission for this",
-        )
-    # except WrongGrantsError as e:
+    # except ClientNotFoundError as e:
     #     logger.exception(e)
     #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect token"
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="You don't have permission for this",
     #     )
+    except WrongGrantsError as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect token"
+        )
 
     except GrantNotFoundError as e:
         logger.exception(e)
