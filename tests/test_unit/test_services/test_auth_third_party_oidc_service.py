@@ -1,22 +1,19 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-from sqlalchemy import insert, delete
+from sqlalchemy import delete, insert
 
-from src.data_access.postgresql.errors import (
-    ThirdPartyStateDuplicationError,
-)
+from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.tables import IdentityProviderMapped
 from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderState,
 )
 from tests.test_unit.fixtures import (
-    third_party_oidc_request_model,
     state_request_model,
+    third_party_oidc_request_model,
 )
-
 
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
 
@@ -179,6 +176,16 @@ class TestAuthorizationService:
 
         assert result_uri == expected_uri
 
+    async def test_update_redirect_url_without_request_model(
+        self, auth_third_party_service
+    ):
+        service = auth_third_party_service
+        result_uri = await service._update_redirect_url_with_params(
+            redirect_uri="https://www.google.com/", secret_code="Secrete_code"
+        )
+
+        assert result_uri is None
+
     async def test_update_redirect_url_no_state(
         self, auth_third_party_service, third_party_oidc_request_model
     ):
@@ -214,7 +221,9 @@ class TestAuthorizationService:
         assert result["password"] == expected_password
         assert result["username"] == expected_username
 
-    async def test_parse_empty_response_content(self, auth_third_party_service):
+    async def test_parse_empty_response_content(
+        self, auth_third_party_service
+    ):
         expected = {}
         to_parse = ""
         result = auth_third_party_service._parse_response_content(to_parse)
