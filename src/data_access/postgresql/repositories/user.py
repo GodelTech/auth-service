@@ -260,7 +260,7 @@ class UserRepository(BaseRepository):
 
     async def create(
         self,
-        id: Union[None, str] = None,
+        id: Union[None, int] = None,
         username: Union[None, str] = None,
         identity_provider_id: Union[None, int] = None,
         security_stamp: Union[None, str] = None,

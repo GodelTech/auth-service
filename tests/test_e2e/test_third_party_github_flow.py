@@ -7,7 +7,9 @@ from src.data_access.postgresql.tables.identity_resource import IdentityProvider
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim, User
 from src.business_logic.services.jwt_token import JWTService
-
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -21,8 +23,8 @@ STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https:/
 @pytest.mark.asyncio
 class TestThirdPartyGithubFlow:
     async def test_successful_github_code_flow(
-        self, client: AsyncClient, connection, mocker
-    ):
+        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    ) -> None:
         # 1st stage Authorization endpoint with get request
         params = {
             "client_id": "spider_man",
@@ -48,10 +50,10 @@ class TestThirdPartyGithubFlow:
         )
         await connection.commit()
 
-        async def replace_post(*args, **kwargs):
+        async def replace_post(*args:Any, **kwargs:Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
+        async def replace_get(*args:Any, **kwargs:Any) -> str:
             return "NewUserNew"
 
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"

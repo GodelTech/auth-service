@@ -7,6 +7,10 @@ from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderState,
     IdentityProviderMapped,
 )
+from typing import Any
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
 SHORT_STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
@@ -15,8 +19,8 @@ SHORT_STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
 @pytest.mark.asyncio
 class TestThirdPartyGitHubEndpoint:
     async def test_successful_github_request_get(
-        self, client: AsyncClient, connection, mocker
-    ):
+        self, client: AsyncClient, connection: AsyncSession, mocker:Any
+    ) -> None:
         await connection.execute(
             insert(IdentityProviderState).values(state=STUB_STATE)
         )
@@ -31,10 +35,10 @@ class TestThirdPartyGitHubEndpoint:
         )
         await connection.commit()
 
-        async def replace_post(*args, **kwargs):
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
             return "NewUserNew"
 
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
@@ -69,8 +73,8 @@ class TestThirdPartyGitHubEndpoint:
         await connection.commit()
 
     async def test_unsuccessful_github_request_get_index_error(
-        self, client: AsyncClient, connection, mocker
-    ):
+        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    ) -> None:
         expected_content = '{"message":"Error in parsing"}'
 
         await connection.execute(
@@ -86,10 +90,10 @@ class TestThirdPartyGitHubEndpoint:
             )
         )
 
-        async def replace_post(*args, **kwargs):
+        async def replace_post(*args:Any, **kwargs:Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
+        async def replace_get(*args:Any, **kwargs:Any) -> str:
             return "NewUserNew"
 
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
@@ -119,7 +123,7 @@ class TestThirdPartyGitHubEndpoint:
 
     async def test_unsuccessful_github_request_get_wrong_state(
         self, client: AsyncClient
-    ):
+    ) -> None:
         expected_content = '{"message":"Wrong data has been passed"}'
 
         params = {"code": "test_code", "state": "test_state"}
@@ -133,8 +137,8 @@ class TestThirdPartyGitHubEndpoint:
 @pytest.mark.asyncio
 class TestCreateStateEndpoint:
     async def test_successful_create_state(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
         content_type = "application/x-www-form-urlencoded"
 
         params = {
@@ -155,8 +159,8 @@ class TestCreateStateEndpoint:
         await connection.commit()
 
     async def test_unsuccessful_create_state_duplication(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
         expected_content = '{"message":"Third Party State already exists"}'
 
         await connection.execute(

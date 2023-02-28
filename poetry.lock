@@ -1083,6 +1083,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "types-mock"
+version = "5.0.0.5"
+description = "Typing stubs for mock"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "types-pyopenssl"
 version = "23.0.0.4"
 description = "Typing stubs for pyOpenSSL"
@@ -1216,7 +1224,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "21e62f7443a9802440c5eebd5ab81531316945ab0d3faa15eb2fecfa5896882b"
+content-hash = "2aebd2e58ac68c209a48948ce49f0cdfa285041ee116606d2964d916f23ce07d"
 
 [metadata.files]
 aiohttp = []
@@ -1303,6 +1311,7 @@ sqlalchemy-utils = []
 starlette = []
 testcontainers = []
 tomli = []
+types-mock = []
 types-pyopenssl = []
 types-redis = []
 typing-extensions = []

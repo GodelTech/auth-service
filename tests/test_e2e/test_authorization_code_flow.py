@@ -6,7 +6,8 @@ from sqlalchemy import select, insert, delete, text
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
 from src.business_logic.services.jwt_token import JWTService
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -21,8 +22,9 @@ TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlow:
     async def test_successful_authorization_code_flow(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",
