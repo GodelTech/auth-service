@@ -46,7 +46,6 @@ def get_base_payload(
     } | kwargs
     return base_payload
 
-
 async def get_single_token(
     client_id: str,
     additional_data: dict[str, Any],
@@ -152,7 +151,7 @@ class TokenService:
             raise GrantNotFoundError
 
 
-class TokenMaker:
+class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
         self.request_model: BodyRequestTokenModel= token_service.request_model
@@ -161,7 +160,7 @@ class TokenMaker:
         self.user_repo: UserRepository = token_service.user_repo
         self.jwt_service: JWTService = token_service.jwt_service
 
-    async def create(self) -> None:
+    async def validation(self) -> None:
         encoded_attr = None
 
         if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
@@ -247,22 +246,21 @@ class TokenMaker:
                 user_id=user_id,
                 grant_type="refresh_token",
             )
-            
+            # delete_old_refresh
+            await self.persistent_grant_repo.delete(
+                grant_data=self.request_model.code,
+                grant_type=self.request_model.grant_type,
+            )
         return {
             "access_token" : new_access_token,
             "refresh_token" : new_refresh_token,
             "id_token": new_id_token,
         }
         
-class CodeMaker(TokenMaker):
+class CodeMaker(BaseMaker):
     async def create(self) -> dict[str, Any]:
-        await super().create()
+        await self.validation()
         tokens = await self.make_tokens()
-        # delete_old_refresh
-        await self.persistent_grant_repo.delete(
-                        grant_data=self.request_model.code,
-                        grant_type=self.request_model.grant_type,
-                    )
         return {
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
@@ -271,7 +269,7 @@ class CodeMaker(TokenMaker):
                 "token_type": "Bearer",
                 }
     
-class DeviceCodeMaker(TokenMaker):
+class DeviceCodeMaker(BaseMaker):
     def __init__(self, token_service: TokenService) -> None:
         super().__init__(token_service)
         self.device_repo: DeviceRepository = token_service.device_repo
@@ -312,13 +310,8 @@ class DeviceCodeMaker(TokenMaker):
     async def create(self) -> dict[str, Any]:
         
         await self.device_validation()
-        await super().create()
+        await self.validation()
         tokens = await self.make_tokens(create_id_token = False)
-        # delete_old_refresh
-        await self.persistent_grant_repo.delete(
-                        grant_data=self.request_model.code,
-                        grant_type=self.request_model.grant_type,
-                    )
         return {
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
@@ -326,9 +319,9 @@ class DeviceCodeMaker(TokenMaker):
                 "token_type": "Bearer",
                 }
     
-class RefreshMaker(TokenMaker):
+class RefreshMaker(BaseMaker):
     async def create(self) -> dict[str: Any]:
-        await super().create()
+        await self.validation()
         incoming_refresh_token = self.request_model.refresh_token
         try:    
             await self.jwt_service.decode_token(incoming_refresh_token)
@@ -350,7 +343,7 @@ class RefreshMaker(TokenMaker):
                     "token_type": "Bearer",
                     }
 
-class ClientCredentialsMaker(TokenMaker):
+class ClientCredentialsMaker(BaseMaker):
     async def create(self) -> dict[str: Any]:
         client_from_db = ...
         if self.request_model is None:
