@@ -44,7 +44,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
 
     async def get_row_provider_credentials_by_name(
         self, name: str
-    ) -> Optional[Tuple[str, str]]:
+    ) -> Optional[Tuple[str, str, str]]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -54,6 +54,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
                 select(
                     IdentityProviderMapped.provider_client_id,
                     IdentityProviderMapped.provider_client_secret,
+                    IdentityProvider.internal_redirect_uri,
                 )
                 .join(IdentityProvider)
                 .where(

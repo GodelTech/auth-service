@@ -68,6 +68,10 @@ class LoginFormService:
                         f"redirect_uri={provider[3]}&state={state}&"
                         f"response_type={self.request_model.response_type}",
                     }
+                    if provider[0] == "google":
+                        providers_data[provider[0]][
+                            "provider_link"
+                        ] += "&scope=openid profile email"
                 return providers_data
         return None
 

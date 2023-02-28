@@ -19,7 +19,7 @@ SHORT_STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
 @pytest.mark.asyncio
 class TestThirdPartyGitHubEndpoint:
     async def test_successful_github_request_get(
-        self, client: AsyncClient, connection: AsyncSession, mocker:Any
+        self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
         await connection.execute(
             insert(IdentityProviderState).values(state=STUB_STATE)
@@ -44,7 +44,7 @@ class TestThirdPartyGitHubEndpoint:
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
 
         mocker.patch(
-            f"{patch_start}.make_post_request_for_access_token", replace_post
+            f"{patch_start}.make_request_for_access_token", replace_post
         )
         mocker.patch(
             f"{patch_start}.make_get_request_for_user_data", replace_get
@@ -90,16 +90,16 @@ class TestThirdPartyGitHubEndpoint:
             )
         )
 
-        async def replace_post(*args:Any, **kwargs:Any) -> str:
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
             return "access_token"
 
-        async def replace_get(*args:Any, **kwargs:Any) -> str:
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
             return "NewUserNew"
 
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
 
         mocker.patch(
-            f"{patch_start}.make_post_request_for_access_token", replace_post
+            f"{patch_start}.make_request_for_access_token", replace_post
         )
         mocker.patch(
             f"{patch_start}.make_get_request_for_user_data", replace_get
