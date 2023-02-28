@@ -10,7 +10,7 @@ from src.data_access.postgresql.tables import IdentityProviderMapped
 
 
 @pytest.mark.asyncio
-class TestClientRepository:
+class TestThirdPartyRepository:
     async def test_get_row_providers_data(self, engine, connection):
         oidc_repo = ThirdPartyOIDCRepository(engine)
         await connection.execute(
@@ -53,7 +53,7 @@ class TestClientRepository:
         )
         await connection.commit()
         provider_data = await oidc_repo.get_row_provider_credentials_by_name(
-            name="GitHub"
+            name="github"
         )
         assert len(provider_data) == 2
         assert provider_data[0] == "test_client"
@@ -77,7 +77,7 @@ class TestClientRepository:
         expected_token_link = "https://github.com/login/oauth/access_token"
         expected_user_link = "https://api.github.com/user"
 
-        links = await oidc_repo.get_provider_external_links(name="GitHub")
+        links = await oidc_repo.get_provider_external_links(name="github")
 
         assert expected_token_link == links[0]
         assert expected_user_link == links[1]
@@ -121,7 +121,7 @@ class TestClientRepository:
 
     async def test_get_provider_id_by_name(self, engine):
         oidc_repo = ThirdPartyOIDCRepository(engine)
-        provider_id = await oidc_repo.get_provider_id_by_name(name="GitHub")
+        provider_id = await oidc_repo.get_provider_id_by_name(name="github")
         assert provider_id == 1
 
     async def test_get_not_registered_provider_id_by_name(self, engine):

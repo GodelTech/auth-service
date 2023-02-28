@@ -37,7 +37,7 @@ class AuthThirdPartyOIDCService:
         self.http_client = http_client
 
     async def get_github_redirect_uri(self) -> Optional[str]:
-        github_links = await self.get_provider_external_links(name="GitHub")
+        github_links = await self.get_provider_external_links(name="github")
         access_token_url: str = ""
         user_data_url: str = ""
         if github_links is not None:
@@ -51,7 +51,7 @@ class AuthThirdPartyOIDCService:
                     state=self.request_model.state
                 )
                 request_params = await self.get_provider_auth_request_data(
-                    name="GitHub"
+                    name="github"
                 )
 
                 # make request to access_token_url to get a request token
@@ -81,7 +81,7 @@ class AuthThirdPartyOIDCService:
                 ):
                     # create new user
                     provider_id = await self.oidc_repo.get_provider_id_by_name(
-                        name="GitHub"
+                        name="github"
                     )
                     if provider_id is not None:
                         await self.create_new_user(

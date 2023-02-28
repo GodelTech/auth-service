@@ -46,7 +46,7 @@ class TestAuthorizationService:
             "code": "test_code",
         }
         result_data = await service.get_provider_auth_request_data(
-            name="GitHub"
+            name="github"
         )
         assert expected_data == result_data
         await connection.execute(
@@ -73,7 +73,7 @@ class TestAuthorizationService:
 
         result_links = (
             await auth_third_party_service.get_provider_external_links(
-                name="GitHub"
+                name="github"
             )
         )
         assert result_links == expected_links
