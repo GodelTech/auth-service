@@ -167,7 +167,7 @@ REFRESH_TOKEN_USAGE = ["one_time_only", "reuse"]
 
 IDENTITY_PROVIDERS = [
     {
-        "name": "GitHub",
+        "name": "github",
         "auth_endpoint_link": "https://github.com/login/oauth/authorize",
         "token_endpoint_link": "https://github.com/login/oauth/access_token",
         "userinfo_link": "https://api.github.com/user",
@@ -182,4 +182,17 @@ IDENTITY_PROVIDERS = [
         "internal_redirect_uri": "facebook_internal_redirect_uri",
         "provider_icon": "fa-facebook",
     },
+]
+
+POST_LOGOUT_REDIRECT_URL = [
+    "http://thompson-chung.com/",
+    "http://welch-miller.com/",
+    "https://www.cole.com/",
+    "https://www.mccarthy-ruiz.info/",
+    "http://chen-smith.com/",
+    "http://www.ross-zamora.biz/",
+    "https://www.king.com/",
+    "http://www.sparks.net/",
+    "https://www.villarreal.com/",
+    "https://meyer-berry.com/",
 ]
