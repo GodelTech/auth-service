@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import select
-
+from time import sleep
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository, PersistentGrant
 from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
 
@@ -183,4 +183,16 @@ class TestPersistentGrantRepository:
         with pytest.raises(Exception):
             await persistent_grant_repo.get_client_id_by_data(grant_data="test_get_client_id_by_wrong_data")
 
-
+    async def test_deleting_expired_grants(self, engine):
+        persistent_grant_repo = PersistentGrantRepository(engine)
+        await persistent_grant_repo.create(
+            client_id="test_client",
+            grant_data='test_deleting_expired_grants',
+            user_id=2,
+            grant_type='code',
+            expiration_time= 1
+        )
+        sleep(1)
+        await persistent_grant_repo.delete_expired()
+        with pytest.raises(PersistentGrantNotFoundError):
+            await persistent_grant_repo.get(grant_data='test_deleting_expired_grants', grant_type='code')

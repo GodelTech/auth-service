@@ -470,3 +470,7 @@ class TokenService:
             pass
         else:
             raise GrantNotFoundError
+
+    async def delete_expired(self) -> None:    
+        await self.persistent_grant_repo.delete_expired()
+        

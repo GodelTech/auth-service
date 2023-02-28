@@ -101,7 +101,7 @@ from src.di.providers import (
 
 import logging
 from src.log import LOGGING_CONFIG
-
+from fastapi_utils.tasks import repeat_every
 
 logger = logging.getLogger(__name__)
 
@@ -332,7 +332,25 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 # Redis activation
 @app.on_event("startup")
 async def startup() -> None:
-    logger.info("Creating Redis connection with DataBase.")
+    logger.warning("Creating Redis connection with DataBase.")
     redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
+
+
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+
+@app.on_event("startup")
+@repeat_every(seconds=10)
+async def remove_expired_tokens_task(
+    
+) -> None:
+    
+    logger.warning("started cleaning")
+   
+    db_engine = provide_db(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    )
+
+    token_class:PersistentGrantRepository = PersistentGrantRepository(db_engine)
+    await token_class.delete_expired()

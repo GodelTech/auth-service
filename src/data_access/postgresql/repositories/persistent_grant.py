@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from fastapi import status
-from sqlalchemy import delete, exists, insert, select, text
+from sqlalchemy import delete, exists, insert, select, text, func, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -12,7 +12,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantType, Client
 from sqlalchemy.engine.result import ChunkedIteratorResult
-
+from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
@@ -92,7 +92,7 @@ class PersistentGrantRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
 
-            result = await session.execute(
+            grants = await session.execute(
                 select(PersistentGrant)
                 .join(Client, PersistentGrant.client_id == Client.id)
                 .where(
@@ -100,7 +100,10 @@ class PersistentGrantRepository(BaseRepository):
                     PersistentGrant.grant_data == grant_data,
                 )
             )
-            return result.first()[0]
+            result = grants.first()
+            if result is None:
+                raise PersistentGrantNotFoundError
+            return result[0]
 
     async def delete(self, grant_type:str, grant_data: str) -> int:
         session_factory = sessionmaker(
@@ -211,3 +214,22 @@ class PersistentGrantRepository(BaseRepository):
             types = await session.execute(select(PersistentGrantType.type_of_grant))
             
             return types.all()
+        
+    async def delete_expired(self) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            grants_to_delete = await session.execute(
+                select(PersistentGrant)
+                .where(func.trunc(extract('epoch', datetime.utcnow()) - extract('epoch', PersistentGrant.created_at) )  >= PersistentGrant.expiration)
+                )
+            grants_to_delete_list = grants_to_delete.all()
+            logger.warning(f"Deleted {len(grants_to_delete_list)} expired tokens")
+            for grant in grants_to_delete_list:
+                await session.delete(grant[0])
+            await session.commit()
+            
+    def make_datediff_seconds(self, begin, end):
+          return f"""(DATE_PART('day', {end}::timestamp - persistent_grants.created_at::timestamp) * 24 + DATE_PART('hour', {end}::timestamp - persistent_grants.created_at::timestamp)) * 60 + DATE_PART('minute', {end}::timestamp - persistent_grants.created_at::timestamp)) * 60 +DATE_PART('second', {end}::timestamp - persistent_grants.created_at::timestamp)"""
