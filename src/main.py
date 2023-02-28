@@ -150,6 +150,7 @@ def setup_di(app: FastAPI) -> None:
     admin = CustomAdmin(
         app,
         db_engine,
+        templates_dir="templates",
         authentication_backend=AdminAuthController(
             secret_key="1234",
             auth_service=provide_admin_auth_service(
