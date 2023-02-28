@@ -1,4 +1,4 @@
-from sqladmin import ModelView
+from sqladmin import ModelView, expose
 from typing import no_type_check
 from src.data_access.postgresql.tables import (
     IdentityClaim,
@@ -6,7 +6,6 @@ from src.data_access.postgresql.tables import (
     IdentityProviderMapped,
     IdentityResource,
 )
-
 
 class IdentityResourceAdminController(ModelView, model=IdentityResource):
     icon = "fa-solid fa-fingerprint"
@@ -36,9 +35,7 @@ class IdentityProviderMappedAdminController(
 ):
     icon = "fa-solid fa-fingerprint"
     name_plural = "Identity Providers Mapped"
-    # column_formatters = {
-    #     IdentityProviderMapped.identity_provider: lambda m: str(m.identity_provider)[: str(m.identity_provider).find("|")]
-    # }
+    create_template = 'test.html'
 
     column_list = [
         IdentityProviderMapped.id,
