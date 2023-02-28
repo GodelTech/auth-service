@@ -4,18 +4,19 @@ from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
-from typing import Callable, Any
+from typing import Callable, Any, Union
 from src.business_logic.services.jwt_token import JWTService
+
 
 logger = logging.getLogger(__name__)
 
 
 class AccessTokenMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp, jwt_service: JWTService = JWTService()):
+    def __init__(self, app: Any, jwt_service: JWTService = JWTService()):
         self.app = app
         self.jwt_service = jwt_service
 
-    async def dispatch_func(self, request: Request, call_next:Callable[..., Any]) -> Any:
+    async def dispatch_func(self, request: Any, call_next:Callable[..., Any]) -> Any:
 
         if "/administration/" in request.url.path:
             token = request.headers.get("access-token")

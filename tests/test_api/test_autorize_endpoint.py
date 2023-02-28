@@ -12,7 +12,7 @@ scope = (
 
 @pytest.mark.asyncio
 class TestAuthorizeEndpoint:
-    async def test_successful_authorize_request_get(self, client: AsyncClient):
+    async def test_successful_authorize_request_get(self, client: AsyncClient) -> None:
         params = {
             "client_id": "test_client",
             "response_type": "code",
@@ -24,7 +24,7 @@ class TestAuthorizeEndpoint:
 
     async def test_unsuccessful_authorize_request_not_full_data_get(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             "response_type": "code",
             "scope": scope,
@@ -35,7 +35,7 @@ class TestAuthorizeEndpoint:
 
     async def test_unsuccessful_authorize_request_wrong_client_get(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             "client_id": "wrong_test_client",
             "response_type": "code",
@@ -50,7 +50,7 @@ class TestAuthorizeEndpoint:
 
     async def test_unsuccessful_authorize_request_bad_uri_get(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             "client_id": "test_client",
             "response_type": "code",
@@ -65,7 +65,7 @@ class TestAuthorizeEndpoint:
 
     async def test_unsuccessful_authorize_request_bad_response_type(
         self, client: AsyncClient
-    ):
+    ) -> None:
         local_scope = (
             "gcp-api%20IdentityServerApi&grant_type="
             "password&client_id=test_client&client_secret="
@@ -89,7 +89,7 @@ class TestAuthorizeEndpoint:
 class TestAuthoriseEndpointPOST:
     content_type = "application/x-www-form-urlencoded"
 
-    async def test_successful_authorize_request_post(self, client: AsyncClient):
+    async def test_successful_authorize_request_post(self, client: AsyncClient) -> None:
         params = {
             "client_id": "test_client",
             "response_type": "code",
@@ -106,7 +106,7 @@ class TestAuthoriseEndpointPOST:
 
     async def test_unsuccessful_authorize_request_not_full_data_post(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             "response_type": "code",
             "scope": scope,
@@ -122,7 +122,7 @@ class TestAuthoriseEndpointPOST:
 
     async def test_unsuccessful_authorize_request_wrong_client_post(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             "client_id": "wrong_test_client",
             "response_type": "code",
@@ -142,7 +142,7 @@ class TestAuthoriseEndpointPOST:
 
     async def test_unsuccessful_authorize_request_bad_password_post(
         self, client: AsyncClient
-    ):
+    ) -> None:
         local_scope = (
             "gcp-api%20IdentityServerApi&grant_type="
             "password&client_id=test_client&client_secret="
@@ -168,7 +168,7 @@ class TestAuthoriseEndpointPOST:
 
     async def test_unsuccessful_authorize_request_bad_user_name_post(
         self, client: AsyncClient
-    ):
+    ) -> None:
         local_scope = (
             "gcp-api%20IdentityServerApi&grant_type="
             "password&client_id=test_client&client_secret="
@@ -194,7 +194,7 @@ class TestAuthoriseEndpointPOST:
 
     async def test_unsuccessful_authorize_request_wrong_scope_key_error_post(
         self, client: AsyncClient
-    ):
+    ) -> None:
         local_scope = "gcp-api%20IdentityServerApi&grant_type=password&client_id=test_client"
         params = {
             "client_id": "test_client",

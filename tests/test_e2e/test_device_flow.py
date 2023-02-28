@@ -6,6 +6,8 @@ from sqlalchemy import select, text, exists
 from src.data_access.postgresql.tables.device import Device
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.business_logic.services.jwt_token import JWTService
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 
 scope = (
@@ -27,8 +29,9 @@ class TestDeviceFlow:
     content_type = "application/x-www-form-urlencoded"
 
     async def test_successful_device_flow(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    )  -> None:
+
         # 1st stage Create a device instance the database for the relevant client
         params = {"client_id": "test_client", "scope": "scope"}
         response = await client.request(
@@ -157,8 +160,9 @@ class TestDeviceFlow:
         assert type(response.content) == bytes
 
     async def test_unsuccessful_device_flow(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+
         # 1st stage Create a device instance the database for the relevant client
         params = {
             "client_id": "test_client",

@@ -1096,6 +1096,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "types-mock"
+version = "5.0.0.5"
+description = "Typing stubs for mock"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "types-pyopenssl"
 version = "23.0.0.4"
 description = "Typing stubs for pyOpenSSL"
@@ -1317,6 +1325,7 @@ sqlalchemy-utils = []
 starlette = []
 testcontainers = []
 tomli = []
+types-mock = []
 types-pyopenssl = []
 types-redis = []
 typing-extensions = []

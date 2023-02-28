@@ -203,7 +203,8 @@ class AuthorizationService:
                 redirect_uri += f"&state={self.request_model.state}"
 
             return redirect_uri
-
+        else:
+            return None
     @property
     def request_model(self) -> Optional[RequestModel]:
         return self._request_model
