@@ -22,5 +22,5 @@ class Device(BaseModel):
     expires_in = Column(Integer, default=600, nullable=False)
     interval = Column(Integer, default=5, nullable=False)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"Device: {self.device_code}"

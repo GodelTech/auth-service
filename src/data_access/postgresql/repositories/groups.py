@@ -22,7 +22,9 @@ class GroupRepository(BaseRepository):
         self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:
         try:
-            kwargs = params_to_dict(name=name, parent_group=parent_group, id=id)
+            kwargs = params_to_dict(
+                name=name, parent_group=parent_group, id=id
+            )
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -81,7 +83,6 @@ class GroupRepository(BaseRepository):
             raise ValueError
 
     async def get_group_by_name(self, name: str) -> Group:
-
         try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
@@ -166,5 +167,5 @@ class GroupRepository(BaseRepository):
 
         return result
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return "Group repository"

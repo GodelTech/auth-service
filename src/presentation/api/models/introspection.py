@@ -1,25 +1,24 @@
-from typing import Optional
-from pydantic import BaseModel
 from dataclasses import dataclass
+from typing import Optional
+
 from fastapi import Form
+from pydantic import BaseModel
 
 
 @dataclass
 class BodyRequestIntrospectionModel:
-    
     token: str = Form(...)
     token_type_hint: str = Form(None)
-    
+
     class Config:
         orm_mode = True
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}"
+        return f"Model {self.__class__.__name__}"  # pragma: no coverage
 
 
 class ResponceIntrospectionModel(BaseModel):
-    
-    active : bool
+    active: bool
     scope: Optional[str]
     client_id: Optional[str]
     username: Optional[str]
@@ -36,4 +35,4 @@ class ResponceIntrospectionModel(BaseModel):
         orm_mode = True
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}"
+        return f"Model {self.__class__.__name__}"  # pragma: no coverage

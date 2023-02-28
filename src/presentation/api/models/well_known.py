@@ -1,6 +1,8 @@
-from typing import Optional, Any
 import logging
+from typing import Any, Optional
+
 from pydantic import BaseModel
+
 
 class ResponseOpenIdConfiguration(BaseModel):
     issuer: str
@@ -47,8 +49,9 @@ class ResponseOpenIdConfiguration(BaseModel):
     class Config:
         orm_mode = True
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}"
+
 
 class ResponseJWKS(BaseModel):
     keys: list[Any]
@@ -62,5 +65,5 @@ class ResponseJWKS(BaseModel):
     class Config:
         orm_mode = True
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}"
