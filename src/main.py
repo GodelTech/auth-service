@@ -97,6 +97,10 @@ from src.di.providers import (
     provide_third_party_oidc_repo_stub,
     provide_auth_third_party_oidc_service_stub,
     provide_auth_third_party_oidc_service,
+    provide_third_party_google_service_stub,
+    provide_third_party_google_service,
+    provide_third_party_facebook_service_stub,
+    provide_third_party_facebook_service,
 )
 
 import logging
@@ -105,15 +109,17 @@ from src.log import LOGGING_CONFIG
 
 logger = logging.getLogger(__name__)
 
-class NewFastApi(FastAPI):
-    def __init__(self, *args:Any, **kwargs:Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.container:Optional[Container] = None
 
-def get_application(test:bool = False) -> NewFastApi:
+class NewFastApi(FastAPI):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.container: Optional[Container] = None
+
+
+def get_application(test: bool = False) -> NewFastApi:
     # configure logging
     dictConfig(LOGGING_CONFIG)
-    
+
     application = NewFastApi()
     application.add_middleware(
         CORSMiddleware,
@@ -320,6 +326,34 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_auth_third_party_oidc_service_stub
     ] = nodepends_provide_auth_third_party_oidc_service
+
+    nodepends_provide_third_party_google_service = (
+        lambda: provide_third_party_google_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_google_service_stub
+    ] = nodepends_provide_third_party_google_service
+
+    nodepends_provide_third_party_facebook_service = (
+        lambda: provide_third_party_facebook_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_facebook_service_stub
+    ] = nodepends_provide_third_party_facebook_service
 
 
 app = get_application()

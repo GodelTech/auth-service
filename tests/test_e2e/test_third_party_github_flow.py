@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 
+
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
     "password&client_id=spider_man&client_secret="
@@ -59,7 +60,7 @@ class TestThirdPartyGithubFlow:
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
 
         mocker.patch(
-            f"{patch_start}.make_post_request_for_access_token", replace_post
+            f"{patch_start}.make_request_for_access_token", replace_post
         )
         mocker.patch(
             f"{patch_start}.make_get_request_for_user_data", replace_get
