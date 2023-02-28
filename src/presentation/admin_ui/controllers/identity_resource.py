@@ -35,7 +35,7 @@ class IdentityProviderMappedAdminController(
 ):
     icon = "fa-solid fa-fingerprint"
     name_plural = "Identity Providers Mapped"
-    create_template = 'test.html'
+    create_template = 'identity_provider_create_with_copy_button.html'
 
     column_list = [
         IdentityProviderMapped.id,
