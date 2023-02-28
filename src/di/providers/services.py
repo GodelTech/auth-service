@@ -7,6 +7,8 @@ from src.business_logic.services import (
     AdminUserService,
     AuthorizationService,
     AuthThirdPartyOIDCService,
+    ThirdPartyGoogleService,
+    ThirdPartyFacebookService,
     DeviceService,
     EndSessionService,
     IntrospectionServies,
@@ -227,6 +229,46 @@ def provide_auth_third_party_oidc_service(
     http_client: AsyncClient,
 ) -> AuthThirdPartyOIDCService:
     return AuthThirdPartyOIDCService(
+        client_repo=client_repo,
+        user_repo=user_repo,
+        persistent_grant_repo=persistent_grant_repo,
+        oidc_repo=oidc_repo,
+        http_client=http_client,
+    )
+
+
+def provide_third_party_google_service_stub() -> None:
+    ...
+
+
+def provide_third_party_google_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    oidc_repo: ThirdPartyOIDCRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    http_client: AsyncClient,
+) -> ThirdPartyGoogleService:
+    return ThirdPartyGoogleService(
+        client_repo=client_repo,
+        user_repo=user_repo,
+        persistent_grant_repo=persistent_grant_repo,
+        oidc_repo=oidc_repo,
+        http_client=http_client,
+    )
+
+
+def provide_third_party_facebook_service_stub() -> None:
+    ...
+
+
+def provide_third_party_facebook_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    oidc_repo: ThirdPartyOIDCRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    http_client: AsyncClient,
+) -> ThirdPartyFacebookService:
+    return ThirdPartyFacebookService(
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,

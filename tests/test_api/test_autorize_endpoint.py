@@ -12,7 +12,9 @@ scope = (
 
 @pytest.mark.asyncio
 class TestAuthorizeEndpoint:
-    async def test_successful_authorize_request_get(self, client: AsyncClient) -> None:
+    async def test_successful_authorize_request_get(
+        self, client: AsyncClient
+    ) -> None:
         params = {
             "client_id": "test_client",
             "response_type": "code",
@@ -89,7 +91,9 @@ class TestAuthorizeEndpoint:
 class TestAuthoriseEndpointPOST:
     content_type = "application/x-www-form-urlencoded"
 
-    async def test_successful_authorize_request_post(self, client: AsyncClient) -> None:
+    async def test_successful_authorize_request_post(
+        self, client: AsyncClient
+    ) -> None:
         params = {
             "client_id": "test_client",
             "response_type": "code",

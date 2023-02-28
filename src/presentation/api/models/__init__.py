@@ -6,6 +6,8 @@ from .device_authorization import (
 )
 from .third_party_oidc_authorization import (
     ThirdPartyOIDCRequestModel,
+    ThirdPartyFacebookRequestModel,
+    ThirdPartyGoogleRequestModel,
     StateRequestModel,
 )
 from .tokens import BodyRequestTokenModel, ResponseTokenModel

@@ -30,8 +30,7 @@ class TestDeviceFlow:
 
     async def test_successful_device_flow(
         self, client: AsyncClient, connection: AsyncSession
-    )  -> None:
-
+    ) -> None:
         # 1st stage Create a device instance the database for the relevant client
         params = {"client_id": "test_client", "scope": "scope"}
         response = await client.request(
@@ -162,7 +161,6 @@ class TestDeviceFlow:
     async def test_unsuccessful_device_flow(
         self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-
         # 1st stage Create a device instance the database for the relevant client
         params = {
             "client_id": "test_client",
