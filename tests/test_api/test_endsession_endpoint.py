@@ -2,16 +2,15 @@ import jwt
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete
-from sqlalchemy import insert
+from sqlalchemy import delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from tests.test_unit.fixtures import (
-    end_session_request_model,
     TOKEN_HINT_DATA,
     TokenHint,
+    end_session_request_model,
 )
 
 
@@ -35,7 +34,7 @@ class TestEndSessionEndpoint:
         )
         async with session_factory() as sess:
             session = sess
-            grant = await session.execute(
+            await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=3,
@@ -77,7 +76,7 @@ class TestEndSessionEndpoint:
         )
         async with session_factory() as sess:
             session = sess
-            grant = await session.execute(
+            await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=3,
@@ -111,7 +110,7 @@ class TestEndSessionEndpoint:
         )
         async with session_factory() as sess:
             session = sess
-            grant = await session.execute(
+            await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=3,

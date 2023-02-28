@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Any, Optional
+from typing import Any, Optional, Union
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
@@ -15,14 +15,10 @@ from src.presentation.api.models.userinfo import ResponseUserInfoModel
 
 logger = logging.getLogger(__name__)
 
-userinfo_router = APIRouter(
-    prefix="/userinfo",
-)
+userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 
 
-@userinfo_router.get(
-    "/", response_model=dict, tags=["UserInfo"]
-)
+@userinfo_router.get("/", response_model=dict)
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
@@ -37,15 +33,8 @@ async def get_userinfo(
 ) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get("authorization")
-
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
         return await userinfo_class.get_user_info()
 
@@ -60,13 +49,8 @@ async def get_userinfo(
             status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.post(
-    "/", response_model=ResponseUserInfoModel, tags=["UserInfo"]
-)
+@userinfo_router.post("/", response_model=ResponseUserInfoModel)
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
@@ -81,15 +65,8 @@ async def post_userinfo(
 ) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get("authorization")
-
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
         return await userinfo_class.get_user_info()
 
@@ -104,11 +81,8 @@ async def post_userinfo(
             status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.get("/jwt", response_model=str, tags=["UserInfo"])
+@userinfo_router.get("/jwt", response_model=str)
 @cache(
     expire=CacheTimeSettings.USERINFO_JWT,
     coder=JsonCoder,
@@ -121,20 +95,13 @@ async def get_userinfo_jwt(
     ),
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
-
     try:
         userinfo_class = userinfo_class
         jwt_service = JWTService()
-
-        token = request.headers.get("authorization")
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
+
         return await userinfo_class.jwt.encode_jwt(
             payload=await userinfo_class.get_user_info()
         )
@@ -150,13 +117,8 @@ async def get_userinfo_jwt(
             detail="You don't have permission for this claims",
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.get(
-    "/get_default_token", response_model=str, tags=["UserInfo"]
-)
+@userinfo_router.get("/get_default_token", response_model=str)
 async def get_default_token(
     with_iss_me: Optional[bool] = None,
     with_aud_facebook: Optional[bool] = None,
@@ -174,14 +136,13 @@ async def get_default_token(
         raise HTTPException(status_code=500)
 
 
-@userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
+@userinfo_router.get("/decode_token", response_model=dict)
 async def get_decode_token(
     token: str,
     issuer: Optional[str] = None,
     audience: Optional[str] = None,
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> dict[str, Any]:
-
     uis = userinfo_class
     kwargs = {}
     if issuer is not None:
@@ -190,4 +151,3 @@ async def get_decode_token(
         kwargs["audience"] = audience
 
     return await uis.jwt.decode_token(token, **kwargs)
-

@@ -5,11 +5,11 @@ from typing import Any
 from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
+    DeviceCodeExpirationTimeError,
+    DeviceCodeNotFoundError,
+    DeviceRegistrationError,
     GrantNotFoundError,
     WrongGrantsError,
-    DeviceCodeExpirationTimeError,
-    DeviceRegistrationError,
-    DeviceCodeNotFoundError,
 )
 from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.tokens import (
@@ -20,12 +20,10 @@ from src.presentation.api.models.tokens import (
 logger = logging.getLogger(__name__)
 
 
-token_router = APIRouter(
-    prefix="/token",
-)
+token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
-@token_router.post("/", response_model=ResponseTokenModel, tags=["Token"])
+@token_router.post("/", response_model=ResponseTokenModel)
 async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
@@ -63,12 +61,14 @@ async def get_tokens(
     except DeviceRegistrationError as e:
         logger.exception(e)
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Device registration in progress"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Device registration in progress",
         )
     except DeviceCodeNotFoundError as e:
         logger.exception(e)
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Such device code does not exist"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Such device code does not exist",
         )
     except ValueError as e:
         logger.exception(e)
