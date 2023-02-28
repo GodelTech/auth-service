@@ -144,9 +144,6 @@ def get_application(test: bool = False) -> NewFastApi:
 
 # TODO: move the creation of RSA keys here.
 def setup_di(app: FastAPI) -> None:
-    print("===================>>>>>>>>>>>>>>>>>>")
-    print(DB_URL)
-    print("===================>>>>>>>>>>>>>>>>>>")
     db_engine = provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
