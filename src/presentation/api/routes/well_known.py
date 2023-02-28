@@ -2,7 +2,14 @@ import logging
 import time
 from typing import Optional, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from fastapi_cache.decorator import cache
 
 from src.business_logic.cache.key_builders import builder_with_parametr
@@ -13,17 +20,13 @@ from src.presentation.api.models.well_known import (
     ResponseOpenIdConfiguration,
 )
 
-well_known_router = APIRouter(
-    prefix="/.well-known",
-)
+well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 
 logger = logging.getLogger(__name__)
 
 
 @well_known_router.get(
-    "/openid-configuration",
-    response_model=ResponseOpenIdConfiguration,
-    tags=["Well Known"],
+    "/openid-configuration", response_model=ResponseOpenIdConfiguration
 )
 @cache(
     expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG,
@@ -41,11 +44,7 @@ async def get_openid_configuration(
         raise HTTPException(status_code=404)
 
 
-@well_known_router.get(
-    "/jwks",
-    response_model=ResponseJWKS,
-    tags=["Well Known"],
-)
+@well_known_router.get("/jwks", response_model=ResponseJWKS)
 async def get_jwks(
     request: Request, well_known_info_class: WellKnownServies = Depends()
 ) -> dict[str, Any]:

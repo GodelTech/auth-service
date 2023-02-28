@@ -1,11 +1,12 @@
-from sqlalchemy import select, exists, update, insert
+from typing import Any, Dict, Optional, Union
+
+from sqlalchemy import exists, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+
+from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import Role
-from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union, Dict, Any, Optional
-
 
 
 def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
@@ -14,7 +15,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
         if kwargs[key] is not None:
             result[key] = kwargs[key]
     return result
-    
+
 
 class RoleRepository(BaseRepository):
     async def exists(self, role_id: int) -> bool:
@@ -42,7 +43,7 @@ class RoleRepository(BaseRepository):
                 await session.commit()
             else:
                 raise ValueError
-    
+
     async def get_role_by_name(self, name: str) -> Role:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -74,9 +75,8 @@ class RoleRepository(BaseRepository):
                 return role[0]
         except:
             raise ValueError
-            
-    async def update(self, role_id: int, name: str) -> None:
 
+    async def update(self, role_id: int, name: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -84,7 +84,11 @@ class RoleRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 if await self.exists(role_id=role_id):
-                    updates = update(Role).values(name = name).where(Role.id == role_id)
+                    updates = (
+                        update(Role)
+                        .values(name=name)
+                        .where(Role.id == role_id)
+                    )
                     await session.execute(updates)
                     await session.commit()
                 else:
@@ -103,9 +107,7 @@ class RoleRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
 
-                await session.execute(
-                    insert(Role).values(**kwargs)
-                )
+                await session.execute(insert(Role).values(**kwargs))
                 await session.commit()
         except:
             raise DuplicationError
@@ -118,11 +120,9 @@ class RoleRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
 
-            quiery = await session.execute(
-                select(Role)
-            )
+            quiery = await session.execute(select(Role))
             quiery = quiery.all()
             return [role[0] for role in quiery]
-    
-    def __repr__(self) -> str:
+
+    def __repr__(self) -> str:  # pragma: no cover
         return "Role repository"

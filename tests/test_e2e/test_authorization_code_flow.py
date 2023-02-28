@@ -23,7 +23,6 @@ class TestAuthorizationCodeFlow:
     async def test_successful_authorization_code_flow(
         self, client: AsyncClient, connection
     ):
-
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",
@@ -45,8 +44,10 @@ class TestAuthorizationCodeFlow:
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
         secret_code = await connection.execute(
-            select(PersistentGrant.grant_data)
-            .where(PersistentGrant.client_id == 8))
+            select(PersistentGrant.grant_data).where(
+                PersistentGrant.client_id == 8
+            )
+        )
 
         secret_code = secret_code.first()[0]
 
@@ -55,7 +56,7 @@ class TestAuthorizationCodeFlow:
             "grant_type": "code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "http://www.sparks.net/",
         }
 
         content_type = "application/x-www-form-urlencoded"
@@ -76,7 +77,9 @@ class TestAuthorizationCodeFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
 
         await connection.execute(

@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import insert, delete, text
+from sqlalchemy import delete, insert, text
 
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -7,7 +7,10 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
 )
 from src.data_access.postgresql.tables.client import Client
-from tests.test_unit.fixtures import DEFAULT_CLIENT, authorization_request_model
+from tests.test_unit.fixtures import (
+    DEFAULT_CLIENT,
+    authorization_request_model,
+)
 
 
 @pytest.mark.asyncio
@@ -117,11 +120,29 @@ class TestAuthorizationService:
         with pytest.raises(UserNotFoundError):
             await service.get_redirect_url()
 
+    async def test_get_redirect_url_without_scope(
+        self, authorization_service, authorization_request_model
+    ):
+        service = authorization_service
+        service.request_model = authorization_request_model
+        service.request_model.scope = None
+        result = await service.get_redirect_url()
+        assert result is None
+
+    async def test_get_redirect_url_id_without_request_model(
+        self, authorization_service
+    ):
+        service = authorization_service
+        result = await service.get_redirect_url()
+        assert result is None
+
     async def test_validate_client(self, authorization_service, connection):
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('clients', 'id'), (SELECT MAX(id) FROM clients)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('clients', 'id'), (SELECT MAX(id) FROM clients)+1);"
+            )
         )
         await connection.execute(insert(Client).values(**DEFAULT_CLIENT))
         await connection.commit()
@@ -169,7 +190,7 @@ class TestAuthorizationService:
         assert result == expected
 
     async def test_parse_scope_without_separator(self, authorization_service):
-        expected = {'some_key': "key"}
+        expected = {"some_key": "key"}
         to_parse = "some_key=key"
         result = await authorization_service._parse_scope_data(to_parse)
         assert result == expected
@@ -186,6 +207,14 @@ class TestAuthorizationService:
         )
 
         assert redirect_url == expected_url
+
+    async def test_update_redirect_url_without_request_model(
+        self, authorization_service
+    ):
+        result = await authorization_service._update_redirect_url_with_params(
+            "secret"
+        )
+        assert result is None
 
     async def test_update_redirect_url_without_state(
         self, authorization_service, authorization_request_model
@@ -226,6 +255,24 @@ class TestAuthorizationService:
             grant_data=data["code"], grant_type="code"
         )
 
+    async def test_get_redirect_url_code_response_type_without_request_model(
+        self, authorization_service
+    ):
+        result = (
+            await authorization_service.get_redirect_url_code_response_type(
+                user_id=2
+            )
+        )
+        assert result is None
+
+    async def test_get_redirect_url_device_code_response_type_without_request_model(
+        self, authorization_service
+    ):
+        result = await authorization_service.get_redirect_url_device_code_response_type(
+            user_id=2
+        )
+        assert result is None
+
     async def test_get_redirect_url_token_response_type(
         self, authorization_service, authorization_request_model
     ):
@@ -247,6 +294,16 @@ class TestAuthorizationService:
         assert "id_token" not in data
         assert data["token_type"] in "Bearer"
 
+    async def test_get_redirect_url_token_response_type_without_request_model(
+        self, authorization_service
+    ):
+        result = (
+            await authorization_service.get_redirect_url_token_response_type(
+                user_id=2
+            )
+        )
+        assert result is None
+
     async def test_get_redirect_url_id_token_token_response_type(
         self, authorization_service, authorization_request_model
     ):
@@ -265,3 +322,11 @@ class TestAuthorizationService:
         assert "access_token" in data
         assert "id_token" in data
         assert data["token_type"] in "Bearer"
+
+    async def test_get_redirect_url_id_token_token_response_type_without_request_model(
+        self, authorization_service
+    ):
+        result = await authorization_service.get_redirect_url_id_token_token_response_type(
+            user_id=2
+        )
+        assert result is None
