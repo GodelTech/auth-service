@@ -1,7 +1,8 @@
 import pytest
 
 from sqlalchemy import select
-
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.tables.group import Group
 from src.data_access.postgresql.errors.user import DuplicationError
@@ -10,7 +11,7 @@ from src.data_access.postgresql.errors.user import DuplicationError
 @pytest.mark.asyncio
 class TestGroupRepository:
 
-    async def test_create_delete_exist_not_exist(self, engine, connection):
+    async def test_create_delete_exist_not_exist(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -30,7 +31,7 @@ class TestGroupRepository:
         deleted = await group_repo.exists(group_id=group_id)
         assert deleted is False
 
-    async def test_create_existing(self, engine, connection):
+    async def test_create_existing(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -52,12 +53,12 @@ class TestGroupRepository:
         deleted = await group_repo.exists(group_id=group_id)
         assert deleted is False
 
-    async def test_delete_not_existing(self, engine):
+    async def test_delete_not_existing(self, engine: AsyncEngine) -> None:
         group_repo = GroupRepository(engine)
         with pytest.raises(ValueError):
             await group_repo.delete(group_id=55555)
 
-    async def test_delete_all(self, engine, connection):
+    async def test_delete_all(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
 
         await group_repo.delete()
@@ -67,7 +68,7 @@ class TestGroupRepository:
         groups = groups.all()
         assert groups == []
 
-    async def test_get_by_id(self, engine, connection):
+    async def test_get_by_id(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -84,12 +85,12 @@ class TestGroupRepository:
         assert group.name == "strange_name"
         await group_repo.delete(group_id=group_id)
 
-    async def test_get_by_id_not_exist(self, engine):
+    async def test_get_by_id_not_exist(self, engine: AsyncEngine) -> None:
         group_repo = GroupRepository(engine)
         with pytest.raises(ValueError):
             await group_repo.get_by_id(group_id=55555)
 
-    async def test_get_by_name(self, engine, connection):
+    async def test_get_by_name(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -106,12 +107,12 @@ class TestGroupRepository:
         assert group.name == "strange_name"
         await group_repo.delete(group_id=group_id)
 
-    async def test_get_by_name_not_exist(self, engine):
+    async def test_get_by_name_not_exist(self, engine: AsyncEngine) -> None:
         group_repo = GroupRepository(engine)
         with pytest.raises(ValueError):
             await group_repo.get_group_by_name(name="pom_pon")
 
-    async def test_get_all_groups(self, engine, connection):
+    async def test_get_all_groups(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -134,7 +135,7 @@ class TestGroupRepository:
         await group_repo.delete(group_id=group_id)
         await group_repo.delete(group_id=(group_id + 1))
 
-    async def test_get_all_subgroups(self, engine, connection):
+    async def test_get_all_subgroups(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -164,7 +165,7 @@ class TestGroupRepository:
         await group_repo.delete(group_id=(group_id + 1))
         await group_repo.delete(group_id=group_id)
 
-    async def test_update(self, engine, connection):
+    async def test_update(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)
@@ -182,12 +183,12 @@ class TestGroupRepository:
         assert updated_group.name == "updated_name"
         await group_repo.delete(group_id=group_id)
 
-    async def test_update_not_exist(self, engine):
+    async def test_update_not_exist(self, engine: AsyncEngine) -> None:
         group_repo = GroupRepository(engine)
         with pytest.raises(ValueError):
             await group_repo.update(group_id=555555, name="updated_name")
 
-    async def test_update_duplication_error(self, engine, connection):
+    async def test_update_duplication_error(self, engine: AsyncEngine, connection: AsyncSession) -> None:
         group_repo = GroupRepository(engine)
         group_ids = await connection.execute(
             select(Group.id)

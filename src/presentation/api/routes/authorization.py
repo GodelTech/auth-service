@@ -23,15 +23,12 @@ logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="src/presentation/api/templates/")
 
-auth_router = APIRouter(
-    prefix="/authorize",
-)
+auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
 
 
 @auth_router.get(
     "/",
     status_code=status.HTTP_200_OK,
-    tags=["Authorization"],
     response_class=HTMLResponse,
 )
 async def get_authorize(
@@ -72,12 +69,6 @@ async def get_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Redirect Uri not found"},
         )
-    except WrongPasswordError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Bad password"},
-        )
     except WrongResponseTypeError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -86,9 +77,7 @@ async def get_authorize(
         )
 
 
-@auth_router.post(
-    "/", status_code=status.HTTP_302_FOUND, tags=["Authorization"]
-)
+@auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
     request_body: DataRequestModel = Depends(),
     auth_class: AuthorizationService = Depends(provide_auth_service_stub),

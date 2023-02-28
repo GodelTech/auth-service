@@ -86,7 +86,6 @@ class CustomAdmin(Admin):
             form_data = await request.form()
 
             form = Form(form_data)
-
             if identity == "client-secret":
                 value = str(uuid.uuid4())
                 form._fields["value"].default = value
@@ -97,6 +96,7 @@ class CustomAdmin(Admin):
                 "model_view": model_view,
                 "form": form,
             }
+            
 
             if request.method == "GET":
                 return self.templates.TemplateResponse(

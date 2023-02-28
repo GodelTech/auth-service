@@ -27,7 +27,7 @@ from src.data_access.postgresql.repositories import (
 )
 
 
-def provide_auth_service_stub() -> None:
+def provide_auth_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -49,7 +49,7 @@ def provide_auth_service(
     )
 
 
-def provide_password_service_stub() -> None:
+def provide_password_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -57,7 +57,7 @@ def provide_password_service() -> PasswordHash:
     return PasswordHash()
 
 
-def provide_endsession_service_stub() -> None:
+def provide_endsession_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -73,7 +73,7 @@ def provide_endsession_service(
     )
 
 
-def provide_jwt_service_stub() -> None:
+def provide_jwt_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -81,7 +81,7 @@ def provide_jwt_service() -> JWTService:
     return JWTService()
 
 
-def provide_introspection_service_stub() -> None:
+def provide_introspection_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -101,7 +101,7 @@ def provide_introspection_service(
     )
 
 
-def provide_token_service_stub() -> None:
+def provide_token_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -121,7 +121,7 @@ def provide_token_service(
     )
 
 
-def provide_admin_user_service_stub() -> None:
+def provide_admin_user_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -133,7 +133,7 @@ def provide_admin_user_service(
     )
 
 
-def provide_admin_group_service_stub() -> None:
+def provide_admin_group_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -145,7 +145,7 @@ def provide_admin_group_service(
     )
 
 
-def provide_admin_role_service_stub() -> None:
+def provide_admin_role_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -157,7 +157,7 @@ def provide_admin_role_service(
     )
 
 
-def provide_userinfo_service_stub() -> None:
+def provide_userinfo_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -177,7 +177,7 @@ def provide_userinfo_service(
     )
 
 
-def provide_login_form_service_stub() -> None:
+def provide_login_form_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -188,7 +188,7 @@ def provide_login_form_service(
     return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo)
 
 
-def provide_admin_auth_service_stub() -> None:
+def provide_admin_auth_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -204,7 +204,7 @@ def provide_admin_auth_service(
     )
 
 
-def provide_device_service_stub() -> None:
+def provide_device_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -215,7 +215,7 @@ def provide_device_service(
     return DeviceService(client_repo=client_repo, device_repo=device_repo)
 
 
-def provide_auth_third_party_oidc_service_stub() -> None:
+def provide_auth_third_party_oidc_service_stub() -> None:  # pragma: no cover
     ...
 
 

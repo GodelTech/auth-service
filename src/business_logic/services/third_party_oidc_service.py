@@ -37,13 +37,13 @@ class AuthThirdPartyOIDCService:
         self.http_client = http_client
 
     async def get_github_redirect_uri(self) -> Optional[str]:
-        github_links = await self.get_provider_external_links(name="GitHub")
+        github_links = await self.get_provider_external_links(name="github")
         access_token_url: str = ""
         user_data_url: str = ""
         if github_links is not None:
             access_token_url = github_links["token_endpoint_link"]
             user_data_url = github_links["userinfo_link"]
-        if self.request_model is not None:
+        if self.request_model is not None and self.request_model.state:
             if await self.oidc_repo.validate_state(
                 state=self.request_model.state
             ):
@@ -51,7 +51,7 @@ class AuthThirdPartyOIDCService:
                     state=self.request_model.state
                 )
                 request_params = await self.get_provider_auth_request_data(
-                    name="GitHub"
+                    name="github"
                 )
 
                 # make request to access_token_url to get a request token
@@ -81,7 +81,7 @@ class AuthThirdPartyOIDCService:
                 ):
                     # create new user
                     provider_id = await self.oidc_repo.get_provider_id_by_name(
-                        name="GitHub"
+                        name="github"
                     )
                     if provider_id is not None:
                         await self.create_new_user(
@@ -171,6 +171,8 @@ class AuthThirdPartyOIDCService:
     ) -> None:
         if self.request_model is not None:
             user = await self.user_repo.get_user_by_username(username=username)
+            if not self.request_model.state:
+                raise AttributeError
             grant_data = {
                 "client_id": self.request_model.state.split("!_!")[1],
                 "grant_data": secret_code,

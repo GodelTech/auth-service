@@ -15,7 +15,6 @@ from src.data_access.postgresql.repositories import (
 
 from src.data_access.postgresql.errors import NoScopeError
 from src.presentation.api.models import RequestModel
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class AuthorizationService:
         password_service: PasswordHash,
         jwt_service: JWTService,
     ) -> None:
-        self._request_model:Optional[RequestModel] = None
+        self._request_model: Optional[RequestModel] = None
         self.client_repo = client_repo
         self.user_repo = user_repo
         self.persistent_grant_repo = persistent_grant_repo
@@ -68,14 +67,14 @@ class AuthorizationService:
             )
 
     async def get_redirect_url(self) -> Optional[str]:
-        if self.request_model is not None:
+        if (
+            self.request_model is not None
+            and self.request_model.scope is not None
+        ):
             if await self._validate_client(self.request_model.client_id):
-                scope_data ={"scope": "None"}
-                if self.request_model.scope is not None:
-                    scope_data = await self._parse_scope_data(
-                        scope=self.request_model.scope
-                    )
-                
+                scope_data = await self._parse_scope_data(
+                    scope=self.request_model.scope
+                )
                 password = scope_data["password"]
                 user_name = scope_data["username"]
 
@@ -175,7 +174,7 @@ class AuthorizationService:
 
     async def get_redirect_url_id_token_token_response_type(
         self, user_id: int
-    ) ->  Optional[str]:
+    ) -> Optional[str]:
         if self.request_model is not None:
             expiration_time = 600
             scope = {"scopes": self.request_model.scope}
@@ -205,8 +204,7 @@ class AuthorizationService:
             return result_uri
         return None
 
-        
-    async def _validate_client(self, client_id: str) ->  Optional[bool]:
+    async def _validate_client(self, client_id: str) -> Optional[bool]:
         """
         Checks if the client is in the database.
         """
@@ -215,9 +213,9 @@ class AuthorizationService:
                 client_id=client_id
             )
             return client
-        else: 
+        else:
             return None
-        
+
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         """ """
         return {
@@ -226,15 +224,19 @@ class AuthorizationService:
             if len(item.split("=")) == 2
         }
 
-
-    async def _update_redirect_url_with_params(self, secret_code: str) -> Optional[str]:
+    async def _update_redirect_url_with_params(
+        self, secret_code: str
+    ) -> Optional[str]:
         if self.request_model is not None:
-            redirect_uri = f"{self.request_model.redirect_uri}?code={secret_code}"
+            redirect_uri = (
+                f"{self.request_model.redirect_uri}?code={secret_code}"
+            )
             if self.request_model.state:
                 redirect_uri += f"&state={self.request_model.state}"
 
-        return redirect_uri
-
+            return redirect_uri
+        else:
+            return None
     @property
     def request_model(self) -> Optional[RequestModel]:
         return self._request_model

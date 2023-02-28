@@ -65,7 +65,9 @@ class Client(BaseModel):
         nullable=False,
     )
     protocol_type = relationship(
-        "ProtocolType", backref="client", foreign_keys="Client.protocol_type_id"
+        "ProtocolType",
+        backref="client",
+        foreign_keys="Client.protocol_type_id",
     )
 
     refresh_token_expiration_type_id = Column(
@@ -126,10 +128,10 @@ class Client(BaseModel):
         "ClientIdRestriction", back_populates="client"
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.id} id: {self.client_name}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.id} id: {self.client_name}"
 
 
@@ -138,10 +140,10 @@ class AccessTokenType(Base):
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
 
@@ -150,10 +152,10 @@ class ProtocolType(Base):
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
 
@@ -162,10 +164,10 @@ class RefreshTokenExpirationType(Base):
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
 
@@ -174,10 +176,10 @@ class RefreshTokenUsageType(Base):
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
 
@@ -191,7 +193,7 @@ class ClientIdRestriction(BaseModel):
         back_populates="id_restrictions",
     )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.provider}"
 
 
@@ -201,9 +203,12 @@ class ClientClaim(BaseModel):
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
-    client = relationship("Client", back_populates="claims")
+    client = relationship(
+        "Client",
+        back_populates="claims",
+    )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 
 
@@ -217,10 +222,10 @@ class ClientScope(BaseModel):
         back_populates="scopes",
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.scope}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.scope}"
 
 
@@ -234,10 +239,10 @@ class ClientPostLogoutRedirectUri(BaseModel):
         back_populates="post_logout_redirect_uris",
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.post_logout_redirect_uri}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -251,7 +256,7 @@ class ClientCorsOrigin(BaseModel):
         back_populates="cors_origins",
     )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -262,7 +267,7 @@ class ClientRedirectUri(BaseModel):
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
     client = relationship("Client", back_populates="redirect_uris")
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -276,7 +281,7 @@ class ClientGrantType(BaseModel):
         back_populates="grant_types",
     )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.id}"
 
 
@@ -290,5 +295,5 @@ class ClientSecret(BaseModel):
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
     client = relationship("Client", back_populates="secrets")
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.type}"

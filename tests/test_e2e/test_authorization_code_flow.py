@@ -8,7 +8,8 @@ from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import PKCEError
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -23,8 +24,8 @@ TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlow:
     async def test_successful_authorization_code_flow(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
 
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
@@ -81,7 +82,9 @@ class TestAuthorizationCodeFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
 
         await connection.execute(

@@ -24,7 +24,7 @@ class IdentityClaim(BaseModel):
     )
     type = Column(String)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.__tablename__}: {self.id}"
 
 
@@ -45,7 +45,7 @@ class IdentityResource(BaseModel):
         foreign_keys="IdentityClaim.identity_resource_id",
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.__tablename__}: {self.name}"
 
 
@@ -93,11 +93,12 @@ class IdentityProvider(BaseModel):
         foreign_keys="IdentityProviderMapped.identity_provider_id",
     )
     users = relationship(
-        "User", 
-        back_populates = "identity_provider", 
-        foreign_keys="User.identity_provider_id", 
-        )
-    def __str__(self) -> str:
+        "User",
+        back_populates="identity_provider",
+        foreign_keys="User.identity_provider_id",
+    )
+
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.name}\t|\t{self.internal_redirect_uri}"
 
 
@@ -106,5 +107,5 @@ class IdentityProviderState(BaseModel):
 
     state = Column(String, nullable=False, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.state}"
