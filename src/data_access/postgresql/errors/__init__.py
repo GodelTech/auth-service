@@ -16,5 +16,6 @@ from .response_type import WrongResponseTypeError
 from .third_party_oidc import (
     ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
+    WrongDataError,
 )
 from .user import ClaimsNotFoundError, UserNotFoundError

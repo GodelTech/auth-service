@@ -7,9 +7,9 @@ from httpx import AsyncClient
 
 from src.business_logic.services import AuthThirdPartyOIDCService
 from src.data_access.postgresql.errors import (
-    ClientNotFoundError,
     ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
+    WrongDataError,
 )
 from src.di.providers import provide_auth_third_party_oidc_service_stub
 from src.presentation.api.models import (
@@ -40,31 +40,24 @@ async def get_github_authorize(
         auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_github_redirect_uri()
-        
         if github_redirect_uri is None:
-            raise ValueError
+            raise WrongDataError
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
         return response
 
-    except ClientNotFoundError as exception:
+    except WrongDataError as exception:
         logger.exception(exception)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
+            content={"message": "Wrong data has been passed"},
         )
-    except ThirdPartyStateNotFoundError as exception:
+    except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Third Party State not found"},
-        )
-    except ThirdPartyStateDuplicationError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Third Party State already exists"},
+            content={"message": "Error in parsing"},
         )
 
 
@@ -87,6 +80,6 @@ async def post_create_state(
     except ThirdPartyStateDuplicationError as exception:
         logger.exception(exception)
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "Third Party State already exists"},
         )
