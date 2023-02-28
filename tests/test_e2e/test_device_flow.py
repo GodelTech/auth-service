@@ -18,25 +18,25 @@ scope = (
 TOKEN_HINT_DATA = {
     "sub": 1,
     "client_id": "test_client",
-    "type": "urn:ietf:params:oauth:grant-type:device_code"
+    "type": "urn:ietf:params:oauth:grant-type:device_code",
 }
 
 
 @pytest.mark.asyncio
 class TestDeviceFlow:
-    content_type = 'application/x-www-form-urlencoded'
+    content_type = "application/x-www-form-urlencoded"
 
     async def test_successful_device_flow(
         self, client: AsyncClient, connection
     ):
-
         # 1st stage Create a device instance the database for the relevant client
-        params = {
-            "client_id": "test_client",
-            "scope": "scope"
-        }
-        response = await client.request("POST", "/device/", data=params,
-                                        headers={'Content-Type': self.content_type})
+        params = {"client_id": "test_client", "scope": "scope"}
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=params,
+            headers={"Content-Type": self.content_type},
+        )
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
             select(exists().where(Device.client_id == 1))
@@ -61,7 +61,10 @@ class TestDeviceFlow:
             "user_code": user_code,
         }
         response = await client.request(
-            "POST", "/device/auth", data=param_3rd, headers={'Content-Type': self.content_type}
+            "POST",
+            "/device/auth",
+            data=param_3rd,
+            headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_302_FOUND
 
@@ -125,7 +128,9 @@ class TestDeviceFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
         response = await client.request(
             "GET", "/userinfo/", headers={"authorization": access_token}
@@ -139,7 +144,7 @@ class TestDeviceFlow:
 
         params = {
             "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": 'http://thompson-chung.com/',
+            "post_logout_redirect_uri": "http://thompson-chung.com/",
             "state": "test_state",
         }
         response = await client.request("GET", "/endsession/", params=params)
@@ -154,7 +159,6 @@ class TestDeviceFlow:
     async def test_unsuccessful_device_flow(
         self, client: AsyncClient, connection
     ):
-
         # 1st stage Create a device instance the database for the relevant client
         params = {
             "client_id": "test_client",
@@ -163,7 +167,7 @@ class TestDeviceFlow:
             "POST",
             "/device/",
             data=params,
-            headers={'Content-Type': self.content_type}
+            headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
@@ -188,7 +192,10 @@ class TestDeviceFlow:
             "user_code": user_code,
         }
         response = await client.request(
-            "POST", "/device/auth", data=param_3rd, headers={'Content-Type': self.content_type}
+            "POST",
+            "/device/auth",
+            data=param_3rd,
+            headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_302_FOUND
 
@@ -207,7 +214,10 @@ class TestDeviceFlow:
             "scope": f"user_code={user_code}",
         }
         response = await client.request(
-            "DELETE", "/device/auth/cancel", data=param_next, headers={'Content-Type': self.content_type}
+            "DELETE",
+            "/device/auth/cancel",
+            data=param_next,
+            headers={"Content-Type": self.content_type},
         )
 
         assert response.status_code == status.HTTP_200_OK

@@ -28,7 +28,7 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_password_table()
         cls.populate_user_table()
-        
+
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
@@ -39,7 +39,7 @@ class DataBasePopulation:
     @classmethod
     def populate_user_password_table(cls) -> None:
         # from src.business_logic.services.password import PasswordHash
-    
+
         for i in range(len(data.CLIENT_USERNAMES)):
             password = user_factory.UserPasswordFactory()
             user_factory.sess.session.commit()
@@ -204,9 +204,10 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls) -> None:
-        for item in range(len(data.CLIENT_IDS)):
+        for i in range(len(data.POST_LOGOUT_REDIRECT_URL)):
             uri = cl_factory.ClientPostLogoutRedirectUriFactory(
-                client_id=item + 1
+                client_id=i + 1,
+                post_logout_redirect_uri=data.POST_LOGOUT_REDIRECT_URL[i],
             )
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()

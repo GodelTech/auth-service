@@ -68,7 +68,7 @@ class TestLoginFormService:
         service.request_model = authorization_request_model
         providers_data = await service.form_providers_data_for_auth()
         assert len(providers_data) == 1
-        assert providers_data["GitHub"]["provider_icon"] == "fa-github"
+        assert providers_data["github"]["provider_icon"] == "fa-github"
         await connection.execute(
             delete(IdentityProviderMapped).where(
                 IdentityProviderMapped.provider_client_id == "test_client"
