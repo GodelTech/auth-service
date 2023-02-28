@@ -24,7 +24,6 @@ class TestAuthorizationCodeFlow:
     async def test_successful_authorization_code_flow(
         self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",
