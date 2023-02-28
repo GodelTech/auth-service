@@ -341,16 +341,14 @@ async def startup() -> None:
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 @app.on_event("startup")
-@repeat_every(seconds=10)
-async def remove_expired_tokens_task(
-    
-) -> None:
-    
+@repeat_every(seconds=10 * 60)
+async def remove_expired_tokens_task() -> None:
     logger.warning("started cleaning")
-   
     db_engine = provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-
     token_class:PersistentGrantRepository = PersistentGrantRepository(db_engine)
-    await token_class.delete_expired()
+    try:
+        await token_class.delete_expired()
+    except:
+        logger.error("Cleaning of grants doesn't work")
