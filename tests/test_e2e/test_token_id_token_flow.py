@@ -5,6 +5,8 @@ from sqlalchemy import insert, delete
 
 from src.data_access.postgresql.tables.users import UserClaim
 from src.business_logic.services.jwt_token import JWTService
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 
 scope = (
@@ -23,7 +25,7 @@ TOKEN_HINT_DATA = {
 
 @pytest.mark.asyncio
 class TestAuthorizationTokenFlow:
-    async def test_successful_authorization_token_flow(self, client: AsyncClient, connection):
+    async def test_successful_authorization_token_flow(self, client: AsyncClient, connection: AsyncSession) -> None:
 
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
@@ -76,7 +78,7 @@ class TestAuthorizationTokenFlow:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content
 
-    async def test_successful_authorization_token_id_token_flow(self, client: AsyncClient, connection):
+    async def test_successful_authorization_token_id_token_flow(self, client: AsyncClient, connection: AsyncSession) -> None:
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",

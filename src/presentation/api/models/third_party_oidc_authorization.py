@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class ThirdPartyOIDCRequestModel(BaseModel):
     code: str
-    state: str
+    state: Optional[str]
 
     class Config:
         orm_mode = True

@@ -146,12 +146,12 @@ class TokenHint:
     sv = JWTService()
 
     @classmethod
-    async def get_token_hint(cls):
+    async def get_token_hint(cls) -> str:
         token_hint = await cls.sv.encode_jwt(payload=TOKEN_HINT_DATA)
         return token_hint
 
     @classmethod
-    async def get_short_token_hint(cls):
+    async def get_short_token_hint(cls) -> str:
         short_token_hint = await cls.sv.encode_jwt(
             payload=SHORT_TOKEN_HINT_DATA
         )

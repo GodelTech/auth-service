@@ -43,7 +43,7 @@ class AuthThirdPartyOIDCService:
         if github_links is not None:
             access_token_url = github_links["token_endpoint_link"]
             user_data_url = github_links["userinfo_link"]
-        if self.request_model is not None:
+        if self.request_model is not None and self.request_model.state:
             if await self.oidc_repo.validate_state(
                 state=self.request_model.state
             ):
@@ -171,6 +171,8 @@ class AuthThirdPartyOIDCService:
     ) -> None:
         if self.request_model is not None:
             user = await self.user_repo.get_user_by_username(username=username)
+            if not self.request_model.state:
+                raise AttributeError
             grant_data = {
                 "client_id": self.request_model.state.split("!_!")[1],
                 "grant_data": secret_code,

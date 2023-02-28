@@ -7,33 +7,42 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
 )
 from src.data_access.postgresql.tables.client import Client
-from tests.test_unit.fixtures import (
-    DEFAULT_CLIENT,
-    authorization_request_model,
-)
+from tests.test_unit.fixtures import DEFAULT_CLIENT, authorization_request_model
+from src.business_logic.services.authorization import AuthorizationService
+from src.presentation.api.models.authorization import RequestModel
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from typing import Any
 
 
 @pytest.mark.asyncio
 class TestAuthorizationService:
     async def test_get_redirect_url_code(
-        self, authorization_service, authorization_request_model
-    ):
+        self, 
+        authorization_service: AuthorizationService, 
+        authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         expected_url = "https://www.google.com/"
         redirect_url = await service.get_redirect_url()
+        if not redirect_url:
+            raise AssertionError
         redirect_url = redirect_url.split("?")[0]
 
         assert expected_url == redirect_url
 
     async def test_get_redirect_url_token(
-        self, authorization_service, authorization_request_model
-    ):
+        self, 
+        authorization_service: AuthorizationService,
+        authorization_request_model: RequestModel
+    ) -> None:
         authorization_request_model.response_type = "token"
         service = authorization_service
         service.request_model = authorization_request_model
         expected_url = "https://www.google.com/"
         redirect_url = await service.get_redirect_url()
+        if not redirect_url:
+            raise AssertionError
         data = {
             item.split("=")[0]: item.split("=")[1]
             for item in redirect_url.split("?")[1].split("&")
@@ -46,13 +55,15 @@ class TestAuthorizationService:
         assert data["token_type"] in "Bearer"
 
     async def test_get_redirect_url_id_token_token(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         authorization_request_model.response_type = "id_token token"
         service = authorization_service
         service.request_model = authorization_request_model
         expected_url = "https://www.google.com/"
         redirect_url = await service.get_redirect_url()
+        if not redirect_url:
+            raise AssertionError
         data = {
             item.split("=")[0]: item.split("=")[1]
             for item in redirect_url.split("?")[1].split("&")
@@ -64,8 +75,8 @@ class TestAuthorizationService:
         assert data["token_type"] in "Bearer"
 
     async def test_get_redirect_url_wrong_client(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         service.request_model.client_id = "not_exist_client"
@@ -73,8 +84,8 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_get_redirect_url_wrong_scope_key(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         service.request_model.scope = "gcp-api%20IdentityServerApi&grant_type=password&client_id=test_client"
@@ -82,8 +93,8 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_get_redirect_url_wrong_scope_no_password(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         service.request_model.scope = "gcp-api%20IdentityServerApi&grant_type"
@@ -91,8 +102,8 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_get_redirect_url_wrong_scope_password(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         scope = (
@@ -106,8 +117,8 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_get_redirect_url_wrong_scope_user_name(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         scope = (
@@ -121,8 +132,8 @@ class TestAuthorizationService:
             await service.get_redirect_url()
 
     async def test_get_redirect_url_without_scope(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         service = authorization_service
         service.request_model = authorization_request_model
         service.request_model.scope = None
@@ -130,13 +141,13 @@ class TestAuthorizationService:
         assert result is None
 
     async def test_get_redirect_url_id_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         service = authorization_service
         result = await service.get_redirect_url()
         assert result is None
 
-    async def test_validate_client(self, authorization_service, connection):
+    async def test_validate_client(self, authorization_service: AuthorizationService, connection: AsyncEngine) -> None:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
@@ -146,7 +157,7 @@ class TestAuthorizationService:
         )
         await connection.execute(insert(Client).values(**DEFAULT_CLIENT))
         await connection.commit()
-        authorization_service.request_model = 1
+        authorization_service.request_model = RequestModel(client_id='h', response_type='u', redirect_uri='y')
         client = await authorization_service._validate_client(
             client_id="default_test_client"
         )
@@ -156,14 +167,14 @@ class TestAuthorizationService:
         )
         await connection.commit()
 
-    async def test_validate_client_error(self, authorization_service):
+    async def test_validate_client_error(self, authorization_service: AuthorizationService) -> None:
         with pytest.raises(ClientNotFoundError):
-            authorization_service.request_model = 1
+            authorization_service.request_model = RequestModel(client_id='h', response_type='u', redirect_uri='y')
             await authorization_service._validate_client(
                 client_id="test_client_not_exist"
             )
 
-    async def test_parse_scope_data(self, authorization_service):
+    async def test_parse_scope_data(self, authorization_service: AuthorizationService) -> None:
         expected_password = "BestOfTheBest"
         expected_client_id = "tony_stark"
         expected_username = "IronMan"
@@ -174,7 +185,7 @@ class TestAuthorizationService:
         assert result["password"] == expected_password
         assert result["username"] == expected_username
 
-    async def test_parse_scope_data_len_two(self, authorization_service):
+    async def test_parse_scope_data_len_two(self, authorization_service: AuthorizationService) -> None:
         expected_password = "BestOfTheBest"
         expected_username = "IronMan"
 
@@ -183,21 +194,21 @@ class TestAuthorizationService:
         assert result["password"] == expected_password
         assert result["username"] == expected_username
 
-    async def test_parse_empty_scope(self, authorization_service):
-        expected = {}
+    async def test_parse_empty_scope(self, authorization_service: AuthorizationService) -> None:
+        expected:dict[str, Any] = {}
         to_parse = ""
         result = await authorization_service._parse_scope_data(to_parse)
         assert result == expected
 
-    async def test_parse_scope_without_separator(self, authorization_service):
-        expected = {"some_key": "key"}
+    async def test_parse_scope_without_separator(self, authorization_service: AuthorizationService) -> None:
+        expected = {'some_key': "key"}
         to_parse = "some_key=key"
         result = await authorization_service._parse_scope_data(to_parse)
         assert result == expected
 
     async def test_update_redirect_url_with_state(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         authorization_service.request_model = authorization_request_model
         expected_url = "https://www.google.com/?code=secret&state=state"
         redirect_url = (
@@ -209,16 +220,16 @@ class TestAuthorizationService:
         assert redirect_url == expected_url
 
     async def test_update_redirect_url_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         result = await authorization_service._update_redirect_url_with_params(
             "secret"
         )
         assert result is None
 
     async def test_update_redirect_url_without_state(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         authorization_service.request_model = authorization_request_model
         authorization_service.request_model.state = None
         expected_url = "https://www.google.com/?code=secret"
@@ -231,8 +242,8 @@ class TestAuthorizationService:
         assert redirect_url == expected_url
 
     async def test_get_redirect_url_code_response_type(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         expected_start = "https://www.google.com/"
         authorization_service.request_model = authorization_request_model
         result_uri = (
@@ -240,6 +251,10 @@ class TestAuthorizationService:
                 user_id=2
             )
         )
+        if not result_uri:
+            raise AssertionError
+        if not result_uri:
+            raise AssertionError
         start_uri = result_uri.split("?")[0]
         data = {
             item.split("=")[0]: item.split("=")[1]
@@ -256,8 +271,8 @@ class TestAuthorizationService:
         )
 
     async def test_get_redirect_url_code_response_type_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         result = (
             await authorization_service.get_redirect_url_code_response_type(
                 user_id=2
@@ -266,16 +281,16 @@ class TestAuthorizationService:
         assert result is None
 
     async def test_get_redirect_url_device_code_response_type_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         result = await authorization_service.get_redirect_url_device_code_response_type(
             user_id=2
         )
         assert result is None
 
     async def test_get_redirect_url_token_response_type(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         expected_start = "https://www.google.com/"
         authorization_request_model.response_type = "token"
         authorization_service.request_model = authorization_request_model
@@ -284,6 +299,8 @@ class TestAuthorizationService:
                 user_id=2
             )
         )
+        if not result_uri:
+            raise AssertionError
         start_uri = result_uri.split("?")[0]
         data = {
             item.split("=")[0]: item.split("=")[1]
@@ -295,8 +312,8 @@ class TestAuthorizationService:
         assert data["token_type"] in "Bearer"
 
     async def test_get_redirect_url_token_response_type_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         result = (
             await authorization_service.get_redirect_url_token_response_type(
                 user_id=2
@@ -305,14 +322,16 @@ class TestAuthorizationService:
         assert result is None
 
     async def test_get_redirect_url_id_token_token_response_type(
-        self, authorization_service, authorization_request_model
-    ):
+        self, authorization_service: AuthorizationService, authorization_request_model: RequestModel
+    ) -> None:
         expected_start = "https://www.google.com/"
         authorization_request_model.response_type = "id_token token"
         authorization_service.request_model = authorization_request_model
         result_uri = await authorization_service.get_redirect_url_id_token_token_response_type(
             user_id=2
         )
+        if not result_uri:
+            raise AssertionError
         start_uri = result_uri.split("?")[0]
         data = {
             item.split("=")[0]: item.split("=")[1]
@@ -324,8 +343,8 @@ class TestAuthorizationService:
         assert data["token_type"] in "Bearer"
 
     async def test_get_redirect_url_id_token_token_response_type_without_request_model(
-        self, authorization_service
-    ):
+        self, authorization_service: AuthorizationService
+    ) -> None:
         result = await authorization_service.get_redirect_url_id_token_token_response_type(
             user_id=2
         )

@@ -14,6 +14,13 @@ from tests.test_unit.fixtures import (
     state_request_model,
     third_party_oidc_request_model,
 )
+from src.business_logic.services import AuthThirdPartyOIDCService
+from typing import Any
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from src.presentation.api.models import (
+    ThirdPartyOIDCRequestModel,
+    StateRequestModel,
+)
 
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
 
@@ -22,10 +29,10 @@ STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https:
 class TestAuthorizationService:
     async def test_get_provider_auth_request_data(
         self,
-        auth_third_party_service,
-        connection,
-        third_party_oidc_request_model,
-    ):
+        auth_third_party_service: AuthThirdPartyOIDCService,
+        connection: AsyncEngine,
+        third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
+    ) -> None:
         service = auth_third_party_service
         service.request_model = third_party_oidc_request_model
         await connection.execute(
@@ -54,15 +61,19 @@ class TestAuthorizationService:
         await connection.commit()
 
     async def test_get_provider_auth_request_data_no_request_model(
-        self, auth_third_party_service
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         service = auth_third_party_service
         result_url = await service.get_provider_auth_request_data(
             name="No_such_a_provider"
         )
         assert result_url is None
 
-    async def test_get_provider_external_links(self, auth_third_party_service):
+    async def test_get_provider_external_links(
+            self, 
+            auth_third_party_service: AuthThirdPartyOIDCService
+        ) -> None:
         expected_links = {
             "token_endpoint_link": "https://github.com/login/oauth/access_token",
             "userinfo_link": "https://api.github.com/user",
@@ -76,8 +87,9 @@ class TestAuthorizationService:
         assert result_links == expected_links
 
     async def test_get_provider_external_links_not_registered_provider(
-        self, auth_third_party_service
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         result_links = (
             await auth_third_party_service.get_provider_external_links(
                 name="Not_registered_provider"
@@ -85,7 +97,10 @@ class TestAuthorizationService:
         )
         assert result_links is None
 
-    async def test_create_new_user(self, auth_third_party_service) -> None:
+    async def test_create_new_user(
+            self, 
+            auth_third_party_service: AuthThirdPartyOIDCService
+        ) -> None:
         await auth_third_party_service.create_new_user(
             username="TheNewestUser", provider=1
         )
@@ -109,7 +124,8 @@ class TestAuthorizationService:
         assert deleted is False
 
     async def test_create_new_user_already_exists(
-        self, auth_third_party_service
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService
     ) -> None:
         with pytest.raises(DuplicationError):
             await auth_third_party_service.create_new_user(
@@ -117,8 +133,10 @@ class TestAuthorizationService:
             )
 
     async def test_create_new_persistent_grant(
-        self, auth_third_party_service, third_party_oidc_request_model
-    ):
+        self, 
+        auth_third_party_service : AuthThirdPartyOIDCService, 
+        third_party_oidc_request_model: ThirdPartyOIDCRequestModel
+    ) -> None:
         service = auth_third_party_service
         third_party_oidc_request_model.state = STUB_STATE
         service.request_model = third_party_oidc_request_model
@@ -139,8 +157,9 @@ class TestAuthorizationService:
         assert deleted is False
 
     async def test_create_provider_state(
-        self, auth_third_party_service, state_request_model
-    ):
+        self, auth_third_party_service: AuthThirdPartyOIDCService, 
+        state_request_model: StateRequestModel
+    ) -> None:
         service = auth_third_party_service
         service.state_request_model = state_request_model
         await service.create_provider_state()
@@ -150,8 +169,10 @@ class TestAuthorizationService:
         assert created is True
 
     async def test_create_provider_state_exists(
-        self, auth_third_party_service, state_request_model
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService, 
+        state_request_model: StateRequestModel
+    ) -> None:
         service = auth_third_party_service
         service.state_request_model = state_request_model
         with pytest.raises(ThirdPartyStateDuplicationError):
@@ -163,8 +184,10 @@ class TestAuthorizationService:
         assert deleted is False
 
     async def test_update_redirect_url_with_params(
-        self, auth_third_party_service, third_party_oidc_request_model
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService, 
+        third_party_oidc_request_model: ThirdPartyOIDCRequestModel
+    ) -> None:
         service = auth_third_party_service
         service.request_model = third_party_oidc_request_model
         expected_uri = (
@@ -177,8 +200,8 @@ class TestAuthorizationService:
         assert result_uri == expected_uri
 
     async def test_update_redirect_url_without_request_model(
-        self, auth_third_party_service
-    ):
+        self, auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         service = auth_third_party_service
         result_uri = await service._update_redirect_url_with_params(
             redirect_uri="https://www.google.com/", secret_code="Secrete_code"
@@ -187,8 +210,10 @@ class TestAuthorizationService:
         assert result_uri is None
 
     async def test_update_redirect_url_no_state(
-        self, auth_third_party_service, third_party_oidc_request_model
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService, 
+        third_party_oidc_request_model: ThirdPartyOIDCRequestModel
+    ) -> None:
         service = auth_third_party_service
         third_party_oidc_request_model.state = None
         service.request_model = third_party_oidc_request_model
@@ -199,7 +224,10 @@ class TestAuthorizationService:
 
         assert result_uri == expected_uri
 
-    async def test_parse_response_content_data(self, auth_third_party_service):
+    async def test_parse_response_content_data(
+            self, 
+            auth_third_party_service: AuthThirdPartyOIDCService
+        ) -> None:
         expected_password = "BestOfTheBest"
         expected_client_id = "tony_stark"
         expected_username = "IronMan"
@@ -211,8 +239,9 @@ class TestAuthorizationService:
         assert result["username"] == expected_username
 
     async def test_parse_response_content_data_len_two(
-        self, auth_third_party_service
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         expected_password = "BestOfTheBest"
         expected_username = "IronMan"
 
@@ -221,48 +250,48 @@ class TestAuthorizationService:
         assert result["password"] == expected_password
         assert result["username"] == expected_username
 
-    async def test_parse_empty_response_content(
-        self, auth_third_party_service
-    ):
-        expected = {}
+    async def test_parse_empty_response_content(self, auth_third_party_service: AuthThirdPartyOIDCService) -> None:
+        expected:dict[str, Any] = {}
         to_parse = ""
         result = auth_third_party_service._parse_response_content(to_parse)
         assert result == expected
 
     async def test_parse_response_content_without_separator(
-        self, auth_third_party_service
-    ):
+        self, 
+        auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         expected = {"some_key": "key"}
         to_parse = "some_key=key"
         result = auth_third_party_service._parse_response_content(to_parse)
         assert result == expected
 
-    async def test_parse_response_content_uri(self, auth_third_party_service):
+    async def test_parse_response_content_uri(self, auth_third_party_service: AuthThirdPartyOIDCService) -> None:
         to_parse = f"https://www.google.com/?code=blfpo4Bk3xXME5-lyYnyVNiy9wA5RmXPREhT2NERKG8&state={STUB_STATE}"
         result = auth_third_party_service._parse_response_content(to_parse)
         assert result["state"] == STUB_STATE
 
     async def test_get_github_redirect_uri_empty_request_model(
-        self, auth_third_party_service
-    ):
+        self, auth_third_party_service: AuthThirdPartyOIDCService
+    ) -> None:
         result_uri = await auth_third_party_service.get_github_redirect_uri()
         assert result_uri is None
 
     async def test_get_github_redirect_uri(
         self,
-        auth_third_party_service,
-        third_party_oidc_request_model,
-        connection,
-        mocker,
-    ):
-        async def replace_post(*args, **kwargs):
+        auth_third_party_service: AuthThirdPartyOIDCService,
+        third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
+        connection: AsyncEngine,
+        mocker: Any,
+    ) -> None:
+        async def replace_post(*args:Any, **kwargs:Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
+        async def replace_get(*args:Any, **kwargs:Any) -> str:
             return "NewUserNew"
 
         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
-
+        if not auth_third_party_service:
+            raise AssertionError                                                                                                                                                                                                                                                                
         service = auth_third_party_service
         service.request_model = third_party_oidc_request_model
         service.request_model.state = STUB_STATE
@@ -290,7 +319,7 @@ class TestAuthorizationService:
         expected_uri_end = STUB_STATE
 
         result_uri = await service.get_github_redirect_uri()
-
+        assert result_uri
         assert result_uri.startswith(expected_uri_start)
         assert result_uri.endswith(expected_uri_end)
         await connection.execute(
@@ -305,8 +334,8 @@ class TestAuthorizationService:
         await connection.commit()
 
     async def test_make_post_request_for_access_token(
-        self, auth_third_party_service, mocker
-    ):
+        self, auth_third_party_service: AuthThirdPartyOIDCService, mocker:Any
+    ) -> None:
         service = auth_third_party_service
         request_params = {
             "client_id": "TestClient",
@@ -327,8 +356,8 @@ class TestAuthorizationService:
         assert access_token == expected_token
 
     async def test_make_get_request_for_user_data(
-        self, auth_third_party_service, mocker
-    ):
+        self, auth_third_party_service: AuthThirdPartyOIDCService, mocker:Any
+    ) -> None:
         service = auth_third_party_service
         headers = {
             "Authorization": "Bearer " + "access_token",

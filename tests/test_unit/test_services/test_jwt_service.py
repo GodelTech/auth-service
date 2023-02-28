@@ -6,7 +6,7 @@ from src.business_logic.services.jwt_token import JWTService
 @pytest.mark.asyncio
 class TestJWTService:
 
-    async def test_encode_and_decode(self):
+    async def test_encode_and_decode(self) -> None:
         service = JWTService()
         token = await service.encode_jwt(payload={"sub": 123, "name": "Danya"})
         assert token.count(".") == 2
