@@ -96,13 +96,7 @@ class TokenService:
             if self.request_model.redirect_uri is None or self.request_model.code is None:
                 raise ValueError
             else:
-                service = CodeMaker(
-                    jwt_service=self.jwt_service,
-                    request_model=self.request_model,
-                    user_repo=self.user_repo,
-                    client_repo=self.client_repo,
-                    persistent_grant_repo=self.persistent_grant_repo
-                    )
+                service = CodeMaker(token_service=self)
                 return await service.create()
                 
         elif self.request_model.grant_type == "password": 
@@ -115,40 +109,21 @@ class TokenService:
             if self.request_model.refresh_token is None:
                 raise ValueError
             else:
-                service = RefreshMaker(
-                    jwt_service=self.jwt_service,
-                    request_model=self.request_model,
-                    user_repo=self.user_repo,
-                    client_repo=self.client_repo,
-                    persistent_grant_repo=self.persistent_grant_repo
-                    )
+                service = RefreshMaker(token_service=self)
                 return await service.create()
 
         elif self.request_model.grant_type== "urn:ietf:params:oauth:grant-type:device_code":
             if self.request_model.device_code is None:
                 raise ValueError
             else:
-                service = DeviceCodeMaker(
-                    jwt_service=self.jwt_service,
-                    request_model=self.request_model,
-                    user_repo=self.user_repo,
-                    client_repo=self.client_repo,
-                    persistent_grant_repo=self.persistent_grant_repo,
-                    device_repo=self.device_repo
-                    )
+                service = DeviceCodeMaker(token_service=self)
                 return await service.create()
 
         elif self.request_model.grant_type == "client_credentials":
             if self.request_model.client_secret is None:
                 raise ValueError
             else:
-                service = ClientCredentialsMaker(
-                    jwt_service=self.jwt_service,
-                    request_model=self.request_model,
-                    user_repo=self.user_repo,
-                    client_repo=self.client_repo,
-                    persistent_grant_repo=self.persistent_grant_repo
-                    )
+                service = ClientCredentialsMaker(token_service=self)
                 return await service.create()
         else:
             raise GrantNotFoundError
@@ -178,13 +153,13 @@ class TokenService:
 
 
 class TokenMaker:
-    def __init__(self, jwt_service, request_model, user_repo, client_repo, persistent_grant_repo) -> None:
+    def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel= request_model
-        self.client_repo: ClientRepository = client_repo
-        self.persistent_grant_repo: PersistentGrantRepository = persistent_grant_repo
-        self.user_repo: UserRepository = user_repo
-        self.jwt_service: JWTService = jwt_service
+        self.request_model: BodyRequestTokenModel= token_service.request_model
+        self.client_repo: ClientRepository = token_service.client_repo
+        self.persistent_grant_repo: PersistentGrantRepository = token_service.persistent_grant_repo
+        self.user_repo: UserRepository = token_service.user_repo
+        self.jwt_service: JWTService = token_service.jwt_service
 
     async def create(self) -> None:
         encoded_attr = None
@@ -297,9 +272,9 @@ class CodeMaker(TokenMaker):
                 }
     
 class DeviceCodeMaker(TokenMaker):
-    def __init__(self, device_repo, jwt_service, request_model, user_repo, client_repo, persistent_grant_repo) -> None:
-        super().__init__(jwt_service, request_model, user_repo, client_repo, persistent_grant_repo)
-        self.device_repo: DeviceRepository = device_repo
+    def __init__(self, token_service: TokenService) -> None:
+        super().__init__(token_service)
+        self.device_repo: DeviceRepository = token_service.device_repo
 
     async def device_validation(self) -> None:
         if not await self.persistent_grant_repo.exists(
@@ -377,12 +352,13 @@ class RefreshMaker(TokenMaker):
 
 class ClientCredentialsMaker(TokenMaker):
     async def create(self) -> dict[str: Any]:
-        client_from_db = await self.client_repo.get_client_by_client_id(
-                client_id=self.request_model.client_id
-            )
+        client_from_db = ...
         if self.request_model is None:
             raise ValueError
         try:
+            client_from_db = await self.client_repo.get_client_by_client_id(
+                client_id=self.request_model.client_id
+            )
             if not self.request_model.client_id:
                 raise ClientNotFoundError
             if not bool(client_from_db):
