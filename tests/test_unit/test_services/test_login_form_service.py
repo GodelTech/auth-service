@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import insert, delete
+from sqlalchemy import delete, insert
 
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -28,7 +28,9 @@ class TestLoginFormService:
         )
         assert uri is True
 
-    async def test_validate_client_redirect_uri_error(self, login_form_service):
+    async def test_validate_client_redirect_uri_error(
+        self, login_form_service
+    ):
         with pytest.raises(ClientRedirectUriError):
             await login_form_service._validate_client_redirect_uri(
                 client_id="santa", redirect_uri="no_uri"
@@ -68,7 +70,7 @@ class TestLoginFormService:
         service.request_model = authorization_request_model
         providers_data = await service.form_providers_data_for_auth()
         assert len(providers_data) == 1
-        assert providers_data["GitHub"]["provider_icon"] == "fa-github"
+        assert providers_data["github"]["provider_icon"] == "fa-github"
         await connection.execute(
             delete(IdentityProviderMapped).where(
                 IdentityProviderMapped.provider_client_id == "test_client"
@@ -104,3 +106,8 @@ class TestLoginFormService:
         service = login_form_service
         providers_data = await service.form_providers_data_for_auth()
         assert providers_data is None
+
+    async def test_get_html_form_no_request_model(self, login_form_service):
+        service = login_form_service
+        result = await service.get_html_form()
+        assert result is None

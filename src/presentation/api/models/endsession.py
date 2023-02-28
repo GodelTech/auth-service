@@ -11,5 +11,5 @@ class RequestEndSessionModel(BaseModel):
     class Config:
         orm_mode = True
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}"
