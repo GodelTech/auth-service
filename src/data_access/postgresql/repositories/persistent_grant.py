@@ -226,10 +226,8 @@ class PersistentGrantRepository(BaseRepository):
                 .where(func.trunc(extract('epoch', datetime.utcnow()) - extract('epoch', PersistentGrant.created_at) )  >= PersistentGrant.expiration)
                 )
             grants_to_delete_list = grants_to_delete.all()
-            logger.warning(f"Deleted {len(grants_to_delete_list)} expired tokens")
+            logger.info(f"Deleted {len(grants_to_delete_list)} expired tokens")
             for grant in grants_to_delete_list:
                 await session.delete(grant[0])
             await session.commit()
             
-    def make_datediff_seconds(self, begin, end):
-          return f"""(DATE_PART('day', {end}::timestamp - persistent_grants.created_at::timestamp) * 24 + DATE_PART('hour', {end}::timestamp - persistent_grants.created_at::timestamp)) * 60 + DATE_PART('minute', {end}::timestamp - persistent_grants.created_at::timestamp)) * 60 +DATE_PART('second', {end}::timestamp - persistent_grants.created_at::timestamp)"""
