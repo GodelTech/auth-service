@@ -83,7 +83,7 @@ class TestTokenEndpoint:
         )
 
         params = {
-            'client_id': 'double_test',
+            'client_id': 'test_client',
             'grant_type': 'refresh_token',
             'refresh_token': test_token,
             'scope': 'test',
