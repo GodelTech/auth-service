@@ -96,6 +96,8 @@ from src.di.providers import (
     provide_third_party_oidc_repo,
     provide_third_party_oidc_repo_stub,
     provide_auth_third_party_oidc_service_stub,
+    provide_auth_third_party_linkedin_service,
+    provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service,
     provide_third_party_google_service_stub,
     provide_third_party_google_service,
@@ -290,8 +292,10 @@ def setup_di(app: FastAPI) -> None:
         provide_admin_user_service_stub
     ] = nodepends_provide_admin_user_service
 
-    nodepends_provide_admin_group_service = lambda: provide_admin_group_service(
-        group_repo=provide_group_repo(db_engine),
+    nodepends_provide_admin_group_service = (
+        lambda: provide_admin_group_service(
+            group_repo=provide_group_repo(db_engine),
+        )
     )
 
     app.dependency_overrides[
@@ -322,10 +326,22 @@ def setup_di(app: FastAPI) -> None:
             http_client=AsyncClient(),
         )
     )
-
     app.dependency_overrides[
         provide_auth_third_party_oidc_service_stub
     ] = nodepends_provide_auth_third_party_oidc_service
+
+    nodepends_provide_auth_linkedin_third_party_service = (
+        lambda: provide_auth_third_party_linkedin_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+    app.dependency_overrides[
+        provide_auth_third_party_linkedin_service_stub
+    ] = nodepends_provide_auth_linkedin_third_party_service
 
     nodepends_provide_third_party_google_service = (
         lambda: provide_third_party_google_service(
@@ -367,6 +383,8 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
+    redis = aioredis.from_url(
+        REDIS_URL, encoding="utf8", decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")

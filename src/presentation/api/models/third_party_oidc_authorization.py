@@ -40,6 +40,18 @@ class ThirdPartyGoogleRequestModel(BaseModel):
         return f"Model {self.__class__.__name__}"
 
 
+class ThirdPartyLinkedinRequestModel(BaseModel):
+    state: str
+    code: Optional[str]
+    scope: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+    def __repr__(self) -> str:
+        return f"Model {self.__class__.__name__}"
+
+
 @dataclass
 class StateRequestModel:
     state: str = Form(...)
