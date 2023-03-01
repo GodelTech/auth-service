@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isp-redis
+spec:
+  replicas: {{ .Values.redis.replicaCount  }}
+  selector:
+    matchLabels:
+      component: {{ .Values.redis.name  }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.redis.name  }}
+    spec:
+      hostNetwork: true
+      containers:
+        - name: {{ .Values.redis.name  }}
+          image: {{ .Values.redis.image  }}
+          ports:
+            - containerPort: {{ .Values.redis.port  }}

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 )
 @cache(
     expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG,
-    key_builder=builder_with_parametr,
+    # key_builder=builder_with_parametr,
 )
 async def get_openid_configuration(
     request: Request, well_known_info_class: WellKnownServies = Depends()
