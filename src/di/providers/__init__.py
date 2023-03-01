@@ -25,6 +25,8 @@ from .services import (
     provide_admin_user_service_stub,
     provide_auth_service,
     provide_auth_service_stub,
+    provide_auth_third_party_linkedin_service,
+    provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service,
     provide_auth_third_party_oidc_service_stub,
     provide_third_party_google_service_stub,

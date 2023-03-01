@@ -9,6 +9,7 @@ from src.business_logic.services import (
     AuthThirdPartyOIDCService,
     ThirdPartyGoogleService,
     ThirdPartyFacebookService,
+    ThirdPartyLinkedinService,
     DeviceService,
     EndSessionService,
     IntrospectionServies,
@@ -237,7 +238,29 @@ def provide_auth_third_party_oidc_service(
     )
 
 
-def provide_third_party_google_service_stub() -> None:
+def provide_auth_third_party_linkedin_service_stub() -> (
+    None
+):  # pragma: no cover
+    ...
+
+
+def provide_auth_third_party_linkedin_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    oidc_repo: ThirdPartyOIDCRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    http_client: AsyncClient,
+) -> ThirdPartyLinkedinService:
+    return ThirdPartyLinkedinService(
+        client_repo=client_repo,
+        user_repo=user_repo,
+        persistent_grant_repo=persistent_grant_repo,
+        oidc_repo=oidc_repo,
+        http_client=http_client,
+    )
+
+
+def provide_third_party_google_service_stub() -> None:  # pragma: no cover
     ...
 
 
@@ -257,7 +280,7 @@ def provide_third_party_google_service(
     )
 
 
-def provide_third_party_facebook_service_stub() -> None:
+def provide_third_party_facebook_service_stub() -> None:  # pragma: no cover
     ...
 
 
