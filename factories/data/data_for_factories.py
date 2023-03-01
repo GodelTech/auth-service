@@ -167,7 +167,7 @@ REFRESH_TOKEN_USAGE = ["one_time_only", "reuse"]
 
 IDENTITY_PROVIDERS = [
     {
-        "name": "GitHub",
+        "name": "github",
         "auth_endpoint_link": "https://github.com/login/oauth/authorize",
         "token_endpoint_link": "https://github.com/login/oauth/access_token",
         "userinfo_link": "https://api.github.com/user",
@@ -176,10 +176,44 @@ IDENTITY_PROVIDERS = [
     },
     {
         "name": "facebook",
-        "auth_endpoint_link": "facebook_auth_endpoint_link",
-        "token_endpoint_link": "facebook_token_endpoint_link",
-        "userinfo_link": "facebook_userinfo_link",
-        "internal_redirect_uri": "facebook_internal_redirect_uri",
+        "auth_endpoint_link": "https://www.facebook.com/v16.0/dialog/oauth",
+        "token_endpoint_link": "https://graph.facebook.com/v16.0/oauth/access_token",
+        "userinfo_link": "https://graph.facebook.com/debug_token",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/facebook",
         "provider_icon": "fa-facebook",
     },
+    {
+        "name": "google",
+        "auth_endpoint_link": "https://accounts.google.com/o/oauth2/v2/auth",
+        "token_endpoint_link": "https://oauth2.googleapis.com/token",
+        "userinfo_link": "https://openidconnect.googleapis.com/v1/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/google",
+        "provider_icon": "fa-google",
+    },
+]
+
+POST_LOGOUT_REDIRECT_URL = [
+    "http://thompson-chung.com/",
+    "http://welch-miller.com/",
+    "https://www.cole.com/",
+    "https://www.mccarthy-ruiz.info/",
+    "http://chen-smith.com/",
+    "http://www.ross-zamora.biz/",
+    "https://www.king.com/",
+    "http://www.sparks.net/",
+    "https://www.villarreal.com/",
+    "https://meyer-berry.com/",
+]
+
+POST_LOGOUT_REDIRECT_URL = [
+    "http://thompson-chung.com/",
+    "http://welch-miller.com/",
+    "https://www.cole.com/",
+    "https://www.mccarthy-ruiz.info/",
+    "http://chen-smith.com/",
+    "http://www.ross-zamora.biz/",
+    "https://www.king.com/",
+    "http://www.sparks.net/",
+    "https://www.villarreal.com/",
+    "https://meyer-berry.com/",
 ]

@@ -321,7 +321,7 @@ doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "Faker"
-version = "17.3.0"
+version = "17.4.0"
 description = "Faker is a Python package that generates fake data for you."
 category = "main"
 optional = false
@@ -1098,6 +1098,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "types-mock"
+version = "5.0.0.5"
+description = "Typing stubs for mock"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "types-pyOpenSSL"
 version = "23.0.0.4"
 description = "Typing stubs for pyOpenSSL"
@@ -1166,7 +1174,7 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 
 [[package]]
 name = "virtualenv"
-version = "20.19.0"
+version = "20.20.0"
 description = "Virtual Python Environment builder"
 category = "dev"
 optional = false
@@ -1231,7 +1239,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "723da161fabd0701a8b6cebf2ee5b049db110ec138be19ee5e8eaf61056ac5a4"
+content-hash = "3da37d02245fd31bb89800638babfc27136a4d0659cbd4b9bb692d9bd5f6d321"
 
 [metadata.files]
 aiohttp = [
@@ -1757,8 +1765,8 @@ factory-boy = [
     {file = "factory_boy-3.2.1.tar.gz", hash = "sha256:a98d277b0c047c75eb6e4ab8508a7f81fb03d2cb21986f627913546ef7a2a55e"},
 ]
 Faker = [
-    {file = "Faker-17.3.0-py3-none-any.whl", hash = "sha256:1dfffa43b4492b899a839619f2056060b585ba0bc76f329525194ca04dde0988"},
-    {file = "Faker-17.3.0.tar.gz", hash = "sha256:26b2864a5332094f2c7f3968deebabce69be39ed5db4dbf22b4fa0ba3d1acdae"},
+    {file = "Faker-17.4.0-py3-none-any.whl", hash = "sha256:fdd9cc16cd7e0d8dfcd2bb19d80c1bca5ce52d79690f93bfbb13916d7ed1cb2e"},
+    {file = "Faker-17.4.0.tar.gz", hash = "sha256:7b225dd6bc33405188f33f77c990bd08057f5c512042f7e0966e026c633ec646"},
 ]
 fastapi = [
     {file = "fastapi-0.87.0-py3-none-any.whl", hash = "sha256:254453a2e22f64e2a1b4e1d8baf67d239e55b6c8165c079d25746a5220c81bb4"},
@@ -2526,6 +2534,10 @@ tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
+types-mock = [
+    {file = "types-mock-5.0.0.5.tar.gz", hash = "sha256:171e6618583db52cfa72386538022892e2d341b2b5bc47c07cba90c96d0e8735"},
+    {file = "types_mock-5.0.0.5-py3-none-any.whl", hash = "sha256:03790888cd33d9fef408f0391aa20803d44d4c21b021dd8a08de8763ffdd2c91"},
+]
 types-pyOpenSSL = [
     {file = "types-pyOpenSSL-23.0.0.4.tar.gz", hash = "sha256:8b3550b6e19d51ce78aabd724b0d8ebd962081a5fce95e7f85a592dfcdbc16bf"},
     {file = "types_pyOpenSSL-23.0.0.4-py3-none-any.whl", hash = "sha256:ad49e15bb8bb2f251b8fc24776f414d877629e44b1b049240063ab013b5a6a7d"},
@@ -2551,8 +2563,8 @@ uvicorn = [
     {file = "uvicorn-0.20.0.tar.gz", hash = "sha256:a4e12017b940247f836bc90b72e725d7dfd0c8ed1c51eb365f5ba30d9f5127d8"},
 ]
 virtualenv = [
-    {file = "virtualenv-20.19.0-py3-none-any.whl", hash = "sha256:54eb59e7352b573aa04d53f80fc9736ed0ad5143af445a1e539aada6eb947dd1"},
-    {file = "virtualenv-20.19.0.tar.gz", hash = "sha256:37a640ba82ed40b226599c522d411e4be5edb339a0c0de030c0dc7b646d61590"},
+    {file = "virtualenv-20.20.0-py3-none-any.whl", hash = "sha256:3c22fa5a7c7aa106ced59934d2c20a2ecb7f49b4130b8bf444178a16b880fa45"},
+    {file = "virtualenv-20.20.0.tar.gz", hash = "sha256:a8a4b8ca1e28f864b7514a253f98c1d62b64e31e77325ba279248c65fb4fcef4"},
 ]
 websocket-client = [
     {file = "websocket-client-1.5.1.tar.gz", hash = "sha256:3f09e6d8230892547132177f575a4e3e73cfdf06526e20cc02aa1c3b47184d40"},

@@ -7,6 +7,7 @@ from src.presentation.api.models import (
     DeviceRequestModel,
     ThirdPartyOIDCRequestModel,
     StateRequestModel,
+    ThirdPartyGoogleRequestModel,
 )
 from src.presentation.api.models.authorization import RequestModel
 from src.presentation.api.models.endsession import RequestEndSessionModel
@@ -146,12 +147,12 @@ class TokenHint:
     sv = JWTService()
 
     @classmethod
-    async def get_token_hint(cls):
+    async def get_token_hint(cls) -> str:
         token_hint = await cls.sv.encode_jwt(payload=TOKEN_HINT_DATA)
         return token_hint
 
     @classmethod
-    async def get_short_token_hint(cls):
+    async def get_short_token_hint(cls) -> str:
         short_token_hint = await cls.sv.encode_jwt(
             payload=SHORT_TOKEN_HINT_DATA
         )
@@ -182,3 +183,11 @@ async def third_party_oidc_request_model() -> ThirdPartyOIDCRequestModel:
 async def state_request_model() -> StateRequestModel:
     request_model = StateRequestModel(state="some_crazy_state")
     return request_model
+
+
+@pytest_asyncio.fixture
+async def third_party_google_request_model() -> ThirdPartyGoogleRequestModel:
+    oidc_request_model = ThirdPartyGoogleRequestModel(
+        code="test_code", state="test_state", scope="test_scope"
+    )
+    return oidc_request_model

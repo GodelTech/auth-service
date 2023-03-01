@@ -4,8 +4,8 @@ import os
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
 ).start()
-
-from typing import AsyncIterator
+from fastapi import Request
+from typing import AsyncIterator, Any
 
 import pytest_asyncio
 from fastapi import FastAPI
@@ -34,19 +34,20 @@ from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
+    ThirdPartyGoogleService,
 )
 from src.data_access.postgresql.tables.base import Base
 
 
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
-
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
-async def engine():
+async def engine() -> AsyncEngine:
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
     ).with_bind_ports(5432, 5465)
@@ -67,7 +68,7 @@ async def engine():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def connection(engine):
+async def connection(engine: AsyncEngine) -> AsyncSession:
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -81,7 +82,7 @@ async def app() -> FastAPI:
 
 
 @pytest_asyncio.fixture
-async def client(app: FastAPI, connection) -> AsyncIterator[AsyncClient]:
+async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
     async with AsyncClient(
         app=app,
         base_url="http://testserver",
@@ -91,14 +92,14 @@ async def client(app: FastAPI, connection) -> AsyncIterator[AsyncClient]:
 
 
 @pytest.fixture(scope="session")
-def event_loop(request):
+def event_loop(request: Request) -> Any:
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
 
 
 @pytest_asyncio.fixture
-async def authorization_service(engine) -> AuthorizationService:
+async def authorization_service(engine: AsyncEngine) -> AuthorizationService:
     auth_service = AuthorizationService(
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
@@ -111,7 +112,7 @@ async def authorization_service(engine) -> AuthorizationService:
 
 
 @pytest_asyncio.fixture
-async def end_session_service(engine) -> EndSessionService:
+async def end_session_service(engine: AsyncEngine) -> EndSessionService:
     end_sess_service = EndSessionService(
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
@@ -121,7 +122,7 @@ async def end_session_service(engine) -> EndSessionService:
 
 
 @pytest_asyncio.fixture
-async def introspection_service(engine) -> IntrospectionServies:
+async def introspection_service(engine: AsyncEngine) -> IntrospectionServies:
     intro_service = IntrospectionServies(
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
@@ -132,7 +133,7 @@ async def introspection_service(engine) -> IntrospectionServies:
 
 
 @pytest_asyncio.fixture
-async def user_info_service(engine) -> UserInfoServices:
+async def user_info_service(engine: AsyncEngine) -> UserInfoServices:
     user_info = UserInfoServices(
         jwt=JWTService(),
         client_repo=ClientRepository(engine),
@@ -143,7 +144,7 @@ async def user_info_service(engine) -> UserInfoServices:
 
 
 @pytest_asyncio.fixture
-async def token_service(engine) -> TokenService:
+async def token_service(engine: AsyncEngine) -> TokenService:
     tk_service = TokenService(
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
@@ -155,7 +156,7 @@ async def token_service(engine) -> TokenService:
 
 
 @pytest_asyncio.fixture
-async def login_form_service(engine) -> LoginFormService:
+async def login_form_service(engine: AsyncEngine) -> LoginFormService:
     login_service = LoginFormService(
         client_repo=ClientRepository(engine),
         oidc_repo=ThirdPartyOIDCRepository(engine),
@@ -164,7 +165,7 @@ async def login_form_service(engine) -> LoginFormService:
 
 
 @pytest_asyncio.fixture
-async def device_service(engine) -> DeviceService:
+async def device_service(engine: AsyncEngine) -> DeviceService:
     dev_service = DeviceService(
         client_repo=ClientRepository(engine),
         device_repo=DeviceRepository(engine),
@@ -173,7 +174,9 @@ async def device_service(engine) -> DeviceService:
 
 
 @pytest_asyncio.fixture
-async def auth_third_party_service(engine) -> AuthThirdPartyOIDCService:
+async def auth_third_party_service(
+    engine: AsyncEngine,
+) -> AuthThirdPartyOIDCService:
     third_party_service = AuthThirdPartyOIDCService(
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
@@ -182,3 +185,15 @@ async def auth_third_party_service(engine) -> AuthThirdPartyOIDCService:
         http_client=AsyncClient(),
     )
     return third_party_service
+
+
+@pytest_asyncio.fixture
+async def google_third_party_service(engine) -> ThirdPartyGoogleService:
+    google_service = ThirdPartyGoogleService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return google_service

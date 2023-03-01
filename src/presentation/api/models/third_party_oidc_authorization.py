@@ -7,7 +7,31 @@ from pydantic import BaseModel
 
 class ThirdPartyOIDCRequestModel(BaseModel):
     code: str
+    state: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+    def __repr__(self) -> str:
+        return f"Model {self.__class__.__name__}"
+
+
+class ThirdPartyFacebookRequestModel(BaseModel):
     state: str
+    response_type: Optional[str]
+    scope: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+    def __repr__(self) -> str:
+        return f"Model {self.__class__.__name__}"
+
+
+class ThirdPartyGoogleRequestModel(BaseModel):
+    state: str
+    code: Optional[str]
+    scope: Optional[str]
 
     class Config:
         orm_mode = True
