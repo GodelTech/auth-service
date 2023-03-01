@@ -197,6 +197,14 @@ IDENTITY_PROVIDERS = [
         "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/google",
         "provider_icon": "fa-google",
     },
+    {
+        "name": "gitlab",
+        "auth_endpoint_link": "https://gitlab.com/oauth/authorize",
+        "token_endpoint_link": "https://gitlab.com/oauth/token",
+        "userinfo_link": "https://gitlab.com/oauth/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/gitlab",
+        "provider_icon": "fa-gitlab",
+    },
 ]
 
 POST_LOGOUT_REDIRECT_URL = [

@@ -10,6 +10,7 @@ from src.business_logic.services import (
     ThirdPartyGoogleService,
     ThirdPartyFacebookService,
     ThirdPartyLinkedinService,
+    ThirdPartyGitLabService,
     DeviceService,
     EndSessionService,
     IntrospectionServies,
@@ -292,6 +293,26 @@ def provide_third_party_facebook_service(
     http_client: AsyncClient,
 ) -> ThirdPartyFacebookService:
     return ThirdPartyFacebookService(
+        client_repo=client_repo,
+        user_repo=user_repo,
+        persistent_grant_repo=persistent_grant_repo,
+        oidc_repo=oidc_repo,
+        http_client=http_client,
+    )
+
+
+def provide_third_party_gitlab_service_stub() -> None:
+    ...
+
+
+def provide_third_party_gitlab_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    oidc_repo: ThirdPartyOIDCRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    http_client: AsyncClient,
+) -> ThirdPartyGitLabService:
+    return ThirdPartyGitLabService(
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,
