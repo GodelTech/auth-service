@@ -1,12 +1,12 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from sqlalchemy import exists, insert, select, delete
+from sqlalchemy import delete, exists, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.third_party_oidc import (
-    ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
+    ThirdPartyStateNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.identity_resource import (
@@ -80,7 +80,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
                     )
                 )
                 await session.commit()
-            else:
+            else:  # TODO ?
                 raise ThirdPartyStateDuplicationError(
                     "State you are trying to delete for does not exist"
                 )

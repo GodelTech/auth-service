@@ -10,8 +10,9 @@ from .login_form_service import LoginFormService
 from .password import PasswordHash
 from .third_party_oidc_service import (
     AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
     ThirdPartyFacebookService,
+    ThirdPartyGoogleService,
+    ThirdPartyLinkedinService,
 )
 from .tokens import TokenService
 from .userinfo import UserInfoServices

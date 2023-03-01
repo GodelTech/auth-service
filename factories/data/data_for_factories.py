@@ -1,7 +1,6 @@
 from src.main import app
 from src.business_logic.services.password import PasswordHash
 
-
 CLIENT_IDS = [
     "test_client",
     "double_test",
@@ -183,6 +182,14 @@ IDENTITY_PROVIDERS = [
         "provider_icon": "fa-facebook",
     },
     {
+        "name": "linkedin",
+        "auth_endpoint_link": "https://www.linkedin.com/oauth/v2/authorization",
+        "token_endpoint_link": "https://www.linkedin.com/oauth/v2/accessToken",
+        "userinfo_link": "https://api.linkedin.com/v2/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/linkedin",
+        "provider_icon": "fa-linkedin",
+    },
+    {
         "name": "google",
         "auth_endpoint_link": "https://accounts.google.com/o/oauth2/v2/auth",
         "token_endpoint_link": "https://oauth2.googleapis.com/token",
@@ -190,19 +197,6 @@ IDENTITY_PROVIDERS = [
         "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/google",
         "provider_icon": "fa-google",
     },
-]
-
-POST_LOGOUT_REDIRECT_URL = [
-    "http://thompson-chung.com/",
-    "http://welch-miller.com/",
-    "https://www.cole.com/",
-    "https://www.mccarthy-ruiz.info/",
-    "http://chen-smith.com/",
-    "http://www.ross-zamora.biz/",
-    "https://www.king.com/",
-    "http://www.sparks.net/",
-    "https://www.villarreal.com/",
-    "https://meyer-berry.com/",
 ]
 
 POST_LOGOUT_REDIRECT_URL = [
