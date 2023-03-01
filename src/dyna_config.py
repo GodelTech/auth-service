@@ -5,7 +5,7 @@ from dynaconf import Dynaconf
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 settings = Dynaconf(
-    envvar_prefix="identity_server_poc",
+    envvar_prefix=False,
     preload=[os.path.join(APP_DIR, "default.toml")],
     includes=["../configs/*.toml"],
     environments=["local", "development", "docker", "test", "pipeline"],
@@ -14,7 +14,29 @@ settings = Dynaconf(
 )
 
 
-DB_URL = settings.db.get("url")
 DB_MAX_CONNECTION_COUNT = settings.db.get("max_connection_count")
+DB_PORT = settings.db.get("port")
 
-REDIS_URL = settings.redis.get("url")
+REDIS_SCHEME = settings.redis.get("scheme")
+REDIS_HOST = settings.redis.get("host")
+REDIS_PORT = settings.redis.get("port")
+REDIS_URL = f"{REDIS_SCHEME}{REDIS_HOST}:{REDIS_PORT}"
+
+
+IS_CLIENT = settings.env_for_dynaconf not in (
+    "local",
+    "development",
+    "docker",
+    "test",
+    "pipeline",
+)
+
+if not IS_CLIENT:
+    DB_URL = settings.db.get("url")
+else:
+    DB_USER = settings.DB_USER
+    DB_PASSWORD = settings.DB_PASSWORD
+    DB_HOST = settings.DB_HOST
+    DB_PORT = settings.DB_PORT
+    DB_NAME = settings.DB_NAME
+    DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

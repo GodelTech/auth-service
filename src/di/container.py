@@ -6,6 +6,7 @@ from src.data_access.postgresql import Database
 
 class Container(containers.DeclarativeContainer):
     config = providers.Object(get_app_settings())
+
     db = providers.Singleton(
         Database,
         database_url=str(config().database_url),

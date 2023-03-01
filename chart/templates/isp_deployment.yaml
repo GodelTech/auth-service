@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.application.name  }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.application.name  }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.application.name  }}
+    spec:
+      hostNetwork: true
+      imagePullSecrets:
+        - name: {{ .Values.application.name | }}
+      containers:
+      - name: isp-container
+        image: {{ .Values.application.image  }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.application.port  }}
+          protocol: TCP

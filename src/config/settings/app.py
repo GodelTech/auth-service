@@ -3,23 +3,25 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import PostgresDsn, SecretStr
 
+from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
 from src.config.settings.base import BaseAppSettings
-from src.config.rsa_keys import RSAKeypair, CreateRSAKeypair
 
 
 class AppSettings(BaseAppSettings):
     debug: bool = False
     docs_url: str = "/docs"
-    openapi_prefix: str = ""
+    openapi_prefix: str = "/"
     openapi_url: str = "/openapi.json"
     redoc_url: str = "/redoc"
     title: str = "IS POC application"
     version: str = "0.1.0"
 
-    database_url: PostgresDsn
+    database_url: PostgresDsn = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+    )
     max_connection_count: int = 10
 
-    secret_key: SecretStr
+    secret_key: SecretStr = "secret"
 
     allowed_hosts: List[str] = ["*"]
 
@@ -38,4 +40,6 @@ class AppSettings(BaseAppSettings):
             "redoc_url": self.redoc_url,
             "title": self.title,
             "version": self.version,
+            "database_url": self.database_url,
+            "secret_key": self.secret_key,
         }

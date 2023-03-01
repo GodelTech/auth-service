@@ -52,7 +52,7 @@ docker-dev:
 	docker-compose -f ./docker-compose.dev.yml up
 
 docker:
-	docker-compose -f ./docker-compose.yml up
+	docker run -d --name identity-server-provider --net=host -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock identity
 
 docker-test:
-	docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"
+	docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
