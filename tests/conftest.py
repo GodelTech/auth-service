@@ -34,6 +34,7 @@ from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
+    ThirdPartyGoogleService,
 )
 from src.data_access.postgresql.tables.base import Base
 
@@ -86,7 +87,6 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
-
 
 
 @pytest.fixture(scope="session")
@@ -172,7 +172,9 @@ async def device_service(engine: AsyncEngine) -> DeviceService:
 
 
 @pytest_asyncio.fixture
-async def auth_third_party_service(engine: AsyncEngine) -> AuthThirdPartyOIDCService:
+async def auth_third_party_service(
+    engine: AsyncEngine,
+) -> AuthThirdPartyOIDCService:
     third_party_service = AuthThirdPartyOIDCService(
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
@@ -181,3 +183,15 @@ async def auth_third_party_service(engine: AsyncEngine) -> AuthThirdPartyOIDCSer
         http_client=AsyncClient(),
     )
     return third_party_service
+
+
+@pytest_asyncio.fixture
+async def google_third_party_service(engine) -> ThirdPartyGoogleService:
+    google_service = ThirdPartyGoogleService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return google_service
