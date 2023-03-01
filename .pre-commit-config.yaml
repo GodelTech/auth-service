@@ -21,12 +21,14 @@ repos:
       - id: mypy
         exclude: ^tests/|src/main
 
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
       - id: check-json
       - id: check-yaml
+        exclude: ^deploy/|^chart/
       - id: check-docstring-first
       - id: end-of-file-fixer
       - id: debug-statements
