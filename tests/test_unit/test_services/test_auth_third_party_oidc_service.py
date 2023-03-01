@@ -21,7 +21,6 @@ from src.business_logic.services import (
     ThirdPartyGoogleService,
 )
 from typing import Any
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from src.presentation.api.models import (
     ThirdPartyOIDCRequestModel,
     StateRequestModel,
@@ -277,7 +276,9 @@ class TestAuthorizationService:
     async def test_get_github_redirect_uri_empty_request_model(
         self, auth_third_party_service: AuthThirdPartyOIDCService
     ) -> None:
-        result_uri = await auth_third_party_service.get_github_redirect_uri()
+        result_uri = await auth_third_party_service.get_github_redirect_uri(
+            provider_name="github"
+        )
         assert result_uri is None
 
     async def test_get_github_redirect_uri(
@@ -322,7 +323,9 @@ class TestAuthorizationService:
         expected_uri_start = "https://www.google.com/?code"
         expected_uri_end = STUB_STATE
 
-        result_uri = await service.get_github_redirect_uri()
+        result_uri = await service.get_github_redirect_uri(
+            provider_name="github"
+        )
         assert result_uri
         assert result_uri.startswith(expected_uri_start)
         assert result_uri.endswith(expected_uri_end)
@@ -433,7 +436,9 @@ class TestThirdPartyGoogleService:
     async def test_get_google_redirect_uri_empty_request_model(
         self, google_third_party_service: ThirdPartyGoogleService
     ) -> None:
-        result_uri = await google_third_party_service.get_google_redirect_uri()
+        result_uri = await google_third_party_service.get_google_redirect_uri(
+            provider_name="google"
+        )
         assert result_uri is None
 
     async def test_get_google_redirect_uri(
@@ -475,7 +480,9 @@ class TestThirdPartyGoogleService:
         expected_uri_start = "https://www.google.com/?code"
         expected_uri_end = STUB_STATE
 
-        result_uri = await service.get_google_redirect_uri()
+        result_uri = await service.get_google_redirect_uri(
+            provider_name="google"
+        )
 
         assert result_uri.startswith(expected_uri_start)
         assert result_uri.endswith(expected_uri_end)
