@@ -98,6 +98,12 @@ async def get_facebook_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Wrong data has been passed"},
         )
+    except IndexError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Error in parsing"},
+        )
 
 
 @auth_oidc_router.get(
@@ -126,6 +132,12 @@ async def get_google_authorize(
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Wrong data has been passed"},
+        )
+    except IndexError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Error in parsing"},
         )
 
 

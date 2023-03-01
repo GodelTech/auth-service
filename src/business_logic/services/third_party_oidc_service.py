@@ -256,7 +256,7 @@ class ThirdPartyGoogleService(AuthThirdPartyOIDCService):
                     request_params["grant_type"] = "authorization_code"
 
                     # make request to access_token_url to get a request token
-                    access_token: str = ""
+                access_token: str = ""
                 if request_params is not None:
                     access_token = await self.get_google_access_token(
                         method="POST",
