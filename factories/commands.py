@@ -69,7 +69,6 @@ class DataBasePopulation:
                 "TRUNCATE TABLE persistent_grant_types RESTART IDENTITY CASCADE"
             )
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
         )
@@ -83,12 +82,11 @@ class DataBasePopulation:
             text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
         )
         sess.session.execute(
-            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE")
+            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
         )
         sess.session.execute(
             text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE")
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE")
         )

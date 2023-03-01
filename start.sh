@@ -3,9 +3,9 @@
 set -e
 
 # Environment
-#export ENV_FOR_DYNACONF="development"
-#echo "Environment: $ENV_FOR_DYNACONF"
+export ENV_FOR_DYNACONF="pipeline"
+echo "Environment: $ENV_FOR_DYNACONF"
 
 
-echo "Uvicorn running src.main:app --reload --host 0.0.0.0 --port 8000"
-uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+echo "uvicorn src.main:app --host 0.0.0.0 --port 8000"
+uvicorn src.main:app --host 0.0.0.0 --port 8000
