@@ -8,7 +8,6 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -62,16 +61,19 @@ class LoginFormService:
                         ]
                     )
                     # await self.oidc_repo.create_state(state=state)
+                    provider_link = (
+                        f"{provider[1]}?client_id={provider[2]}&"
+                        f"redirect_uri={provider[3]}&state={state}&"
+                        f"response_type={self.request_model.response_type}"
+                    )
+                    # TODO
+                    if provider[0] in ["google", "linkedin"]:
+                        provider_link += "&scope=openid profile email"
+
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
-                        "provider_link": f"{provider[1]}?client_id={provider[2]}&"
-                        f"redirect_uri={provider[3]}&state={state}&"
-                        f"response_type={self.request_model.response_type}",
+                        "provider_link": provider_link,
                     }
-                    if provider[0] == "google":
-                        providers_data[provider[0]][
-                            "provider_link"
-                        ] += "&scope=openid profile email"
                 return providers_data
         return None
 

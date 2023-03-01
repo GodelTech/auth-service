@@ -7,24 +7,28 @@ from httpx import AsyncClient
 
 from src.business_logic.services import (
     AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
     ThirdPartyFacebookService,
+    ThirdPartyGoogleService,
+    ThirdPartyLinkedinService,
 )
 from src.data_access.postgresql.errors import (
-    ThirdPartyStateNotFoundError,
+    ClientNotFoundError,
     ThirdPartyStateDuplicationError,
+    ThirdPartyStateNotFoundError,
     WrongDataError,
 )
 from src.di.providers import (
+    provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service_stub,
-    provide_third_party_google_service_stub,
     provide_third_party_facebook_service_stub,
+    provide_third_party_google_service_stub,
 )
 from src.presentation.api.models import (
-    ThirdPartyOIDCRequestModel,
+    StateRequestModel,
     ThirdPartyFacebookRequestModel,
     ThirdPartyGoogleRequestModel,
-    StateRequestModel,
+    ThirdPartyLinkedinRequestModel,
+    ThirdPartyOIDCRequestModel,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,6 +58,38 @@ async def get_github_authorize(
             raise WrongDataError
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
+        )
+        return response
+
+    except WrongDataError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Wrong data has been passed"},
+        )
+    except IndexError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Error in parsing"},
+        )
+
+
+@auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND)
+async def get_linedin_authorize(
+    request_model: ThirdPartyLinkedinRequestModel = Depends(),
+    auth_class: ThirdPartyLinkedinService = Depends(
+        provide_auth_third_party_linkedin_service_stub
+    ),
+) -> Union[RedirectResponse, JSONResponse]:
+    try:
+        auth_class = auth_class
+        auth_class.request_model = request_model
+        linkedin_redirect_uri = await auth_class.get_redirect_uri()
+        if linkedin_redirect_uri is None:
+            raise WrongDataError
+        response = RedirectResponse(
+            linkedin_redirect_uri, status_code=status.HTTP_302_FOUND
         )
         return response
 
