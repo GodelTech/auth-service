@@ -43,6 +43,7 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -50,6 +51,7 @@ async def engine() -> AsyncEngine:
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
     ).with_bind_ports(5432, 5465)
+
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")
