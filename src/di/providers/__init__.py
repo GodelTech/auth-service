@@ -33,6 +33,8 @@ from .services import (
     provide_third_party_google_service,
     provide_third_party_facebook_service_stub,
     provide_third_party_facebook_service,
+    provide_third_party_gitlab_service_stub,
+    provide_third_party_gitlab_service,
     provide_device_service,
     provide_device_service_stub,
     provide_endsession_service,
