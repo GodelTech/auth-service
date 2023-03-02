@@ -26,6 +26,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     DeviceRepository,
     ThirdPartyOIDCRepository,
+    BlacklistedTokenRepository
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
@@ -149,6 +150,7 @@ async def token_service(engine: AsyncEngine) -> TokenService:
         user_repo=UserRepository(engine),
         device_repo=DeviceRepository(engine),
         jwt_service=JWTService(),
+        blacklisted_repo=BlacklistedTokenRepository(engine)
     )
     return tk_service
 

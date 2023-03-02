@@ -97,6 +97,7 @@ from src.di.providers import (
     provide_third_party_oidc_repo_stub,
     provide_auth_third_party_oidc_service_stub,
     provide_auth_third_party_oidc_service,
+    provide_blacklisted_repo,
 )
 
 import logging
@@ -122,8 +123,7 @@ def get_application(test:bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.add_middleware(AuthorizationMiddleware)
-    application.add_middleware(AccessTokenMiddleware)
+
 
     setup_di(application)
     container = Container()
@@ -145,6 +145,11 @@ def setup_di(app: FastAPI) -> None:
     db_engine = provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
+
+    from src.data_access.postgresql.repositories.blacklisted_token import BlacklistedTokenRepository
+    
+    app.add_middleware(AuthorizationMiddleware)
+    app.add_middleware(middleware_class=AccessTokenMiddleware, blacklisted_repo=BlacklistedTokenRepository(db_engine))
 
     # Register admin-ui controllers on application start-up.
     admin = CustomAdmin(
@@ -252,6 +257,7 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
         device_repo=provide_device_repo(db_engine),
+        blacklisted_repo=provide_blacklisted_repo(db_engine)
     )
     app.dependency_overrides[
         provide_token_service_stub

@@ -6,6 +6,8 @@ from typing import Any, Optional, Union
 
 from fastapi import Request
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -20,6 +22,7 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     PersistentGrantRepository,
     UserRepository,
+    BlacklistedTokenRepository
 )
 from src.presentation.api.models import (
     BodyRequestRevokeModel,
@@ -76,6 +79,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         jwt_service: JWTService,
+        blacklisted_repo: BlacklistedTokenRepository
     ) -> None:
         self.request: Optional[Request] = None
         self.request_model: Optional[BodyRequestTokenModel] = None
@@ -86,6 +90,7 @@ class TokenService:
         self.user_repo = user_repo
         self.device_repo = device_repo
         self.jwt_service = jwt_service
+        self.blacklisted_repo = blacklisted_repo
 
     async def get_tokens(self) -> dict[str, Any]:
         if self.request_model is None:
@@ -154,11 +159,13 @@ class TokenService:
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel= token_service.request_model
+        self.request_model: BodyRequestTokenModel= token_service.request_model #type: ignore
         self.client_repo: ClientRepository = token_service.client_repo
         self.persistent_grant_repo: PersistentGrantRepository = token_service.persistent_grant_repo
         self.user_repo: UserRepository = token_service.user_repo
         self.jwt_service: JWTService = token_service.jwt_service
+        self.blacklisted_repo: BlacklistedTokenRepository = token_service.blacklisted_repo
+
 
     async def validation(self) -> None:
         encoded_attr = None
@@ -324,8 +331,14 @@ class RefreshMaker(BaseMaker):
         await self.validation()
         incoming_refresh_token = self.request_model.refresh_token
         try:    
-            await self.jwt_service.decode_token(incoming_refresh_token)
             tokens = await self.make_tokens(create_refresh_token=False)
+            
+            old_token = await self.jwt_service.decode_token(incoming_refresh_token)
+            await self.blacklisted_repo.create(
+                token=incoming_refresh_token,
+                expiration=old_token["exp"]
+            )
+            
             return {
                     "access_token": tokens["access_token"],
                     "refresh_token": incoming_refresh_token,
@@ -333,6 +346,7 @@ class RefreshMaker(BaseMaker):
                     "expires_in": self.expiration_time,
                     "token_type": "Bearer",
                     }
+            
         except ExpiredSignatureError:
             tokens = await self.make_tokens()
             return {
