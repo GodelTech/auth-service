@@ -18,7 +18,7 @@ IMPORTANT_LOGS_FILE_PATH = (
     f"{settings.logging.important_logs_filename}"
 )
 
-BASIC_FORMAT = "%(levelname)s:%(name)s:%(message)s"
+BASIC_FORMAT = "%(asctime)s - %(levelname)s:%(name)s:%(message)s"
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -56,7 +56,7 @@ LOGGING_CONFIG = {
             "stream": "ext://sys.stderr",
         },
         "console": {
-            "formatter": "access",
+            "formatter": "basic_formatter",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
         },
@@ -95,7 +95,7 @@ LOGGING_CONFIG = {
             "level": logging.DEBUG,
             "propagate": False,
         },
-        "identity_server_provider": {
+        "src": {
             "handlers": ["console", "file_all", "file_important"],
             "level": logging.DEBUG,
             "propagate": False,

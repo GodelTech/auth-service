@@ -29,7 +29,9 @@ from src.presentation.api.models import (
     BodyRequestTokenModel,
 )
 from src.data_access.postgresql.errors import ClaimsNotFoundError
+from src.data_access.postgresql.errors import ClaimsNotFoundError
 logger = logging.getLogger(__name__)
+from jwt.exceptions import ExpiredSignatureError
 from jwt.exceptions import ExpiredSignatureError
 
 def get_base_payload(

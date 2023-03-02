@@ -96,8 +96,16 @@ from src.di.providers import (
     provide_third_party_oidc_repo,
     provide_third_party_oidc_repo_stub,
     provide_auth_third_party_oidc_service_stub,
+    provide_auth_third_party_linkedin_service,
+    provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service,
     provide_blacklisted_repo,
+    provide_third_party_google_service_stub,
+    provide_third_party_google_service,
+    provide_third_party_facebook_service_stub,
+    provide_third_party_facebook_service,
+    provide_third_party_gitlab_service,
+    provide_third_party_gitlab_service_stub,
 )
 
 import logging
@@ -106,15 +114,17 @@ from fastapi_utils.tasks import repeat_every
 
 logger = logging.getLogger(__name__)
 
-class NewFastApi(FastAPI):
-    def __init__(self, *args:Any, **kwargs:Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.container:Optional[Container] = None
 
-def get_application(test:bool = False) -> NewFastApi:
+class NewFastApi(FastAPI):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.container: Optional[Container] = None
+
+
+def get_application(test: bool = False) -> NewFastApi:
     # configure logging
     dictConfig(LOGGING_CONFIG)
-    
+
     application = NewFastApi()
     application.add_middleware(
         CORSMiddleware,
@@ -322,10 +332,64 @@ def setup_di(app: FastAPI) -> None:
             http_client=AsyncClient(),
         )
     )
-
     app.dependency_overrides[
         provide_auth_third_party_oidc_service_stub
     ] = nodepends_provide_auth_third_party_oidc_service
+
+    nodepends_provide_auth_linkedin_third_party_service = (
+        lambda: provide_auth_third_party_linkedin_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+    app.dependency_overrides[
+        provide_auth_third_party_linkedin_service_stub
+    ] = nodepends_provide_auth_linkedin_third_party_service
+
+    nodepends_provide_third_party_google_service = (
+        lambda: provide_third_party_google_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_google_service_stub
+    ] = nodepends_provide_third_party_google_service
+
+    nodepends_provide_third_party_facebook_service = (
+        lambda: provide_third_party_facebook_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_facebook_service_stub
+    ] = nodepends_provide_third_party_facebook_service
+
+    nodepends_provide_third_party_gitlab_service = (
+        lambda: provide_third_party_gitlab_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_gitlab_service_stub
+    ] = nodepends_provide_third_party_gitlab_service
 
 
 app = get_application()

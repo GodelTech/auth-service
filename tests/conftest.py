@@ -35,6 +35,7 @@ from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
+    ThirdPartyGoogleService,
 )
 from src.data_access.postgresql.tables.base import Base
 
@@ -43,6 +44,7 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -50,6 +52,7 @@ async def engine() -> AsyncEngine:
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
     ).with_bind_ports(5432, 5465)
+
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()
         db_url = db_url.replace("psycopg2", "asyncpg")
@@ -87,7 +90,6 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
         headers={"Content-Type": "application/json"},
     ) as client:
         yield client
-
 
 
 @pytest.fixture(scope="session")
@@ -174,7 +176,9 @@ async def device_service(engine: AsyncEngine) -> DeviceService:
 
 
 @pytest_asyncio.fixture
-async def auth_third_party_service(engine: AsyncEngine) -> AuthThirdPartyOIDCService:
+async def auth_third_party_service(
+    engine: AsyncEngine,
+) -> AuthThirdPartyOIDCService:
     third_party_service = AuthThirdPartyOIDCService(
         client_repo=ClientRepository(engine),
         user_repo=UserRepository(engine),
@@ -183,3 +187,15 @@ async def auth_third_party_service(engine: AsyncEngine) -> AuthThirdPartyOIDCSer
         http_client=AsyncClient(),
     )
     return third_party_service
+
+
+@pytest_asyncio.fixture
+async def google_third_party_service(engine) -> ThirdPartyGoogleService:
+    google_service = ThirdPartyGoogleService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return google_service

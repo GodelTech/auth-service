@@ -69,7 +69,6 @@ class DataBasePopulation:
                 "TRUNCATE TABLE persistent_grant_types RESTART IDENTITY CASCADE"
             )
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
         )
@@ -83,12 +82,11 @@ class DataBasePopulation:
             text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
         )
         sess.session.execute(
-            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE")
+            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
         )
         sess.session.execute(
             text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE")
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE")
         )
@@ -114,7 +112,9 @@ class DataBasePopulation:
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
         for val in data.USER_CLAIM_TYPE:
-            type_of_claim = user_factory.UserClaimTypeFactory(type_of_claim=val)
+            type_of_claim = user_factory.UserClaimTypeFactory(
+                type_of_claim=val
+            )
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 

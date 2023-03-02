@@ -1,12 +1,18 @@
+FROM python:3.9-slim-buster as requirements-stage
+
+WORKDIR /tmp
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
 FROM python:3.9-slim-buster
 
 WORKDIR /Identity
 
-RUN pip install poetry
-
-COPY ./pyproject.toml ./poetry.lock* /Identity/
-
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+COPY --from=requirements-stage /tmp/requirements.txt /Identity/requirements.txt
 
 RUN apt-get update \
   # dependencies for building Python packages

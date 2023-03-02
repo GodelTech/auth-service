@@ -1,7 +1,6 @@
 from src.main import app
 from src.business_logic.services.password import PasswordHash
 
-
 CLIENT_IDS = [
     "test_client",
     "double_test",
@@ -176,11 +175,35 @@ IDENTITY_PROVIDERS = [
     },
     {
         "name": "facebook",
-        "auth_endpoint_link": "facebook_auth_endpoint_link",
-        "token_endpoint_link": "facebook_token_endpoint_link",
-        "userinfo_link": "facebook_userinfo_link",
-        "internal_redirect_uri": "facebook_internal_redirect_uri",
+        "auth_endpoint_link": "https://www.facebook.com/v16.0/dialog/oauth",
+        "token_endpoint_link": "https://graph.facebook.com/v16.0/oauth/access_token",
+        "userinfo_link": "https://graph.facebook.com/debug_token",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/facebook",
         "provider_icon": "fa-facebook",
+    },
+    {
+        "name": "linkedin",
+        "auth_endpoint_link": "https://www.linkedin.com/oauth/v2/authorization",
+        "token_endpoint_link": "https://www.linkedin.com/oauth/v2/accessToken",
+        "userinfo_link": "https://api.linkedin.com/v2/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/linkedin",
+        "provider_icon": "fa-linkedin",
+    },
+    {
+        "name": "google",
+        "auth_endpoint_link": "https://accounts.google.com/o/oauth2/v2/auth",
+        "token_endpoint_link": "https://oauth2.googleapis.com/token",
+        "userinfo_link": "https://openidconnect.googleapis.com/v1/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/google",
+        "provider_icon": "fa-google",
+    },
+    {
+        "name": "gitlab",
+        "auth_endpoint_link": "https://gitlab.com/oauth/authorize",
+        "token_endpoint_link": "https://gitlab.com/oauth/token",
+        "userinfo_link": "https://gitlab.com/oauth/userinfo",
+        "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/gitlab",
+        "provider_icon": "fa-gitlab",
     },
 ]
 

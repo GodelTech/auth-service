@@ -1,12 +1,12 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from sqlalchemy import exists, insert, select, delete
+from sqlalchemy import delete, exists, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.third_party_oidc import (
-    ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
+    ThirdPartyStateNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.identity_resource import (
@@ -44,7 +44,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
 
     async def get_row_provider_credentials_by_name(
         self, name: str
-    ) -> Optional[Tuple[str, str]]:
+    ) -> Optional[Tuple[str, str, str]]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -54,6 +54,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
                 select(
                     IdentityProviderMapped.provider_client_id,
                     IdentityProviderMapped.provider_client_secret,
+                    IdentityProvider.internal_redirect_uri,
                 )
                 .join(IdentityProvider)
                 .where(
@@ -79,7 +80,7 @@ class ThirdPartyOIDCRepository(BaseRepository):
                     )
                 )
                 await session.commit()
-            else:
+            else:  # TODO ?
                 raise ThirdPartyStateDuplicationError(
                     "State you are trying to delete for does not exist"
                 )

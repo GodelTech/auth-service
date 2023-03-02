@@ -16,8 +16,11 @@ from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 @pytest.mark.asyncio
 class TestEndSessionService:
-
-    async def test_validate_logout_redirect_uri(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel) -> None:
+    async def test_validate_logout_redirect_uri(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         if not service.request_model.post_logout_redirect_uri:
@@ -29,7 +32,11 @@ class TestEndSessionService:
 
         assert result is True
 
-    async def test_validate_logout_redirect_uri_error(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel) -> None:
+    async def test_validate_logout_redirect_uri_error(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         service.request_model.post_logout_redirect_uri = "not_exist_uri"
@@ -40,7 +47,12 @@ class TestEndSessionService:
             )
             a = 1
 
-    async def test_logout(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel, connection: AsyncEngine) -> None:
+    async def test_logout(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+        connection: AsyncEngine,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         await connection.execute(
@@ -64,13 +76,21 @@ class TestEndSessionService:
         await connection.commit()
         assert grant.first() is None
 
-    async def test_logout_account_not_exists(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel) -> None:
+    async def test_logout_account_not_exists(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         with pytest.raises(PersistentGrantNotFoundError):
             await service._logout(client_id="test_client", user_id=33333)
 
-    async def test_decode_id_token_hint(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel) -> None:
+    async def test_decode_id_token_hint(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         data = await service._decode_id_token_hint(
@@ -80,12 +100,19 @@ class TestEndSessionService:
         assert data["sub"] == 3
         assert data["data"] == "secret_code"
 
-    async def test_decode_id_token_hint_error(self, end_session_service: EndSessionService) -> None:
+    async def test_decode_id_token_hint_error(
+        self, end_session_service: EndSessionService
+    ) -> None:
         service = end_session_service
         with pytest.raises(jwt.exceptions.DecodeError):
             await service._decode_id_token_hint("abra$kadabra")
 
-    async def test_end_session(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel, connection: AsyncEngine) -> None:
+    async def test_end_session(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+        connection: AsyncEngine,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
@@ -108,7 +135,12 @@ class TestEndSessionService:
         )
         await connection.commit()
 
-    async def test_end_session_without_state(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel, connection: AsyncEngine) -> None:
+    async def test_end_session_without_state(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+        connection: AsyncEngine,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
@@ -132,7 +164,12 @@ class TestEndSessionService:
         )
         await connection.commit()
 
-    async def test_end_session_wrong_uri(self, end_session_service: EndSessionService, end_session_request_model: RequestEndSessionModel, connection: AsyncEngine) -> None:
+    async def test_end_session_wrong_uri(
+        self,
+        end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
+        connection: AsyncEngine,
+    ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
         await connection.execute(
