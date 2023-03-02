@@ -150,8 +150,11 @@ class TokenService:
             else:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
-            # TODO: realize logic for access_token revocation.
-            pass
+            decoded_token = await self.jwt_service.decode_token(self.request_body.token)
+            await self.blacklisted_repo.create(
+                token=self.request_body.token,
+                expiration=decoded_token["exp"]
+            )
         else:
             raise GrantNotFoundError
 
@@ -332,12 +335,6 @@ class RefreshMaker(BaseMaker):
         incoming_refresh_token = self.request_model.refresh_token
         try:    
             tokens = await self.make_tokens(create_refresh_token=False)
-            
-            old_token = await self.jwt_service.decode_token(incoming_refresh_token)
-            await self.blacklisted_repo.create(
-                token=incoming_refresh_token,
-                expiration=old_token["exp"]
-            )
             
             return {
                     "access_token": tokens["access_token"],
