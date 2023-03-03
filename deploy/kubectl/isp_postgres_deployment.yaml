@@ -16,17 +16,16 @@ spec:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: database-persistent-volume-claim
-      hostNetwork: true
       containers:
         - name: postgres
           image: postgres
+          ports:
+            - containerPort: 5432
           env:
             - name: POSTGRES_USER
               value: postgres
             - name: POSTGRES_PASSWORD
               value: postgres
-          ports:
-            - containerPort: 5432
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
