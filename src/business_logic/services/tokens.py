@@ -357,14 +357,12 @@ class DeviceCodeMaker(BaseMaker):
                 }
     
 class PKCEMaker(BaseMaker):
-    async def check_code_challenge(repo: PersistentGrantRepository, user_id: int, code_verifier: str) -> bool:
+    async def check_code_challenge(self, repo: PersistentGrantRepository, user_id: int, code_verifier: str) -> bool:
         saved_code_challenge = await repo.get_code_challenge(
             user_id=user_id
         )
         encoded_code_challenge = sha256(saved_code_challenge.encode("utf-8")).hexdigest()
-
-        return True
-
+        
         if code_verifier != encoded_code_challenge:
             return False
         return True
