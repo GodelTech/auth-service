@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: isp-app
+  name: isp
 spec:
   replicas: 1
   selector:
@@ -12,11 +12,10 @@ spec:
       labels:
         app: isp
     spec:
-      hostNetwork: true
       imagePullSecrets:
         - name: regcred
       containers:
-      - name: isp-container
+      - name: isp
         image: levigoldman/identity
         imagePullPolicy: Always
         ports:

@@ -1,47 +1,29 @@
-init:
-  image: "alpine:3.8"
-  imagePullPolicy: IfNotPresent
-
-
-# ------------------------------------------------------------------------------
-# Application
-# -----------------------------------------------------------------------------
+# App
 application:
-  name: identity-server-poc
-  namespace: innovation
-  image: gitlab.godeltech.com:4567/gte-internal/python/identity-server-poc:latest
-  domain: rnd-identityserver-dev.godeltech.com
+  name: isp
+  image: levigoldman/identity
+  replicaCount: 1
   port: 8000
+  domain: rnd-identityserver-dev.godeltech.com
 
 
-# ------------------------------------------------------------------------------
-# Application image version
-# -----------------------------------------------------------------------------
+# Redis
+redis:
+  image: redis
+  replicaCount: 1
+  name: redis
+  port: 6379
+
+
+# Parameters for the secret containing ContainerRegistry's credentials
 imagePullSecret:
-  server: gitlab.godeltech.com:4567
-  username: xxx
-  password: "xxx"
+  server: https://index.docker.io/v1
+  username: levigoldman
+  password: PUSH2023levi
 
 
-# ------------------------------------------------------------------------------
 # Application Service properties
-# -----------------------------------------------------------------------------
 service:
   port: 8000
   targetPort: 8000
   type: ClusterIP
-
-## How many instances to run
-replicaCount: 1
-
-
-# ------------------------------------------------------------------------------
-# Application resources for the deployment
-# -----------------------------------------------------------------------------
-resources:
-  requests:
-    memory: "128Mi"
-    cpu: "50m"
-  limits:
-    memory: "256Mi"
-    cpu: "200m"
