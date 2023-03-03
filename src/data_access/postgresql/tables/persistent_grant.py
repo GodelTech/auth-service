@@ -17,7 +17,7 @@ from .base import Base, BaseModel
 
 LIFESPAN_OF_TOKEN = 999
 
-TYPES_OF_GRANTS = ["code", "refresh_token"]
+TYPES_OF_GRANTS = ["code", "refresh_token", "password", "code_challenge", "urn:ietf:params:oauth:grant-type:device_code"]
 
 
 class PersistentGrant(BaseModel):

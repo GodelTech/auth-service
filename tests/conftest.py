@@ -51,7 +51,7 @@ from src.dyna_config import DB_URL
 async def engine() -> AsyncEngine:
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
-    ).with_bind_ports(5432, 5465)
+    ).with_bind_ports(5432, 5463)
 
     with postgres_container as postgres:
         db_url = postgres.get_connection_url()

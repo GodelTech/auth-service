@@ -86,6 +86,8 @@ async def post_authorize(
         request_model = RequestModel(**request_body.__dict__)
         auth_class = auth_class
         auth_class.request_model = request_model
+        await auth_class.save_code_challenge_data()
+
         firmed_redirect_uri = await auth_class.get_redirect_url()
         
         if not firmed_redirect_uri:

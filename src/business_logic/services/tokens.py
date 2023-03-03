@@ -2,6 +2,9 @@ import datetime
 import logging
 import time
 import uuid
+from jwt import ExpiredSignatureError
+from hashlib import sha256
+from fastapi import status
 from typing import Any, Optional, Union
 
 from fastapi import Request
@@ -16,7 +19,9 @@ from src.data_access.postgresql.errors import (
     DeviceRegistrationError,
     GrantNotFoundError,
     WrongGrantsError,
+    PKCEError
 )
+
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
@@ -97,7 +102,27 @@ class TokenService:
     async def get_tokens(self) -> dict[str, Any]:
         if self.request_model is None:
             raise ValueError
-
+        
+        if self.request_model.code_verifier is not None:
+            if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
+                encoded_attr = self.request_model.device_code
+            else:
+                encoded_attr = getattr(self.request_model, self.request_model.grant_type)
+            
+            grant = await self.persistent_grant_repo.get(
+                        grant_type=self.request_model.grant_type,
+                        grant_data=encoded_attr
+                    )
+            user_id = grant.user_id
+            
+            service = PKCEMaker(token_service=self)
+            if not await service.check_code_challenge(
+                repo=self.persistent_grant_repo,
+                user_id=user_id,
+                code_verifier=self.request_model.code_verifier
+            ):
+                raise PKCEError
+            
         if self.request_model.grant_type == "code":
             if self.request_model.redirect_uri is None or self.request_model.code is None:
                 raise ValueError
@@ -330,6 +355,19 @@ class DeviceCodeMaker(BaseMaker):
                 "expires_in": self.expiration_time,
                 "token_type": "Bearer",
                 }
+    
+class PKCEMaker(BaseMaker):
+    async def check_code_challenge(repo: PersistentGrantRepository, user_id: int, code_verifier: str) -> bool:
+        saved_code_challenge = await repo.get_code_challenge(
+            user_id=user_id
+        )
+        encoded_code_challenge = sha256(saved_code_challenge.encode("utf-8")).hexdigest()
+
+        return True
+
+        if code_verifier != encoded_code_challenge:
+            return False
+        return True
     
 class RefreshMaker(BaseMaker):
     async def create(self) -> dict[str: Any]:

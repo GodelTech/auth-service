@@ -10,7 +10,7 @@ from .device import (
     DeviceRegistrationError,
     UserCodeNotFoundError,
 )
-from .grant import GrantNotFoundError
+from .grant import GrantNotFoundError,  PKCEError, NoScopeError
 from .password import WrongPasswordError, WrongPasswordFormatError
 from .response_type import WrongResponseTypeError
 from .third_party_oidc import (

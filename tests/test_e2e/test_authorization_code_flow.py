@@ -2,9 +2,11 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import select, insert, delete, text
+from hashlib import sha256
 
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim
+from src.data_access.postgresql.errors import PKCEError
 from src.business_logic.services.jwt_token import JWTService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
@@ -45,10 +47,12 @@ class TestAuthorizationCodeFlow:
 
         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
         secret_code = await connection.execute(
-            select(PersistentGrant.grant_data).where(
-                PersistentGrant.client_id == 8
+            select(PersistentGrant.grant_data)
+            .where(PersistentGrant.client_id == 8)
+            .where(PersistentGrant.user_id == 8)
+            .where(PersistentGrant.persistent_grant_type_id == 1)
             )
-        )
+        
 
         secret_code = secret_code.first()[0]
 
@@ -57,7 +61,7 @@ class TestAuthorizationCodeFlow:
             "grant_type": "code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "http://www.sparks.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"
@@ -112,3 +116,123 @@ class TestAuthorizationCodeFlow:
         }
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_302_FOUND
+
+    async def test_successful_authorization_code_flow_with_pkce(self, client: AsyncClient, connection):
+        
+         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table with code challenge
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": scope,
+            "redirect_uri": "https://www.google.com/",
+            "code_challenge": "e2e_code_challenge",
+        }
+
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        content_type = 'application/x-www-form-urlencoded'
+        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
+        assert response.status_code == status.HTTP_302_FOUND
+
+        # 2nd stage Token endpoint changes secrete code in Persistent grant table to token and checks code_verifier
+        secret_code = await connection.execute(
+            select(PersistentGrant.grant_data)
+            .where(PersistentGrant.client_id == 8)
+            .where(PersistentGrant.user_id == 8)
+            .where(PersistentGrant.persistent_grant_type_id == 1)
+        )
+
+        secret_code = secret_code.first()[0]
+
+        params = {
+            'client_id': 'spider_man',
+            'grant_type': 'code',
+            'code': secret_code,
+            'scope': 'test',
+            'redirect_uri': 'https://www.google.com/',
+            'code_verifier': sha256('e2e_code_challenge'.encode('utf-8')).hexdigest()
+        }
+
+        content_type = 'application/x-www-form-urlencoded'
+
+        response = await client.request('POST', '/token/', data=params, headers={'Content-Type': content_type})
+        response_data = response.json()
+        access_token = response_data.get('access_token')
+
+        assert response.status_code == status.HTTP_200_OK
+
+        # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
+        await connection.execute(
+            insert(UserClaim).values(
+                user_id=8,
+                claim_type_id=1,
+                claim_value="Peter"
+            )
+         )
+        await connection.commit()
+        response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
+        assert response.status_code == status.HTTP_200_OK
+        await connection.execute(
+            delete(UserClaim)
+            .where(UserClaim.user_id == 8)
+            .where(UserClaim.claim_type_id == 1)
+         )
+        await connection.commit()
+
+        # 4th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
+        jwt_service = JWTService()
+
+        id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
+
+        params = {
+            "id_token_hint": id_token_hint,
+            "post_logout_redirect_uri": "http://www.sparks.net/",
+            "state": "test_state",
+        }
+        response = await client.request("GET", "/endsession/", params=params)
+        assert response.status_code == status.HTTP_302_FOUND
+
+    async def test_UNsuccessful_authorization_code_flow_with_wrong_pkce(self, client: AsyncClient, connection):
+        
+         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table with code challenge
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": scope,
+            "redirect_uri": "https://www.google.com/",
+            "code_challenge": "e2e_code_challenge",
+        }
+
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        content_type = 'application/x-www-form-urlencoded'
+        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
+        assert response.status_code == status.HTTP_302_FOUND
+
+        # 2nd stage Token endpoint changes secrete code in Persistent grant table to token and checks code_verifier
+        secret_code = await connection.execute(
+            select(PersistentGrant.grant_data)
+            .where(PersistentGrant.client_id == 8)
+            .where(PersistentGrant.user_id == 8)
+            .where(PersistentGrant.persistent_grant_type_id == 1)
+        )
+
+        secret_code = secret_code.first()[0]
+
+        params = {
+            'client_id': 'spider_man',
+            'grant_type': 'code',
+            'code': secret_code,
+            'scope': 'test',
+            'redirect_uri': 'https://www.google.com/',
+            'code_verifier': sha256('WRONG_e2e_code_challenge'.encode('utf-8')).hexdigest()
+        }
+
+        content_type = 'application/x-www-form-urlencoded'
+        try: 
+            response = await client.request('POST', '/token/', data=params, headers={'Content-Type': content_type})
+            assert False
+        except PKCEError:
+            assert True

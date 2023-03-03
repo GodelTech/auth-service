@@ -116,6 +116,24 @@ class PersistentGrantRepository(BaseRepository):
             else:
                 return status.HTTP_404_NOT_FOUND
 
+    async def get_code_challenge(self, user_id: int) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+
+            result = await session.execute(
+                select(PersistentGrant).where(
+                    PersistentGrant.persistent_grant_type_id == 5, PersistentGrant.user_id == user_id
+                )
+            )
+
+            result = result.first()[0]
+
+            code_challenge = result.grant_data
+            return code_challenge
+        
     async def delete_persistent_grant_by_client_and_user_id(
         self, client_id: str, user_id: int
     ) -> None:
