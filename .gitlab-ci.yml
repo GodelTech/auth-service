@@ -71,12 +71,12 @@ build-and-test:
 # DEPLOY-TO-DEV
 #################
 
-#deploy-to-dev:
-#  extends: .deploy-to-dev-ext
-#  stage: deploy-to-dev
-#  variables:
-#    ENV_FOR_DYNACONF: development
-#    SERVICE: "${SERVICE_NAME}"
-#    HELM_PATH: ./chart
-#  only:
-#    - Configure-CI-CD-pipeline
+deploy-to-dev:
+  extends: .deploy-to-dev-ext
+  stage: deploy-to-dev
+  variables:
+    ENV_FOR_DYNACONF: development
+    SERVICE: "${SERVICE_NAME}"
+    HELM_PATH: ./deploy/helm
+  only:
+    - 27271-Add-Deploy-Stage-To-Pipeline
