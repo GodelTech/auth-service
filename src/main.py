@@ -20,9 +20,8 @@ from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-import logging
 from src.log import LOGGING_CONFIG
-
+from src.scripts import CreateIndentityProvidersFromConfig
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +78,7 @@ def setup_di(app: FastAPI) -> None:
     )
 
     CreateIndentityProvidersFromConfig(
-        providers_repo=provide_third_party_oidc_repo(db_engine)
+        providers_repo=prov.provide_third_party_oidc_repo(db_engine)
     ).execute()
 
     # Register admin-ui controllers on application start-up.
