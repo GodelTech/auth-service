@@ -231,13 +231,19 @@ class BaseMaker:
         # REFRESH TOKEN
         new_refresh_token = None
         if create_refresh_token:
-            new_refresh_token = await get_single_token(
-                                user_id=user_id,
-                                client_id=client_id,
-                                additional_data=scopes,
-                                jwt_service=self.jwt_service,
-                                expiration_time=self.expiration_time * 6,
-                            )
+            new_refresh_token = await self.jwt_service.encode_jwt(
+                payload={
+                    "iat": int(time.time()),
+                    "exp": int(time.time() + self.expiration_time*6),
+                }
+            )
+            #                 get_single_token(
+            #                     user_id=user_id,
+            #                     client_id=client_id,
+            #                     additional_data=scopes,
+            #                     jwt_service=self.jwt_service,
+            #                     expiration_time=self.expiration_time * 6,
+            #                 )
 
             await self.persistent_grant_repo.create(
                 client_id=client_id,
