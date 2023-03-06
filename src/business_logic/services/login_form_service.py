@@ -71,6 +71,8 @@ class LoginFormService:
                         provider_link += "&scope=openid profile email"
                     if provider[0] == "gitlab":
                         provider_link += "&scope=openid"
+                    if provider[0] == "microsoft":
+                        provider_link += "&scope=openid+profile+email"
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
                         "provider_link": provider_link,

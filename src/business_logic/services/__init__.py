@@ -14,6 +14,7 @@ from .third_party_oidc_service import (
     ThirdPartyGitLabService,
     ThirdPartyGoogleService,
     ThirdPartyLinkedinService,
+    ThirdPartyMicrosoftService,
 )
 from .tokens import TokenService
 from .userinfo import UserInfoServices

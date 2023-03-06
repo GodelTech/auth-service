@@ -478,6 +478,8 @@ class ThirdPartyGitLabService(AuthThirdPartyOIDCService):
                 request_params = await self.get_provider_auth_request_data(
                     name=provider_name
                 )
+                if request_params is not None:
+                    request_params["grant_type"] = "authorization_code"
 
                 # make request to access_token_url to get a request token
                 access_token: str = ""
@@ -528,26 +530,6 @@ class ThirdPartyGitLabService(AuthThirdPartyOIDCService):
 
         return None
 
-    async def get_provider_auth_request_data(
-        self, name: str
-    ) -> Optional[Dict[str, Any]]:
-        if self.request_model is not None:
-            provider_row_data = (
-                await self.oidc_repo.get_row_provider_credentials_by_name(
-                    name=name
-                )
-            )
-            if provider_row_data is not None:
-                request_params = {
-                    "client_id": provider_row_data[0],
-                    "client_secret": provider_row_data[1],
-                    "redirect_uri": provider_row_data[2],
-                    "code": self.request_model.code,
-                    "grant_type": "authorization_code",
-                }
-                return request_params
-        return None
-
     async def make_request_for_access_token(
         self, method: str, access_url: str, params: Dict[str, Any]
     ) -> str:
@@ -569,4 +551,99 @@ class ThirdPartyGitLabService(AuthThirdPartyOIDCService):
             user_response.content.decode("utf-8")
         )
         user_name = user_response_content["nickname"]
+        return user_name
+
+
+class ThirdPartyMicrosoftService(AuthThirdPartyOIDCService):
+    async def get_redirect_uri(self, provider_name: str) -> Optional[str]:
+        github_links = await self.get_provider_external_links(
+            name=provider_name
+        )
+        access_token_url: str = ""
+        user_data_url: str = ""
+        if github_links is not None:
+            access_token_url = github_links["token_endpoint_link"]
+            user_data_url = github_links["userinfo_link"]
+        if self.request_model is not None and self.request_model.state:
+            if await self.oidc_repo.validate_state(
+                state=self.request_model.state
+            ):
+                await self.oidc_repo.delete_state(
+                    state=self.request_model.state
+                )
+                request_params = await self.get_provider_auth_request_data(
+                    name=provider_name
+                )
+                if request_params is not None:
+                    request_params["grant_type"] = "authorization_code"
+
+                # make request to access_token_url to get a request token
+                access_token: str = ""
+                if request_params is not None:
+                    access_token = await self.make_request_for_access_token(
+                        method="POST",
+                        access_url=access_token_url,
+                        params=request_params,
+                    )
+
+                # make request to user_data_url to get user information
+                headers = {
+                    "Authorization": "Bearer " + access_token,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                }
+                user_name = await self.make_get_request_for_user_data(
+                    access_url=user_data_url, headers=headers
+                )
+
+                redirect_uri = self.request_model.state.split("!_!")[
+                    -1
+                ]  # this redirect uri we return
+
+                if not await self.user_repo.validate_user_by_username(
+                    username=user_name
+                ):
+                    # create new user
+                    provider_id = await self.oidc_repo.get_provider_id_by_name(
+                        name=provider_name
+                    )
+                    if provider_id is not None:
+                        await self.create_new_user(
+                            username=user_name, provider=provider_id
+                        )
+
+                # create new persistent grant
+                secret_code = secrets.token_urlsafe(32)
+
+                await self.create_new_persistent_grant(
+                    username=user_name, secret_code=secret_code
+                )
+                ready_redirect_uri = (
+                    await self._update_redirect_url_with_params(
+                        redirect_uri=redirect_uri, secret_code=secret_code
+                    )
+                )
+                return ready_redirect_uri
+
+        return None
+
+    async def make_request_for_access_token(
+        self, method: str, access_url: str, params: Dict[str, Any]
+    ) -> str:
+        token_response = await self.http_client.request(
+            f"{method}", access_url, data=params
+        )
+        token_response_content = json.loads(token_response.content)
+        access_token = token_response_content["access_token"]
+        return access_token
+
+    async def make_get_request_for_user_data(
+        self, access_url: str, headers: Dict[str, Any]
+    ) -> str:
+        user_response = await self.http_client.request(
+            "GET", access_url, headers=headers
+        )
+        user_response_content = json.loads(
+            user_response.content.decode("utf-8")
+        )
+        user_name = user_response_content["email"]
         return user_name

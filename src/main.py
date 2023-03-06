@@ -61,7 +61,6 @@ from src.presentation.admin_ui.controllers import (
     CustomAdmin,
 )
 from src.di.providers import (
-    provide_config,
     provide_db,
     provide_auth_service,
     provide_auth_service_stub,
@@ -105,8 +104,9 @@ from src.di.providers import (
     provide_third_party_facebook_service,
     provide_third_party_gitlab_service,
     provide_third_party_gitlab_service_stub,
+    provide_third_party_microsoft_service,
+    provide_third_party_microsoft_service_stub,
     provide_wellknown_repo,
-    provide_wellknown_repo_stub,
     provide_wellknown_service,
     provide_wellknown_service_stub,
     
@@ -396,6 +396,20 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_wellknown_service_stub
     ] = nodepends_wellknown_service
+
+    nodepends_provide_third_party_microsoft_service = (
+        lambda: provide_third_party_microsoft_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_microsoft_service_stub
+    ] = nodepends_provide_third_party_microsoft_service
 
 
 app = get_application()
