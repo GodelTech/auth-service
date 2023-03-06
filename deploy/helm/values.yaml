@@ -17,9 +17,9 @@ redis:
 
 # Parameters for the secret containing ContainerRegistry's credentials
 imagePullSecret:
-  server: https://index.docker.io/v1
-  username: levigoldman
-  password: PUSH2023levi
+  server: ""
+  username: xxx
+  password: "xxx"
 
 
 # Application Service properties
