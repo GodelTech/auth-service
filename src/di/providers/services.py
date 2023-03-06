@@ -19,6 +19,7 @@ from src.business_logic.services import (
     ThirdPartyLinkedinService,
     TokenService,
     UserInfoServices,
+    WellKnownServices,
 )
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -28,6 +29,7 @@ from src.data_access.postgresql.repositories import (
     RoleRepository,
     ThirdPartyOIDCRepository,
     UserRepository,
+    WellKnownRepository
 )
 
 
@@ -158,6 +160,16 @@ def provide_admin_role_service(
 ) -> AdminRoleService:
     return AdminRoleService(
         role_repo=role_repo,
+    )
+
+def provide_wellknown_service_stub() -> None:
+    ...
+
+def provide_wellknown_service(
+    wlk_repo: WellKnownRepository,
+) -> WellKnownServices:
+    return WellKnownServices(
+        wlk_repo=wlk_repo,
     )
 
 

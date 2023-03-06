@@ -105,6 +105,11 @@ from src.di.providers import (
     provide_third_party_facebook_service,
     provide_third_party_gitlab_service,
     provide_third_party_gitlab_service_stub,
+    provide_wellknown_repo,
+    provide_wellknown_repo_stub,
+    provide_wellknown_service,
+    provide_wellknown_service_stub,
+    
 )
 
 import logging
@@ -384,6 +389,13 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         provide_third_party_gitlab_service_stub
     ] = nodepends_provide_third_party_gitlab_service
+    
+    nodepends_wellknown_service = lambda: provide_wellknown_service(
+        wlk_repo=provide_wellknown_repo(db_engine),
+    )
+    app.dependency_overrides[
+        provide_wellknown_service_stub
+    ] = nodepends_wellknown_service
 
 
 app = get_application()
