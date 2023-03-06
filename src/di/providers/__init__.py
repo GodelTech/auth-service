@@ -1,6 +1,8 @@
 from .config import provide_config
 from .db import provide_db
 from .repositories import (
+    provide_wellknown_repo,
+    provide_wellknown_repo_stub,
     provide_client_repo,
     provide_client_repo_stub,
     provide_device_repo,
@@ -13,8 +15,11 @@ from .repositories import (
     provide_third_party_oidc_repo_stub,
     provide_user_repo,
     provide_user_repo_stub,
+    
 )
 from .services import (
+    provide_wellknown_service,
+    provide_wellknown_service_stub,
     provide_admin_auth_service,
     provide_admin_auth_service_stub,
     provide_admin_group_service,

@@ -5,7 +5,7 @@ from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.well_known import WellKnownServies
+from src.business_logic.services.well_known import WellKnownServices
 from typing import Any, no_type_check
 
 class UrlMock:
@@ -28,10 +28,10 @@ async def decode_token(self, token: str) -> dict[str, Any]:
 
 
 @pytest.mark.asyncio
-class TestWellKnownServies:
+class TestWellKnownServices:
 
     # def setup_class(self) -> None:
-    #     self.wks = WellKnownServies()
+    #     self.wks = WellKnownServices()
     #     self.wks.request = RequestMock()
     #     self.wks.request.url = "/localhost/.well-known/openid-configuration"
 
@@ -48,14 +48,19 @@ class TestWellKnownServies:
             "get_default_token": "http://127.0.0.1:800...ault_token",
             "get_openid_configuration": "http://127.0.0.1:800...figuration",
             "get_tokens": "http://127.0.0.1:800...token",
+            "get_jwks": "http://127.0.0.1:800...jwks",
+            "end_session": "http://127.0.0.1:800...end_session",
             "false": "/ Not ready yet",
         }
 
-    async def test_well_known_openid_cofig(self) -> None:
+    async def test_well_known_openid_cofig(
+            self,  
+            wlk_services: WellKnownServices,
+        ) -> None:
         with mock.patch.object(
-                WellKnownServies, "get_all_urls", new=self.new_get_all_urls
+                WellKnownServices, "get_all_urls", new=self.new_get_all_urls
         ):
-            wks = WellKnownServies()
+            wks = wlk_services
             wks.request = RequestMock
             result = await wks.get_openid_configuration()
             dict_of_parametrs_and_types = {
@@ -116,8 +121,8 @@ class TestWellKnownServies:
             for key in KEYS_REQUIRED:
                 assert key in result.keys()
 
-    async def test_jwks_RSA(self) -> None:
-        wks = WellKnownServies()
+    async def test_jwks_RSA(self, wlk_services: WellKnownServices,) -> None:
+        wks = wlk_services
         jwt_service = JWTService()
         result = await wks.get_jwks()
         test_token = await jwt_service.encode_jwt(payload={"sub": 1})

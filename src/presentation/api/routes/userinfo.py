@@ -19,11 +19,11 @@ userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 
 
 @userinfo_router.get("/", response_model=dict)
-@cache(
-    expire=CacheTimeSettings.USERINFO,
-    coder=JsonCoder,
-    key_builder=builder_with_parametr,
-)
+# @cache(
+#     expire=CacheTimeSettings.USERINFO,
+#     coder=JsonCoder,
+#     key_builder=builder_with_parametr,
+# )
 async def get_userinfo(
     request: Request,
     auth_swagger: Union[str, None] = Header(
@@ -35,8 +35,10 @@ async def get_userinfo(
         userinfo_class = userinfo_class
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
-        logger.info("Collecting Claims from DataBase.")
-        return await userinfo_class.get_user_info()
+        logger.debug("Collecting Claims from DataBase.")
+        result = await userinfo_class.get_user_info()
+        
+        return {k: v for k, v in result.items() if v is not None}
 
     except ClaimsNotFoundError:
         raise HTTPException(
@@ -68,7 +70,8 @@ async def post_userinfo(
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
-        return await userinfo_class.get_user_info()
+        result = await userinfo_class.get_user_info()
+        return {k: v for k, v in result.items() if v is not None}
 
     except ClaimsNotFoundError:
         raise HTTPException(
@@ -101,9 +104,10 @@ async def get_userinfo_jwt(
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
-
+        result = await userinfo_class.get_user_info()
+        result = {k: v for k, v in result.items() if v is not None}
         return await userinfo_class.jwt.encode_jwt(
-            payload=await userinfo_class.get_user_info()
+            payload=result
         )
 
     except ValueError:
@@ -122,11 +126,12 @@ async def get_userinfo_jwt(
 async def get_default_token(
     with_iss_me: Optional[bool] = None,
     with_aud_facebook: Optional[bool] = None,
+    scope: str = 'profile',
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
     try:
         uis = userinfo_class
-        payload: dict[str, Any] = {"sub": "1"}
+        payload: dict[str, Any] = {"sub": "1", "scope": scope}
         if with_iss_me:
             payload["iss"] = "me"
         if with_aud_facebook:
