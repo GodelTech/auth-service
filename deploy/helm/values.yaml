@@ -1,7 +1,7 @@
 # App
 application:
   name: isp
-  image: levigoldman/identity
+  image: identity-server-poc:latest
   replicaCount: 1
   port: 8000
   domain: rnd-identityserver-dev.godeltech.com
@@ -20,7 +20,6 @@ imagePullSecret:
   server: ""
   username: xxx
   password: "xxx"
-  email: "noreply@godeltech.com"
 
 
 # Application Service properties
