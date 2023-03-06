@@ -8,9 +8,9 @@ from httpx import AsyncClient
 from src.business_logic.services import (
     AuthThirdPartyOIDCService,
     ThirdPartyFacebookService,
+    ThirdPartyGitLabService,
     ThirdPartyGoogleService,
     ThirdPartyLinkedinService,
-    ThirdPartyGitLabService,
 )
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -22,8 +22,8 @@ from src.di.providers import (
     provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service_stub,
     provide_third_party_facebook_service_stub,
-    provide_third_party_google_service_stub,
     provide_third_party_gitlab_service_stub,
+    provide_third_party_google_service_stub,
 )
 from src.presentation.api.models import (
     StateRequestModel,
@@ -89,7 +89,9 @@ async def get_linedin_authorize(
     try:
         auth_class = auth_class
         auth_class.request_model = request_model
-        linkedin_redirect_uri = await auth_class.get_redirect_uri()
+        linkedin_redirect_uri = await auth_class.get_redirect_uri(
+            provider_name="linkedin"
+        )
         if linkedin_redirect_uri is None:
             raise WrongDataError
         response = RedirectResponse(
