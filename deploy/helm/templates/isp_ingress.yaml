@@ -13,9 +13,6 @@ spec:
     - http:
         paths:
           - path: /
-            pathType: ImplementationSpecific
             backend:
-              service:
-                name: {{ .Values.application.name }}
-                port:
-                  number: {{ .Values.service.port }}
+              serviceName: {{ .Values.application.name }}
+              servicePort: {{ .Values.service.port }}
