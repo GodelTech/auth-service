@@ -3,5 +3,5 @@ application:
 
 imagePullSecret
     server: ${CI_REGISTRY}
-    username: ${$CI_REGISTRY_USER}
-    password: ${$CI_JOB_TOKEN}
+    username: ${CI_REGISTRY_USER}
+    password: ${CI_JOB_TOKEN}

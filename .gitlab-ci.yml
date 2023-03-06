@@ -63,8 +63,8 @@ build-and-test:
     - docker run -d --name identity-server-provider -p 8000:8000 --env ENV_FOR_DYNACONF=pipeline -v /var/run/docker.sock:/var/run/docker.sock ${DOCKER_IMAGE_PATH}
     - docker exec -i identity-server-provider sh -c "pytest --cov=src"
     - echo ${CI_REGISTRY}
-    - echo ${$CI_REGISTRY_USER}
-    - echo ${$CI_JOB_TOKEN}
+    - echo ${CI_REGISTRY_USER}
+    - echo ${CI_JOB_TOKEN}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
     - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
