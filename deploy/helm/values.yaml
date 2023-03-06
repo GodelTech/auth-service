@@ -20,6 +20,7 @@ imagePullSecret:
   server: ""
   username: xxx
   password: "xxx"
+  email: "noreply@godeltech.com"
 
 
 # Application Service properties
