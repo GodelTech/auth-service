@@ -5,6 +5,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import delete, insert, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.identity_resource import (
@@ -24,8 +25,8 @@ STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https:/
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGithubFlow:
-    async def test_successful_github_code_flow(
+class TestThirdPartyLinkedinFlow:
+    async def test_successful_linkedin_code_flow(
         self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
         # 1st stage Authorization endpoint with get request
@@ -38,51 +39,43 @@ class TestThirdPartyGithubFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        # 2nd stage third party GitHub provider endpoint
+        # 2nd stage third party Linkedin provider endpoint
         await connection.execute(
             insert(IdentityProviderState).values(state=STUB_STATE)
         )
         await connection.commit()
         await connection.execute(
             insert(IdentityProviderMapped).values(
-                identity_provider_id=4,
-                provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                provider_client_secret="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",
+                identity_provider_id=3,
+                provider_client_id="123",
+                provider_client_secret="456",
                 enabled=True,
             )
         )
         await connection.commit()
 
-        async def replace_post(*args, **kwargs):
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
-            return "UserNewEmail"
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
+            return "users_email"
 
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGoogleService"
+        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyLinkedinService"
 
-        mocker.patch(f"{patch_start}.get_google_access_token", replace_post)
+        mocker.patch(f"{patch_start}.get_access_token", replace_post)
         mocker.patch(
             f"{patch_start}.make_get_request_for_user_email", replace_get
         )
-
-        params = {
-            "code": "test_code",
-            "state": STUB_STATE,
-            "scope": "test_scope",
-        }
+        params = {"code": "test_code", "state": STUB_STATE}
         response = await client.request(
-            "GET", "/authorize/oidc/google", params=params
+            "GET", "/authorize/oidc/linkedin", params=params
         )
         assert response.status_code == status.HTTP_302_FOUND
-
         await connection.execute(
             delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 4,
-                IdentityProviderMapped.provider_client_id
-                == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                IdentityProviderMapped.provider_client_secret
-                == "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",
+                IdentityProviderMapped.identity_provider_id == 3,
+                IdentityProviderMapped.provider_client_id == "123",
+                IdentityProviderMapped.provider_client_secret == "456",
             )
         )
         await connection.commit()
@@ -95,7 +88,7 @@ class TestThirdPartyGithubFlow:
 
         # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
         user_id = await connection.execute(
-            select(User.id).where(User.username == "UserNewEmail")
+            select(User.id).where(User.username == "users_email")
         )
         user_id = user_id.first()[0]
         secret_code = await connection.execute(

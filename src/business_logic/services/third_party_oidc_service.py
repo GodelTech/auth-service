@@ -247,8 +247,8 @@ class AuthThirdPartyOIDCService:
 
 
 class ThirdPartyLinkedinService(AuthThirdPartyOIDCService):
-    async def get_redirect_uri(self) -> Optional[str]:
-        links = await self.get_provider_external_links(name="linkedin")
+    async def get_redirect_uri(self, provider_name: str) -> Optional[str]:
+        links = await self.get_provider_external_links(provider_name)
         access_token_url: str = ""
         user_data_url: str = ""
         if links is not None:
@@ -262,7 +262,7 @@ class ThirdPartyLinkedinService(AuthThirdPartyOIDCService):
                     state=self.request_model.state
                 )
                 request_params = await self.get_provider_auth_request_data(
-                    name="linkedin"
+                    name=provider_name
                 )
                 if request_params is not None:
                     request_params["grant_type"] = "authorization_code"
@@ -292,7 +292,7 @@ class ThirdPartyLinkedinService(AuthThirdPartyOIDCService):
                 ):
                     # create new user
                     provider_id = await self.oidc_repo.get_provider_id_by_name(
-                        name="linkedin"
+                        name=provider_name
                     )
                     if provider_id is not None:
                         await self.create_new_user(
@@ -329,7 +329,7 @@ class ThirdPartyGoogleService(AuthThirdPartyOIDCService):
     async def get_google_redirect_uri(
         self, provider_name: str
     ) -> Optional[str]:
-        links = await self.get_provider_external_links(name=provider_name)
+        links = await self.get_provider_external_links(provider_name)
         access_token_url: str = ""
         user_data_url: str = ""
         if links is not None:
@@ -353,7 +353,7 @@ class ThirdPartyGoogleService(AuthThirdPartyOIDCService):
                 if request_params is not None:
                     request_params["grant_type"] = "authorization_code"
 
-                    # make request to access_token_url to get a request token
+                # make request to access_token_url to get a request token
                 access_token: str = ""
                 if request_params is not None:
                     access_token = await self.get_google_access_token(
