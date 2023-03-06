@@ -6,6 +6,8 @@ from typing import Any, Optional, Union
 
 from fastapi import Request
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
@@ -20,6 +22,7 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     PersistentGrantRepository,
     UserRepository,
+    BlacklistedTokenRepository,
 )
 from src.presentation.api.models import (
     BodyRequestRevokeModel,
@@ -81,6 +84,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         jwt_service: JWTService,
+        blacklisted_repo: BlacklistedTokenRepository
     ) -> None:
         self.request: Optional[Request] = None
         self.request_model: Optional[BodyRequestTokenModel] = None
@@ -91,6 +95,7 @@ class TokenService:
         self.user_repo = user_repo
         self.device_repo = device_repo
         self.jwt_service = jwt_service
+        self.blacklisted_repo = blacklisted_repo
 
     async def get_tokens(self) -> dict[str, Any]:
         if self.request_model is None or self.request_model.grant_type is None:
@@ -136,9 +141,6 @@ class TokenService:
             raise ValueError
         token_type_hint = self.request_body.token_type_hint
         if token_type_hint == "refresh_token":
-            logger.debug("I am here")
-            logger.debug(f"{token_type_hint}")
-            logger.debug(f"{self.request_body.token}")
             if await self.persistent_grant_repo.exists(
                 grant_type=token_type_hint, grant_data=self.request_body.token
             ):
@@ -149,20 +151,23 @@ class TokenService:
             else:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
-            # TODO: realize logic for access_token revocation.
-            pass
+            decoded_token = await self.jwt_service.decode_token(self.request_body.token)
+            await self.blacklisted_repo.create(
+                token=self.request_body.token,
+                expiration=decoded_token["exp"]
+            )
         else:
             raise GrantNotFoundError
-
 
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel= token_service.request_model
+        self.request_model: BodyRequestTokenModel= token_service.request_model #type: ignore
         self.client_repo: ClientRepository = token_service.client_repo
         self.persistent_grant_repo: PersistentGrantRepository = token_service.persistent_grant_repo
         self.user_repo: UserRepository = token_service.user_repo
         self.jwt_service: JWTService = token_service.jwt_service
+        self.blacklisted_repo: BlacklistedTokenRepository = token_service.blacklisted_repo
 
     async def validation(self) -> None:
         encoded_attr:Optional[str] = None
@@ -312,6 +317,33 @@ class DeviceCodeMaker(BaseMaker):
             )
         ):
             raise GrantNotFoundError
+            if await self.device_repo.validate_device_code(
+                device_code=self.request_model.device_code
+            ):
+                # add check for expire time
+                now = datetime.datetime.utcnow()
+                check_time = datetime.datetime.timestamp(now)
+                expire_in = await self.device_repo.get_expiration_time(
+                    device_code=self.request_model.device_code
+                )
+                if check_time > expire_in:
+                    await self.device_repo.delete_by_device_code(
+                        device_code=self.request_model.device_code
+                    )
+                    raise DeviceCodeExpirationTimeError(
+                        "Device code expired"
+                    )
+                raise DeviceRegistrationError(
+                    "Device registration in progress"
+                )
+        elif (
+            self.request_model.device_code is None
+            or not await self.persistent_grant_repo.exists(
+                grant_type=self.request_model.grant_type,
+                grant_data=self.request_model.device_code,
+            )
+        ):
+            raise GrantNotFoundError
 
     async def create(self) -> dict[str, Any]:
         
@@ -330,8 +362,8 @@ class RefreshMaker(BaseMaker):
         await self.validation()
         incoming_refresh_token = self.request_model.refresh_token
         try:    
-            await self.jwt_service.decode_token(incoming_refresh_token)
             tokens = await self.make_tokens(create_refresh_token=False)
+            
             return {
                     "access_token": tokens["access_token"],
                     "refresh_token": incoming_refresh_token,
@@ -339,6 +371,7 @@ class RefreshMaker(BaseMaker):
                     "expires_in": self.expiration_time,
                     "token_type": "Bearer",
                     }
+            
         except ExpiredSignatureError:
             tokens = await self.make_tokens()
             return {
