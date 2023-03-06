@@ -360,6 +360,7 @@ python-versions = ">=3.7,<4.0"
 aiohttp = {version = ">=3.8.3", markers = "python_version >= \"3.11\""}
 fastapi = "*"
 pendulum = "*"
+typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.10\""}
 uvicorn = "*"
 
 [package.extras]
@@ -367,6 +368,19 @@ all = ["aiobotocore (>=1.4.1,<2.0.0)", "aiomcache", "redis (>=4.2.0rc1,<5.0.0)"]
 dynamodb = ["aiobotocore (>=1.4.1,<2.0.0)"]
 memcache = ["aiomcache"]
 redis = ["redis (>=4.2.0rc1,<5.0.0)"]
+
+[[package]]
+name = "fastapi-utils"
+version = "0.2.1"
+description = "Reusable utilities for FastAPI"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[package.dependencies]
+fastapi = "*"
+pydantic = ">=1.0,<2.0"
+sqlalchemy = ">=1.3.12,<2.0.0"
 
 [[package]]
 name = "filelock"
@@ -1054,6 +1068,7 @@ itsdangerous = {version = "*", optional = true, markers = "extra == \"full\""}
 jinja2 = {version = "*", optional = true, markers = "extra == \"full\""}
 python-multipart = {version = "*", optional = true, markers = "extra == \"full\""}
 pyyaml = {version = "*", optional = true, markers = "extra == \"full\""}
+typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyaml"]
@@ -1238,8 +1253,8 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.10"
-content-hash = "3da37d02245fd31bb89800638babfc27136a4d0659cbd4b9bb692d9bd5f6d321"
+python-versions = "^3.9"
+content-hash = "6d3d95d605e42cae2205eef9cb797bbf5797b96b48c8c6a564503708d6fdb31f"
 
 [metadata.files]
 aiohttp = [
@@ -1775,6 +1790,10 @@ fastapi = [
 fastapi-cache2 = [
     {file = "fastapi_cache2-0.2.1-py3-none-any.whl", hash = "sha256:532c24253ab8f162ba2f0a7dcccb98591424f0424c28da70346eb3c99daf2b06"},
     {file = "fastapi_cache2-0.2.1.tar.gz", hash = "sha256:0c68803c5a7fdebfec3e4430fd08482c091344dc4dd55a00209a882220712f89"},
+]
+fastapi-utils = [
+    {file = "fastapi-utils-0.2.1.tar.gz", hash = "sha256:0e6c7fc1870b80e681494957abf65d4f4f42f4c7f70005918e9181b22f1bd759"},
+    {file = "fastapi_utils-0.2.1-py3-none-any.whl", hash = "sha256:dd0be7dc7f03fa681b25487a206651d99f2330d5a567fb8ab6cb5f8a06a29360"},
 ]
 filelock = [
     {file = "filelock-3.9.0-py3-none-any.whl", hash = "sha256:f58d535af89bb9ad5cd4df046f741f8553a418c01a7856bf0d173bbc9f6bd16d"},
