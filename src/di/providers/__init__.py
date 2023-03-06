@@ -15,7 +15,7 @@ from .repositories import (
     provide_third_party_oidc_repo_stub,
     provide_user_repo,
     provide_user_repo_stub,
-    
+    provide_blacklisted_repo
 )
 from .services import (
     provide_wellknown_service,
