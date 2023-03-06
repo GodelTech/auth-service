@@ -85,6 +85,7 @@ deploy-to-dev:
     ENV_NAME: development
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./deploy/helm
+    KUBECONFIG: ${KUBERNETES_CONFIG}
 #  image:
 #    name: alpine/helm:3.5.4
 #    entrypoint: [""]
