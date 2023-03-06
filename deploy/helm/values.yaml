@@ -1,7 +1,7 @@
 # App
 application:
   name: identity-server-poc
-  namespace: innovation
+#  namespace: innovation
   image: identity-server-poc:latest
   replicaCount: 1
   port: 8000
