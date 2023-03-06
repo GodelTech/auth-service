@@ -1,7 +1,7 @@
 application:
     image: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
 
-imagePullSecret
+imagePullSecret:
     server: ${CI_REGISTRY}
     username: ${CI_REGISTRY_USER}
     password: ${CI_JOB_TOKEN}
