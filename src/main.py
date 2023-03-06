@@ -411,6 +411,20 @@ def setup_di(app: FastAPI) -> None:
         provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
+    nodepends_provide_third_party_microsoft_service = (
+        lambda: provide_third_party_microsoft_service(
+            client_repo=provide_client_repo(db_engine),
+            user_repo=provide_user_repo(db_engine),
+            persistent_grant_repo=provide_persistent_grant_repo(db_engine),
+            oidc_repo=provide_third_party_oidc_repo(db_engine),
+            http_client=AsyncClient(),
+        )
+    )
+
+    app.dependency_overrides[
+        provide_third_party_microsoft_service_stub
+    ] = nodepends_provide_third_party_microsoft_service
+
 
 app = get_application()
 
