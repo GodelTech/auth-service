@@ -228,6 +228,7 @@ async def microsoft_third_party_service(engine) -> ThirdPartyMicrosoftService:
     return microsoft_service
 
 
+@pytest_asyncio.fixture
 async def wlk_services(engine) -> WellKnownServices:
     wlk_services = WellKnownServices(
         wlk_repo = WellKnownRepository(engine),
