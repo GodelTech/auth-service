@@ -8,7 +8,6 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +75,6 @@ class LoginFormService:
                         "provider_icon": provider[5],
                         "provider_link": provider_link,
                     }
-
                 return providers_data
         return None
 
