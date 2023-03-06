@@ -17,6 +17,7 @@ from src.di.providers import (
     provide_auth_service_stub,
     provide_login_form_service_stub,
 )
+from src.dyna_config import BASE_URL
 from src.presentation.api.models import DataRequestModel, RequestModel
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> Union[JSONResponse, _TemplateResponse] :
+) -> Union[JSONResponse, _TemplateResponse]:
     try:
         auth_class = auth_class
         auth_class.request_model = request_model
@@ -51,6 +52,7 @@ async def get_authorize(
                     "request": request,
                     "request_model": request_model,
                     "external_logins": external_logins,
+                    "base_url": BASE_URL,
                 },
                 status_code=200,
             )
@@ -87,10 +89,10 @@ async def post_authorize(
         auth_class = auth_class
         auth_class.request_model = request_model
         firmed_redirect_uri = await auth_class.get_redirect_url()
-        
+
         if not firmed_redirect_uri:
             raise UserNotFoundError
-        
+
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
