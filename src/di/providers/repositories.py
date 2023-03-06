@@ -74,5 +74,10 @@ def provide_device_repo_stub() -> None:  # pragma: no cover
 def provide_device_repo(engine: AsyncEngine) -> DeviceRepository:
     return DeviceRepository(engine)
 
+
+def provide_blacklisted_repo_stub(engine: AsyncEngine) -> None:
+    ...
+
+
 def provide_blacklisted_repo(engine: AsyncEngine) -> BlacklistedTokenRepository:
     return BlacklistedTokenRepository(engine)
