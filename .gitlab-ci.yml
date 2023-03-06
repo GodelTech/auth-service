@@ -75,19 +75,13 @@ build-and-test:
 #################
 # DEPLOY-TO-DEV
 #################
-#
+
 #deploy-to-dev:
-##  extends: .deploy-to-dev-ext
+#  extends: .deploy-to-dev-ext
 #  stage: deploy-to-dev
-##  variables:
-##    ENV_FOR_DYNACONF: development
-##    SERVICE: "${SERVICE_NAME}"
-##    HELM_PATH: ./deploy/helm
-#  script:
-#    - echo ${CI_REGISTRY}
-#    - echo ${$CI_REGISTRY_USER}
-#    - echo ${$CI_JOB_TOKEN}
-#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-#    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+#  variables:
+#    ENV_FOR_DYNACONF: development
+#    SERVICE: "${SERVICE_NAME}"
+#    HELM_PATH: ./deploy/helm
 #  only:
 #    - 27271-Add-Deploy-Stage-To-Pipeline
