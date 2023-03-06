@@ -3,7 +3,7 @@ from fastapi import Header
 from pydantic import BaseModel
 
 class ResponseUserInfoModel(BaseModel):
-    sub: str
+    sub: Optional[str]
     name: Optional[str]
     given_name: Optional[str]
     family_name: Optional[str]

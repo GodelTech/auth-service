@@ -9,7 +9,7 @@ class BlacklistedToken(BaseModel):
     expiration = Column(Integer, nullable=False)
 
     def __str__(self) -> str:  # pragma: no cover
-        return f"{self.token}"
+        return f"{self.token} | {self.expiration}"
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"{self.token}"

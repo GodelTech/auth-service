@@ -37,7 +37,7 @@ class TestTokenEndpoint:
             'client_id': 'double_test',
             'grant_type': 'code',
             'code': 'secret_code',
-            'scope': 'test',
+            'scope': 'openid',
             'redirect_uri':"http://www.sosa-stephens.com/",
         }
 

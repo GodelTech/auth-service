@@ -3,6 +3,8 @@ import random
 from string import ascii_uppercase
 import secrets
 from typing import Any, Optional, Union
+
+from src.dyna_config import BASE_URL
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
@@ -27,8 +29,8 @@ class DeviceService:
         if type(self.request_model) == DeviceRequestModel:
             device_code = secrets.token_urlsafe(32)
             user_code = "".join(random.sample(ascii_uppercase, k=8))
-            verification_uri = "http://127.0.0.1:8000/device/auth"
-            verification_uri_complete = f"http://127.0.0.1:8000/device/outh?user_code={user_code}"
+            verification_uri = f"http://{BASE_URL}/device/auth"
+            verification_uri_complete = f"http://{BASE_URL}/device/outh?user_code={user_code}"
             if await self._validate_client(client_id=self.request_model.client_id):
                 device_data:dict[str, Any] = {
                     "device_code": device_code,
@@ -45,7 +47,7 @@ class DeviceService:
     
     async def get_redirect_uri(self) -> str:
         if type(self.request_model) == DeviceUserCodeModel:
-            uri_start = "http://127.0.0.1:8000/authorize/?"
+            uri_start = f"http://{BASE_URL}/authorize/?"
             redirect_uri = "https://www.google.com/"
             if self.request_model.user_code is None:
                 raise ValueError
@@ -70,7 +72,7 @@ class DeviceService:
             user_code = scope_data["user_code"]
             if await self._validate_user_code(user_code=user_code):
                 await self.device_repo.delete_by_user_code(user_code=user_code)
-        return "http://127.0.0.1:8000/device/auth/cancel"
+        return f"http://{BASE_URL}/device/auth/cancel"
 
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         """ """

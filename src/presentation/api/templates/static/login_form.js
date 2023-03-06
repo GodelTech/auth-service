@@ -6,6 +6,7 @@ let log_button = document.getElementById('butt')
 let auth_form = document.getElementById('auth_form')
 let request_model = document.getElementById('rq_model')
 let div_elements = document.getElementsByClassName('model_elem')
+let base_url = document.getElementById('base_url').innerText
 
 let yesButton = document.getElementById('yes_butt')
 let noButton = document.getElementById('no_butt')
@@ -57,16 +58,9 @@ function formBody(){
     return bodyData
 }
 
-// async function redirect(data){
-//     return await fetch("http://127.0.0.1:8000/authorize/", {
-//         method: "POST",
-//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//         body: data
-//     })
-// }
 
 async function redirect(data){
-    await fetch("http://127.0.0.1:8000/authorize/", {
+    await fetch(`http://${base_url}/authorize/`, {
         method: "POST",
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: data
@@ -75,7 +69,6 @@ async function redirect(data){
             throw new Error("Wrong credentials")
         } else {
             let new_location = response.url
-            // window.location = "http://127.0.0.1:8000/device/auth/success"
             window.location = new_location
         }
     }).catch((err) => {
@@ -92,7 +85,7 @@ async function redirect(data){
     })
 }
 async function clearDeviceData(data){
-    response = await fetch("http://127.0.0.1:8000/device/auth/cancel", {
+    response = await fetch(`http://${base_url}/device/auth/cancel`, {
         method: "DELETE",
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: data
@@ -146,7 +139,7 @@ deviceButtonsArray.forEach((item) => {
     item.addEventListener('click', async function() {
         let device_link = item.name
         state = parseLink(device_link)
-        await fetch("http://127.0.0.1:8000/authorize/oidc/state", {
+        await fetch(`http://${base_url}/authorize/oidc/state`, {
             method: "POST",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: state

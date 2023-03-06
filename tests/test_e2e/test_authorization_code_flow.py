@@ -60,8 +60,8 @@ class TestAuthorizationCodeFlow:
             "client_id": "spider_man",
             "grant_type": "code",
             "code": secret_code,
-            "scope": "test",
-            "redirect_uri": "https://www.google.com/",
+            "scope": "openid profile",
+            "redirect_uri": "http://www.sparks.net/",
         }
 
         content_type = "application/x-www-form-urlencoded"
