@@ -7,7 +7,6 @@ from src.data_access.postgresql.tables.identity_resource import IdentityProvider
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim, User
 from src.business_logic.services.jwt_token import JWTService
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 
