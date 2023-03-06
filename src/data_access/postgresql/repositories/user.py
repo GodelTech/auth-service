@@ -1,21 +1,30 @@
-from sqlalchemy import select, exists, update, insert, text, join
+from typing import Any, Dict, Optional, Tuple, Union
+
+from sqlalchemy import exists, insert, join, select, text, update
+from sqlalchemy.engine.result import ChunkedIteratorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from src.data_access.postgresql.tables.group import Group
+
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
-    UserNotFoundError,
+    DuplicationError,
     NoPasswordError,
+    UserNotFoundError,
 )
-
 from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.tables import User, UserClaim, Role, UserClaimType, UserPassword, IdentityProvider
-from src.data_access.postgresql.tables.users import users_roles, users_groups
-from src.data_access.postgresql.errors.user import DuplicationError
-from typing import Union
+from src.data_access.postgresql.tables import (
+    IdentityProvider,
+    Role,
+    User,
+    UserClaim,
+    UserClaimType,
+    UserPassword,
+)
+from src.data_access.postgresql.tables.group import Group
+from src.data_access.postgresql.tables.users import users_groups, users_roles
 
 
-def params_to_dict(**kwargs):
+def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:
@@ -37,7 +46,7 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
 
-    async def delete(self, user_id: int):
+    async def delete(self, user_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -59,8 +68,16 @@ class UserRepository(BaseRepository):
                 session = sess
                 user = await session.execute(
                     select(User)
-                    .join(UserPassword, User.password_hash_id == UserPassword.id, isouter = True)
-                    .join(IdentityProvider, User.identity_provider_id == IdentityProvider.id, isouter = True)
+                    .join(
+                        UserPassword,
+                        User.password_hash_id == UserPassword.id,
+                        isouter=True,
+                    )
+                    .join(
+                        IdentityProvider,
+                        User.identity_provider_id == IdentityProvider.id,
+                        isouter=True,
+                    )
                     .where(User.id == user_id)
                 )
                 user = user.first()
@@ -69,7 +86,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_hash_password(self, user_name: str) -> tuple:
+    async def get_hash_password(self, user_name: str) -> Tuple[str, int]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -89,7 +106,7 @@ class UserRepository(BaseRepository):
 
             return user[0].password_hash.value, user[0].id
 
-    async def get_claims(self, id: int) -> dict:
+    async def get_claims(self, id: int) -> Dict[str, Any]:
         claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
@@ -103,7 +120,7 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def request_DB_for_claims(self, sub: int):
+    async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -138,8 +155,16 @@ class UserRepository(BaseRepository):
                 session = sess
                 user = await session.execute(
                     select(User)
-                    .join(UserPassword, User.password_hash_id == UserPassword.id, isouter = True)
-                    .join(IdentityProvider, User.identity_provider_id == IdentityProvider.id, isouter = True)
+                    .join(
+                        UserPassword,
+                        User.password_hash_id == UserPassword.id,
+                        isouter=True,
+                    )
+                    .join(
+                        IdentityProvider,
+                        User.identity_provider_id == IdentityProvider.id,
+                        isouter=True,
+                    )
                     .where(User.username == username)
                 )
                 user = user.first()
@@ -149,7 +174,7 @@ class UserRepository(BaseRepository):
             raise ValueError
 
     async def get_all_users(
-        self, group_id: int = None, role_id: int = None
+        self, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -198,10 +223,10 @@ class UserRepository(BaseRepository):
         phone_number_confirmed: Union[None, bool] = None,
         two_factors_enabled: Union[None, bool] = None,
         lockout_end_date_utc: Union[None, str] = None,
-        password_hash: Union[None, int] = None,
+        password_hash: Union[None, str] = None,
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = None,
-    ):
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -235,7 +260,7 @@ class UserRepository(BaseRepository):
 
     async def create(
         self,
-        id: Union[None, str] = None,
+        id: Union[None, int] = None,
         username: Union[None, str] = None,
         identity_provider_id: Union[None, int] = None,
         security_stamp: Union[None, str] = None,
@@ -248,7 +273,7 @@ class UserRepository(BaseRepository):
         password_hash_id: Union[None, int] = None,
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = 0,
-    ) -> bool:
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -276,7 +301,7 @@ class UserRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def add_group(self, user_id: int, group_id: int):
+    async def add_group(self, user_id: int, group_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -307,7 +332,7 @@ class UserRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def add_role(self, user_id: int, role_id: int) -> bool:
+    async def add_role(self, user_id: int, role_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -315,14 +340,15 @@ class UserRepository(BaseRepository):
             async with session_factory() as sess:
                 session = sess
                 await session.execute(
-                    insert(users_roles).values(user_id=user_id, role_id=role_id)
+                    insert(users_roles).values(
+                        user_id=user_id, role_id=role_id
+                    )
                 )
                 await session.commit()
-                return True
         except:
             raise DuplicationError
 
-    async def remove_user_groups(self, user_id: int, group_ids: list) -> bool:
+    async def remove_user_groups(self, user_id: int, group_ids: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -335,7 +361,7 @@ class UserRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def remove_user_roles(self, user_id: int, role_ids: str) -> bool:
+    async def remove_user_roles(self, user_id: int, role_ids: str) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -345,9 +371,8 @@ class UserRepository(BaseRepository):
                 sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND role_id IN ({role_ids})"
                 await session.execute(text(sql))
                 await session.commit()
-            return True
         except:
-            return False
+            raise ValueError
 
     async def get_roles(self, user_id: int) -> list[Role]:
         session_factory = sessionmaker(
@@ -361,11 +386,12 @@ class UserRepository(BaseRepository):
                     .join(User, Role.users)
                     .where(User.id == user_id)
                 )
-                return [role[0] for role in iterator.all()]
+                result = [role[0] for role in iterator.all()]
+                return result
         except:
             raise ValueError
 
-    async def get_groups(self, user_id: int):
+    async def get_groups(self, user_id: int) -> list[Group]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -377,12 +403,14 @@ class UserRepository(BaseRepository):
                     .join(User, Group.users)
                     .where(User.id == user_id)
                 )
-                return [group[0] for group in iterator.all()]
+                result = [group[0] for group in iterator.all()]
+                return result
         except:
             raise ValueError
 
-    async def change_password(self, user_id: int, password:str = None):
-
+    async def change_password(
+        self, user_id: int, password: Optional[str] = None
+    ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -391,40 +419,62 @@ class UserRepository(BaseRepository):
             user = await self.get_user_by_id(user_id=user_id)
             if user:
                 if password is None:
-                        updates = update(User).values(password_hash_id = None).where(User.id == user_id)
-                        await session.execute(updates)
-                        if not user.password_hash_id:
-                            password_to_delete = (await session.execute(select(UserPassword).where(UserPassword.id == user.password_hash_id))).first()
-                            await session.delete(password_to_delete)
-                        await session.commit()
+                    updates = (
+                        update(User)
+                        .values(password_hash_id=None)
+                        .where(User.id == user_id)
+                    )
+                    await session.execute(updates)
+                    if not user.password_hash_id:
+                        password_to_delete = (
+                            await session.execute(
+                                select(UserPassword).where(
+                                    UserPassword.id == user.password_hash_id
+                                )
+                            )
+                        ).first()
+                        await session.delete(password_to_delete)
+                    await session.commit()
                 else:
                     if user.password_hash_id:
-                        updates = update(UserPassword).values(value = password).where(UserPassword.id == user.password_hash_id)
+                        updates = (
+                            update(UserPassword)
+                            .values(value=password)
+                            .where(UserPassword.id == user.password_hash_id)
+                        )
                         await session.execute(updates)
                         await session.commit()
                     else:
                         await session.execute(
-                            insert(UserPassword).values(value = password)
+                            insert(UserPassword).values(value=password)
                         )
-                        password_id = await session.execute(select(UserPassword).where(UserPassword.value == password))
+                        password_id = await session.execute(
+                            select(UserPassword).where(
+                                UserPassword.value == password
+                            )
+                        )
                         password_id = password_id.first()[0].id
-                        updates = update(User).values(password_hash_id = password_id).where(User.id == user_id)
+                        updates = (
+                            update(User)
+                            .values(password_hash_id=password_id)
+                            .where(User.id == user_id)
+                        )
                         await session.execute(updates)
                         await session.commit()
             else:
                 raise ValueError
 
-    async def validate_user_by_username(self, username: str) -> bool:    
-        session_factory = sessionmaker(        
-            self.engine, expire_on_commit=False, class_=AsyncSession    
-            )    
-        async with session_factory() as sess:        
-            session = sess        
-            result = await session.execute(            
-                select(exists().where(User.username == username))        
-                )        
-            result = result.first()        
+    async def validate_user_by_username(self, username: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                select(exists().where(User.username == username))
+            )
+            result = result.first()
             return result[0]
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return "User repository"

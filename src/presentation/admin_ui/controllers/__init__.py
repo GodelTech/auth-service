@@ -55,20 +55,21 @@ from .users import (
     UserClaimAdminController,
     PasswordAdminController,
 )
-
+from typing import no_type_check
 Base = declarative_base()
 
 
 class SeparationLine(BaseView):
     name = " "
     # icon = "fa-solid fa-chart-line"
-
+    @no_type_check
     @expose("/", methods=["GET"])
     def test_page(self, request) -> None:
         return None
 
 
 class CustomAdmin(Admin):
+    @no_type_check
     async def create(self, request: Request) -> _TemplateResponse:
         # Create model endpoint.
         try:
@@ -85,7 +86,6 @@ class CustomAdmin(Admin):
             form_data = await request.form()
 
             form = Form(form_data)
-
             if identity == "client-secret":
                 value = str(uuid.uuid4())
                 form._fields["value"].default = value
@@ -96,6 +96,7 @@ class CustomAdmin(Admin):
                 "model_view": model_view,
                 "form": form,
             }
+            
 
             if request.method == "GET":
                 return self.templates.TemplateResponse(

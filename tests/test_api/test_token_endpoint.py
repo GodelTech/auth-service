@@ -9,7 +9,9 @@ from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
 )
-
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.business_logic.services.tokens import TokenService
 
 @pytest.mark.asyncio
 class TestTokenEndpoint:
@@ -19,8 +21,8 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_code_authorization(
-        self, client: AsyncClient, engine, token_service
-    ):
+        self, client: AsyncClient, engine: AsyncEngine, token_service: TokenService
+    ) -> None:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
         service = token_service
         await service.persistent_grant_repo.create(
@@ -35,7 +37,7 @@ class TestTokenEndpoint:
             'client_id': 'double_test',
             'grant_type': 'code',
             'code': 'secret_code',
-            'scope': 'test',
+            'scope': 'openid',
             'redirect_uri':"http://www.sosa-stephens.com/",
         }
 
@@ -49,18 +51,18 @@ class TestTokenEndpoint:
         assert response.status_code == status.HTTP_200_OK
 
         response_json = response.json()
-        pytest.refresh_token = response_json['refresh_token']
+        refresh_token = response_json['refresh_token']
         assert (
             await service.persistent_grant_repo.exists(
-                grant_type='refresh_token', grant_data=pytest.refresh_token
+                grant_type='refresh_token', grant_data=refresh_token
             )
             is True
         )
 
     @pytest.mark.asyncio
     async def test_refresh_token_authorization(
-        self, client: AsyncClient, engine
-    ):
+        self, client: AsyncClient, engine: AsyncEngine
+    ) -> None:
         '''
         It can pass only if the test above (test_code_authorization) passed.
         It uses refresh_token grant from that previous test.
@@ -81,7 +83,7 @@ class TestTokenEndpoint:
         )
 
         params = {
-            'client_id': 'double_test',
+            'client_id': 'test_client',
             'grant_type': 'refresh_token',
             'refresh_token': test_token,
             'scope': 'test',
@@ -105,7 +107,7 @@ class TestTokenEndpoint:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.asyncio
-    async def test_wrong_client_id(self, client: AsyncClient, engine):
+    async def test_wrong_client_id(self, client: AsyncClient, engine: AsyncEngine) -> None:
         self.persistent_grant_repo = PersistentGrantRepository(engine)
 
         await self.persistent_grant_repo.create(
@@ -136,7 +138,7 @@ class TestTokenEndpoint:
     @pytest.mark.asyncio
     async def test_code_authorization_incorrect_code(
         self, client: AsyncClient
-    ):
+    ) -> None:
         params = {
             'client_id': 'test_client',
             'grant_type': 'code',
@@ -155,7 +157,7 @@ class TestTokenEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.asyncio
-    async def test_refresh_token_incorrect_token(self, client: AsyncClient):
+    async def test_refresh_token_incorrect_token(self, client: AsyncClient) -> None:
         params = {
             'client_id': 'test_client',
             'grant_type': 'refresh_token',
@@ -175,8 +177,8 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_client_credentials_successful(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient,
+    ) -> None:
 
         params = {
             'client_id': 'test_client',
@@ -207,8 +209,8 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_client_credentials_incorrect_client_id(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient,
+    ) -> None:
 
         params = {
             'client_id': 'Star_Platinum',
@@ -225,8 +227,8 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_client_credentials_incorrect_client_secret(
-        self, client: AsyncClient, connection
-    ):
+        self, client: AsyncClient,
+    ) -> None:
 
         params = {
             'client_id': 'test_client',

@@ -13,6 +13,7 @@ from src.data_access.postgresql.tables import (
     client,
     device
 )
+from typing import Any
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,6 +21,7 @@ config = context.config
 
 # get database path from dyna_config
 config.set_section_option("alembic", "sqlalchemy.url", DB_URL)
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -66,7 +68,7 @@ def run_migrations_offline() -> None:
 
 # EnvironmentContext.configure.compare_type = True
 
-def do_run_migrations(connection):
+def do_run_migrations(connection:Any) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():

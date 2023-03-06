@@ -61,11 +61,21 @@ class LoginFormService:
                         ]
                     )
                     # await self.oidc_repo.create_state(state=state)
+                    provider_link = (
+                        f"{provider[1]}?client_id={provider[2]}&"
+                        f"redirect_uri={provider[3]}&state={state}&"
+                        f"response_type={self.request_model.response_type}"
+                    )
+                    # TODO
+                    if provider[0] in ["google", "linkedin"]:
+                        provider_link += "&scope=openid profile email"
+                    if provider[0] == "gitlab":
+                        provider_link += "&scope=openid"
+                    if provider[0] == "microsoft":
+                        provider_link += "&scope=openid+profile+email"
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
-                        "provider_link": f"{provider[1]}?client_id={provider[2]}&"
-                        f"redirect_uri={provider[3]}&state={state}&"
-                        f"response_type={self.request_model.response_type}",
+                        "provider_link": provider_link,
                     }
                 return providers_data
         return None

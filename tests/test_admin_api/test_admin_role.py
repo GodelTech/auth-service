@@ -13,13 +13,16 @@ from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
 from src.data_access.postgresql.errors.user import DuplicationError
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
 class TestAdminRoleEndpoint:
-    async def setup_base(self, engine, user_id: int = 1000):
+    async def setup_base(self, engine: AsyncEngine, user_id: int = 1000) -> None:
         self.access_token = await JWTService().encode_jwt(
             payload={"stand": "CrazyDiamond"}
         )
@@ -48,12 +51,89 @@ class TestAdminRoleEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
-           # "password_hash": "1",
+            #  "password_hash": "1",
             "two_factors_enabled": False,
         }
-        await self.user_repo.create(**data)
+        await self.user_repo.create( 
+            id=user_id,
+            username="DioBrando",
+            email = "theworld@timestop.com",
+            email_confirmed = True,
+            phone_number ="+20-123-123-123",
+            phone_number_confirmed = False,
+            two_factors_enabled = False,
+        )
+        await self.user_repo.change_password(
+            user_id=user_id, password="WalkLikeAnEgiptian"
+        )
 
-    async def setup_roles(self, engine):
+    async def setup_groups_roles(self, engine: AsyncEngine) -> None:
+        await self.setup_base(engine)
+        group_repo = GroupRepository(engine)
+        groups:list[dict[str, Any]] = [
+            {"name": "Polnareff", "parent_group": None},
+            {"name": "Giorno", "parent_group": None},
+        ]
+        for group in groups:
+            try:
+                name = group["name"]
+                parent_group = group["parent_group"]
+                if type(name) is str and (parent_group is None or type(parent_group) is int):
+                    await group_repo.create(
+                            name=name,
+                            parent_group=parent_group,
+                        )
+            except DuplicationError:
+                if group["name"]:
+                    logger.info(group["name"] + " group already exists")
+
+        groups = [
+            {
+                "name": "Gold",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Giorno")
+                ).id,
+            },
+            {
+                "name": "Expirience",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Giorno")
+                ).id,
+            },
+            {
+                "name": "Silver",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Polnareff")
+                ).id,
+            },
+            {
+                "name": "Silver",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Polnareff")
+                ).id,
+            },
+        ]
+        for group in groups:
+            try:
+                await group_repo.create(**group)
+            except DuplicationError:
+                logger.info(group["name"] + " group already exists")
+
+        groups = [
+            {
+                "name": "Reqiuem",
+                "parent_group": (
+                    await group_repo.get_group_by_name(name="Expirience")
+                ).id,
+            }
+        ]
+        for group in groups:
+            try:
+                await group_repo.create(**group)
+            except DuplicationError:
+                if group["name"]:
+                    logger.info(group["name"] + " group already exists")
+
         role_repo = RoleRepository(engine)
         role_repo.delete
         for role in ("Standuser", "French", "Italian", "Vampire"):
@@ -62,36 +142,34 @@ class TestAdminRoleEndpoint:
             except DuplicationError:
                 logger.info(role + " role already exists")
 
-    async def test_get_role(self, engine, client: AsyncClient):
+    async def test_get_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
-        await self.setup_roles(engine)
+        await self.setup_groups_roles(engine)
 
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_id": (await self.role_repo.get_role_by_name("Standuser")).id
-        }
+        role_id = (await self.role_repo.get_role_by_name("Standuser")).id
+        
 
         response = await client.request(
             "GET",
-            "/administration/role/get_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
         logger.info(response_content)
         assert response_content["role"]["name"] == "Standuser"
 
-    async def test_get_all_roles(self, engine, client: AsyncClient):
+    async def test_get_all_roles(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
-        await self.setup_roles(engine)
+        await self.setup_groups_roles(engine)
 
         headers = {
             "access-token": self.access_token,
@@ -99,73 +177,41 @@ class TestAdminRoleEndpoint:
         }
 
         response = await client.request(
-            "GET", "/administration/role/get_all_roles", headers=headers
+            "GET", "/administration/roles", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
         logger.info(response_content)
         assert len(response_content["all_roles"])
 
-    async def test_get_roles(self, engine, client: AsyncClient):
+
+    async def test_delete_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
-        await self.setup_roles(engine)
+        await self.setup_groups_roles(engine)
 
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_ids": f'{(await self.role_repo.get_role_by_name(name = "Standuser")).id},{(await self.role_repo.get_role_by_name(name = "Vampire")).id}'
-        }
-
-        response = await client.request(
-            "GET",
-            "/administration/role/get_roles",
-            headers=headers,
-            params=params,
-        )
-        assert response.status_code == status.HTTP_200_OK
-        response_content = json.loads(response.content.decode("utf-8"))
-        logger.info(response_content)
-        for role in list(response_content.values())[0]:
-            if role["name"] not in ("Standuser", "Vampire"):
-                raise AssertionError
-
-    async def test_delete_role(self, engine, client: AsyncClient):
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_roles(engine)
-
-        headers = {
-            "access-token": self.access_token,
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-        params = {
-            "role_id": (
-                await self.role_repo.get_role_by_name(name="Standuser")
-            ).id
-        }
+        role_id=(await self.role_repo.get_role_by_name(name="Standuser")).id
 
         response = await client.request(
             "DELETE",
-            "/administration/role/delete_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            "/administration/role/get_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    async def test_create_update_role(self, engine, client: AsyncClient):
+    async def test_create_update_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -190,7 +236,7 @@ class TestAdminRoleEndpoint:
 
         response = await client.request(
             "POST",
-            "/administration/role/new_role",
+            "/administration/roles",
             headers=headers,
             data=params,
         )
@@ -200,14 +246,11 @@ class TestAdminRoleEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "role_id": (await self.role_repo.get_role_by_name("Pillar Man")).id,
-            "name": "Ultimate Life Form",
-        }
-
+        params = {"name": "Ultimate Life Form",}
+        role_id = (await self.role_repo.get_role_by_name("Pillar Man")).id
         response = await client.request(
             "PUT",
-            "/administration/role/update_role",
+            f"/administration/roles/{role_id}",
             headers=headers,
             data=params,
         )

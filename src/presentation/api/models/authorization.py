@@ -20,12 +20,13 @@ class RequestModel(BaseModel):
     id_token_hint: Optional[str]
     login_hint: Optional[str]
     acr_values: Optional[str]
-
+    user_code: Optional[str]
+    
     class Config:
         orm_mode = True
 
     def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}: {self.client_id}"
+        return f"Model {self.__class__.__name__}: {self.client_id}"  # pragma: no coverage
 
 
 class ResponseAuthorizationModel(BaseModel):

@@ -4,6 +4,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
 from src.business_logic.services.jwt_token import JWTService
@@ -13,13 +14,15 @@ from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
 from src.data_access.postgresql.errors.user import DuplicationError
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
 class TestAdminGroupEndpoint:
-    async def setup_base(self, engine, user_id: int = 1000):
+    async def setup_base(self, engine: AsyncEngine, user_id: int = 1000) -> None:
         self.access_token = await JWTService().encode_jwt(
             payload={"stand": "CrazyDiamond"}
         )
@@ -48,21 +51,41 @@ class TestAdminGroupEndpoint:
             "email_confirmed": True,
             "phone_number": "+20-123-123-123",
             "phone_number_confirmed": False,
+            #  "password_hash": "1",
             "two_factors_enabled": False,
         }
-        await self.user_repo.create(**data)
+        await self.user_repo.create( 
+            id=user_id,
+            username="DioBrando",
+            email = "theworld@timestop.com",
+            email_confirmed = True,
+            phone_number ="+20-123-123-123",
+            phone_number_confirmed = False,
+            two_factors_enabled = False,
+        )
+        await self.user_repo.change_password(
+            user_id=user_id, password="WalkLikeAnEgiptian"
+        )
 
-    async def setup_groups_roles(self, engine):
+    async def setup_groups_roles(self, engine: AsyncEngine) -> None:
+        await self.setup_base(engine)
         group_repo = GroupRepository(engine)
-        groups = [
+        groups:list[dict[str, Any]] = [
             {"name": "Polnareff", "parent_group": None},
             {"name": "Giorno", "parent_group": None},
         ]
         for group in groups:
             try:
-                await group_repo.create(**group)
+                name = group["name"]
+                parent_group = group["parent_group"]
+                if type(name) is str and (parent_group is None or type(parent_group) is int):
+                    await group_repo.create(
+                            name=name,
+                            parent_group=parent_group,
+                        )
             except DuplicationError:
-                logger.info(group["name"] + " group already exists")
+                if group["name"]:
+                    logger.info(group["name"] + " group already exists")
 
         groups = [
             {
@@ -84,7 +107,7 @@ class TestAdminGroupEndpoint:
                 ).id,
             },
             {
-                "name": "Chariot",
+                "name": "Silver",
                 "parent_group": (
                     await group_repo.get_group_by_name(name="Polnareff")
                 ).id,
@@ -108,9 +131,18 @@ class TestAdminGroupEndpoint:
             try:
                 await group_repo.create(**group)
             except DuplicationError:
-                logger.info(group["name"] + " group already exists")
+                if group["name"]:
+                    logger.info(group["name"] + " group already exists")
 
-    async def test_get_group(self, engine, client: AsyncClient):
+        role_repo = RoleRepository(engine)
+        role_repo.delete
+        for role in ("Standuser", "French", "Italian", "Vampire"):
+            try:
+                await role_repo.create(name=role)
+            except DuplicationError:
+                logger.info(role + " role already exists")
+
+    async def test_get_group(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -120,24 +152,20 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name("Polnareff")
-            ).id
-        }
-
+       
+        group_id=(await self.group_repo.get_group_by_name("Polnareff")).id
+        
         response = await client.request(
             "GET",
-            "/administration/group/get_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
         logger.info(response_content)
         assert response_content["name"] == "Polnareff"
 
-    async def test_get_all_group(self, engine, client: AsyncClient):
+    async def test_get_all_group(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -149,14 +177,14 @@ class TestAdminGroupEndpoint:
         }
 
         response = await client.request(
-            "GET", "/administration/group/get_all_groups", headers=headers
+            "GET", "/administration/groups", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
         logger.info(response_content)
-        assert len(response_content["all_groups"]) >= 7
+        assert len(response_content["all_groups"]) >= 6
 
-    async def test_get_subgroups(self, engine, client: AsyncClient):
+    async def test_get_subgroups(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -166,17 +194,13 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name(name="Giorno")
-            ).id
-        }
+        
+        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
 
         response = await client.request(
             "GET",
-            "/administration/group/get_subgroups",
+            f"/administration/groups/{group_id}/subgroups",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -187,7 +211,7 @@ class TestAdminGroupEndpoint:
         else:
             raise AssertionError
 
-    async def test_delete_group(self, engine, client: AsyncClient):
+    async def test_delete_group(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -197,29 +221,23 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name(name="Giorno")
-            ).id
-        }
+        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
 
         response = await client.request(
             "DELETE",
-            "/administration/group/delete_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
-            data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            "/administration/group/get_group",
-            headers=headers,
-            params=params,
+            f"/administration/groups/{group_id}",
+            headers=headers
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    async def test_create_update_group(self, engine, client: AsyncClient):
+    async def test_create_update_group(self, engine: AsyncEngine, client: AsyncClient) -> None:
         await self.setup_base(
             engine,
         )
@@ -237,7 +255,7 @@ class TestAdminGroupEndpoint:
 
         response = await client.request(
             "POST",
-            "/administration/group/new_group",
+            "/administration/groups",
             headers=headers,
             data=params,
         )
@@ -248,13 +266,12 @@ class TestAdminGroupEndpoint:
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {
-            "group_id": (await self.group_repo.get_group_by_name("Diavolo")).id,
             "name": "Doppio",
         }
-
+        group_id = (await self.group_repo.get_group_by_name("Diavolo")).id
         response = await client.request(
             "PUT",
-            "/administration/group/update_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
             data=params,
         )

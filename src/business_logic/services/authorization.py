@@ -2,6 +2,7 @@ import logging
 import secrets
 from typing import Any, Dict, Optional
 
+from src.dyna_config import BASE_URL
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.tokens import get_single_token
@@ -115,7 +116,7 @@ class AuthorizationService:
             )
             await self.device_repo.delete_by_user_code(user_code=user_code)
 
-            return "http://127.0.0.1:8000/device/auth/success"
+            return f"http://{BASE_URL}/device/auth/success"
         return None
 
     async def get_redirect_url_token_response_type(
@@ -143,8 +144,8 @@ class AuthorizationService:
     async def get_redirect_url_id_token_token_response_type(
         self, user_id: int
     ) -> Optional[str]:
-        expiration_time = 600
         if self.request_model is not None:
+            expiration_time = 600
             scope = {"scopes": self.request_model.scope}
             claims = await self.user_repo.get_claims(
                 id=1
@@ -172,16 +173,19 @@ class AuthorizationService:
             return result_uri
         return None
 
-    async def _validate_client(self, client_id: str) -> bool:
+    async def _validate_client(self, client_id: str) -> Optional[bool]:
         """
         Checks if the client is in the database.
         """
-        client = await self.client_repo.get_client_by_client_id(
-            client_id=client_id
-        )
-        return client
+        if self.request_model is not None:
+            client = await self.client_repo.get_client_by_client_id(
+                client_id=client_id
+            )
+            return client
+        else:
+            return None
 
-    async def _parse_scope_data(self, scope: str) -> Dict[str, Any]:
+    async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         """ """
         return {
             item.split("=")[0]: item.split("=")[1]
@@ -200,8 +204,8 @@ class AuthorizationService:
                 redirect_uri += f"&state={self.request_model.state}"
 
             return redirect_uri
-        return None
-
+        else:
+            return None
     @property
     def request_model(self) -> Optional[RequestModel]:
         return self._request_model

@@ -1,8 +1,9 @@
 from sqladmin import ModelView
 from sqladmin.forms import get_model_form
-
+from typing import Type, no_type_check
 from src.data_access.postgresql.tables.client import *
-
+from typing import Optional
+from wtforms import Form
 
 class ClientAdminController(ModelView, model=Client):
     icon = "fa-solid fa-mobile-screen-button"
@@ -50,11 +51,12 @@ class ClientAdminController(ModelView, model=Client):
         Client.id_restrictions,
     ]
 
-    async def scaffold_form(self, task=None):  # -> Type[Form]:
+    @no_type_check
+    async def scaffold_form(self, task=None) -> Type[Form]:
         if self.form is not None:
             return self.form
 
-        exclude = []
+        exclude:list[Optional[str]] = []
 
         if task is None:
             exclude = None

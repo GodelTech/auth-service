@@ -28,7 +28,7 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_password_table()
         cls.populate_user_table()
-        
+
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
@@ -37,9 +37,9 @@ class DataBasePopulation:
         cls.populate_grants()
 
     @classmethod
-    def populate_user_password_table(cls):
+    def populate_user_password_table(cls) -> None:
         # from src.business_logic.services.password import PasswordHash
-    
+
         for i in range(len(data.CLIENT_USERNAMES)):
             password = user_factory.UserPasswordFactory()
             user_factory.sess.session.commit()
@@ -69,7 +69,6 @@ class DataBasePopulation:
                 "TRUNCATE TABLE persistent_grant_types RESTART IDENTITY CASCADE"
             )
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
         )
@@ -83,12 +82,11 @@ class DataBasePopulation:
             text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
         )
         sess.session.execute(
-            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE")
+            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
         )
         sess.session.execute(
             text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE")
         )
-
         sess.session.execute(
             text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE")
         )
@@ -114,7 +112,9 @@ class DataBasePopulation:
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
         for val in data.USER_CLAIM_TYPE:
-            type_of_claim = user_factory.UserClaimTypeFactory(type_of_claim=val)
+            type_of_claim = user_factory.UserClaimTypeFactory(
+                type_of_claim=val
+            )
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
@@ -204,9 +204,10 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls) -> None:
-        for item in range(len(data.CLIENT_IDS)):
+        for i in range(len(data.POST_LOGOUT_REDIRECT_URL)):
             uri = cl_factory.ClientPostLogoutRedirectUriFactory(
-                client_id=item + 1
+                client_id=i + 1,
+                post_logout_redirect_uri=data.POST_LOGOUT_REDIRECT_URL[i],
             )
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()

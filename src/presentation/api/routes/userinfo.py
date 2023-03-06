@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Any, Optional, Union
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
@@ -15,39 +15,30 @@ from src.presentation.api.models.userinfo import ResponseUserInfoModel
 
 logger = logging.getLogger(__name__)
 
-userinfo_router = APIRouter(
-    prefix="/userinfo",
-)
+userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 
 
-@userinfo_router.get(
-    "/", response_model=dict, tags=["UserInfo"]
-)
-@cache(
-    expire=CacheTimeSettings.USERINFO,
-    coder=JsonCoder,
-    key_builder=builder_with_parametr,
-)
+@userinfo_router.get("/", response_model=dict)
+# @cache(
+#     expire=CacheTimeSettings.USERINFO,
+#     coder=JsonCoder,
+#     key_builder=builder_with_parametr,
+# )
 async def get_userinfo(
     request: Request,
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get("authorization")
-
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
-        logger.info("Collecting Claims from DataBase.")
-        return await userinfo_class.get_user_info()
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
+        logger.debug("Collecting Claims from DataBase.")
+        result = await userinfo_class.get_user_info()
+        
+        return {k: v for k, v in result.items() if v is not None}
 
     except ClaimsNotFoundError:
         raise HTTPException(
@@ -60,13 +51,8 @@ async def get_userinfo(
             status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.post(
-    "/", response_model=ResponseUserInfoModel, tags=["UserInfo"]
-)
+@userinfo_router.post("/", response_model=ResponseUserInfoModel)
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
@@ -78,20 +64,14 @@ async def post_userinfo(
         default=None, description="Authorization"
     ),  # crutch for swagger
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> dict[str, Any]:
     try:
         userinfo_class = userinfo_class
-        token = request.headers.get("authorization")
-
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
-        return await userinfo_class.get_user_info()
+        result = await userinfo_class.get_user_info()
+        return {k: v for k, v in result.items() if v is not None}
 
     except ClaimsNotFoundError:
         raise HTTPException(
@@ -104,11 +84,8 @@ async def post_userinfo(
             status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.get("/jwt", response_model=str, tags=["UserInfo"])
+@userinfo_router.get("/jwt", response_model=str)
 @cache(
     expire=CacheTimeSettings.USERINFO_JWT,
     coder=JsonCoder,
@@ -120,23 +97,17 @@ async def get_userinfo_jwt(
         default=None, description="Authorization"
     ),
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
-
+) -> str:
     try:
         userinfo_class = userinfo_class
         jwt_service = JWTService()
-
-        token = request.headers.get("authorization")
-        if token != None:
-            userinfo_class.authorization = token
-        elif auth_swagger != None:
-            userinfo_class.authorization = auth_swagger
-        else:
-            raise PermissionError
-
+        token = request.headers.get("authorization") or auth_swagger
+        userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
+        result = await userinfo_class.get_user_info()
+        result = {k: v for k, v in result.items() if v is not None}
         return await userinfo_class.jwt.encode_jwt(
-            payload=await userinfo_class.get_user_info()
+            payload=result
         )
 
     except ValueError:
@@ -150,21 +121,17 @@ async def get_userinfo_jwt(
             detail="You don't have permission for this claims",
         )
 
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@userinfo_router.get(
-    "/get_default_token", response_model=str, tags=["UserInfo"]
-)
+@userinfo_router.get("/get_default_token", response_model=str)
 async def get_default_token(
-    with_iss_me: bool = None,
-    with_aud_facebook: bool = None,
+    with_iss_me: Optional[bool] = None,
+    with_aud_facebook: Optional[bool] = None,
+    scope: str = 'profile',
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
+) -> str:
     try:
         uis = userinfo_class
-        payload = {"sub": "1"}
+        payload: dict[str, Any] = {"sub": "1", "scope": scope}
         if with_iss_me:
             payload["iss"] = "me"
         if with_aud_facebook:
@@ -174,14 +141,13 @@ async def get_default_token(
         raise HTTPException(status_code=500)
 
 
-@userinfo_router.get("/decode_token", response_model=dict, tags=["UserInfo"])
+@userinfo_router.get("/decode_token", response_model=dict)
 async def get_decode_token(
     token: str,
-    issuer: str = None,
-    audience: str = None,
+    issuer: Optional[str] = None,
+    audience: Optional[str] = None,
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
-):
-    # try:
+) -> dict[str, Any]:
     uis = userinfo_class
     kwargs = {}
     if issuer is not None:
@@ -190,5 +156,3 @@ async def get_decode_token(
         kwargs["audience"] = audience
 
     return await uis.jwt.decode_token(token, **kwargs)
-    # except:
-    raise HTTPException(status_code=500)

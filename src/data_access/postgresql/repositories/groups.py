@@ -7,9 +7,9 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.group import *
+from typing import Any, Dict, Union, Optional
 
-
-def params_to_dict(**kwargs):
+def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
     for key in kwargs:
         if kwargs[key] is not None:
@@ -19,10 +19,12 @@ def params_to_dict(**kwargs):
 
 class GroupRepository(BaseRepository):
     async def create(
-        self, name: str = None, parent_group: int = None, id: int = None
+        self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:
         try:
-            kwargs = params_to_dict(name=name, parent_group=parent_group, id=id)
+            kwargs = params_to_dict(
+                name=name, parent_group=parent_group, id=id
+            )
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -34,7 +36,7 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def delete(self, group_id: int = None) -> None:
+    async def delete(self, group_id: Optional[int] = None) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -81,7 +83,6 @@ class GroupRepository(BaseRepository):
             raise ValueError
 
     async def get_group_by_name(self, name: str) -> Group:
-
         try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
@@ -97,7 +98,7 @@ class GroupRepository(BaseRepository):
         except:
             raise ValueError
 
-    async def get_all_groups(self) -> list:
+    async def get_all_groups(self) -> list[Group]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -109,7 +110,7 @@ class GroupRepository(BaseRepository):
             return result
 
     async def update(
-        self, group_id: int, name: str = None, parent_group: int = None
+        self, group_id: int, name: Optional[str] = None, parent_group: Optional[int] = None
     ) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -133,7 +134,7 @@ class GroupRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def get_all_subgroups(self, main_group: Group) -> dict:
+    async def get_all_subgroups(self, main_group: Group) -> dict[str, Any]:
         all_groups = await self.get_all_groups()
 
         result = {
@@ -144,8 +145,8 @@ class GroupRepository(BaseRepository):
         return result
 
     def recursion(
-        self, main_group: dict, all_groups: list
-    ) -> Union[list, None]:
+        self, main_group: dict[str, Any], all_groups: list[Any]
+    ) -> Union[list[dict[str, Any]], None]:
         result = []
         groups_remove = []
         for group in all_groups:
@@ -157,9 +158,8 @@ class GroupRepository(BaseRepository):
             all_groups.remove(group)
 
         if len(result) == 0:
-            result = None
-            return result
-
+            return None
+            
         for group in result:
             group["subgroups"] = self.recursion(
                 main_group=group, all_groups=all_groups
@@ -167,5 +167,5 @@ class GroupRepository(BaseRepository):
 
         return result
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return "Group repository"

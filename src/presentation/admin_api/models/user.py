@@ -1,26 +1,23 @@
-from typing import Union
+from typing import Union, Optional, Any
 from pydantic import BaseModel
 from dataclasses import dataclass
 from fastapi import Form
 
 @dataclass
 class RequestDefaultUserModel(BaseModel):
-    user_id: int = Form(...)
 
     class Config:
         orm_mode = True
 
 class RequestUserModel(BaseModel):
 
-    user_id: int
-
     class Config:
         orm_mode = True
 
-@dataclass
-class RequestAllUserModel:
-    group_id: Union[int, None] = Form(None)
-    role_id: Union[int, None] = Form(None)
+
+class RequestAllUserModel(BaseModel):
+    group_id: Union[int, None] 
+    role_id: Union[int, None]
 
     class Config:
         orm_mode = True
@@ -34,7 +31,7 @@ class ResponceAllUserModel(BaseModel):
 
 @dataclass
 class RequestUpdateUserModel:
-    user_id: int = Form(...)
+
     username: Union[None, str] = Form(None)
     email: Union[None, str] = Form(None)
     email_confirmed: Union[None, bool] = Form(None)
@@ -56,7 +53,7 @@ class RequestCreateUserModel:
     username:str = Form(...)
     # password:str = Form(...)
 
-    def dictionary(self):
+    def dictionary(self) -> dict[str, Any]:
         return{
             "email":self.email,
             "security_stamp":self.security_stamp,
@@ -71,7 +68,6 @@ class RequestCreateUserModel:
 @dataclass
 class RequestGroupsUserModel:
 
-    user_id: int = Form(...)
     group_ids: str = Form(..., description='Example: "1,2,3"')
 
     class Config:
@@ -79,7 +75,7 @@ class RequestGroupsUserModel:
 
 @dataclass
 class RequestRolesUserModel:    
-    user_id: int = Form(...)
+
     role_ids: str = Form(..., description='Example: "1,2,3"')
 
     class Config:
@@ -89,7 +85,6 @@ class RequestRolesUserModel:
 @dataclass
 class RequestPasswordUserModel:
 
-    user_id: int = Form(...)
     new_password: str = Form(...)
 
     class Config:

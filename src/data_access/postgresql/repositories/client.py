@@ -1,6 +1,7 @@
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
@@ -19,12 +20,16 @@ from src.data_access.postgresql.tables.client import (
 
 
 class ClientRepository(BaseRepository):
-    async def get_client_by_client_id(self, client_id: str) -> Client:
+    async def get_client_by_client_id(self, 
+        client_id: str
+        ) -> Client:
+        
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
+            
             client = await session.execute(
                 select(Client).where(Client.client_id == client_id)
             )
@@ -106,19 +111,18 @@ class ClientRepository(BaseRepository):
         async with session_factory() as sess:
             session = sess
 
-            logout_redirect_uri = await session.execute(
+            logout_redirect_uri_obj = await session.execute(
                 select(ClientPostLogoutRedirectUri)
                 .join(
                     Client, ClientPostLogoutRedirectUri.client_id == Client.id
                 )
                 .where(
-                    Client.client_id == client_id,
-                    ClientPostLogoutRedirectUri.post_logout_redirect_uri
-                    == logout_redirect_uri,
-                )
-            )
-
-            result = logout_redirect_uri.first()
+                        Client.client_id == client_id,
+                        ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
+                        )
+                    )
+            
+            result = logout_redirect_uri_obj.first()
             if not result:
                 raise ClientPostLogoutRedirectUriError(
                     "Post logout redirect uri you are looking for does not exist"
@@ -136,17 +140,12 @@ class ClientRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            client_id_int = (
-                await self.get_client_by_client_id(client_id=client_id)
-            ).id
-            redirect_uri = await session.execute(
-                select(ClientRedirectUri).where(
-                    ClientRedirectUri.client_id == client_id_int,
-                    ClientRedirectUri.redirect_uri == redirect_uri,
+            client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
+            redirect_uri_obj = await session.execute(
+                select(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int, ClientRedirectUri.redirect_uri == redirect_uri )
                 )
-            )
-
-            result = redirect_uri.first()
+                
+            result = redirect_uri_obj.first()
             if not result:
                 raise ClientRedirectUriError(
                     "Redirect uri you are looking for does not exist"
@@ -154,7 +153,7 @@ class ClientRepository(BaseRepository):
             else:
                 return True
 
-    async def get_client_scopes(self, client_id: int) -> list:
+    async def get_client_scopes(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -170,7 +169,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_redirect_uris(self, client_id: int) -> list:
+    async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -188,7 +187,7 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    async def get_client_claims(self, client_id: int) -> list:
+    async def get_client_claims(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -204,5 +203,5 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Client Repository"

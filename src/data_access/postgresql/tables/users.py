@@ -2,6 +2,7 @@ import datetime
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Column,
     Date,
     DateTime,
@@ -9,37 +10,16 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
-    CheckConstraint,
 )
 from sqlalchemy.orm import relationship
+
 from src.data_access.postgresql.tables.group import (
-    users_groups,
     permissions_roles,
+    users_groups,
 )
+
 from .base import Base, BaseModel
 
-
-USER_CLAIM_TYPE = [
-    "name",
-    "given_name",
-    "family_name",
-    "middle_name",
-    "nickname",
-    "preferred_username",
-    "profile",
-    "picture",
-    "website",
-    "email",
-    "email_verified",
-    "gender",
-    "birthdate",
-    "zoneinfo",
-    "locale",
-    "phone_number",
-    "phone_number_verified",
-    "address",
-    "updated_at",
-]
 
 users_roles = Table(
     "users_roles",
@@ -71,10 +51,10 @@ class UserLogin(BaseModel):
         unique=True,
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.login_provider}: {self.provider_key}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.login_provider}: {self.provider_key}"
 
 
@@ -131,7 +111,7 @@ class User(BaseModel):
         foreign_keys="PersistentGrant.user_id",
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"id {self.id}\t{self.username}"
 
 
@@ -144,7 +124,7 @@ class UserPassword(BaseModel):
         foreign_keys="User.password_hash_id",
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.value}"
 
 
@@ -157,7 +137,7 @@ class Role(BaseModel):
         "Permission", secondary=permissions_roles, back_populates="roles"
     )
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.id}: {self.name}"
 
 
@@ -177,7 +157,7 @@ class UserClaim(BaseModel):
     claim_type = relationship("UserClaimType", backref="claim", lazy="joined")
     claim_value = Column(String, nullable=False)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.claim_type_id}: {self.claim_value}"
 
 
@@ -186,5 +166,5 @@ class UserClaimType(Base):
     id = Column(Integer, primary_key=True)
     type_of_claim = Column(String, unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"{self.type_of_claim}"

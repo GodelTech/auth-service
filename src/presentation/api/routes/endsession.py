@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import jwt
 from fastapi import APIRouter, Depends, status
@@ -17,18 +18,16 @@ from src.presentation.api.models.endsession import RequestEndSessionModel
 logger = logging.getLogger(__name__)
 
 
-endsession_router = APIRouter(
-    prefix="/endsession",
-)
+endsession_router = APIRouter(prefix="/endsession", tags=["End Session"])
 
 
-@endsession_router.get(
-    "/", status_code=status.HTTP_204_NO_CONTENT, tags=["End Session"]
-)
+@endsession_router.get("/", status_code=status.HTTP_204_NO_CONTENT)
 async def end_session(
     request_model: RequestEndSessionModel = Depends(),
-    service_class: EndSessionService = Depends(provide_endsession_service_stub),
-):
+    service_class: EndSessionService = Depends(
+        provide_endsession_service_stub
+    ),
+) -> Union[int, RedirectResponse, JSONResponse]:
     try:
         service_class = service_class
         service_class.request_model = request_model

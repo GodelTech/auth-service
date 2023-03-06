@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Any
 
 class LogConfig(BaseModel):
     """Logging configuration to be set for the server"""
@@ -30,5 +30,5 @@ class LogConfig(BaseModel):
     }
 
     @property
-    def to_dict(self):
+    def to_dict(self) -> Any:
         return self.dict()

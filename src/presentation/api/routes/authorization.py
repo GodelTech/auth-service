@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, Union
-
+from starlette.templating import _TemplateResponse
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -17,28 +17,26 @@ from src.di.providers import (
     provide_auth_service_stub,
     provide_login_form_service_stub,
 )
+from src.dyna_config import BASE_URL
 from src.presentation.api.models import DataRequestModel, RequestModel
 
 logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="src/presentation/api/templates/")
 
-auth_router = APIRouter(
-    prefix="/authorize",
-)
+auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
 
 
 @auth_router.get(
     "/",
     status_code=status.HTTP_200_OK,
-    tags=["Authorization"],
     response_class=HTMLResponse,
 )
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> HTMLResponse:
+) -> Union[JSONResponse, _TemplateResponse]:
     try:
         auth_class = auth_class
         auth_class.request_model = request_model
@@ -54,9 +52,12 @@ async def get_authorize(
                     "request": request,
                     "request_model": request_model,
                     "external_logins": external_logins,
+                    "base_url": BASE_URL,
                 },
                 status_code=200,
             )
+        else:
+            raise ValueError
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -70,12 +71,6 @@ async def get_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Redirect Uri not found"},
         )
-    except WrongPasswordError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Bad password"},
-        )
     except WrongResponseTypeError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -84,9 +79,7 @@ async def get_authorize(
         )
 
 
-@auth_router.post(
-    "/", status_code=status.HTTP_302_FOUND, tags=["Authorization"]
-)
+@auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
     request_body: DataRequestModel = Depends(),
     auth_class: AuthorizationService = Depends(provide_auth_service_stub),
@@ -96,6 +89,10 @@ async def post_authorize(
         auth_class = auth_class
         auth_class.request_model = request_model
         firmed_redirect_uri = await auth_class.get_redirect_url()
+
+        if not firmed_redirect_uri:
+            raise UserNotFoundError
+
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
