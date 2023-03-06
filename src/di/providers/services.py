@@ -18,6 +18,10 @@ from src.business_logic.services import (
     JWTService,
     LoginFormService,
     PasswordHash,
+    ThirdPartyFacebookService,
+    ThirdPartyGitLabService,
+    ThirdPartyGoogleService,
+    ThirdPartyLinkedinService,
     TokenService,
     UserInfoServices,
     WellKnownServices,
@@ -30,7 +34,8 @@ from src.data_access.postgresql.repositories import (
     RoleRepository,
     ThirdPartyOIDCRepository,
     UserRepository,
-    WellKnownRepository
+    WellKnownRepository,
+    BlacklistedTokenRepository,
 )
 
 
@@ -118,6 +123,7 @@ def provide_token_service(
     user_repo: UserRepository,
     device_repo: DeviceRepository,
     jwt_service: JWTService,
+    blacklisted_repo: BlacklistedTokenRepository,
 ) -> TokenService:
     return TokenService(
         client_repo=client_repo,
@@ -125,6 +131,7 @@ def provide_token_service(
         user_repo=user_repo,
         device_repo=device_repo,
         jwt_service=jwt_service,
+        blacklisted_repo=blacklisted_repo
     )
 
 

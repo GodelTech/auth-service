@@ -98,6 +98,8 @@ from src.di.providers import (
     provide_auth_third_party_linkedin_service,
     provide_auth_third_party_linkedin_service_stub,
     provide_auth_third_party_oidc_service,
+    provide_blacklisted_repo,
+    provide_blacklisted_repo,
     provide_third_party_google_service_stub,
     provide_third_party_google_service,
     provide_third_party_facebook_service_stub,
@@ -114,7 +116,7 @@ from src.di.providers import (
 
 import logging
 from src.log import LOGGING_CONFIG
-
+from fastapi_utils.tasks import repeat_every
 
 logger = logging.getLogger(__name__)
 
@@ -137,8 +139,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.add_middleware(AuthorizationMiddleware)
-    application.add_middleware(AccessTokenMiddleware)
+
 
     setup_di(application)
     container = Container()
@@ -161,11 +162,16 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
+    from src.data_access.postgresql.repositories.blacklisted_token import BlacklistedTokenRepository
+    
+    app.add_middleware(middleware_class=AuthorizationMiddleware, blacklisted_repo=BlacklistedTokenRepository(db_engine))
+    app.add_middleware(middleware_class=AccessTokenMiddleware, blacklisted_repo=BlacklistedTokenRepository(db_engine))
+
     # Register admin-ui controllers on application start-up.
     admin = CustomAdmin(
         app,
         db_engine,
-        templates_dir="templates",
+        templates_dir="templates_admin_ui",
         authentication_backend=AdminAuthController(
             secret_key="1234",
             auth_service=provide_admin_auth_service(
@@ -267,6 +273,7 @@ def setup_di(app: FastAPI) -> None:
         client_repo=provide_client_repo(db_engine),
         persistent_grant_repo=provide_persistent_grant_repo(db_engine),
         device_repo=provide_device_repo(db_engine),
+        blacklisted_repo=provide_blacklisted_repo(db_engine)
     )
     app.dependency_overrides[
         provide_token_service_stub
@@ -426,3 +433,19 @@ async def startup() -> None:
     redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
+
+
+from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+
+@app.on_event("startup")
+@repeat_every(seconds=10 * 60)
+async def remove_expired_tokens_task() -> None:
+    logger.info("Started to remove expired tokens")
+    db_engine = provide_db(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    )
+    token_class: PersistentGrantRepository = PersistentGrantRepository(db_engine)
+    try:
+        await token_class.delete_expired()
+    except:
+        logger.error("Removing of grants doesn't work")
