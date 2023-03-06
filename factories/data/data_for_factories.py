@@ -210,6 +210,14 @@ IDENTITY_PROVIDERS = [
         "internal_redirect_uri": "http://127.0.0.1:8000/authorize/oidc/gitlab",
         "provider_icon": "fa-gitlab",
     },
+    {
+        "name": "microsoft",
+        "auth_endpoint_link": "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize",
+        "token_endpoint_link": "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
+        "userinfo_link": "https://graph.microsoft.com/oidc/userinfo",
+        "internal_redirect_uri": "http://localhost:8000/authorize/oidc/microsoft",
+        "provider_icon": "fa-microsoft",
+    },
 ]
 
 POST_LOGOUT_REDIRECT_URL = [
