@@ -36,6 +36,8 @@ from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
     ThirdPartyGoogleService,
+    ThirdPartyMicrosoftService,
+    ThirdPartyGitLabService,
 )
 from src.data_access.postgresql.tables.base import Base
 
@@ -201,6 +203,29 @@ async def google_third_party_service(engine) -> ThirdPartyGoogleService:
 
 
 @pytest_asyncio.fixture
+async def gitlab_third_party_service(engine) -> ThirdPartyGitLabService:
+    gitlab_service = ThirdPartyGitLabService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return gitlab_service
+
+
+@pytest_asyncio.fixture
+async def microsoft_third_party_service(engine) -> ThirdPartyMicrosoftService:
+    microsoft_service = ThirdPartyMicrosoftService(
+        client_repo=ClientRepository(engine),
+        user_repo=UserRepository(engine),
+        persistent_grant_repo=PersistentGrantRepository(engine),
+        oidc_repo=ThirdPartyOIDCRepository(engine),
+        http_client=AsyncClient(),
+    )
+    return microsoft_service
+
+
 async def wlk_services(engine) -> WellKnownServices:
     wlk_services = WellKnownServices(
         wlk_repo = WellKnownRepository(engine),
