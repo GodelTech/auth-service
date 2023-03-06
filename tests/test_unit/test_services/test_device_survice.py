@@ -5,6 +5,7 @@ from src.data_access.postgresql.errors import (
     UserCodeNotFoundError,
 )
 from tests.test_unit.fixtures import device_cancel_model, device_user_code_model, device_request_model
+from src.dyna_config import BASE_URL
 from src.business_logic.services.device_auth import DeviceService, DeviceCancelModel, DeviceUserCodeModel, DeviceRequestModel
 
 @pytest.mark.asyncio
@@ -73,7 +74,7 @@ class TestDeviceService:
     async def test_clean_device_data(self, device_service: DeviceService, device_cancel_model: DeviceCancelModel) -> None:
         service = device_service
         service.request_model = device_cancel_model
-        expected = "http://127.0.0.1:8000/device/auth/cancel"
+        expected = f"http://{BASE_URL}/device/auth/cancel"
         await service.device_repo.create(
             client_id="test_client",
             device_code="urn:ietf:params:oauth:grant-type:device_code",
@@ -105,7 +106,7 @@ class TestDeviceService:
     async def test_get_redirect_uri(self, device_service: DeviceService, device_user_code_model: DeviceUserCodeModel) -> None:
         service = device_service
         service.request_model = device_user_code_model
-        expected_uri = "http://127.0.0.1:8000/authorize/?client_id=test_client&" \
+        expected_uri = f"http://{BASE_URL}/authorize/?client_id=test_client&" \
                        "response_type=urn:ietf:params:oauth:grant-type:device_code&" \
                        "redirect_uri=https://www.google.com/&scope=user_code=GHJKTYUI"
         await service.device_repo.create(
