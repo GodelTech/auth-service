@@ -152,17 +152,13 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name("Polnareff")
-            ).id
-        }
-
+       
+        group_id=(await self.group_repo.get_group_by_name("Polnareff")).id
+        
         response = await client.request(
             "GET",
-            "/administration/group/get_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -181,7 +177,7 @@ class TestAdminGroupEndpoint:
         }
 
         response = await client.request(
-            "GET", "/administration/group/get_all_groups", headers=headers
+            "GET", "/administration/groups", headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -198,17 +194,13 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name(name="Giorno")
-            ).id
-        }
+        
+        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
 
         response = await client.request(
             "GET",
-            "/administration/group/get_subgroups",
+            f"/administration/groups/{group_id}/subgroups",
             headers=headers,
-            params=params,
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = json.loads(response.content.decode("utf-8"))
@@ -229,25 +221,19 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        params = {
-            "group_id": (
-                await self.group_repo.get_group_by_name(name="Giorno")
-            ).id
-        }
+        group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
 
         response = await client.request(
             "DELETE",
-            "/administration/group/delete_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
-            data=params,
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
             "GET",
-            "/administration/group/get_group",
-            headers=headers,
-            params=params,
+            f"/administration/groups/{group_id}",
+            headers=headers
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -269,7 +255,7 @@ class TestAdminGroupEndpoint:
 
         response = await client.request(
             "POST",
-            "/administration/group/new_group",
+            "/administration/groups",
             headers=headers,
             data=params,
         )
@@ -280,13 +266,12 @@ class TestAdminGroupEndpoint:
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {
-            "group_id": (await self.group_repo.get_group_by_name("Diavolo")).id,
             "name": "Doppio",
         }
-
+        group_id = (await self.group_repo.get_group_by_name("Diavolo")).id
         response = await client.request(
             "PUT",
-            "/administration/group/update_group",
+            f"/administration/groups/{group_id}",
             headers=headers,
             data=params,
         )
