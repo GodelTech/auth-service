@@ -3,7 +3,7 @@ from typing import Union, Optional, Any
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.user import UserRepository
 
-from src.business_logic.services.well_known import WellKnownServies
+from src.business_logic.services.well_known import WellKnownServices
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 

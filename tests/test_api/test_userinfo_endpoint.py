@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from src.business_logic.services import UserInfoServices
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
-ANSWER_USER_INFO = {'sub': '1',
+ANSWER_USER_INFO = {
                     'name': 'Daniil',
                     'given_name': 'Ibragim',
                     'family_name': 'Krats',
@@ -20,8 +20,6 @@ ANSWER_USER_INFO = {'sub': '1',
                     'profile': 'werni_stenu',
                     'picture': 'https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg',
                     'website': 'https://www.instagram.com/daniilkrats/',
-                    'email': 'danya.krats87@gmail.com',
-                    'email_verified': 'true',
                     'gender': 'Attack Helicopter',
                     'birthdate': '02/01/2000',
                     'zoneinfo': 'GMT+1',
@@ -38,7 +36,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile'})
         headers = {
             "authorization": token,
         }
@@ -52,7 +50,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_jwt_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile'})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
         response = await client.request(
@@ -104,7 +102,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_post_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile'})
         headers = {
             "authorization": token,
         }
@@ -157,7 +155,7 @@ class TestUserInfoEndpoint:
             token=response_content
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response_content == {"sub": "1"}
+        assert response_content == {"sub": "1", 'scope': 'profile'}
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_iss_me(
@@ -171,7 +169,7 @@ class TestUserInfoEndpoint:
             token=response_content
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response_content == {"sub": "1", "iss": "me"}
+        assert response_content == {"sub": "1", "iss": "me", 'scope': 'profile'}
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_aud_facebook(
@@ -185,7 +183,7 @@ class TestUserInfoEndpoint:
             token=response_content, audience="facebook"
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response_content == {"sub": "1", "aud": ["facebook"]}
+        assert response_content == {"sub": "1", "aud": ["facebook"], 'scope': 'profile'}
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_iss_me_and_aud_facebook(
@@ -199,7 +197,7 @@ class TestUserInfoEndpoint:
         response_content = await user_info_service.jwt.decode_token(
             token=response_content, audience="facebook"
         )
-        expected_result = {"sub": "1", "iss": "me", "aud": ["facebook"]}
+        expected_result = {"sub": "1", "iss": "me", "aud": ["facebook"], 'scope': 'profile'}
         assert response.status_code == status.HTTP_200_OK
         assert response_content == expected_result
 

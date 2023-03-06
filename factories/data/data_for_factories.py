@@ -73,6 +73,11 @@ USER_CLAIM_TYPE = [
     "phone_number_verified",
     "address",
     "updated_at",
+    "aud",
+    "exp",
+    "iat",
+    "iss",
+    "sub"
 ]
 
 TYPES_OF_GRANTS = [
