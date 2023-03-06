@@ -4,6 +4,7 @@ import pytest
 from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 
+from src.dyna_config import BASE_URL
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.well_known import WellKnownServices
 from typing import Any, no_type_check
@@ -37,19 +38,19 @@ class TestWellKnownServices:
 
     def new_get_all_urls(self, *args:Any, **kwargs:Any) -> dict[str, str]:
         return {
-            "openapi": "http://127.0.0.1:800...enapi.json",
-            "swagger_ui_html": "http://127.0.0.1:8000/docs",
-            "swagger_ui_redirect": "http://127.0.0.1:800...2-redirect",
-            "redoc_html": "http://127.0.0.1:8000/redoc",
-            "get_authorize": "http://127.0.0.1:800...authorize/",
-            "post_authorize": "http://127.0.0.1:800...authorize/",
-            "get_userinfo": "http://127.0.0.1:800.../userinfo/",
-            "get_userinfo_jwt": "http://127.0.0.1:800...erinfo/jwt",
-            "get_default_token": "http://127.0.0.1:800...ault_token",
-            "get_openid_configuration": "http://127.0.0.1:800...figuration",
-            "get_tokens": "http://127.0.0.1:800...token",
-            "get_jwks": "http://127.0.0.1:800...jwks",
-            "end_session": "http://127.0.0.1:800...end_session",
+            "openapi": f"http://{BASE_URL}...enapi.json",
+            "swagger_ui_html": f"http://{BASE_URL}0/docs",
+            "swagger_ui_redirect": f"http://{BASE_URL}...2-redirect",
+            "redoc_html": f"http://{BASE_URL}0/redoc",
+            "get_authorize": f"http://{BASE_URL}...authorize/",
+            "post_authorize": f"http://{BASE_URL}...authorize/",
+            "get_userinfo": f"http://{BASE_URL}.../userinfo/",
+            "get_userinfo_jwt": f"http://{BASE_URL}...erinfo/jwt",
+            "get_default_token": f"http://{BASE_URL}...ault_token",
+            "get_openid_configuration": f"http://{BASE_URL}...figuration",
+            "get_tokens": f"http://{BASE_URL}...token",
+            "get_jwks": f"http://{BASE_URL}...jwks",
+            "end_session": f"http://{BASE_URL}...end",
             "false": "/ Not ready yet",
         }
 

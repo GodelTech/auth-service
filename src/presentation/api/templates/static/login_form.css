@@ -135,7 +135,7 @@ input:focus {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 30;
-  box-shadow: 0 3px 10px -.5px rgba(0, 0, 0, .2); 
+  box-shadow: 0 3px 10px -.5px rgba(0, 0, 0, .2);
   text-align: center;
   padding: 30px;
   border-radius: 3px;
@@ -181,11 +181,11 @@ p.form_auth_block_head_text.credentials_note{
   background-color: rgb(53, 188, 80);
 }
 
-.overlay {   
+.overlay {
   /* Hide the background  */
   opacity: 0;
   visibility: hidden;
-  
+
   position: fixed;
   top: 0;
   left: 0;
@@ -202,4 +202,6 @@ p.form_auth_block_head_text.credentials_note{
    visibility: visible;
 }
 
-
+#base_url{
+  display: none;
+}

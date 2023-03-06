@@ -11,3 +11,8 @@ max_connection_count = 10
 [local.redis]
 echo = true
 url = "redis://127.0.0.1:6379"
+
+
+[local.server]
+base_url_host = "127.0.0.1"
+base_url_port = "8000"

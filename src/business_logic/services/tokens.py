@@ -3,7 +3,7 @@ import logging
 import time
 import uuid
 from typing import Any, Optional, Union
-
+from src.dyna_config import BASE_URL
 from fastapi import Request
 
 from src.business_logic.services.jwt_token import JWTService
@@ -39,7 +39,7 @@ def get_base_payload(
         kwargs.pop("user_id")
 
     base_payload = {
-        "iss": "http://localhost:8000",
+        "iss": f"http://{BASE_URL}",
         "client_id": client_id,
         "iat": int(time.time()),
         "exp": int(time.time() + expiration_time),
@@ -400,8 +400,7 @@ class ClientCredentialsMaker(BaseMaker):
                 "typ": "Bearer",
                 "exp": time.time() + self.expiration_time,
                 "iat": time.time(),
-                #TODO: Change iss
-                "iss": "some" 
+                "iss": f"http://{BASE_URL}"
 
                  # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1
             }
