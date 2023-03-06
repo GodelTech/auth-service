@@ -20,27 +20,6 @@ from src.data_access.postgresql.tables.group import (
 
 from .base import Base, BaseModel
 
-USER_CLAIM_TYPE = [
-    "name",
-    "given_name",
-    "family_name",
-    "middle_name",
-    "nickname",
-    "preferred_username",
-    "profile",
-    "picture",
-    "website",
-    "email",
-    "email_verified",
-    "gender",
-    "birthdate",
-    "zoneinfo",
-    "locale",
-    "phone_number",
-    "phone_number_verified",
-    "address",
-    "updated_at",
-]
 
 users_roles = Table(
     "users_roles",
