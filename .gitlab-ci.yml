@@ -84,7 +84,7 @@ deploy-to-dev:
   variables:
     ENV_NAME: development
     SERVICE: "${SERVICE_NAME}"
-    KUBECONFIG: ${KUBERNETES_CONFIG}
+#    KUBECONFIG: ${KUBERNETES_CONFIG}
 #    HELM_PATH: ./deploy/helm
   image:
     name: alpine/helm:3.5.4
@@ -93,6 +93,7 @@ deploy-to-dev:
     name: development
   script:
     - echo 'test deploy-to-dev'
+    - echo ${KUBERNETES_CONFIG}
     - helm version
     - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}"
     - helm upgrade --install --atomic ${SERVICE_NAME} ./deploy/helm -f ./deploy/helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --create-namespace --wait --set namespace=${PROJECT_NAME}-${ENV_NAME} --set name=${SERVICE_NAME}-${ENV_NAME} --set image=${DOCKER_IMAGES_PATH} --set imagePullSecret.server=${CI_REGISTRY} --set imagePullSecret.username=${CI_REGISTRY_USER} --set imagePullSecret.password=${CI_JOB_TOKEN}
