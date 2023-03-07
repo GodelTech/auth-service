@@ -52,7 +52,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                         content="Token blacklisted"
                     )
                 try:
-                    if not bool(await self.jwt_service.decode_token(token)):
+                    aud = request_with_auth["path"].split("/")[1]
+                    if not bool(await self.jwt_service.decode_token(token=token, aud=aud)):
                         logger.exception("Authorization Failed")
                         return JSONResponse(
                             status_code=status.HTTP_401_UNAUTHORIZED,

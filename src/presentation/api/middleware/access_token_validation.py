@@ -35,9 +35,9 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
                     ):
                     return JSONResponse(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        content="Token blacklisted"
+                        content="Token revoked"
                     )
-                if not await self.jwt_service.verify_token(token):
+                if not await self.jwt_service.verify_token(token, aud='admin'):
                     logger.exception("403 Incorrect Access Token")
                     return JSONResponse(
                         status_code=status.HTTP_403_FORBIDDEN,
@@ -46,7 +46,6 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
                     
                 else:
                     logger.info("Access Token Auth Passed")
-
                     response = await call_next(request)
                     return response
             except:

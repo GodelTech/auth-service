@@ -16,6 +16,7 @@ from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
 )
+from jwt.exceptions import ExpiredSignatureError
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,12 @@ async def get_tokens(
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         return result
-
+    except ExpiredSignatureError as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Token Signature expired",
+        )
     except ClientNotFoundError as e:
         logger.exception(e)
         raise HTTPException(

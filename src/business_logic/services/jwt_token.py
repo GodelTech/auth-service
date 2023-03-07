@@ -1,7 +1,7 @@
 import logging
 
 import jwt
-from typing import Any, no_type_check
+from typing import Any, no_type_check, Optional
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
 
@@ -25,19 +25,30 @@ class JWTService:
         return token
 
     @no_type_check
-    async def decode_token(self, token: str, **kwargs:Any) -> dict[str, Any]:
+    async def decode_token(self, token: str, aud:Optional[str] = None, **kwargs:Any) -> dict[str, Any]:
 
         token = token.replace("Bearer ", "")
-        decoded = jwt.decode(
-            token,
-            key=self.keys.public_key,
-            algorithms=self.algorithms,
-            **kwargs,
-        )
+        decoded = {}
+        if aud:
+            decoded = jwt.decode(
+                token,
+                key=self.keys.public_key,
+                algorithms=self.algorithms,
+                audience=aud,
+                **kwargs,
+            )
+        else:
+            decoded = jwt.decode(
+                token,
+                key=self.keys.public_key,
+                algorithms=self.algorithms,
+                **kwargs,
+            )
+
         return decoded
 
-    async def verify_token(self, token: str) -> bool:
-        return bool(await self.decode_token(token))
+    async def verify_token(self, token: str, aud:Optional[str]) -> bool:
+        return bool(await self.decode_token(token=token, aud=aud))
 
     async def get_module(self) -> int:
         return self.keys.n

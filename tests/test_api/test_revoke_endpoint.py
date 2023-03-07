@@ -28,7 +28,7 @@ class TestRevokationEndpoint:
         )
         headers = {
             "authorization": await jwt.encode_jwt(
-                payload={"sub": "1"}
+                payload={"sub": "1", "aud":["revoke"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -50,7 +50,7 @@ class TestRevokationEndpoint:
         revoke_token = "----token_not_exists-----"
         headers = {
             "authorization": await jwt.encode_jwt(
-                payload={"sub": "1"}
+                payload={"sub": "1", "aud":["revoke"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",
         }

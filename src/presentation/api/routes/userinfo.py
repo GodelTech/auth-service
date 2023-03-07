@@ -19,11 +19,11 @@ userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 
 
 @userinfo_router.get("/", response_model=dict)
-# @cache(
-#     expire=CacheTimeSettings.USERINFO,
-#     coder=JsonCoder,
-#     key_builder=builder_with_parametr,
-# )
+@cache(
+    expire=CacheTimeSettings.USERINFO,
+    coder=JsonCoder,
+    key_builder=builder_with_parametr,
+)
 async def get_userinfo(
     request: Request,
     auth_swagger: Union[str, None] = Header(
@@ -125,7 +125,7 @@ async def get_userinfo_jwt(
 @userinfo_router.get("/get_default_token", response_model=str)
 async def get_default_token(
     with_iss_me: Optional[bool] = None,
-    with_aud_facebook: Optional[bool] = None,
+    with_aud: Optional[bool] = None,
     scope: str = 'profile',
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
@@ -134,8 +134,8 @@ async def get_default_token(
         payload: dict[str, Any] = {"sub": "1", "scope": scope}
         if with_iss_me:
             payload["iss"] = "me"
-        if with_aud_facebook:
-            payload["aud"] = ["facebook"]
+        if with_aud:
+            payload["aud"] = ["admin", "userinfo"]
         return await uis.jwt.encode_jwt(payload)
     except:
         raise HTTPException(status_code=500)

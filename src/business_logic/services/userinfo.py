@@ -35,7 +35,7 @@ class UserInfoServices:
         token = self.authorization
         decoded_token = None
         try:
-            decoded_token = await self.jwt.decode_token(token=token)
+            decoded_token = await self.jwt.decode_token(token=token, aud="userinfo")
             sub = int(decoded_token["sub"])
         except (PyJWTError, KeyError):
             raise ValueError

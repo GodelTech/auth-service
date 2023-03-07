@@ -92,8 +92,8 @@ class DeviceRepository(BaseRepository):
                     exists().where(Device.device_code == device_code))
                 )
             result = result.first()
-            if not result[0]:
-                raise DeviceCodeNotFoundError('Wrong Device Code')
+            # if not result[0]:
+            #     raise DeviceCodeNotFoundError('Wrong Device Code')
 
             return result[0]
 

@@ -47,13 +47,9 @@ class AuthorizationService:
                 password = scope_data["password"]
                 user_name = scope_data["username"]
 
-                (
-                    user_hash_password,
-                    user_id,
-                ) = await self.user_repo.get_hash_password(user_name)
-                validated = self.password_service.validate_password(
-                    password, user_hash_password
-                )
+                (user_hash_password, user_id) = await self.user_repo.get_hash_password(user_name)
+                
+                validated = self.password_service.validate_password(password, user_hash_password)
 
                 if user_hash_password and validated:
                     if self.request_model.response_type == "code":
@@ -131,6 +127,7 @@ class AuthorizationService:
                 additional_data=scope,
                 jwt_service=self.jwt_service,
                 expiration_time=expiration_time,
+                aud=['userinfo', 'introspection', 'revoke']
             )
 
             uri_data = (
@@ -156,6 +153,7 @@ class AuthorizationService:
                 additional_data=scope,
                 jwt_service=self.jwt_service,
                 expiration_time=expiration_time,
+                aud=['userinfo', 'introspection', 'revoke']
             )
             id_token = await get_single_token(
                 user_id=user_id,
