@@ -2,7 +2,7 @@ from .client import (
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,
     ClientRedirectUriError,
-    WrongGrantsError,
+    ClientGrantsError,
 )
 from .device import (
     DeviceCodeExpirationTimeError,

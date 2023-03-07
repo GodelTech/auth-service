@@ -1,15 +1,17 @@
 import logging
+from typing import Any, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from typing import Any
+from fastapi.responses import JSONResponse
+
 from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
+    ClientGrantsError,
     ClientNotFoundError,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
-    WrongGrantsError,
 )
 from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.tokens import (
@@ -28,7 +30,7 @@ async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-) -> dict[str, Any]:
+) -> Union[JSONResponse, dict[str, Any]]:
     try:
         token_class = token_class
         token_class.request = request
@@ -38,20 +40,33 @@ async def get_tokens(
 
     except ClientNotFoundError as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission for this",
-        )
-    except WrongGrantsError as e:
-        logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect token"
+        return JSONResponse(
+            content={
+                "error": "invalid_client",
+                "error_description": "Client authentication failed.",
+            },
+            status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
+    except ClientGrantsError as e:
+        logger.exception(e)
+        return JSONResponse(
+            content={
+                "error": "unauthorized_client",
+                "error_description": "The client is not authorized to use requested grant type.",
+            },
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+    # TODO by now it's get triggered if we provide wrong grant_type too
+    # TODO create separete error when we use unsupported grant_types
     except GrantNotFoundError as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token"
+        return JSONResponse(
+            content={
+                "error": "invalid_grant",
+                "error_description": "The authorization code is invalid or expired.",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
     except DeviceCodeExpirationTimeError as e:
         logger.exception(e)
