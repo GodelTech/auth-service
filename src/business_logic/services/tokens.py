@@ -16,6 +16,7 @@ from src.data_access.postgresql.errors import (
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
+    GrantTypeNotSupported,
 )
 from src.data_access.postgresql.repositories import (
     BlacklistedTokenRepository,
@@ -150,7 +151,7 @@ class TokenService:
                 service = ClientCredentialsMaker(token_service=self)
                 return await service.create()
 
-        raise GrantNotFoundError
+        raise GrantTypeNotSupported
 
     async def revoke_token(self) -> None:
         if self.request_body is None:
@@ -193,6 +194,7 @@ class BaseMaker:
 
     async def validation(self) -> None:
         encoded_attr: Optional[str] = None
+
         # raises ClientNotFoundError if it does not exist
         await self.client_repo.get_client_by_client_id(
             self.request_model.client_id
@@ -348,7 +350,9 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError("Device registration in progress")
+                raise DeviceRegistrationError(
+                    "Device registration in progress"
+                )
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(
@@ -371,7 +375,9 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError("Device registration in progress")
+                raise DeviceRegistrationError(
+                    "Device registration in progress"
+                )
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(

@@ -1,8 +1,8 @@
 from .client import (
+    ClientGrantsError,
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,
     ClientRedirectUriError,
-    ClientGrantsError,
 )
 from .device import (
     DeviceCodeExpirationTimeError,
@@ -10,12 +10,12 @@ from .device import (
     DeviceRegistrationError,
     UserCodeNotFoundError,
 )
-from .grant import GrantNotFoundError
+from .grant import GrantNotFoundError, GrantTypeNotSupported
 from .password import WrongPasswordError, WrongPasswordFormatError
 from .response_type import WrongResponseTypeError
 from .third_party_oidc import (
-    ThirdPartyStateNotFoundError,
     ThirdPartyStateDuplicationError,
+    ThirdPartyStateNotFoundError,
     WrongDataError,
 )
 from .user import ClaimsNotFoundError, UserNotFoundError

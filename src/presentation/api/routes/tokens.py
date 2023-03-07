@@ -12,6 +12,7 @@ from src.data_access.postgresql.errors import (
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
+    GrantTypeNotSupported,
 )
 from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.tokens import (
@@ -37,6 +38,16 @@ async def get_tokens(
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         return result
+
+    except GrantTypeNotSupported as e:
+        logger.exception(e)
+        return JSONResponse(
+            content={
+                "error": "unsupported_grant_type",
+                "error_description": "Requested grant_type was not recognized by the server.",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     except ClientNotFoundError as e:
         logger.exception(e)
@@ -68,6 +79,7 @@ async def get_tokens(
             },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
+
     except DeviceCodeExpirationTimeError as e:
         logger.exception(e)
         raise HTTPException(
