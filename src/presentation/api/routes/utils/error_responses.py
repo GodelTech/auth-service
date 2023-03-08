@@ -26,7 +26,7 @@ class InvalidRequestResponse(ErrorResponseBase):
 class UnsupportedGrantTypeResponse(ErrorResponseBase):
     detail = ErrorResponseBase.get_exception_detail(
         error="unsupported_grant_type",
-        error_desc="Requested grant type not recognized by server.",
+        error_desc="Requested grant type was not recognized by server.",
     )
 
     def __init__(self, detail: Any = detail) -> None:
