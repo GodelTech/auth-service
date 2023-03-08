@@ -44,7 +44,8 @@ async def get_tokens(
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
-        return result
+        headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
+        return JSONResponse(content=result, headers=headers)
 
     except ClientNotFoundError as e:
         logger.exception(e)
