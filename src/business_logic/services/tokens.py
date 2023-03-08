@@ -113,7 +113,7 @@ class TokenService:
                 self.request_model.redirect_uri is None
                 or self.request_model.code is None
             ):
-                pass
+                raise ValueError  # TODO do we need to inform which required param is invalid?
             else:
                 service = CodeMaker(token_service=self)
                 return await service.create()
@@ -123,7 +123,7 @@ class TokenService:
                 self.request_model.username is None
                 or self.request_model.password is None
             ):
-                pass
+                raise ValueError
             else:
                 return None
 
@@ -139,14 +139,15 @@ class TokenService:
             == "urn:ietf:params:oauth:grant-type:device_code"
         ):
             if self.request_model.device_code is None:
-                pass
+                raise ValueError
+
             else:
                 service = DeviceCodeMaker(token_service=self)
                 return await service.create()
 
         elif self.request_model.grant_type == "client_credentials":
             if self.request_model.client_secret is None:
-                pass
+                raise ValueError
             else:
                 service = ClientCredentialsMaker(token_service=self)
                 return await service.create()
@@ -233,7 +234,7 @@ class BaseMaker:
         )
         client_id = self.request_model.client_id
 
-        if client_id is None and (  # TODO WHY?
+        if client_id is None and (  # TODO
             await self.client_repo.get_client_secrete_by_client_id(
                 client_id=client_id
             )

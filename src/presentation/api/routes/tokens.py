@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -31,23 +31,13 @@ async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-) -> Union[JSONResponse, dict[str, Any]]:
+) -> Union[JSONResponse, Dict[str, Any]]:
     try:
         token_class = token_class
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         return result
-
-    except GrantTypeNotSupported as e:
-        logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "unsupported_grant_type",
-                "error_description": "Requested grant_type was not recognized by the server.",
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
 
     except ClientNotFoundError as e:
         logger.exception(e)
@@ -58,7 +48,6 @@ async def get_tokens(
             },
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-
     except ClientGrantsError as e:
         logger.exception(e)
         return JSONResponse(
@@ -68,8 +57,6 @@ async def get_tokens(
             },
             status_code=status.HTTP_403_FORBIDDEN,
         )
-    # TODO by now it's get triggered if we provide wrong grant_type too
-    # TODO create separete error when we use unsupported grant_types
     except GrantNotFoundError as e:
         logger.exception(e)
         return JSONResponse(
@@ -80,6 +67,15 @@ async def get_tokens(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
+    except GrantTypeNotSupported as e:
+        logger.exception(e)
+        return JSONResponse(
+            content={
+                "error": "unsupported_grant_type",
+                "error_description": "Requested grant_type was not recognized by the server.",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
     except DeviceCodeExpirationTimeError as e:
         logger.exception(e)
         raise HTTPException(
@@ -99,7 +95,9 @@ async def get_tokens(
         )
     except ValueError as e:
         logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Not all required parameters were send",
+        return JSONResponse(
+            content={
+                "error": "invalid_request",
+                "error_description": "Request was missing required parameter(s).",
+            }
         )
