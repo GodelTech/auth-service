@@ -3,7 +3,7 @@
 set -e
 
 # Environment
-export ENV_FOR_DYNACONF="local"
+export ENV_FOR_DYNACONF="pipeline"
 echo "Environment: $ENV_FOR_DYNACONF"
 
 
