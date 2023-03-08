@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: isp
+  name: isp-app
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
     - http:
         paths:
-          - path: /
-            pathType: Prefix
-            backend:
+          - backend:
               service:
-                name: isp
+                name: isp-app
                 port:
                   number: 8000
+            path: /
+            pathType: Prefix
