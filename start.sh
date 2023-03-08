@@ -3,13 +3,13 @@
 set -e
 
 # Environment
-export ENV_FOR_DYNACONF=$ENVIRONMENT_NAME
+export ENV_FOR_DYNACONF="local"
 echo "Environment: $ENV_FOR_DYNACONF"
 
 
-if [ $ENV_FOR_DYNACONF = "test" ] || [ $ENV_FOR_DYNACONF = "pipeline" ]; then
+if [ "$ENV_FOR_DYNACONF" = "test" ] || [ "$ENV_FOR_DYNACONF" = "pipeline" ]; then
   echo "Test environment, no need for migrations"
-elif [ $ENV_FOR_DYNACONF = "local" ] || [ $ENV_FOR_DYNACONF = "development" ]; then
+elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" ]; then
   echo "Migrations"
   alembic upgrade head
   echo "Population of database"
