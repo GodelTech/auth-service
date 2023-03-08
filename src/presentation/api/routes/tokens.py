@@ -19,6 +19,13 @@ from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
 )
+from src.presentation.api.routes.utils import (
+    InvalidClientResponse,
+    InvalidGrantResponse,
+    InvalidRequestResponse,
+    UnauthorizedClientResponse,
+    UnsupportedGrantTypeResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,41 +48,20 @@ async def get_tokens(
 
     except ClientNotFoundError as e:
         logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "invalid_client",
-                "error_description": "Client authentication failed.",
-            },
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
+        return InvalidClientResponse()
+
     except ClientGrantsError as e:
         logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "unauthorized_client",
-                "error_description": "The client is not authorized to use requested grant type.",
-            },
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+        return UnauthorizedClientResponse()
+
     except GrantNotFoundError as e:
         logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "invalid_grant",
-                "error_description": "The authorization code is invalid or expired.",
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return InvalidGrantResponse()
 
     except GrantTypeNotSupported as e:
         logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "unsupported_grant_type",
-                "error_description": "Requested grant_type was not recognized by the server.",
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return UnsupportedGrantTypeResponse()
+
     except DeviceCodeExpirationTimeError as e:
         logger.exception(e)
         raise HTTPException(
@@ -95,9 +81,4 @@ async def get_tokens(
         )
     except ValueError as e:
         logger.exception(e)
-        return JSONResponse(
-            content={
-                "error": "invalid_request",
-                "error_description": "Request was missing required parameter(s).",
-            }
-        )
+        return InvalidRequestResponse()
