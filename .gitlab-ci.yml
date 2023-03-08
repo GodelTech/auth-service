@@ -24,8 +24,9 @@ stages:
 variables:
   PROJECT_NAME: innovations
   SERVICE_NAME: identity-server-poc
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DOCKER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
 
 
 # Pip's cache doesn't store the python packages
@@ -63,12 +64,6 @@ build-and-test:
   script:
     - docker run -d --name identity-server-provider -p 8000:8000 --env ENV_FOR_DYNACONF=pipeline -v /var/run/docker.sock:/var/run/docker.sock ${DOCKER_IMAGE_PATH}
     - docker exec -i identity-server-provider sh -c "pytest --cov=src"
-    - echo ${CI_REGISTRY}
-    - echo ${CI_REGISTRY_USER}
-    - echo ${CI_JOB_TOKEN}
-    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_HASH}
-    - echo ${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}
-    - echo ${KUBERNETES_CONFIG}
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   rules:
     - when: always
@@ -88,16 +83,5 @@ deploy-to-dev:
     KUBECONFIG: ${KUBERNETES_CONFIG}
   tags:
     - identity
-#  image:
-#    name: alpine/helm:3.5.4
-#    entrypoint: [""]
-#  environment:
-#    name: development
-#  script:
-#    - echo 'test deploy-to-dev'
-#    - echo ${KUBERNETES_CONFIG}
-#    - helm version
-#    - export DOCKER_IMAGES_PATH="${CI_REGISTRY}/${CI_PROJECT_PATH}:${SERVICE_NAME}-${CI_PIPELINE_ID}"
-#    - helm upgrade --install --atomic ${SERVICE_NAME} ./deploy/helm -f ./deploy/helm/values.yaml --namespace ${PROJECT_NAME}-${ENV_NAME} --create-namespace --wait --set namespace=${PROJECT_NAME}-${ENV_NAME} --set name=${SERVICE_NAME}-${ENV_NAME} --set image=${DOCKER_IMAGES_PATH} --set imagePullSecret.server=${CI_REGISTRY} --set imagePullSecret.username=${CI_REGISTRY_USER} --set imagePullSecret.password=${CI_JOB_TOKEN}
   only:
     - 27271-Add-Deploy-Stage-To-Pipeline
