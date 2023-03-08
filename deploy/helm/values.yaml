@@ -1,7 +1,7 @@
 # App
 application:
-  name: identity-server-poc
   namespace: development
+  name: identity-server-poc
   image: identity-server-poc:latest
   replicaCount: 1
   port: 8000
@@ -19,12 +19,12 @@ redis:
 # Parameters for the secret containing ContainerRegistry's credentials
 imagePullSecret:
   server: ""
-  username: xxx
+  username: "xxx"
   password: "xxx"
 
 
 # Application Service properties
 service:
+  type: ClusterIP
   port: 8000
   targetPort: 8000
-  type: ClusterIP
