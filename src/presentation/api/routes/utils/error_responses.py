@@ -65,7 +65,7 @@ class InvalidClientResponse(ErrorResponseBase):
 class InvalidGrantResponse(ErrorResponseBase):
     detail = ErrorResponseBase.get_exception_detail(
         error="invalid_grant",
-        error_desc="The authorization code is invalid or expired.",
+        error_desc="Provided grant is invalid or expired.",
     )
 
     def __init__(self, detail: Any = detail) -> None:

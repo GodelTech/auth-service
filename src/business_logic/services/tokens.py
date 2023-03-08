@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 import uuid
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Dict
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,7 +105,7 @@ class TokenService:
         self.jwt_service = jwt_service
         self.blacklisted_repo = blacklisted_repo
 
-    async def get_tokens(self) -> dict[str, Any]:
+    async def get_tokens(self) -> Dict[str, Any]:
         if self.request_model is None or self.request_model.grant_type is None:
             pass
         elif self.request_model.grant_type == "code":
@@ -129,7 +129,7 @@ class TokenService:
 
         elif self.request_model.grant_type == "refresh_token":
             if self.request_model.refresh_token is None:
-                pass
+                raise ValueError
             else:
                 service = RefreshMaker(token_service=self)
                 return await service.create()
@@ -219,7 +219,7 @@ class BaseMaker:
 
     async def make_tokens(
         self, create_id_token: bool = True, create_refresh_token: bool = True
-    ) -> dict[str, str]:
+    ) -> Dict[str, str]:
         if (
             self.request_model.grant_type
             == "urn:ietf:params:oauth:grant-type:device_code"
@@ -315,7 +315,7 @@ class BaseMaker:
 
 
 class CodeMaker(BaseMaker):
-    async def create(self) -> dict[str, Any]:
+    async def create(self) -> Dict[str, Any]:
         await self.validation()
         tokens = await self.make_tokens()
         return {
@@ -351,9 +351,7 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError(
-                    "Device registration in progress"
-                )
+                raise DeviceRegistrationError("Device registration in progress")
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(
@@ -376,9 +374,7 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError(
-                    "Device registration in progress"
-                )
+                raise DeviceRegistrationError("Device registration in progress")
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(
@@ -401,7 +397,7 @@ class DeviceCodeMaker(BaseMaker):
 
 
 class RefreshMaker(BaseMaker):
-    async def create(self) -> dict[str:Any]:
+    async def create(self) -> Dict[str, Any]:
         await self.validation()
         incoming_refresh_token = self.request_model.refresh_token
         try:
@@ -427,7 +423,7 @@ class RefreshMaker(BaseMaker):
 
 
 class ClientCredentialsMaker(BaseMaker):
-    async def create(self) -> dict[str:Any]:
+    async def create(self) -> Dict[str, Any]:
         client_from_db = ...
         if self.request_model is None:
             raise ValueError
