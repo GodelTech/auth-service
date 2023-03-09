@@ -452,7 +452,9 @@ class ClientCredentialsMaker(BaseMaker):
         scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )
-        if not all(scope in scopes for scope in requested_scope.split()):
+        if requested_scope and not all(
+            scope in scopes for scope in requested_scope.split()
+        ):
             raise ClientScopesError
 
         if len(scopes) == 0:

@@ -77,7 +77,7 @@ USER_CLAIM_TYPE = [
     "exp",
     "iat",
     "iss",
-    "sub"
+    "sub",
 ]
 
 TYPES_OF_GRANTS = [
@@ -145,6 +145,19 @@ CLIENT_SECRETS = {
     8: "light",
     9: "position",
     10: "themselves",
+}
+
+CLIENT_SCOPES = {
+    1: "openid",
+    2: "email",
+    3: "profile",
+    4: "email",
+    5: "profile",
+    6: "profile",
+    7: "openid",
+    8: "profile",
+    9: "profile",
+    10: "email",
 }
 
 ROLES = [

@@ -21,7 +21,10 @@ from src.data_access.postgresql.errors import (
     GrantNotFoundError,
     GrantTypeNotSupported,
 )
-from src.data_access.postgresql.repositories import PersistentGrantRepository
+from src.data_access.postgresql.repositories import (
+    PersistentGrantRepository,
+    ClientRepository,
+)
 from src.presentation.api.models.tokens import BodyRequestTokenModel
 
 
