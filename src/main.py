@@ -9,12 +9,11 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
-from src.presentation.api.middleware.authorization_validation import (
-    AuthorizationMiddleware,
+from src.presentation.api.middleware import (
+    AuthorizationMiddleware, 
+    AccessTokenMiddleware
 )
-from src.presentation.api.middleware.access_token_validation import (
-    AccessTokenMiddleware,
-)
+
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL

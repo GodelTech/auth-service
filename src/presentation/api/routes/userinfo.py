@@ -135,7 +135,7 @@ async def get_default_token(
         if with_iss_me:
             payload["iss"] = "me"
         if with_aud:
-            payload["aud"] = ["admin", "userinfo"]
+            payload["aud"] = ["admin", "userinfo", "introspection", "revoke"]
         return await uis.jwt.encode_jwt(payload)
     except:
         raise HTTPException(status_code=500)

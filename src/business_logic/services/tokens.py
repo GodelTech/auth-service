@@ -159,7 +159,7 @@ class TokenService:
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel= token_service.request_model #type: ignore
+        self.request_model: BodyRequestTokenModel= token_service.request_model 
         self.client_repo: ClientRepository = token_service.client_repo
         self.persistent_grant_repo: PersistentGrantRepository = token_service.persistent_grant_repo
         self.user_repo: UserRepository = token_service.user_repo

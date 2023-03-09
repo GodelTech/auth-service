@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union
+from typing import Union
 
 from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services.jwt_token import JWTService

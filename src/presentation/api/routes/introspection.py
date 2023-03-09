@@ -36,7 +36,7 @@ async def post_introspection(
         token = request.headers.get("authorization") or auth_swagger
         introspection_class.authorization = token
         introspection_class.request_body = request_body
-        logger.info(f"Introspection for token {request_body.token} started")
+        logger.debug(f"Introspection for token {request_body.token} started")
         return await introspection_class.analyze_token()
 
     except ValueError:

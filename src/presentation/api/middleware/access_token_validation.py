@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typing import Callable, Any, Union
-from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
