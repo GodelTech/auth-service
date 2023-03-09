@@ -3,6 +3,7 @@ from .client import (
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,
     ClientRedirectUriError,
+    ClientScopesError,
 )
 from .device import (
     DeviceCodeExpirationTimeError,

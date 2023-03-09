@@ -12,3 +12,7 @@ class ClientRedirectUriError(Exception):
 
 class ClientGrantsError(Exception):
     """Use this class when user is in the database but don't have provided grants"""
+
+
+class ClientScopesError(Exception):
+    """Use this class when the database does not contain the client scopes you are looking for"""

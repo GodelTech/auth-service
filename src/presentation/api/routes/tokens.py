@@ -8,6 +8,7 @@ from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
     ClientGrantsError,
     ClientNotFoundError,
+    ClientScopesError,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
@@ -23,6 +24,7 @@ from src.presentation.api.routes.utils import (
     InvalidClientResponse,
     InvalidGrantResponse,
     InvalidRequestResponse,
+    InvalidScopeResponse,
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
 )
@@ -54,6 +56,10 @@ async def get_tokens(
     except ClientGrantsError as e:
         logger.exception(e)
         return UnauthorizedClientResponse()
+
+    except ClientScopesError as e:
+        logger.exception(e)
+        return InvalidScopeResponse()
 
     except GrantNotFoundError as e:
         logger.exception(e)

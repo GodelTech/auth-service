@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 import uuid
-from typing import Any, Optional, Union, Dict
+from typing import Any, Dict, Optional, Union
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,7 @@ from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
     ClientGrantsError,
     ClientNotFoundError,
+    ClientScopesError,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
@@ -84,6 +85,7 @@ async def get_single_token(
     return access_token
 
 
+# TODO add scope check and invalid_scope error handling
 class TokenService:
     def __init__(
         self,
@@ -446,9 +448,12 @@ class ClientCredentialsMaker(BaseMaker):
         except:
             raise ClientNotFoundError
 
+        requested_scope = self.request_model.scope
         scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )
+        if not all(scope in scopes for scope in requested_scope.split()):
+            raise ClientScopesError
 
         if len(scopes) == 0:
             scopes = ["No scope"]
