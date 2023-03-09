@@ -6,12 +6,15 @@ from fastapi.responses import JSONResponse
 
 from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
+    ClientBaseException,
     ClientGrantsError,
     ClientNotFoundError,
     ClientScopesError,
+    DeviceBaseException,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
+    GrantBaseException,
     GrantNotFoundError,
     GrantTypeNotSupported,
 )
@@ -49,43 +52,36 @@ async def get_tokens(
         headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
         return JSONResponse(content=result, headers=headers)
 
-    except ClientNotFoundError as e:
+    except (
+        DeviceBaseException,
+        ClientBaseException,
+        GrantBaseException,
+        ValueError,
+    ) as e:
         logger.exception(e)
-        return InvalidClientResponse()
+        response_class = exception_response_mapper.get(type(e))
+        if response_class:
+            return response_class()
+        else:
+            raise e
 
-    except ClientGrantsError as e:
-        logger.exception(e)
-        return UnauthorizedClientResponse()
 
-    except ClientScopesError as e:
-        logger.exception(e)
-        return InvalidScopeResponse()
-
-    except GrantNotFoundError as e:
-        logger.exception(e)
-        return InvalidGrantResponse()
-
-    except GrantTypeNotSupported as e:
-        logger.exception(e)
-        return UnsupportedGrantTypeResponse()
-
-    except DeviceCodeExpirationTimeError as e:
-        logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Device code expired"
-        )
-    except DeviceRegistrationError as e:
-        logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Device registration in progress",
-        )
-    except DeviceCodeNotFoundError as e:
-        logger.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Such device code does not exist",
-        )
-    except ValueError as e:
-        logger.exception(e)
-        return InvalidRequestResponse()
+exception_response_mapper = {
+    ClientNotFoundError: InvalidClientResponse,
+    ClientGrantsError: UnauthorizedClientResponse,
+    ClientScopesError: InvalidScopeResponse,
+    GrantNotFoundError: InvalidGrantResponse,
+    GrantTypeNotSupported: UnsupportedGrantTypeResponse,
+    DeviceCodeExpirationTimeError: HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN, detail="Device code expired"
+    ),
+    DeviceRegistrationError: HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Device registration in progress",
+    ),
+    DeviceCodeNotFoundError: HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Such device code does not exist",
+    ),
+    ValueError: InvalidRequestResponse,
+}
