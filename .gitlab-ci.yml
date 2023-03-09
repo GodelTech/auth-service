@@ -82,6 +82,8 @@ deploy-to-dev:
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./deploy/helm
     KUBECONFIG: ${KUBERNETES_CONFIG}
+  environment:
+    name: development
   script:
     - echo ${ENVIRONMENT_NAME}
   tags:
