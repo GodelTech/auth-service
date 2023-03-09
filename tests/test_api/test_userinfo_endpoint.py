@@ -172,7 +172,7 @@ class TestUserInfoEndpoint:
         assert response_content == {"sub": "1", "iss": "me", 'scope': 'profile'}
 
     @pytest.mark.asyncio
-    async def test_get_default_token_with_aud_facebook(
+    async def test_get_default_token_with_aud(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         response = await client.request(
@@ -184,10 +184,10 @@ class TestUserInfoEndpoint:
             aud="userinfo"
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response_content == {"sub": "1", "aud": ["admin", "userinfo"], 'scope': 'profile'}
+        assert response_content == {"sub": "1", "aud": ["admin", "userinfo", "introspection", "revoke"], 'scope': 'profile'}
 
     @pytest.mark.asyncio
-    async def test_get_default_token_with_iss_me_and_aud_facebook(
+    async def test_get_default_token_with_iss_and_aud(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         response = await client.request(
@@ -198,7 +198,7 @@ class TestUserInfoEndpoint:
         response_content = await user_info_service.jwt.decode_token(
             token=response_content, audience="admin"
         )
-        expected_result = {"sub": "1", "iss": "me", "aud": ["admin", "userinfo"], 'scope': 'profile'}
+        expected_result = {"sub": "1", "iss": "me", "aud": ["admin", "userinfo", "introspection", "revoke"], 'scope': 'profile'}
         assert response.status_code == status.HTTP_200_OK
         assert response_content == expected_result
 

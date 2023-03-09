@@ -26,6 +26,7 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
+            "aud":["introspection"]
         }
         introspection_token = await jwt.encode_jwt(
             payload=payload
@@ -62,6 +63,7 @@ class TestIntrospectionEndpoint:
             "aud": None,
             "iss": "http://testserver",
             "jti": None,
+            'aud': ['introspection']
         }
         response = await client.request(
             method="POST", url="/introspection/", data=params, headers=headers
@@ -117,6 +119,7 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
+            "aud":["introspection"]
         }
         introspection_token = await jwt.encode_jwt(
             payload=payload
