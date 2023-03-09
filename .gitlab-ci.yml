@@ -77,11 +77,13 @@ deploy-to-dev:
   extends: .deploy-to-dev-ext
   stage: deploy-to-dev
   variables:
+    ENV_FOR_DYNACONF: development
+    ENV_NAME: development
     SERVICE: "${SERVICE_NAME}"
     HELM_PATH: ./deploy/helm
     KUBECONFIG: ${KUBERNETES_CONFIG}
-  environment:
-    name: development
+#  environment:
+#    name: development
   tags:
     - identity
   only:
