@@ -15,8 +15,8 @@ include:
 
 stages:
   - container
-#  - build
-  - deploy-to-dev
+  - build
+#  - deploy-to-dev
 
 
 # Change pip's cache directory to be inside the project directory since we can
