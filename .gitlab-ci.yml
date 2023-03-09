@@ -61,10 +61,13 @@ build-and-test:
   image: docker:20
   services:
     - docker:20-dind
+  variables:
+    ENV_FOR_DYNACONF: test
   environment:
     name: pipeline
   before_script:
     - echo ${CI_ENVIRONMENT_NAME}
+    - echo ${ENV_FOR_DYNACONF}
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker run -t --name identity-server-provider -p 8000:8000 --env ENV_FOR_DYNACONF=pipeline -v /var/run/docker.sock:/var/run/docker.sock ${DOCKER_IMAGE_PATH}
