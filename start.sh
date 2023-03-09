@@ -4,7 +4,7 @@ set -e
 
 # Environment
 if [ "$ENVIRONMENT_NAME" = "" ]; then
-  ENVIRONMENT_NAME="development"
+  ENVIRONMENT_NAME="local"
 fi
 export ENV_FOR_DYNACONF=$ENVIRONMENT_NAME
 echo "Environment: $ENV_FOR_DYNACONF"
