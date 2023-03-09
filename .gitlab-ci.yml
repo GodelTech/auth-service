@@ -46,8 +46,6 @@ cache:
 
 container:docker-build:
   extends: .docker-build-artifact
-  environment:
-    name: pipeline
   rules:
     - when: always
 
