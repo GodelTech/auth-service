@@ -3,6 +3,9 @@
 set -e
 
 # Environment
+if [ "$CI_ENVIRONMENT_NAME" = "" ]; then
+  CI_ENVIRONMENT_NAME="pipeline"
+fi
 export ENV_FOR_DYNACONF=$CI_ENVIRONMENT_NAME
 echo "Environment: $ENV_FOR_DYNACONF"
 
