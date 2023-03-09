@@ -85,7 +85,7 @@ deploy-to-dev:
   environment:
     name: development
   script:
-    - echo ${ENVIRONMENT_NAME}
+    - echo ${CI_ENVIRONMENT_NAME}
   tags:
     - identity
   only:
