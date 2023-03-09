@@ -85,7 +85,6 @@ async def get_single_token(
     return access_token
 
 
-# TODO add scope check and invalid_scope error handling
 class TokenService:
     def __init__(
         self,
@@ -115,7 +114,7 @@ class TokenService:
                 self.request_model.redirect_uri is None
                 or self.request_model.code is None
             ):
-                raise ValueError  # TODO do we need to inform which required param is invalid?
+                raise ValueError
             else:
                 service = CodeMaker(token_service=self)
                 return await service.create()
