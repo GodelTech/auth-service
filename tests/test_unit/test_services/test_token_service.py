@@ -45,7 +45,7 @@ class TestTokenServices:
         self.jwt = JWTService()
         self.client_id = "test_client"
         self.scope = "openid"
-        self.grant_type = "code"
+        self.grant_type = "authorization_code"
         self.redirect_uri = "some"
         self.client_secret = "past"
         self.user_id = 1
@@ -77,7 +77,7 @@ class TestTokenServices:
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
-                grant_type="code",
+                grant_type="authorization_code",
                 redirect_uri=None,
                 code=None,
             )
@@ -160,7 +160,9 @@ class TestTokenServices:
         engine: AsyncEngine,
     ):
         result = await self.base_test_token_service(
-            grant_type="code", token_service=token_service, engine=engine
+            grant_type="authorization_code",
+            token_service=token_service,
+            engine=engine,
         )
         for param in (
             "access_token",
@@ -260,7 +262,7 @@ class TestTokenServices:
         engine: AsyncEngine,
     ):
         result = await self.base_test_maker(
-            grant_type="code",
+            grant_type="authorization_code",
             token_service=token_service,
             engine=engine,
             maker=CodeMaker,

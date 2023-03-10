@@ -81,7 +81,7 @@ USER_CLAIM_TYPE = [
 ]
 
 TYPES_OF_GRANTS = [
-    "code",
+    "authorization_code",
     "refresh_token",
     "password",
     "urn:ietf:params:oauth:grant-type:device_code",

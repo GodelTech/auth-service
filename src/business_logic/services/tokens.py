@@ -109,7 +109,7 @@ class TokenService:
     async def get_tokens(self) -> Dict[str, Any]:
         if self.request_model is None or self.request_model.grant_type is None:
             pass
-        elif self.request_model.grant_type == "code":
+        elif self.request_model.grant_type == "authorization_code":
             if (
                 self.request_model.redirect_uri is None
                 or self.request_model.code is None
@@ -207,6 +207,8 @@ class BaseMaker:
             == "urn:ietf:params:oauth:grant-type:device_code"
         ):
             encoded_attr = self.request_model.device_code
+        elif self.request_model.grant_type == "authorization_code":
+            encoded_attr = self.request_model.code
         else:
             encoded_attr = getattr(
                 self.request_model, self.request_model.grant_type
@@ -226,6 +228,8 @@ class BaseMaker:
             == "urn:ietf:params:oauth:grant-type:device_code"
         ):
             encoded_attr = self.request_model.device_code
+        elif self.request_model.grant_type == "authorization_code":
+            encoded_attr = self.request_model.code
         else:
             encoded_attr = getattr(
                 self.request_model, self.request_model.grant_type

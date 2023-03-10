@@ -33,13 +33,13 @@ class TestTokenEndpoint:
             client_id="double_test",
             grant_data="secret_code",
             user_id=1,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
 
         params = {
             "client_id": "double_test",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "openid",
             "redirect_uri": "http://www.sosa-stephens.com/",
@@ -73,13 +73,13 @@ class TestTokenEndpoint:
             client_id="double_test",
             grant_data="secret_code",
             user_id=2,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
 
         wrong_params = {
             "client_id": "wrong_id",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
             "redirect_uri": "https://www.arnold-mann.net/",
@@ -108,13 +108,13 @@ class TestTokenEndpoint:
             client_id="double_test",
             grant_data="secret_code",
             user_id=2,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
 
         wrong_params = {
             "client_id": "double_test",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
         }
@@ -142,13 +142,13 @@ class TestTokenEndpoint:
             client_id="double_test",
             grant_data="secret_code",
             user_id=2,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
 
         wrong_params = {
             "client_id": "double_test",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "scope": "test",
             "redirect_uri": "https://www.arnold-mann.net/",
         }
@@ -176,20 +176,20 @@ class TestTokenEndpoint:
             client_id="double_test",
             grant_data="secret_code",
             user_id=2,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
         await self.persistent_grant_repo.create(
             client_id="test_client",
             grant_data="different_secret_code",
             user_id=1,
-            grant_type="code",
+            grant_type="authorization_code",
             expiration_time=3600,
         )
 
         wrong_params = {
             "client_id": "test_client",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
             "redirect_uri": "https://www.arnold-mann.net/",
@@ -214,7 +214,7 @@ class TestTokenEndpoint:
     ) -> None:
         params = {
             "client_id": "test_client",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": "incorrect_code",
             "scope": "test",
             "redirect_uri": "https://www.arnold-mann.net/",

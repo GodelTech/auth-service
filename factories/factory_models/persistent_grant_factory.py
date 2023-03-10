@@ -2,12 +2,13 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyChoice
 
+import factories.data.data_for_factories as data
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.persistent_grant as grant
 from factories.data.data_for_factories import TYPES_OF_GRANTS
 from factories.factory_models.client_factory import ClientFactory
 from factories.factory_models.user_factory import UserFactory
-import factories.data.data_for_factories as data
+
 
 class PersistentGrantFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -34,4 +35,4 @@ class PersistentGrantTypesFactory(SQLAlchemyModelFactory):
         sqlalchemy_get_or_create = ("type_of_grant",)
 
     id = factory.Sequence(lambda n: n + 1)
-    type_of_grant = factory.Iterator(["code", "refresh_token"])
+    type_of_grant = factory.Iterator(["authorization_code", "refresh_token"])

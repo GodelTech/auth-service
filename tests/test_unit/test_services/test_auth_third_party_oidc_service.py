@@ -145,7 +145,7 @@ class TestAuthorizationService:
             username="TestClient", secret_code="TestClientSecretCode"
         )
         created = await service.persistent_grant_repo.exists(
-            grant_data="TestClientSecretCode", grant_type="code"
+            grant_data="TestClientSecretCode", grant_type="authorization_code"
         )
         assert created is True
 

@@ -54,7 +54,7 @@ class TestAuthorizationCodeFlow:
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "openid profile",
             "redirect_uri": "http://www.sparks.net/",
