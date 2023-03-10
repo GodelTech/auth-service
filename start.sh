@@ -15,8 +15,8 @@ if [ "$ENV_FOR_DYNACONF" = "test" ] || [ "$ENV_FOR_DYNACONF" = "pipeline" ]; the
 elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" ]; then
   echo "Migrations !!!"
   alembic upgrade head
-#  echo "Population of database"
-#  python -m factories.commands
+  echo "Population of database"
+  python -m factories.commands
 else
   echo "Migrations"
   alembic upgrade head
