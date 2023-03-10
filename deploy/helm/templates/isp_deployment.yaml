@@ -13,7 +13,7 @@ spec:
       labels:
         app: {{ .Values.application.name  }}
     spec:
-      hostNetwork: true
+#      hostNetwork: true
       imagePullSecrets:
         - name: {{ .Values.application.name | lower }}-cr
       containers:
