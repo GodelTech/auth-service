@@ -3,5 +3,6 @@ dynaconf_merge = true
 
 [development.db]
 echo = true
-url = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+#url = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+url = "postgresql+asyncpg://is_dev:n5OjMkEO4dL6YD$@192.168.80.100:5432/identity-server-prod-db"
 max_connection_count = 10
