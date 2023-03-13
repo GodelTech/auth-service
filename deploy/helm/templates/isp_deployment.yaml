@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.application.name  }}
+  namespace: {{ .Values.application.namespace  }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.application.replicaCount  }}
   selector:
     matchLabels:
       app: {{ .Values.application.name  }}
@@ -12,13 +13,15 @@ spec:
       labels:
         app: {{ .Values.application.name  }}
     spec:
-      hostNetwork: true
       imagePullSecrets:
-        - name: {{ .Values.application.name | }}
+        - name: {{ .Values.application.name | lower }}-cr
       containers:
-      - name: isp-container
+      - name: {{ .Values.application.name  }}
         image: {{ .Values.application.image  }}
         imagePullPolicy: Always
+        env:
+          - name: ENVIRONMENT_NAME
+            value: {{ .Values.environment_name }}
         ports:
         - containerPort: {{ .Values.application.port  }}
           protocol: TCP
