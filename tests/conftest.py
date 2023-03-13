@@ -43,7 +43,6 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
