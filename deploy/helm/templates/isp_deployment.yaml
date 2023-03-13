@@ -19,6 +19,9 @@ spec:
       - name: {{ .Values.application.name  }}
         image: {{ .Values.application.image  }}
         imagePullPolicy: Always
+        env:
+          - name: ENVIRONMENT_NAME
+            value: {{ .Values.environment_name }}
         ports:
         - containerPort: {{ .Values.application.port  }}
           protocol: TCP
