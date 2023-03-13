@@ -42,7 +42,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "openid",
-            "redirect_uri": "http://www.sosa-stephens.com/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         response = await client.request(
@@ -192,7 +192,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         response = await client.request(
