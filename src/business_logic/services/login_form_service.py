@@ -8,7 +8,6 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +71,12 @@ class LoginFormService:
                         provider_link += "&scope=openid profile email"
                     if provider[0] == "gitlab":
                         provider_link += "&scope=openid"
+                    if provider[0] == "microsoft":
+                        provider_link += "&scope=openid+profile+email"
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
                         "provider_link": provider_link,
                     }
-
                 return providers_data
         return None
 

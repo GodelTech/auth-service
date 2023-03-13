@@ -3,17 +3,16 @@ from typing import Any
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import select, insert, delete, text
+from sqlalchemy import delete, insert, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.identity_resource import (
-    IdentityProviderState,
     IdentityProviderMapped,
+    IdentityProviderState,
 )
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-from src.data_access.postgresql.tables.users import UserClaim, User
-from src.business_logic.services.jwt_token import JWTService
-
+from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -46,7 +45,7 @@ class TestThirdPartyGithubFlow:
         await connection.commit()
         await connection.execute(
             insert(IdentityProviderMapped).values(
-                identity_provider_id=3,
+                identity_provider_id=4,
                 provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
                 provider_client_secret="***REMOVED***",
                 enabled=True,
@@ -79,7 +78,7 @@ class TestThirdPartyGithubFlow:
 
         await connection.execute(
             delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 3,
+                IdentityProviderMapped.identity_provider_id == 4,
                 IdentityProviderMapped.provider_client_id
                 == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
                 IdentityProviderMapped.provider_client_secret

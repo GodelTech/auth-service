@@ -1,15 +1,19 @@
+from typing import Any
+
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import select, insert, delete, text
-
-from src.data_access.postgresql.tables.identity_resource import IdentityProviderState, IdentityProviderMapped
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-from src.data_access.postgresql.tables.users import UserClaim, User
-from src.business_logic.services.jwt_token import JWTService
+from sqlalchemy import delete, insert, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Any
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
+from src.business_logic.services.jwt_token import JWTService
+from src.data_access.postgresql.tables.identity_resource import (
+    IdentityProviderMapped,
+    IdentityProviderState,
+)
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
+from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -21,8 +25,8 @@ STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https:/
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGithubFlow:
-    async def test_successful_github_code_flow(
+class TestThirdPartyLinkedinFlow:
+    async def test_successful_linkedin_code_flow(
         self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
         # 1st stage Authorization endpoint with get request
@@ -35,47 +39,43 @@ class TestThirdPartyGithubFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        # 2nd stage third party GitHub provider endpoint
+        # 2nd stage third party Linkedin provider endpoint
         await connection.execute(
             insert(IdentityProviderState).values(state=STUB_STATE)
         )
         await connection.commit()
         await connection.execute(
             insert(IdentityProviderMapped).values(
-                identity_provider_id=1,
-                provider_client_id="e6a4c6014f35f4acf016",
-                provider_client_secret="***REMOVED***",
+                identity_provider_id=3,
+                provider_client_id="123",
+                provider_client_secret="456",
                 enabled=True,
             )
         )
         await connection.commit()
 
-        async def replace_post(*args:Any, **kwargs:Any) -> str:
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
             return "access_token"
 
-        async def replace_get(*args:Any, **kwargs:Any) -> str:
-            return "NewUserNew"
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
+            return "users_email"
 
-        patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
+        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyLinkedinService"
 
+        mocker.patch(f"{patch_start}.get_access_token", replace_post)
         mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
+            f"{patch_start}.make_get_request_for_user_email", replace_get
         )
         params = {"code": "test_code", "state": STUB_STATE}
         response = await client.request(
-            "GET", "/authorize/oidc/github", params=params
+            "GET", "/authorize/oidc/linkedin", params=params
         )
         assert response.status_code == status.HTTP_302_FOUND
         await connection.execute(
             delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 1,
-                IdentityProviderMapped.provider_client_id
-                == "e6a4c6014f35f4acf016",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
+                IdentityProviderMapped.identity_provider_id == 3,
+                IdentityProviderMapped.provider_client_id == "123",
+                IdentityProviderMapped.provider_client_secret == "456",
             )
         )
         await connection.commit()
@@ -88,13 +88,14 @@ class TestThirdPartyGithubFlow:
 
         # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
         user_id = await connection.execute(
-            select(User.id)
-            .where(User.username == "NewUserNew")
+            select(User.id).where(User.username == "users_email")
         )
         user_id = user_id.first()[0]
         secret_code = await connection.execute(
-            select(PersistentGrant.grant_data)
-            .where(PersistentGrant.client_id == 8, PersistentGrant.user_id == user_id)
+            select(PersistentGrant.grant_data).where(
+                PersistentGrant.client_id == 8,
+                PersistentGrant.user_id == user_id,
+            )
         )
 
         secret_code = secret_code.first()[0]
@@ -124,7 +125,9 @@ class TestThirdPartyGithubFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
         await connection.execute(
             insert(UserClaim).values(
@@ -145,7 +148,11 @@ class TestThirdPartyGithubFlow:
 
         # 5th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
         jwt_service = JWTService()
-        token_hint_data = {"sub": user_id, "client_id": "spider_man", "type": "code"}
+        token_hint_data = {
+            "sub": user_id,
+            "client_id": "spider_man",
+            "type": "code",
+        }
 
         id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
 

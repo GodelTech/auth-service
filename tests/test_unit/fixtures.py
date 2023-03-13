@@ -8,6 +8,7 @@ from src.presentation.api.models import (
     ThirdPartyOIDCRequestModel,
     StateRequestModel,
     ThirdPartyGoogleRequestModel,
+    ThirdPartyMicrosoftRequestModel,
 )
 from src.presentation.api.models.authorization import RequestModel
 from src.presentation.api.models.endsession import RequestEndSessionModel
@@ -189,5 +190,13 @@ async def state_request_model() -> StateRequestModel:
 async def third_party_google_request_model() -> ThirdPartyGoogleRequestModel:
     oidc_request_model = ThirdPartyGoogleRequestModel(
         code="test_code", state="test_state", scope="test_scope"
+    )
+    return oidc_request_model
+
+
+@pytest_asyncio.fixture
+async def third_party_microsoft_request_model() -> ThirdPartyMicrosoftRequestModel:
+    oidc_request_model = ThirdPartyMicrosoftRequestModel(
+        code="test_code", state="test_state"
     )
     return oidc_request_model

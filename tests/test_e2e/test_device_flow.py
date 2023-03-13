@@ -32,7 +32,7 @@ class TestDeviceFlow:
         self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         # 1st stage Create a device instance the database for the relevant client
-        params = {"client_id": "test_client", "scope": "scope"}
+        params = {"client_id": "test_client", "scope": "openid"}
         response = await client.request(
             "POST",
             "/device/",

@@ -56,7 +56,7 @@ class TestAuthorizationCodeFlow:
             "client_id": "spider_man",
             "grant_type": "code",
             "code": secret_code,
-            "scope": "test",
+            "scope": "openid profile",
             "redirect_uri": "http://www.sparks.net/",
         }
 

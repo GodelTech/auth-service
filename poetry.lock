@@ -370,6 +370,19 @@ memcache = ["aiomcache"]
 redis = ["redis (>=4.2.0rc1,<5.0.0)"]
 
 [[package]]
+name = "fastapi-utils"
+version = "0.2.1"
+description = "Reusable utilities for FastAPI"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[package.dependencies]
+fastapi = "*"
+pydantic = ">=1.0,<2.0"
+sqlalchemy = ">=1.3.12,<2.0.0"
+
+[[package]]
 name = "filelock"
 version = "3.9.0"
 description = "A platform independent file lock."
@@ -1241,7 +1254,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "9ea45636ea237d8d8eee3e7acbdcf76c85478a3f6208dc7edd62be6d3e54435d"
+content-hash = "6d3d95d605e42cae2205eef9cb797bbf5797b96b48c8c6a564503708d6fdb31f"
 
 [metadata.files]
 aiohttp = [
@@ -1777,6 +1790,10 @@ fastapi = [
 fastapi-cache2 = [
     {file = "fastapi_cache2-0.2.1-py3-none-any.whl", hash = "sha256:532c24253ab8f162ba2f0a7dcccb98591424f0424c28da70346eb3c99daf2b06"},
     {file = "fastapi_cache2-0.2.1.tar.gz", hash = "sha256:0c68803c5a7fdebfec3e4430fd08482c091344dc4dd55a00209a882220712f89"},
+]
+fastapi-utils = [
+    {file = "fastapi-utils-0.2.1.tar.gz", hash = "sha256:0e6c7fc1870b80e681494957abf65d4f4f42f4c7f70005918e9181b22f1bd759"},
+    {file = "fastapi_utils-0.2.1-py3-none-any.whl", hash = "sha256:dd0be7dc7f03fa681b25487a206651d99f2330d5a567fb8ab6cb5f8a06a29360"},
 ]
 filelock = [
     {file = "filelock-3.9.0-py3-none-any.whl", hash = "sha256:f58d535af89bb9ad5cd4df046f741f8553a418c01a7856bf0d173bbc9f6bd16d"},
