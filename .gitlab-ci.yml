@@ -78,4 +78,5 @@ deploy-to-dev:
   tags:
     - identity
   only:
-    - 27271-Add-Deploy-Stage-To-Pipeline
+    - development
+
