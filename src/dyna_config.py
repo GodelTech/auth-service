@@ -19,6 +19,18 @@ DB_MAX_CONNECTION_COUNT = settings.db.get("max_connection_count")
 # DB_PORT = settings.db.get("port")
 
 
+BASE_URL_HOST = settings.server.get("base_url_host")
+BASE_URL_PORT = settings.server.get("base_url_port")
+
+BASE_URL = f"{BASE_URL_HOST}:{BASE_URL_PORT}"
+
+
+BASE_URL_HOST = settings.server.get("base_url_host")
+BASE_URL_PORT = settings.server.get("base_url_port")
+
+BASE_URL = f"{BASE_URL_HOST}:{BASE_URL_PORT}"
+
+
 REDIS_SCHEME = settings.redis.get("scheme")
 REDIS_HOST = settings.redis.get("host")
 REDIS_PORT = settings.redis.get("port")

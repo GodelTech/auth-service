@@ -10,6 +10,7 @@ from .third_party_oidc_authorization import (
     ThirdPartyFacebookRequestModel,
     ThirdPartyGoogleRequestModel,
     ThirdPartyLinkedinRequestModel,
+    ThirdPartyMicrosoftRequestModel,
     ThirdPartyOIDCRequestModel,
 )
 from .tokens import BodyRequestTokenModel, ResponseTokenModel
