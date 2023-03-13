@@ -116,6 +116,12 @@ async def post_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Bad password"},
         )
+    except ClientRedirectUriError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Redirect Uri not found"},
+        )
     except KeyError as exception:
         message = (
             f"KeyError: key {exception} does not exist is not in the scope"

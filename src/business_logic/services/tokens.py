@@ -321,6 +321,9 @@ class BaseMaker:
 
 class CodeMaker(BaseMaker):
     async def create(self) -> Dict[str, Any]:
+        await self._validate_client_redirect_uri(
+            self.request_model.client_id, self.request_model.redirect_uri
+        )
         await self.validation()
         tokens = await self.make_tokens()
         return {
@@ -330,6 +333,17 @@ class CodeMaker(BaseMaker):
             "expires_in": self.expiration_time,
             "token_type": "Bearer",
         }
+
+    async def _validate_client_redirect_uri(  # TODO create mixin
+        self, client_id: str, redirect_uri: str
+    ) -> bool:
+        """
+        Checks if the redirect uri is in the database.
+        """
+        client = await self.client_repo.validate_client_redirect_uri(
+            client_id=client_id, redirect_uri=redirect_uri
+        )
+        return client
 
 
 class DeviceCodeMaker(BaseMaker):

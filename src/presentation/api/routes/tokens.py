@@ -10,6 +10,7 @@ from src.data_access.postgresql.errors import (
     ClientGrantsError,
     ClientNotFoundError,
     ClientScopesError,
+    ClientRedirectUriError,
     DeviceBaseException,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
@@ -70,6 +71,7 @@ exception_response_mapper = {
     ClientNotFoundError: InvalidClientResponse,
     ClientGrantsError: UnauthorizedClientResponse,
     ClientScopesError: InvalidScopeResponse,
+    ClientRedirectUriError: InvalidGrantResponse,
     GrantNotFoundError: InvalidGrantResponse,
     GrantTypeNotSupported: UnsupportedGrantTypeResponse,
     DeviceCodeExpirationTimeError: HTTPException(

@@ -40,7 +40,11 @@ class AuthorizationService:
             self.request_model is not None
             and self.request_model.scope is not None
         ):
-            if await self._validate_client(self.request_model.client_id):
+            if await self._validate_client(
+                self.request_model.client_id
+            ) and await self._validate_client_redirect_uri(
+                self.request_model.client_id, self.request_model.redirect_uri
+            ):
                 scope_data = await self._parse_scope_data(
                     scope=self.request_model.scope
                 )
@@ -185,6 +189,17 @@ class AuthorizationService:
         else:
             return None
 
+    async def _validate_client_redirect_uri(  # TODO create mixin
+        self, client_id: str, redirect_uri: str
+    ) -> bool:
+        """
+        Checks if the redirect uri is in the database.
+        """
+        client = await self.client_repo.validate_client_redirect_uri(
+            client_id=client_id, redirect_uri=redirect_uri
+        )
+        return client
+
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         """ """
         return {
@@ -206,6 +221,7 @@ class AuthorizationService:
             return redirect_uri
         else:
             return None
+
     @property
     def request_model(self) -> Optional[RequestModel]:
         return self._request_model

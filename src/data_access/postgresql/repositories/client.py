@@ -20,16 +20,13 @@ from src.data_access.postgresql.tables.client import (
 
 
 class ClientRepository(BaseRepository):
-    async def get_client_by_client_id(self, 
-        client_id: str
-        ) -> Client:
-        
+    async def get_client_by_client_id(self, client_id: str) -> Client:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
-            
+
             client = await session.execute(
                 select(Client).where(Client.client_id == client_id)
             )
@@ -117,11 +114,12 @@ class ClientRepository(BaseRepository):
                     Client, ClientPostLogoutRedirectUri.client_id == Client.id
                 )
                 .where(
-                        Client.client_id == client_id,
-                        ClientPostLogoutRedirectUri.post_logout_redirect_uri == logout_redirect_uri,
-                        )
-                    )
-            
+                    Client.client_id == client_id,
+                    ClientPostLogoutRedirectUri.post_logout_redirect_uri
+                    == logout_redirect_uri,
+                )
+            )
+
             result = logout_redirect_uri_obj.first()
             if not result:
                 raise ClientPostLogoutRedirectUriError(
@@ -140,11 +138,16 @@ class ClientRepository(BaseRepository):
         )
         async with session_factory() as sess:
             session = sess
-            client_id_int = (await self.get_client_by_client_id(client_id = client_id)).id
+            client_id_int = (
+                await self.get_client_by_client_id(client_id=client_id)
+            ).id
             redirect_uri_obj = await session.execute(
-                select(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int, ClientRedirectUri.redirect_uri == redirect_uri )
+                select(ClientRedirectUri).where(
+                    ClientRedirectUri.client_id == client_id_int,
+                    ClientRedirectUri.redirect_uri == redirect_uri,
                 )
-                
+            )
+
             result = redirect_uri_obj.first()
             if not result:
                 raise ClientRedirectUriError(
