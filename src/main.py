@@ -20,7 +20,7 @@ from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-   
+
 import logging
 from src.log import LOGGING_CONFIG
 
@@ -47,7 +47,6 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_headers=["*"],
     )
 
-
     setup_di(application)
     container = Container()
     container.db()
@@ -68,14 +67,14 @@ def setup_di(app: FastAPI) -> None:
     db_engine = prov.provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-    
+
     app.add_middleware(
-        middleware_class=AuthorizationMiddleware, 
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine)
+        middleware_class=AuthorizationMiddleware,
+        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
     app.add_middleware(
-        middleware_class=AccessTokenMiddleware, 
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine)
+        middleware_class=AccessTokenMiddleware,
+        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
 
     # Register admin-ui controllers on application start-up.
@@ -91,7 +90,7 @@ def setup_di(app: FastAPI) -> None:
                 jwt_service=prov.provide_jwt_service(),
             ),
         ),
-    ) 
+    )
     # Identity Resourses
     admin.add_view(ui.IdentityProviderAdminController)
     admin.add_view(ui.IdentityProviderMappedAdminController)
@@ -145,7 +144,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.ApiScopeClaimTypeAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    nodepends_provide_auth_service = lambda:prov.provide_auth_service(
+    nodepends_provide_auth_service = lambda: prov.provide_auth_service(
         client_repo=prov.provide_client_repo(db_engine),
         user_repo=prov.provide_user_repo(db_engine),
         persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -154,20 +153,22 @@ def setup_di(app: FastAPI) -> None:
         jwt_service=prov.provide_jwt_service(),
     )
     app.dependency_overrides[
-       prov.provide_auth_service_stub
+        prov.provide_auth_service_stub
     ] = nodepends_provide_auth_service
 
-    nodepends_provide_endsession_servise = lambda:prov.provide_endsession_service(
-        client_repo=prov.provide_client_repo(db_engine),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
-        jwt_service=prov.provide_jwt_service(),
+    nodepends_provide_endsession_servise = (
+        lambda: prov.provide_endsession_service(
+            client_repo=prov.provide_client_repo(db_engine),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
+            jwt_service=prov.provide_jwt_service(),
+        )
     )
     app.dependency_overrides[
-       prov.provide_endsession_service_stub
+        prov.provide_endsession_service_stub
     ] = nodepends_provide_endsession_servise
 
     nodepends_provide_introspection_service = (
-        lambda:prov.provide_introspection_service(
+        lambda: prov.provide_introspection_service(
             jwt=prov.provide_jwt_service(),
             user_repo=prov.provide_user_repo(db_engine),
             client_repo=prov.provide_client_repo(db_engine),
@@ -175,73 +176,81 @@ def setup_di(app: FastAPI) -> None:
         )
     )
     app.dependency_overrides[
-       prov.provide_introspection_service_stub
+        prov.provide_introspection_service_stub
     ] = nodepends_provide_introspection_service
 
-    nodepends_provide_token_service = lambda:prov.provide_token_service(
+    nodepends_provide_token_service = lambda: prov.provide_token_service(
         jwt_service=prov.provide_jwt_service(),
         user_repo=prov.provide_user_repo(db_engine),
         client_repo=prov.provide_client_repo(db_engine),
         persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
         device_repo=prov.provide_device_repo(db_engine),
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine)
+        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
     app.dependency_overrides[
-       prov.provide_token_service_stub
+        prov.provide_token_service_stub
     ] = nodepends_provide_token_service
 
-    nodepends_provide_userinfo_service = lambda:prov.provide_userinfo_service(
+    nodepends_provide_userinfo_service = lambda: prov.provide_userinfo_service(
         jwt=prov.provide_jwt_service(),
         user_repo=prov.provide_user_repo(db_engine),
         client_repo=prov.provide_client_repo(db_engine),
         persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
     )
     app.dependency_overrides[
-       prov.provide_userinfo_service_stub
+        prov.provide_userinfo_service_stub
     ] = nodepends_provide_userinfo_service
 
-    nodepends_provide_login_form_service = lambda:prov.provide_login_form_service(
-        client_repo=prov.provide_client_repo(db_engine),
-        oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
+    nodepends_provide_login_form_service = (
+        lambda: prov.provide_login_form_service(
+            client_repo=prov.provide_client_repo(db_engine),
+            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
+        )
     )
 
     app.dependency_overrides[
-       prov.provide_login_form_service_stub
+        prov.provide_login_form_service_stub
     ] = nodepends_provide_login_form_service
 
-    nodepends_provide_admin_user_service = lambda:prov.provide_admin_user_service(
-        user_repo=prov.provide_user_repo(db_engine),
+    nodepends_provide_admin_user_service = (
+        lambda: prov.provide_admin_user_service(
+            user_repo=prov.provide_user_repo(db_engine),
+        )
     )
 
     app.dependency_overrides[
-       prov.provide_admin_user_service_stub
+        prov.provide_admin_user_service_stub
     ] = nodepends_provide_admin_user_service
 
-    nodepends_provide_admin_group_service = lambda:prov.provide_admin_group_service(
-        group_repo=prov.provide_group_repo(db_engine),
+    nodepends_provide_admin_group_service = (
+        lambda: prov.provide_admin_group_service(
+            group_repo=prov.provide_group_repo(db_engine),
+        )
     )
 
     app.dependency_overrides[
-       prov.provide_admin_group_service_stub
+        prov.provide_admin_group_service_stub
     ] = nodepends_provide_admin_group_service
 
-    nodepends_provide_admin_role_service = lambda:prov.provide_admin_role_service(
-        role_repo=prov.provide_role_repo(db_engine),
+    nodepends_provide_admin_role_service = (
+        lambda: prov.provide_admin_role_service(
+            role_repo=prov.provide_role_repo(db_engine),
+        )
     )
     app.dependency_overrides[
-       prov.provide_admin_role_service_stub
+        prov.provide_admin_role_service_stub
     ] = nodepends_provide_admin_role_service
 
-    nodepends_provide_device_service = lambda:prov.provide_device_service(
+    nodepends_provide_device_service = lambda: prov.provide_device_service(
         client_repo=prov.provide_client_repo(db_engine),
         device_repo=prov.provide_device_repo(db_engine),
     )
     app.dependency_overrides[
-       prov.provide_device_service_stub
+        prov.provide_device_service_stub
     ] = nodepends_provide_device_service
 
     nodepends_provide_auth_third_party_oidc_service = (
-        lambda:prov.provide_auth_third_party_oidc_service(
+        lambda: prov.provide_auth_third_party_oidc_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -250,11 +259,11 @@ def setup_di(app: FastAPI) -> None:
         )
     )
     app.dependency_overrides[
-       prov.provide_auth_third_party_oidc_service_stub
+        prov.provide_auth_third_party_oidc_service_stub
     ] = nodepends_provide_auth_third_party_oidc_service
 
     nodepends_provide_auth_linkedin_third_party_service = (
-        lambda:prov.provide_auth_third_party_linkedin_service(
+        lambda: prov.provide_auth_third_party_linkedin_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -263,11 +272,11 @@ def setup_di(app: FastAPI) -> None:
         )
     )
     app.dependency_overrides[
-       prov.provide_auth_third_party_linkedin_service_stub
+        prov.provide_auth_third_party_linkedin_service_stub
     ] = nodepends_provide_auth_linkedin_third_party_service
 
     nodepends_provide_third_party_google_service = (
-        lambda:prov.provide_third_party_google_service(
+        lambda: prov.provide_third_party_google_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -277,11 +286,11 @@ def setup_di(app: FastAPI) -> None:
     )
 
     app.dependency_overrides[
-       prov.provide_third_party_google_service_stub
+        prov.provide_third_party_google_service_stub
     ] = nodepends_provide_third_party_google_service
 
     nodepends_provide_third_party_facebook_service = (
-        lambda:prov.provide_third_party_facebook_service(
+        lambda: prov.provide_third_party_facebook_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -291,11 +300,11 @@ def setup_di(app: FastAPI) -> None:
     )
 
     app.dependency_overrides[
-       prov.provide_third_party_facebook_service_stub
+        prov.provide_third_party_facebook_service_stub
     ] = nodepends_provide_third_party_facebook_service
 
     nodepends_provide_third_party_gitlab_service = (
-        lambda:prov.provide_third_party_gitlab_service(
+        lambda: prov.provide_third_party_gitlab_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -305,18 +314,18 @@ def setup_di(app: FastAPI) -> None:
     )
 
     app.dependency_overrides[
-       prov.provide_third_party_gitlab_service_stub
+        prov.provide_third_party_gitlab_service_stub
     ] = nodepends_provide_third_party_gitlab_service
-    
-    nodepends_wellknown_service = lambda:prov.provide_wellknown_service(
+
+    nodepends_wellknown_service = lambda: prov.provide_wellknown_service(
         wlk_repo=prov.provide_wellknown_repo(db_engine),
     )
     app.dependency_overrides[
-       prov.provide_wellknown_service_stub
+        prov.provide_wellknown_service_stub
     ] = nodepends_wellknown_service
 
     nodepends_provide_third_party_microsoft_service = (
-        lambda:prov.provide_third_party_microsoft_service(
+        lambda: prov.provide_third_party_microsoft_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -326,11 +335,11 @@ def setup_di(app: FastAPI) -> None:
     )
 
     app.dependency_overrides[
-       prov.provide_third_party_microsoft_service_stub
+        prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
     nodepends_provide_third_party_microsoft_service = (
-        lambda:prov.provide_third_party_microsoft_service(
+        lambda: prov.provide_third_party_microsoft_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
@@ -340,7 +349,7 @@ def setup_di(app: FastAPI) -> None:
     )
 
     app.dependency_overrides[
-       prov.provide_third_party_microsoft_service_stub
+        prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
 

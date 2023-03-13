@@ -34,7 +34,9 @@ logger = logging.getLogger(__name__)
 # )
 async def get_openid_configuration(
     request: Request,
-    well_known_info_class: WellKnownServices = Depends(provide_wellknown_service_stub)
+    well_known_info_class: WellKnownServices = Depends(
+        provide_wellknown_service_stub
+    ),
 ) -> dict[str, Any]:
     try:
         logger.info("Collecting Data for OpenID Configuration.")
@@ -48,8 +50,10 @@ async def get_openid_configuration(
 
 @well_known_router.get("/jwks", response_model=ResponseJWKS)
 async def get_jwks(
-    request: Request, 
-    well_known_info_class: WellKnownServices = Depends(provide_wellknown_service_stub)
+    request: Request,
+    well_known_info_class: WellKnownServices = Depends(
+        provide_wellknown_service_stub
+    ),
 ) -> dict[str, Any]:
     try:
         logger.info("JWKS")

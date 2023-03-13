@@ -12,7 +12,6 @@ spec:
       labels:
         component: redis
     spec:
-      hostNetwork: true
       containers:
         - name: redis
           image: redis

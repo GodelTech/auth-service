@@ -27,7 +27,7 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     ThirdPartyOIDCRepository,
     WellKnownRepository,
-    BlacklistedTokenRepository
+    BlacklistedTokenRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
@@ -47,7 +47,6 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from src.dyna_config import DB_URL
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -155,7 +154,7 @@ async def token_service(engine: AsyncEngine) -> TokenService:
         user_repo=UserRepository(engine),
         device_repo=DeviceRepository(engine),
         jwt_service=JWTService(),
-        blacklisted_repo=BlacklistedTokenRepository(engine)
+        blacklisted_repo=BlacklistedTokenRepository(engine),
     )
     return tk_service
 
@@ -231,6 +230,6 @@ async def microsoft_third_party_service(engine) -> ThirdPartyMicrosoftService:
 @pytest_asyncio.fixture
 async def wlk_services(engine) -> WellKnownServices:
     wlk_services = WellKnownServices(
-        wlk_repo = WellKnownRepository(engine),
+        wlk_repo=WellKnownRepository(engine),
     )
     return wlk_services
