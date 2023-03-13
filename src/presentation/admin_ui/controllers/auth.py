@@ -36,7 +36,4 @@ class AdminAuthController(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool:
         token = request.session.get("Token")
-        if token is not None:
-            return await self.auth_service.authenticate(token)
-        else: 
-            raise ValueError
+        return await self.auth_service.authenticate(token)
