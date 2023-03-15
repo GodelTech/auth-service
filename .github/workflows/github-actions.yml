@@ -1,0 +1,20 @@
+name: Build and Test Auth Server
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Build Docker image
+        run: docker build -t auth-server-image .
+      
+      - name: Run tests
+        run: |
+          docker run -d --name auth-server-container -p 8000:8000 --env ENV_FOR_DYNACONF=pipeline auth-server-image
+          docker exec -i auth-server-container sh -c "pytest --cov=src"
+      
+      - name: Stop Docker container
+        run: docker stop auth-server-container
