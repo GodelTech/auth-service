@@ -16,5 +16,5 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run -it --name auth-server-container --network host --env ENVIRONMENT_NAME=test --env ENV_FOR_DYNACONF=test -v /var/run/docker.sock:/var/run/docker.sock auth-server-image
-          docker exec -it auth-server-container sh -c "pytest --cov=src"
+          docker run --name auth-server-container --network host --env ENVIRONMENT_NAME=test --env ENV_FOR_DYNACONF=test -v /var/run/docker.sock:/var/run/docker.sock auth-server-image
+          docker exec auth-server-container sh -c "pytest --cov=src"
