@@ -11,7 +11,10 @@ jobs:
       - name: Build Docker image
         run: docker build -t auth-server-image .
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Run tests
         run: |
-          docker run -d --name auth-server-container -p 8000:8000 --net=host --env ENVIRONMENT_NAME=test auth-server-image
+          docker run -d --name auth-server-container --net=host --env ENVIRONMENT_NAME=test auth-server-image
           docker exec auth-server-container sh -c "pytest --cov=src"
