@@ -5,3 +5,8 @@ dynaconf_merge = true
 echo = true
 url = "postgresql+asyncpg://identity-server-dev-user:dsPNWv2mmBhFBdz1XP7N@192.168.80.100:5432/identity-server-dev-db"
 max_connection_count = 10
+
+
+[development.server]
+base_url_host = "192.168.80.98"
+base_url_port = "8000"
