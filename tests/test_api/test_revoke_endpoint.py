@@ -31,7 +31,9 @@ class TestRevokationEndpoint:
             expiration_time=3600,
         )
         headers = {
-            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
+            "authorization": await jwt.encode_jwt(
+                payload={"sub": "1", "aud":["revoke"]}
+            ),
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {"token": revoke_token, "token_type_hint": grant_type}
@@ -53,7 +55,9 @@ class TestRevokationEndpoint:
         grant_type = "code"
         revoke_token = "----token_not_exists-----"
         headers = {
-            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
+            "authorization": await jwt.encode_jwt(
+                payload={"sub": "1", "aud":["revoke"]}
+            ),
             "Content-Type": "application/x-www-form-urlencoded",
         }
 

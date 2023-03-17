@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typing import Callable, Any, Union
-from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,9 +35,9 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
                     ):
                     return JSONResponse(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        content="Token blacklisted"
+                        content="Token revoked"
                     )
-                if not await self.jwt_service.verify_token(token):
+                if not await self.jwt_service.verify_token(token, aud='admin'):
                     logger.exception("403 Incorrect Access Token")
                     return JSONResponse(
                         status_code=status.HTTP_403_FORBIDDEN,
@@ -46,7 +46,6 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
                     
                 else:
                     logger.info("Access Token Auth Passed")
-
                     response = await call_next(request)
                     return response
             except:

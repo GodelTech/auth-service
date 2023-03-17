@@ -10,7 +10,6 @@ from time import time, sleep
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError
 from pydantic import SecretStr
 
-
 @pytest.mark.asyncio
 class TestAdminAuthService:
     async def test_authorize(

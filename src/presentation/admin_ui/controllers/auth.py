@@ -15,6 +15,7 @@ class AdminAuthController(AuthenticationBackend):
         super().__init__(secret_key=secret_key)
 
     async def login(self, request: Request) -> bool:
+
         data_from_form = await request.form()
         try:
             token = await self.auth_service.authorize(

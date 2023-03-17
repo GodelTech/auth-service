@@ -1,7 +1,7 @@
 import logging
 
 import jwt
-from typing import Any, no_type_check
+from typing import Any, no_type_check, Optional
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
 

@@ -19,6 +19,7 @@ class TestUserInfoService:
         data_to_code = {
                 "scope":"openid profile",
                 "sub": 1,
+                "aud":["userinfo"]
             }
 
         token = await service.jwt.encode_jwt(payload=data_to_code)

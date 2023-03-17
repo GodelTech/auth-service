@@ -128,8 +128,8 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_request",
-            "error_description": "The request was missing required parameter(s).",
+            "error": "unsupported_grant_type",
+            "error_description": "Requested grant type was not recognized by server.",
         }
 
     @pytest.mark.asyncio
@@ -162,8 +162,8 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_request",
-            "error_description": "The request was missing required parameter(s).",
+            "error": "unsupported_grant_type",
+            "error_description": "Requested grant type was not recognized by server.",
         }
 
     @pytest.mark.asyncio

@@ -92,9 +92,6 @@ class DeviceRepository(BaseRepository):
                     exists().where(Device.device_code == device_code))
                 )
             result = result.first()
-            if not result[0]:
-                raise DeviceCodeNotFoundError('Wrong Device Code')
-
             return result[0]
 
     async def get_device_by_user_code(self, user_code: str) -> Device:

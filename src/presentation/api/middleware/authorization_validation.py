@@ -1,12 +1,11 @@
 import logging
 from typing import Any, Callable
 
-from fastapi import HTTPException, Request, status
+from fastapi import status
 from fastapi.responses import JSONResponse
 from jwt.exceptions import PyJWTError
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp, Receive, Scope, Send
-from typing import Any, Callable, Union
+from typing import Any, Callable
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 
@@ -52,7 +51,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                         content="Token blacklisted"
                     )
                 try:
-                    if not bool(await self.jwt_service.decode_token(token)):
+                    aud = request_with_auth["path"].split("/")[1]
+                    if not bool(await self.jwt_service.decode_token(token=token, audience=aud)):
                         logger.exception("Authorization Failed")
                         return JSONResponse(
                             status_code=status.HTTP_401_UNAUTHORIZED,

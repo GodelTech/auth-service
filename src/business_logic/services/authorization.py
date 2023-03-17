@@ -132,6 +132,7 @@ class AuthorizationService:
                 additional_data=scope,
                 jwt_service=self.jwt_service,
                 expiration_time=expiration_time,
+                aud=['userinfo', 'introspection', 'revoke']
             )
 
             uri_data = (
@@ -157,6 +158,7 @@ class AuthorizationService:
                 additional_data=scope,
                 jwt_service=self.jwt_service,
                 expiration_time=expiration_time,
+                aud=['userinfo', 'introspection', 'revoke']
             )
             id_token = await get_single_token(
                 user_id=user_id,

@@ -73,7 +73,7 @@ class TestTokenServices:
     ) -> None:
         token_service = token_service
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GrantTypeNotSupported):
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
@@ -84,7 +84,7 @@ class TestTokenServices:
             token_service.request_model = request_body
             await token_service.get_tokens()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GrantTypeNotSupported):
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
@@ -95,7 +95,7 @@ class TestTokenServices:
             token_service.request_model = request_body
             await token_service.get_tokens()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GrantTypeNotSupported):
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
@@ -105,7 +105,7 @@ class TestTokenServices:
             token_service.request_model = request_body
             await token_service.get_tokens()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GrantTypeNotSupported):
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
@@ -115,7 +115,7 @@ class TestTokenServices:
             token_service.request_model = request_body
             await token_service.get_tokens()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GrantTypeNotSupported):
             request_body = BodyRequestTokenModel(
                 client_id="SOME",
                 scope="openid",
@@ -333,7 +333,7 @@ class TestTokenServices:
         token_service: TokenService,
         engine: AsyncEngine,
     ):
-        with pytest.raises(DeviceCodeNotFoundError):
+        with pytest.raises(GrantNotFoundError):
             result = await self.base_test_maker(
                 grant_type="urn:ietf:params:oauth:grant-type:device_code",
                 token_service=token_service,
