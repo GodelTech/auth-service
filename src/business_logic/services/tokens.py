@@ -446,6 +446,3 @@ class ClientCredentialsMaker(BaseMaker):
             "not_before_policy": 0,
             "scope": scopes,
         }
-
-
-    

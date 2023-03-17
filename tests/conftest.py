@@ -233,3 +233,14 @@ async def wlk_services(engine) -> WellKnownServices:
         wlk_repo=WellKnownRepository(engine),
     )
     return wlk_services
+
+from src.business_logic.services.admin_auth import AdminAuthService
+
+@pytest_asyncio.fixture
+async def admin_auth_service(engine) -> AdminAuthService:
+    admin_auth_service = AdminAuthService(
+        user_repo=UserRepository(engine),
+        password_service=PasswordHash(),
+        jwt_service=JWTService()
+    )
+    return admin_auth_service
