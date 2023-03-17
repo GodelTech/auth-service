@@ -38,8 +38,7 @@ class TestClientRepository:
         assert created is True
 
         await device_repo.delete_by_device_code(device_code="device_code")
-        with pytest.raises(DeviceCodeNotFoundError):
-            await device_repo.validate_device_code(device_code="device_code")
+        assert not await device_repo.validate_device_code(device_code="device_code")
     
     @no_type_check
     async def test_create_not_full_data(self, engine: AsyncEngine) -> None:
@@ -74,8 +73,7 @@ class TestClientRepository:
 
     async def test_delete_by_device_code_not_exist(self, engine: AsyncEngine) -> None:
         device_repo = DeviceRepository(engine=engine)
-        with pytest.raises(DeviceCodeNotFoundError):
-            await device_repo.delete_by_device_code(device_code="fhjhYTU3")
+        assert not await device_repo.delete_by_device_code(device_code="fhjhYTU3")
 
     async def test_validate_user_code(self, engine: AsyncEngine) -> None:
         device_repo = DeviceRepository(engine=engine)
@@ -114,8 +112,8 @@ class TestClientRepository:
 
         await device_repo.delete_by_device_code(device_code="device_code")
 
-        with pytest.raises(DeviceCodeNotFoundError):
-            await device_repo.validate_device_code(device_code="device_code")
+        
+        assert not await device_repo.validate_device_code(device_code="device_code")
 
     async def test_get_device_by_user_code(self, engine: AsyncEngine) -> None:
         device_repo = DeviceRepository(engine=engine)

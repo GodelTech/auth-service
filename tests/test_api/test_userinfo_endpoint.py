@@ -36,7 +36,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile'})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -50,7 +50,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_jwt_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile'})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
         response = await client.request(
@@ -69,7 +69,7 @@ class TestUserInfoEndpoint:
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
-            payload={"blablabla": "blablabla"}
+            payload={"blablabla": "blablabla", "aud":["userinfo"]}
         )
         for url in ("/userinfo/", "/userinfo/jwt"):
             headers = {
@@ -85,7 +85,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2"})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
         for url in ("/userinfo/", "/userinfo/jwt"):
             headers = {
                 "authorization": token,
@@ -102,7 +102,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_post_request(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile'})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -120,7 +120,7 @@ class TestUserInfoEndpoint:
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
-            payload={"blablabla": "blablabla"}
+            payload={"blablabla": "blablabla", "aud":["userinfo"]}
         )
         headers = {"authorization": token}
         response = await client.request("POST", "/userinfo/", headers=headers)
@@ -133,7 +133,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_post_request_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2"})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -172,32 +172,33 @@ class TestUserInfoEndpoint:
         assert response_content == {"sub": "1", "iss": "me", 'scope': 'profile'}
 
     @pytest.mark.asyncio
-    async def test_get_default_token_with_aud_facebook(
+    async def test_get_default_token_with_aud(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         response = await client.request(
-            "GET", "/userinfo/get_default_token?with_aud_facebook=true"
+            "GET", "/userinfo/get_default_token?with_aud=true"
         )
         response_content = json.loads(response.content.decode("utf-8"))
         response_content = await user_info_service.jwt.decode_token(
-            token=response_content, audience="facebook"
+            token=response_content, 
+            audience="userinfo"
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response_content == {"sub": "1", "aud": ["facebook"], 'scope': 'profile'}
+        assert response_content == {"sub": "1", "aud": ["admin", "userinfo", "introspection", "revoke"], 'scope': 'profile'}
 
     @pytest.mark.asyncio
-    async def test_get_default_token_with_iss_me_and_aud_facebook(
+    async def test_get_default_token_with_iss_and_aud(
         self, user_info_service: UserInfoServices, client: AsyncClient
     ) -> None:
         response = await client.request(
             "GET",
-            "/userinfo/get_default_token?with_iss_me=true&with_aud_facebook=true",
+            "/userinfo/get_default_token?with_iss_me=true&with_aud=true",
         )
         response_content = json.loads(response.content.decode("utf-8"))
         response_content = await user_info_service.jwt.decode_token(
-            token=response_content, audience="facebook"
+            token=response_content, audience="admin"
         )
-        expected_result = {"sub": "1", "iss": "me", "aud": ["facebook"], 'scope': 'profile'}
+        expected_result = {"sub": "1", "iss": "me", "aud": ["admin", "userinfo", "introspection", "revoke"], 'scope': 'profile'}
         assert response.status_code == status.HTTP_200_OK
         assert response_content == expected_result
 

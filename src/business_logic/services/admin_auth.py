@@ -27,7 +27,8 @@ class AdminAuthService:
             credentials.username
         )
         self.password_service.validate_password(
-            credentials.password, user_hash_password
+            credentials.password, 
+            user_hash_password
         )
         return await self.jwt_service.encode_jwt(
             payload={

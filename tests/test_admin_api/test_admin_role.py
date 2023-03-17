@@ -24,7 +24,10 @@ logger = logging.getLogger(__name__)
 class TestAdminRoleEndpoint:
     async def setup_base(self, engine: AsyncEngine, user_id: int = 1000) -> None:
         self.access_token = await JWTService().encode_jwt(
-            payload={"stand": "CrazyDiamond"}
+            payload={
+                "stand": "CrazyDiamond",
+                "aud":["admin"]
+            }
         )
         self.group_repo = GroupRepository(engine)
         self.role_repo = RoleRepository(engine)

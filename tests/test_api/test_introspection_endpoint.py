@@ -31,10 +31,15 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
+            "aud":["introspection"]
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
         access_token = await jwt.encode_jwt(
-            payload={"sub": "1", "client_id": "test_client"}
+            payload={
+                "sub": "1", 
+                "client_id": "test_client",
+                "aud":["introspection"]
+            }
         )
         await persistent_grant_repo.create(
             grant_type=grant_type,
@@ -61,6 +66,7 @@ class TestIntrospectionEndpoint:
             "aud": None,
             "iss": "http://testserver",
             "jti": None,
+            'aud': ['introspection']
         }
         response = await client.request(
             method="POST", url="/introspection/", data=params, headers=headers
@@ -78,8 +84,10 @@ class TestIntrospectionEndpoint:
         jwt = JWTService()
         persistent_grant_repo = PersistentGrantRepository(engine)
         grant_type = "authorization_code"
-        payload = {"sub": 1, "exp": time.time()}
-        introspection_token = await jwt.encode_jwt(payload=payload)
+        payload = {"sub": 1, "exp": time.time(), "aud":["introspection"]}
+        introspection_token = await jwt.encode_jwt(
+            payload=payload
+        )
 
         await persistent_grant_repo.create(
             grant_type=grant_type,
@@ -89,7 +97,9 @@ class TestIntrospectionEndpoint:
             expiration_time=1,
         )
         headers = {
-            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
+            "authorization": await jwt.encode_jwt(
+                payload={"sub": "1", "aud":["introspection"]}
+            ),
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {"token": introspection_token, "token_type_hint": grant_type}
@@ -114,10 +124,11 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
+            "aud":["introspection"]
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
         access_token = await jwt.encode_jwt(
-            payload={"sub": "1", "client_id": "test_client"}
+            payload={"sub": "1", "client_id": "test_client", "aud":["introspection"]}
         )
         await persistent_grant_repo.create(
             grant_type=grant_type,

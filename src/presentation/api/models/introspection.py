@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import Form
 from pydantic import BaseModel
@@ -19,7 +19,7 @@ class BodyRequestIntrospectionModel:
 
 class ResponceIntrospectionModel(BaseModel):
     active: bool
-    scope: Optional[str]
+    scope: Optional[Union[list[str], str]]
     client_id: Optional[str]
     username: Optional[str]
     token_type: Optional[str]
@@ -30,7 +30,7 @@ class ResponceIntrospectionModel(BaseModel):
     aud: Optional[str]
     iss: Optional[str]
     jti: Optional[str]
-
+    aud: Optional[list[str]]
     class Config:
         orm_mode = True
 
