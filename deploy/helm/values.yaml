@@ -1,0 +1,30 @@
+# App
+application:
+  namespace: development
+  name: identity-server-poc
+  image: identity-server-poc:latest
+  replicaCount: 1
+  port: 8000
+  domain: rnd-identityserver-dev.godeltech.com
+
+
+# Redis
+redis:
+  image: redis
+  replicaCount: 1
+  name: redis
+  port: 6379
+
+
+# Parameters for the secret containing ContainerRegistry's credentials
+imagePullSecret:
+  server: ""
+  username: "xxx"
+  password: "xxx"
+
+
+# Application Service properties
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000

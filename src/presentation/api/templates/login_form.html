@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <script src="../static/login_form.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/login_form.css">
+
+</head>
+<body>
+
+  <div class="form_auth_block">
+    <div class="form_auth_block_content">
+      <p class="form_auth_block_head_text">Sign in to your account</p>
+      <form id="auth_form" class="form_auth_style" action="#" method="post" >
+        <label>Enter Username</label>
+        <input id="user" type="text" name="username" placeholder="Username" required >
+        <label>Enter Password</label>
+        <input id="pass" type="password" name="auth_pass" placeholder="Password" required >
+        <button id="butt" class="form_auth_button" type="submit" name="form_auth_submit">Login</button>
+
+      </form>
+      {% if external_logins -%}
+      <p class="sing_in">Sign in with</p>
+<!--          <div class="externals">-->
+        {% for b in external_logins -%}
+          <button id={{ b }} class="form_auth_button device_button" name="{{ external_logins[b]['provider_link'] }}"> {{ b }} <i class="fa {{ external_logins[b]['provider_icon'] }}"></i></button>
+        {% endfor %}
+<!--          </div>-->
+    {% endif -%}
+    </div>
+  </div>
+
+  <div id="rq_model">
+    {% for req in request_model -%}
+      <div class="model_elem" id="{{ req[0] }}">{{ req[1] }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="modal" id="modal_window">
+    <p class="form_auth_block_head_text">Confirm Device Login</p>
+    <div class="buttons">
+      <button id="yes_butt" class="form_device_button" name="form_auth_submit">Confirm</button>
+      <button id="no_butt" class="form_device_button" name="form_auth_submit">Cancel</button>
+    </div>
+  </div>
+
+  <div class="modal" id="credentials_modal_window">
+    <p class="form_auth_block_head_text credentials_note">You have entered incorrect user credentials</p>
+    <div class="buttons credentials_button">
+      <button id="try_again_butt" class="form_device_button" name="credentials_overload">Try again</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay_modal"></div>
+
+  <div class="base_urls" id="base_url">{{ base_url }}</div>
+
+<!-- <div id="rq_model">
+    <div class="model_elem" id="client_id">santa</div>
+    <div class="model_elem" id="response_type">code</div>
+    <div class="model_elem" id="scope">gcp-api%20IdentityServerApi&grant_type=code&client_id=test_client&client_secret=65015c5e-c865-d3d4-3ba1-3abcb4e65500</div>
+    <div class="model_elem" id="redirect_uri">https://www.google.com/</div>
+    <div class="model_elem" id="state">None</div>
+    <div class="model_elem" id="response_mode">None</div>
+    <div class="model_elem" id="nonce">None</div>
+    <div class="model_elem" id="display">None</div>
+    <div class="model_elem" id="prompt">None</div>
+    <div class="model_elem" id="max_age">None</div>
+    <div class="model_elem" id="ui_locales">None</div>
+    <div class="model_elem" id="id_token_hint">None</div>
+    <div class="model_elem" id="login_hint">None</div>
+    <div class="model_elem" id="acr_values">None</div>
+</div> -->
+
+</body>
+</html>

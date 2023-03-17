@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres2
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: is_db
+    restart: on-failure
+    ports:
+      - 5432:5432
+    networks:
+      - identity-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - 80:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+    networks:
+      - identity-network
+
+  redis:
+    container_name: redis2
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - identity-network
+
+  app:
+    build: .
+    ports:
+      - 8000:8000
+    networks:
+      - identity-network
+    environment:
+      - WAIT_HOSTS=postgres:5432
+    volumes:
+      - .:/identity-server-poc
+    depends_on:
+      - postgres
+      - pgadmin
+      - redis
+
+
+networks:
+  identity-network:
+    driver: bridge

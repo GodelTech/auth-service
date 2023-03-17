@@ -1,0 +1,10 @@
+apiVersion: "v1"
+name: identity-server-poc
+version: 1.0.0
+appVersion: ${CI_COMMIT_HASH}
+kubeVersion: ">=1.9.0"
+description: "Identity Server Provider API"
+keywords:
+  - identity-server-poc
+  - backend
+  - python

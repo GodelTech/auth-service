@@ -310,3 +310,6 @@ $RECYCLE.BIN/
 logs
 requirements.txt
 configs/settings.json
+
+# Ignore dynaconf secret files
+.secrets.*

@@ -1,0 +1,18 @@
+[local]
+dynaconf_merge = true
+
+
+[local.db]
+echo = true
+url = "postgresql+asyncpg://postgres:postgres@localhost:5432/is_db"
+max_connection_count = 10
+
+
+[local.redis]
+echo = true
+url = "redis://127.0.0.1:6379"
+
+
+[local.server]
+base_url_host = "127.0.0.1"
+base_url_port = "8000"

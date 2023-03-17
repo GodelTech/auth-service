@@ -1,92 +1,102 @@
-# Identity Server POC
+**development**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/development/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
+**development**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/development/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
 
+# Project installation
 
+##### Link to the GIT repository:
 
-## Getting started
+- *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+##### Settings
+1. Create `.env` file in project root directory and add row:
+>ENV_FOR_DYNACONF=local
+2. Use local for ENV_FOR_DYNACONF if you want to run migrations and populate local database
+3. Use docker for ENV_FOR_DYNACONF if your database is running in a docker container
+3. Our tests are running inside PostgresContainer. You need to switch ENV_FOR_DYNACONF to test
+in order to execute tests.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+##### Running docker:
 
-## Add your files
+We have docker-compose.dev.yml and docker-compose.yml where the first one
+will run postgresql, pgadmin and redis.
+And the docker-compose.yml will create a separate network and run
+postgresql, pgadmin, redis and app all together.
+If you want to spin up all services, first you need to switch to DockerAppSettings
+In src/config/setup.py make: app_env = DockerAppSettings().app_env
+And run the following command
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- *docker-compose -f ./docker-compose.yml up*
 
-```
-cd existing_repo
-git remote add origin https://gitlab.godeltech.com/gte-internal/python/identity-server-poc.git
-git branch -M main
-git push -uf origin main
-```
+You may run another command in a second terminal to execute tests with the following command
 
-## Integrate with your tools
+- *docker exec -it identity-server-poc_app_1 sh -c "pytest -ra -cov tests"*
 
-- [ ] [Set up project integrations](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/settings/integrations)
+Or run the following command to run just postgresql, pgadmin, and redis services
 
-## Collaborate with your team
+- *docker-compose -f ./docker-compose.dev.yml up*
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+##### Starting poetry:
 
-## Test and Deploy
+- *poetry install*
+- *poetry shell*
 
-Use the built-in continuous integration in GitLab.
+##### Server start:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+- uvicorn src.main:app --reload
 
-***
+##### Settings for tests:
 
-# Editing this README
+- Add to the pyproject.toml this:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+*[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]*
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- Create file "*pytest.ini*" and add to it this:
 
-## Name
-Choose a self-explaining name for your project.
+*[pytest]
+pythonpath = . src*
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- Run tests with "*poetry run pytest""*
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+##### Settings for debugger:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Add to your *.vscode/settings.json* file your paths to Virtualenv folder and to the python. To get this paths use "*poetry env info*".
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Example (add your versions to *.vscode/settings.json*):
+*"python.pythonPath": "/home/danya/.cache/pypoetry/virtualenvs/identity-server-poc-hY52nw-1-py3.10",
+"python.defaultInterpreterPath": "/home/danya/.cache/pypoetry/virtualenvs/identity-server-poc-hY52nw-1-py3.10/bin/python",*
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+##### PostgreSQL admin:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+*http://localhost/login?next=%2Fbrowser%2F*
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- login: *admin@example.com*, password: *admin* .After logging create your personal accaunt.
+- After relogging:right click "*Server*" -> "*Register*" ->"*Server*".
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+  Name:*is_db*
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+  Host name/adress:*172.20.0.1* (or your own adress)
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+  Username:***postgres***
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+  Password:*postgres*
 
-## License
-For open source projects, say how it is licensed.
+##### Alembic update or change DB:
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- upgrade:
+  "alembic upgrade heads"
+- change:
+  "alembic revision --autogenerate -m "[_**Your comment**_]" "
+
+##### Links:
+
+* Server:
+
+  *http://127.0.0.1:8000/*
+* Swagger:
+* http://127.0.0.1:8000/docs*
+
+- PostgreSQL admin:
+  *http://localhost/login?next=%2Fbrowser%2F*
