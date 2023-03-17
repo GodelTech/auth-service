@@ -2,38 +2,46 @@ import datetime
 import logging
 import time
 import uuid
-from typing import Any, Optional, Union
-from src.dyna_config import BASE_URL
-from fastapi import Request
+from typing import Any, Dict, Optional, Union
 
+from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import (
+    ClaimsNotFoundError,
+    ClientGrantsError,
     ClientNotFoundError,
+    ClientScopesError,
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
-    WrongGrantsError,
+    GrantTypeNotSupported,
 )
 from src.data_access.postgresql.repositories import (
+    BlacklistedTokenRepository,
     ClientRepository,
     DeviceRepository,
     PersistentGrantRepository,
     UserRepository,
-    BlacklistedTokenRepository,
 )
+from src.dyna_config import BASE_URL
 from src.presentation.api.models import (
     BodyRequestRevokeModel,
     BodyRequestTokenModel,
 )
-from src.data_access.postgresql.errors import ClaimsNotFoundError
+
 logger = logging.getLogger(__name__)
 from jwt.exceptions import ExpiredSignatureError
 
+
 def get_base_payload(
-    client_id: str, expiration_time: int, scope = None, claims = None, **kwargs: Any, 
+    client_id: str,
+    expiration_time: int,
+    scope=None,
+    claims=None,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     if kwargs.get("user_id") and kwargs["user_id"] != "":
         kwargs["sub"] = kwargs.get("user_id")
@@ -48,16 +56,17 @@ def get_base_payload(
         "exp": int(time.time() + expiration_time),
     } | kwargs
     if claims:
-        base_payload['claims'] = claims
+        base_payload["claims"] = claims
     if scope:
         base_payload = base_payload | scope
     return base_payload
+
 
 async def get_single_token(
     client_id: str,
     jwt_service: JWTService,
     expiration_time: int,
-    scope: Optional[str] = None, 
+    scope: Optional[str] = None,
     **kwargs: Any,
 ) -> str:
     """
@@ -84,7 +93,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         jwt_service: JWTService,
-        blacklisted_repo: BlacklistedTokenRepository
+        blacklisted_repo: BlacklistedTokenRepository,
     ) -> None:
         self.request: Optional[Request] = None
         self.request_model: Optional[BodyRequestTokenModel] = None
@@ -97,44 +106,54 @@ class TokenService:
         self.jwt_service = jwt_service
         self.blacklisted_repo = blacklisted_repo
 
-    async def get_tokens(self) -> dict[str, Any]:
+    async def get_tokens(self) -> Dict[str, Any]:
         if self.request_model is None or self.request_model.grant_type is None:
             pass
-        elif self.request_model.grant_type == "code":
-            if self.request_model.redirect_uri is None or self.request_model.code is None:
-                pass
+        elif self.request_model.grant_type == "authorization_code":
+            if (
+                self.request_model.redirect_uri is None
+                or self.request_model.code is None
+            ):
+                raise ValueError
             else:
                 service = CodeMaker(token_service=self)
                 return await service.create()
-                
-        elif self.request_model.grant_type == "password": 
-            if self.request_model.username is None or self.request_model.password is None:
-                pass
+
+        elif self.request_model.grant_type == "password":
+            if (
+                self.request_model.username is None
+                or self.request_model.password is None
+            ):
+                raise ValueError
             else:
                 return None
- 
+
         elif self.request_model.grant_type == "refresh_token":
             if self.request_model.refresh_token is None:
-                pass
+                raise ValueError
             else:
                 service = RefreshMaker(token_service=self)
                 return await service.create()
 
-        elif self.request_model.grant_type== "urn:ietf:params:oauth:grant-type:device_code":
+        elif (
+            self.request_model.grant_type
+            == "urn:ietf:params:oauth:grant-type:device_code"
+        ):
             if self.request_model.device_code is None:
-                pass
+                raise ValueError
+
             else:
                 service = DeviceCodeMaker(token_service=self)
                 return await service.create()
 
         elif self.request_model.grant_type == "client_credentials":
             if self.request_model.client_secret is None:
-                pass
+                raise ValueError
             else:
                 service = ClientCredentialsMaker(token_service=self)
                 return await service.create()
-        
-        raise GrantNotFoundError
+
+        raise GrantTypeNotSupported
 
     async def revoke_token(self) -> None:
         if self.request_body is None:
@@ -151,60 +170,92 @@ class TokenService:
             else:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
-            decoded_token = await self.jwt_service.decode_token(self.request_body.token)
+            decoded_token = await self.jwt_service.decode_token(
+                self.request_body.token
+            )
             await self.blacklisted_repo.create(
-                token=self.request_body.token,
-                expiration=decoded_token["exp"]
+                token=self.request_body.token, expiration=decoded_token["exp"]
             )
         else:
             raise GrantNotFoundError
+
 
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel= token_service.request_model #type: ignore
+        self.request_model: BodyRequestTokenModel = token_service.request_model  # type: ignore
         self.client_repo: ClientRepository = token_service.client_repo
-        self.persistent_grant_repo: PersistentGrantRepository = token_service.persistent_grant_repo
+        self.persistent_grant_repo: PersistentGrantRepository = (
+            token_service.persistent_grant_repo
+        )
         self.user_repo: UserRepository = token_service.user_repo
         self.jwt_service: JWTService = token_service.jwt_service
-        self.blacklisted_repo: BlacklistedTokenRepository = token_service.blacklisted_repo
+        self.blacklisted_repo: BlacklistedTokenRepository = (
+            token_service.blacklisted_repo
+        )
 
     async def validation(self) -> None:
-        encoded_attr:Optional[str] = None
+        encoded_attr: Optional[str] = None
 
-        if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
+        # raises ClientNotFoundError if it does not exist
+        await self.client_repo.get_client_by_client_id(
+            self.request_model.client_id
+        )
+
+        if (
+            self.request_model.grant_type
+            == "urn:ietf:params:oauth:grant-type:device_code"
+        ):
             encoded_attr = self.request_model.device_code
+        elif self.request_model.grant_type == "authorization_code":
+            encoded_attr = self.request_model.code
         else:
-            encoded_attr = getattr(self.request_model, self.request_model.grant_type)
+            encoded_attr = getattr(
+                self.request_model, self.request_model.grant_type
+            )
 
         if not await self.persistent_grant_repo.exists(
-                    grant_type=self.request_model.grant_type,
-                    grant_data=encoded_attr,
-                ):
+            grant_type=self.request_model.grant_type,
+            grant_data=encoded_attr,
+        ):
             raise GrantNotFoundError
-            
-    async def make_tokens(self, create_id_token: bool = True, create_refresh_token: bool = True) -> dict[str, str]:
-        if self.request_model.grant_type == "urn:ietf:params:oauth:grant-type:device_code":
+
+    async def make_tokens(
+        self, create_id_token: bool = True, create_refresh_token: bool = True
+    ) -> Dict[str, str]:
+        if (
+            self.request_model.grant_type
+            == "urn:ietf:params:oauth:grant-type:device_code"
+        ):
             encoded_attr = self.request_model.device_code
+        elif self.request_model.grant_type == "authorization_code":
+            encoded_attr = self.request_model.code
         else:
-            encoded_attr = getattr(self.request_model, self.request_model.grant_type)
+            encoded_attr = getattr(
+                self.request_model, self.request_model.grant_type
+            )
         grant = await self.persistent_grant_repo.get(
-                        grant_type=self.request_model.grant_type,
-                        grant_data=encoded_attr
-                    )
+            grant_type=self.request_model.grant_type, grant_data=encoded_attr
+        )
         client_id = self.request_model.client_id
-        if client_id is None and (await self.client_repo.get_client_secrete_by_client_id(client_id=client_id) != self.request_model.client_secret):
-                raise ClientNotFoundError    
+
+        if client_id is None and (  # TODO
+            await self.client_repo.get_client_secrete_by_client_id(
+                client_id=client_id
+            )
+            != self.request_model.client_secret
+        ):
+            raise ClientNotFoundError
+
         if grant.client.client_id != client_id:
-            raise WrongGrantsError(
+            raise ClientGrantsError(
                 "Client from request has been found in the database\
                 but don't have provided grants"
             )
-        
 
         user_id = grant.user_id
         scopes = {"scope": self.request_model.scope}
-        
+
         # ACCESS TOKEN
         new_access_token = await get_single_token(
             user_id=user_id,
@@ -213,8 +264,8 @@ class BaseMaker:
             jwt_service=self.jwt_service,
             expiration_time=self.expiration_time * 6,
         )
-        # ID TOKEN  
-        new_id_token = None   
+        # ID TOKEN
+        new_id_token = None
         if create_id_token:
             claims = None
             try:
@@ -225,30 +276,29 @@ class BaseMaker:
                     claims=claims,
                     scope=None,
                     jwt_service=self.jwt_service,
-                    expiration_time=self.expiration_time
+                    expiration_time=self.expiration_time,
                 )
             except ClaimsNotFoundError:
-                
                 new_id_token = await get_single_token(
-                user_id=user_id,
-                client_id=client_id,
-                #TODO: fix e2e tests or add claims for users
-                scope=None,
-                claims=None,
-                jwt_service=self.jwt_service,
-                expiration_time=self.expiration_time,
-            )
-        
+                    user_id=user_id,
+                    client_id=client_id,
+                    # TODO: fix e2e tests or add claims for users
+                    scope=None,
+                    claims=None,
+                    jwt_service=self.jwt_service,
+                    expiration_time=self.expiration_time,
+                )
+
         # REFRESH TOKEN
         new_refresh_token = None
         if create_refresh_token:
             new_refresh_token = await get_single_token(
-                                user_id=user_id,
-                                client_id=client_id,
-                                scope=scopes,
-                                jwt_service=self.jwt_service,
-                                expiration_time=self.expiration_time * 6,
-                            )
+                user_id=user_id,
+                client_id=client_id,
+                scope=scopes,
+                jwt_service=self.jwt_service,
+                expiration_time=self.expiration_time * 6,
+            )
 
             await self.persistent_grant_repo.create(
                 client_id=client_id,
@@ -263,23 +313,39 @@ class BaseMaker:
                 grant_type=self.request_model.grant_type,
             )
         return {
-            "access_token" : new_access_token,
-            "refresh_token" : new_refresh_token,
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
             "id_token": new_id_token,
         }
-        
+
+
 class CodeMaker(BaseMaker):
-    async def create(self) -> dict[str, Any]:
+    async def create(self) -> Dict[str, Any]:
+        await self._validate_client_redirect_uri(
+            self.request_model.client_id, self.request_model.redirect_uri
+        )
         await self.validation()
         tokens = await self.make_tokens()
         return {
-                "access_token": tokens["access_token"],
-                "refresh_token": tokens["refresh_token"],
-                "id_token": tokens["id_token"],
-                "expires_in": self.expiration_time,
-                "token_type": "Bearer",
-                }
-    
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
+            "id_token": tokens["id_token"],
+            "expires_in": self.expiration_time,
+            "token_type": "Bearer",
+        }
+
+    async def _validate_client_redirect_uri(  # TODO create mixin
+        self, client_id: str, redirect_uri: str
+    ) -> bool:
+        """
+        Checks if the redirect uri is in the database.
+        """
+        client = await self.client_repo.validate_client_redirect_uri(
+            client_id=client_id, redirect_uri=redirect_uri
+        )
+        return client
+
+
 class DeviceCodeMaker(BaseMaker):
     def __init__(self, token_service: TokenService) -> None:
         super().__init__(token_service)
@@ -287,9 +353,9 @@ class DeviceCodeMaker(BaseMaker):
 
     async def device_validation(self) -> None:
         if not await self.persistent_grant_repo.exists(
-                    grant_type=self.request_model.grant_type,
-                    grant_data=self.request_model.device_code,
-                ):
+            grant_type=self.request_model.grant_type,
+            grant_data=self.request_model.device_code,
+        ):
             if await self.device_repo.validate_device_code(
                 device_code=self.request_model.device_code
             ):
@@ -303,9 +369,7 @@ class DeviceCodeMaker(BaseMaker):
                     await self.device_repo.delete_by_device_code(
                         device_code=self.request_model.device_code
                     )
-                    raise DeviceCodeExpirationTimeError(
-                        "Device code expired"
-                    )
+                    raise DeviceCodeExpirationTimeError("Device code expired")
                 raise DeviceRegistrationError(
                     "Device registration in progress"
                 )
@@ -330,9 +394,7 @@ class DeviceCodeMaker(BaseMaker):
                     await self.device_repo.delete_by_device_code(
                         device_code=self.request_model.device_code
                     )
-                    raise DeviceCodeExpirationTimeError(
-                        "Device code expired"
-                    )
+                    raise DeviceCodeExpirationTimeError("Device code expired")
                 raise DeviceRegistrationError(
                     "Device registration in progress"
                 )
@@ -346,44 +408,45 @@ class DeviceCodeMaker(BaseMaker):
             raise GrantNotFoundError
 
     async def create(self) -> dict[str, Any]:
-        
         await self.device_validation()
         await self.validation()
-        tokens = await self.make_tokens(create_id_token = False)
+        tokens = await self.make_tokens(create_id_token=False)
         return {
-                "access_token": tokens["access_token"],
-                "refresh_token": tokens["refresh_token"],
-                "expires_in": self.expiration_time,
-                "token_type": "Bearer",
-                }
-    
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
+            "expires_in": self.expiration_time,
+            "token_type": "Bearer",
+        }
+
+
 class RefreshMaker(BaseMaker):
-    async def create(self) -> dict[str: Any]:
+    async def create(self) -> Dict[str, Any]:
         await self.validation()
         incoming_refresh_token = self.request_model.refresh_token
-        try:    
+        try:
             tokens = await self.make_tokens(create_refresh_token=False)
-            
+
             return {
-                    "access_token": tokens["access_token"],
-                    "refresh_token": incoming_refresh_token,
-                    "id_token": tokens["id_token"],
-                    "expires_in": self.expiration_time,
-                    "token_type": "Bearer",
-                    }
-            
+                "access_token": tokens["access_token"],
+                "refresh_token": incoming_refresh_token,
+                "id_token": tokens["id_token"],
+                "expires_in": self.expiration_time,
+                "token_type": "Bearer",
+            }
+
         except ExpiredSignatureError:
             tokens = await self.make_tokens()
             return {
-                    "access_token": tokens["access_token"],
-                    "refresh_token": tokens["refresh_token"],
-                    "id_token": tokens["id_token"],
-                    "expires_in": self.expiration_time,
-                    "token_type": "Bearer",
-                    }
+                "access_token": tokens["access_token"],
+                "refresh_token": tokens["refresh_token"],
+                "id_token": tokens["id_token"],
+                "expires_in": self.expiration_time,
+                "token_type": "Bearer",
+            }
+
 
 class ClientCredentialsMaker(BaseMaker):
-    async def create(self) -> dict[str: Any]:
+    async def create(self) -> Dict[str, Any]:
         client_from_db = ...
         if self.request_model is None:
             raise ValueError
@@ -406,9 +469,13 @@ class ClientCredentialsMaker(BaseMaker):
         except:
             raise ClientNotFoundError
 
+        requested_scope = self.request_model.scope
         scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )
+
+        if requested_scope and requested_scope != scopes:
+            raise ClientScopesError
 
         if len(scopes) == 0:
             scopes = ["No scope"]
@@ -434,8 +501,7 @@ class ClientCredentialsMaker(BaseMaker):
                 "exp": time.time() + self.expiration_time,
                 "iat": time.time(),
                 "iss": f"http://{BASE_URL}"
-
-                 # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1
+                # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1
             }
         )
         return {
@@ -446,6 +512,3 @@ class ClientCredentialsMaker(BaseMaker):
             "not_before_policy": 0,
             "scope": scopes,
         }
-
-
-    

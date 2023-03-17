@@ -3,7 +3,10 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import select, insert, delete, text
 
-from src.data_access.postgresql.tables.identity_resource import IdentityProviderState, IdentityProviderMapped
+from src.data_access.postgresql.tables.identity_resource import (
+    IdentityProviderState,
+    IdentityProviderMapped,
+)
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim, User
 from src.business_logic.services.jwt_token import JWTService
@@ -85,23 +88,24 @@ class TestThirdPartyGitLabFlow:
 
         # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
         user_id = await connection.execute(
-            select(User.id)
-            .where(User.username == "UserNewNickname")
+            select(User.id).where(User.username == "UserNewNickname")
         )
         user_id = user_id.first()[0]
         secret_code = await connection.execute(
-            select(PersistentGrant.grant_data)
-            .where(PersistentGrant.client_id == 8, PersistentGrant.user_id == user_id)
+            select(PersistentGrant.grant_data).where(
+                PersistentGrant.client_id == 8,
+                PersistentGrant.user_id == user_id,
+            )
         )
 
         secret_code = secret_code.first()[0]
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"
@@ -121,7 +125,9 @@ class TestThirdPartyGitLabFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
         await connection.execute(
             insert(UserClaim).values(
@@ -142,7 +148,11 @@ class TestThirdPartyGitLabFlow:
 
         # 5th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
         jwt_service = JWTService()
-        token_hint_data = {"sub": user_id, "client_id": "spider_man", "type": "code"}
+        token_hint_data = {
+            "sub": user_id,
+            "client_id": "spider_man",
+            "type": "code",
+        }
 
         id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
 
@@ -220,23 +230,24 @@ class TestThirdPartyMicrosoftFlow:
 
         # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
         user_id = await connection.execute(
-            select(User.id)
-            .where(User.username == "UserNewEmail")
+            select(User.id).where(User.username == "UserNewEmail")
         )
         user_id = user_id.first()[0]
         secret_code = await connection.execute(
-            select(PersistentGrant.grant_data)
-            .where(PersistentGrant.client_id == 8, PersistentGrant.user_id == user_id)
+            select(PersistentGrant.grant_data).where(
+                PersistentGrant.client_id == 8,
+                PersistentGrant.user_id == user_id,
+            )
         )
 
         secret_code = secret_code.first()[0]
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"
@@ -256,7 +267,9 @@ class TestThirdPartyMicrosoftFlow:
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
         await connection.execute(
-            text("SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);")
+            text(
+                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
+            )
         )
         await connection.execute(
             insert(UserClaim).values(
@@ -277,7 +290,11 @@ class TestThirdPartyMicrosoftFlow:
 
         # 5th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
         jwt_service = JWTService()
-        token_hint_data = {"sub": user_id, "client_id": "spider_man", "type": "code"}
+        token_hint_data = {
+            "sub": user_id,
+            "client_id": "spider_man",
+            "type": "code",
+        }
 
         id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
 
@@ -288,4 +305,3 @@ class TestThirdPartyMicrosoftFlow:
         }
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_302_FOUND
-

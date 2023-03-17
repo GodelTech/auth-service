@@ -194,7 +194,7 @@ class AuthThirdPartyOIDCService:
                 "client_id": self.request_model.state.split("!_!")[1],
                 "grant_data": secret_code,
                 "user_id": user.id,
-                "grant_type": "code",
+                "grant_type": "authorization_code",
             }
             await self.persistent_grant_repo.create(**grant_data)
         return None

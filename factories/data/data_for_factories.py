@@ -77,11 +77,11 @@ USER_CLAIM_TYPE = [
     "exp",
     "iat",
     "iss",
-    "sub"
+    "sub",
 ]
 
 TYPES_OF_GRANTS = [
-    "code",
+    "authorization_code",
     "refresh_token",
     "password",
     "urn:ietf:params:oauth:grant-type:device_code",
@@ -145,6 +145,19 @@ CLIENT_SECRETS = {
     8: "light",
     9: "position",
     10: "themselves",
+}
+
+CLIENT_SCOPES = {
+    1: "openid",
+    2: "openid email",
+    3: "openid profile",
+    4: "openid email",
+    5: "openid profile",
+    6: "openid profile",
+    7: "openid",
+    8: "openid profile",
+    9: "openid profile",
+    10: "openid email",
 }
 
 ROLES = [

@@ -24,8 +24,8 @@ STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https:/
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGithubFlow:
-    async def test_successful_github_code_flow(
+class TestThirdPartyGoogleFlow:
+    async def test_successful_google_code_flow(
         self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
         # 1st stage Authorization endpoint with get request
@@ -38,7 +38,7 @@ class TestThirdPartyGithubFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        # 2nd stage third party GitHub provider endpoint
+        # 2nd stage third party Google provider endpoint
         await connection.execute(
             insert(IdentityProviderState).values(state=STUB_STATE)
         )
@@ -109,10 +109,10 @@ class TestThirdPartyGithubFlow:
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"

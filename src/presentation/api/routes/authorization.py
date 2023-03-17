@@ -87,7 +87,7 @@ async def post_authorize(
     try:
         request_model = RequestModel(**request_body.__dict__)
         auth_class = auth_class
-        auth_class.request_model = request_model
+        auth_class.request_model = request_body
         firmed_redirect_uri = await auth_class.get_redirect_url()
 
         if not firmed_redirect_uri:
@@ -115,6 +115,12 @@ async def post_authorize(
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Bad password"},
+        )
+    except ClientRedirectUriError as exception:
+        logger.exception(exception)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": "Redirect Uri not found"},
         )
     except KeyError as exception:
         message = (

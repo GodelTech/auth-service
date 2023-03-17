@@ -10,13 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 
-scope = (
-    "gcp-api%20IdentityServerApi&grant_type="
-    "password&client_id=spider_man&client_secret="
-    "65015c5e-c865-d3d4-3ba1-3abcb4e65500"
-    "&password=test_password&username=TestClient"
-)
-
 TOKEN_HINT_DATA = {
     "sub": 1,
     "client_id": "test_client",
@@ -80,12 +73,14 @@ class TestDeviceFlow:
         assert response.status_code == status.HTTP_200_OK
 
         # 5th stage: suppose we press confirm, this requests the redirect to authorization endpoint with POST
-        scope_data = scope + f"&user_code={user_code}"
+        scope_data = "openid" + f"&user_code={user_code}"
         params_5th = {
             "client_id": "test_client",
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
             "scope": scope_data,
             "redirect_uri": "https://www.google.com/",
+            "username": "TestClient",
+            "password": "test_password",
         }
 
         response = await client.request(
