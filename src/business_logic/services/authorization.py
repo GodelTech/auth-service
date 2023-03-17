@@ -12,7 +12,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
-from src.presentation.api.models import RequestModel
+from src.presentation.api.models import DataRequestModel
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class AuthorizationService:
         password_service: PasswordHash,
         jwt_service: JWTService,
     ) -> None:
-        self._request_model: Optional[RequestModel] = None
+        self._request_model: Optional[DataRequestModel] = None
         self.client_repo = client_repo
         self.user_repo = user_repo
         self.persistent_grant_repo = persistent_grant_repo
@@ -40,17 +40,18 @@ class AuthorizationService:
             self.request_model is not None
             and self.request_model.scope is not None
         ):
-            if await self._validate_client(self.request_model.client_id):
-                scope_data = await self._parse_scope_data(
-                    scope=self.request_model.scope
-                )
-                password = scope_data["password"]
-                user_name = scope_data["username"]
+            if await self._validate_client(
+                self.request_model.client_id
+            ) and await self._validate_client_redirect_uri(
+                self.request_model.client_id, self.request_model.redirect_uri
+            ):
+                password = self.request_model.password
+                username = self.request_model.username
 
                 (
                     user_hash_password,
                     user_id,
-                ) = await self.user_repo.get_hash_password(user_name)
+                ) = await self.user_repo.get_hash_password(username)
                 validated = self.password_service.validate_password(
                     password, user_hash_password
                 )
@@ -185,6 +186,17 @@ class AuthorizationService:
         else:
             return None
 
+    async def _validate_client_redirect_uri(  # TODO create mixin
+        self, client_id: str, redirect_uri: str
+    ) -> bool:
+        """
+        Checks if the redirect uri is in the database.
+        """
+        client = await self.client_repo.validate_client_redirect_uri(
+            client_id=client_id, redirect_uri=redirect_uri
+        )
+        return client
+
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         """ """
         return {
@@ -206,10 +218,11 @@ class AuthorizationService:
             return redirect_uri
         else:
             return None
+
     @property
-    def request_model(self) -> Optional[RequestModel]:
+    def request_model(self) -> Optional[DataRequestModel]:
         return self._request_model
 
     @request_model.setter
-    def request_model(self, request_model: RequestModel) -> None:
+    def request_model(self, request_model: DataRequestModel) -> None:
         self._request_model = request_model

@@ -10,27 +10,31 @@ from src.presentation.api.models import (
     ThirdPartyGoogleRequestModel,
     ThirdPartyMicrosoftRequestModel,
 )
-from src.presentation.api.models.authorization import RequestModel
+from pydantic import SecretStr
+from src.presentation.api.models.authorization import (
+    RequestModel,
+    DataRequestModel,
+)
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.business_logic.services.jwt_token import JWTService
 
 
 TEST_VALIDATE_PASSWORD = [
     (
-        "test_password",
+        SecretStr("test_password"),
         "$2b$12$rNqlpYZ51ilkRAr5uH5SfOAPUeQUrnclub8r3XNTQh6pS7lBqXnEi",
     ),
     (
-        "abra_vadaBra",
+        SecretStr("abra_vadaBra"),
         "$2b$12$dszlwCsMRY29mNuIAgMrEuZt412OslAl3KN8m95Ze.X7eCYnexoce",
     ),
     (
-        "fhfy$%_mkLKvbh67eT",
+        SecretStr("fhfy$%_mkLKvbh67eT"),
         "$2b$12$4dyIxC1keM0taJ6wetY8JOIAW2UOZNYT.Vhz5YoVPnpeqSo.pOmsO",
     ),
-    ("test_password", "$2b$12$rNqlpYZ51ilkRAr5uH5SfOAPUe"),
-    ("abra_vadaBra", "$2b$12$dszlwCsMRY29mNuIAgMrEuZt412OslA"),
-    ("fhfy$%_mkLKvbh67eT", "$2b$12$4dyIxC1keM0taJ6wetY8JOIAW2"),
+    (SecretStr("test_password"), "$2b$12$rNqlpYZ51ilkRAr5uH5SfOAPUe"),
+    (SecretStr("abra_vadaBra"), "$2b$12$dszlwCsMRY29mNuIAgMrEuZt412OslA"),
+    (SecretStr("fhfy$%_mkLKvbh67eT"), "$2b$12$4dyIxC1keM0taJ6wetY8JOIAW2"),
 ]
 
 DEFAULT_CLIENT = {
@@ -87,12 +91,11 @@ DEFAULT_USER_CLAIMS = [
 
 
 @pytest_asyncio.fixture
-def authorization_request_model() -> RequestModel:
+def authorization_get_request_model() -> RequestModel:
     request_model = RequestModel(
         client_id="test_client",
         response_type="code",
-        scope="gcp-api%20IdentityServerApi&grant_type=password&client_id=test_client&client_secret"
-        "=65015c5e-c865-d3d4-3ba1-3abcb4e65500&password=test_password&username=TestClient",
+        scope="openid",
         redirect_uri="https://www.google.com/",
         state="state",
         response_mode="mode",
@@ -104,6 +107,31 @@ def authorization_request_model() -> RequestModel:
         id_token_hint="test_data",
         login_hint="test_data",
         acr_values="test_data",
+        user_code="test_data",
+    )
+
+    return request_model
+
+
+@pytest_asyncio.fixture
+def authorization_post_request_model() -> DataRequestModel:
+    request_model = DataRequestModel(
+        client_id="test_client",
+        response_type="code",
+        scope="openid",
+        redirect_uri="https://www.google.com/",
+        state="state",
+        response_mode="mode",
+        nonce="test_data",
+        display="test_data",
+        prompt="test_data",
+        max_age=3600,
+        ui_locales="test_data",
+        id_token_hint="test_data",
+        login_hint="test_data",
+        acr_values="test_data",
+        username="TestClient",
+        password=SecretStr("test_password"),
     )
 
     return request_model

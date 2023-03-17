@@ -32,6 +32,7 @@ class DataBasePopulation:
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
+        cls.populate_client_scopes()
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()
@@ -112,9 +113,7 @@ class DataBasePopulation:
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
         for val in data.USER_CLAIM_TYPE:
-            type_of_claim = user_factory.UserClaimTypeFactory(
-                type_of_claim=val
-            )
+            type_of_claim = user_factory.UserClaimTypeFactory(type_of_claim=val)
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
@@ -217,6 +216,15 @@ class DataBasePopulation:
         for client_id, secret in data.CLIENT_SECRETS.items():
             sec = cl_factory.ClientSecretFactory(
                 client_id=client_id, value=secret
+            )
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+    @classmethod
+    def populate_client_scopes(cls) -> None:
+        for client_id, scope in data.CLIENT_SCOPES.items():
+            sec = cl_factory.ClientScopeFactory(
+                client_id=client_id, scope=scope
             )
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()

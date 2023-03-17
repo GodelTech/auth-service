@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from fastapi import Form
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
 
 class RequestModel(BaseModel):
@@ -21,7 +21,7 @@ class RequestModel(BaseModel):
     login_hint: Optional[str]
     acr_values: Optional[str]
     user_code: Optional[str]
-    
+
     class Config:
         orm_mode = True
 
@@ -53,3 +53,5 @@ class DataRequestModel:
     id_token_hint: str = Form(None)
     login_hint: str = Form(None)
     acr_values: str = Form(None)
+    username: str = Form(...)
+    password: SecretStr = Form(...)

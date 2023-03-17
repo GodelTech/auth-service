@@ -28,7 +28,7 @@ class TestAuthorizationCodeFlow:
         params = {
             "client_id": "spider_man",
             "response_type": "code",
-            "scope": scope,
+            "scope": "openid profile",
             "redirect_uri": "https://www.google.com/",
         }
         response = await client.request("GET", "/authorize/", params=params)
@@ -38,7 +38,8 @@ class TestAuthorizationCodeFlow:
         response = await client.request(
             "POST",
             "/authorize/",
-            data=params,
+            data=params
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": content_type},
         )
         assert response.status_code == status.HTTP_302_FOUND
@@ -54,10 +55,9 @@ class TestAuthorizationCodeFlow:
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
-            "scope": "openid profile",
-            "redirect_uri": "http://www.sparks.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"

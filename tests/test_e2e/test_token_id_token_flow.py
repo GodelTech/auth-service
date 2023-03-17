@@ -16,17 +16,14 @@ scope = (
     "the_beginner&username=PeterParker"
 )
 
-TOKEN_HINT_DATA = {
-    "sub": 8,
-    "client_id": "spider_man",
-    "type": "code"
-}
+TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
 
 
 @pytest.mark.asyncio
 class TestAuthorizationTokenFlow:
-    async def test_successful_authorization_token_flow(self, client: AsyncClient, connection: AsyncSession) -> None:
-
+    async def test_successful_authorization_token_flow(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",
@@ -37,10 +34,18 @@ class TestAuthorizationTokenFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        content_type = 'application/x-www-form-urlencoded'
-        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
+        content_type = "application/x-www-form-urlencoded"
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+            | {"username": "TestClient", "password": "test_password"},
+            headers={"Content-Type": content_type},
+        )
         data = response.headers["location"].split("?")[1]
-        access_token = {item.split("=")[0]: item.split("=")[1] for item in data.split("&")}["access_token"]
+        access_token = {
+            item.split("=")[0]: item.split("=")[1] for item in data.split("&")
+        }["access_token"]
         assert response.status_code == status.HTTP_302_FOUND
 
         # There is no 2nd stage Token endpoint. Token is formed in the Authorization endpoint method POST
@@ -48,18 +53,19 @@ class TestAuthorizationTokenFlow:
         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
         await connection.execute(
             insert(UserClaim).values(
-                user_id=8, 
-                claim_type_id=1, 
-                claim_value="Peter"
+                user_id=8, claim_type_id=1, claim_value="Peter"
             )
-         )
+        )
         await connection.commit()
-        response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
         assert response.status_code == status.HTTP_200_OK
         await connection.execute(
-            delete(UserClaim).where(UserClaim.user_id == 8).
-            where(UserClaim.claim_type_id == 1)
-         )
+            delete(UserClaim)
+            .where(UserClaim.user_id == 8)
+            .where(UserClaim.claim_type_id == 1)
+        )
         await connection.commit()
 
         # 4th stage EndSession. The logout happens on the application side.
@@ -78,7 +84,9 @@ class TestAuthorizationTokenFlow:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content
 
-    async def test_successful_authorization_token_id_token_flow(self, client: AsyncClient, connection: AsyncSession) -> None:
+    async def test_successful_authorization_token_id_token_flow(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
         params = {
             "client_id": "spider_man",
@@ -89,10 +97,18 @@ class TestAuthorizationTokenFlow:
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
 
-        content_type = 'application/x-www-form-urlencoded'
-        response = await client.request("POST", "/authorize/", data=params, headers={'Content-Type': content_type})
+        content_type = "application/x-www-form-urlencoded"
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+            | {"username": "TestClient", "password": "test_password"},
+            headers={"Content-Type": content_type},
+        )
         data = response.headers["location"].split("?")[1]
-        access_token = {item.split("=")[0]: item.split("=")[1] for item in data.split("&")}["access_token"]
+        access_token = {
+            item.split("=")[0]: item.split("=")[1] for item in data.split("&")
+        }["access_token"]
         assert response.status_code == status.HTTP_302_FOUND
 
         # There is no 2nd stage Token endpoint. Tokens are formed in the Authorization endpoint method POST
@@ -100,16 +116,18 @@ class TestAuthorizationTokenFlow:
         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
         await connection.execute(
             insert(UserClaim).values(
-                user_id=8, 
-                claim_type_id=1, 
-                claim_value="Peter"
+                user_id=8, claim_type_id=1, claim_value="Peter"
             )
         )
         await connection.commit()
-        response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
         assert response.status_code == status.HTTP_200_OK
         await connection.execute(
-            delete(UserClaim).where(UserClaim.user_id == 8).where(UserClaim.claim_type_id == 1)
+            delete(UserClaim)
+            .where(UserClaim.user_id == 8)
+            .where(UserClaim.claim_type_id == 1)
         )
         await connection.commit()
 

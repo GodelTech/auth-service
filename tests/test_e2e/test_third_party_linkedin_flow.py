@@ -102,10 +102,10 @@ class TestThirdPartyLinkedinFlow:
 
         params = {
             "client_id": "spider_man",
-            "grant_type": "code",
+            "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "https://www.google.com/",
         }
 
         content_type = "application/x-www-form-urlencoded"

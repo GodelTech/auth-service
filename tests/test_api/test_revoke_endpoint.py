@@ -5,15 +5,19 @@ from fastapi import status
 from httpx import AsyncClient
 
 from src.business_logic.services.jwt_token import JWTService
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+from src.data_access.postgresql.repositories.persistent_grant import (
+    PersistentGrantRepository,
+)
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
+
 
 @pytest.mark.asyncio
 class TestRevokationEndpoint:
     @pytest.mark.asyncio
-    async def test_successful_revoke_request(self, engine: AsyncEngine, client: AsyncClient) -> None:
-
+    async def test_successful_revoke_request(
+        self, engine: AsyncEngine, client: AsyncClient
+    ) -> None:
         jwt = JWTService()
         persistent_grant_repo = PersistentGrantRepository(engine)
         grant_type = "refresh_token"
@@ -27,9 +31,7 @@ class TestRevokationEndpoint:
             expiration_time=3600,
         )
         headers = {
-            "authorization": await jwt.encode_jwt(
-                payload={"sub": "1"}
-            ),
+            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
             "Content-Type": "application/x-www-form-urlencoded",
         }
         params = {"token": revoke_token, "token_type_hint": grant_type}
@@ -42,16 +44,16 @@ class TestRevokationEndpoint:
         )
 
     @pytest.mark.asyncio
-    async def test_token_does_not_exists(self, engine: AsyncEngine, client: AsyncClient) -> None:
+    async def test_token_does_not_exists(
+        self, engine: AsyncEngine, client: AsyncClient
+    ) -> None:
         jwt = JWTService()
         self.persistent_grant_repo = PersistentGrantRepository(engine)
 
         grant_type = "code"
         revoke_token = "----token_not_exists-----"
         headers = {
-            "authorization": await jwt.encode_jwt(
-                payload={"sub": "1"}
-            ),
+            "authorization": await jwt.encode_jwt(payload={"sub": "1"}),
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
