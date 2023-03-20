@@ -27,9 +27,9 @@ BASE_URL = f"{BASE_URL_HOST}:{BASE_URL_PORT}"
 
 BASE_URL_HOST = settings.server.get("base_url_host")
 BASE_URL_PORT = settings.server.get("base_url_port")
-
 BASE_URL = f"{BASE_URL_HOST}:{BASE_URL_PORT}"
 
+DOMAIN_NAME = settings.server.get("domain_name")
 
 REDIS_SCHEME = settings.redis.get("scheme")
 REDIS_HOST = settings.redis.get("host")
