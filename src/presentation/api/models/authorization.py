@@ -8,7 +8,7 @@ from pydantic import BaseModel, SecretStr
 class RequestModel(BaseModel):
     client_id: str
     response_type: str
-    scope: Optional[str]
+    scope: str = "openid"
     redirect_uri: str
     state: Optional[str]
     response_mode: Optional[str]
@@ -43,6 +43,8 @@ class DataRequestModel:
     response_type: str = Form(...)
     scope: str = Form(...)
     redirect_uri: str = Form(...)
+    username: str = Form(...)
+    password: SecretStr = Form(...)
     state: str = Form(None)
     response_mode: str = Form(None)
     nonce: str = Form(None)
@@ -53,5 +55,3 @@ class DataRequestModel:
     id_token_hint: str = Form(None)
     login_hint: str = Form(None)
     acr_values: str = Form(None)
-    username: str = Form(...)
-    password: SecretStr = Form(...)
