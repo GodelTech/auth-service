@@ -95,8 +95,8 @@ async def post_authorize(
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-
         return response
+
     except ClientNotFoundError as exception:
         logger.exception(exception)
         return JSONResponse(

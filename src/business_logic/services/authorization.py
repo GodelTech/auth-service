@@ -1,6 +1,7 @@
 import logging
 import secrets
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
+from abc import ABC, abstractmethod
 
 from src.dyna_config import BASE_URL
 from src.business_logic.services.jwt_token import JWTService
@@ -15,6 +16,61 @@ from src.data_access.postgresql.repositories import (
 from src.presentation.api.models import DataRequestModel
 
 logger = logging.getLogger(__name__)
+
+
+class ResponseTypeHandler(ABC):
+    @abstractmethod
+    async def get_redirect_url(self, user_id: int) -> Optional[str]:
+        pass
+
+
+class CodeResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> Optional[str]:
+        pass
+
+
+class TokenResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> Optional[str]:
+        pass
+
+
+class IdTokenTokenResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> Optional[str]:
+        pass
+
+
+class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> Optional[str]:
+        pass
+
+
+class ResponseTypeHandlerFactory:
+    _handlers = {}
+
+    @staticmethod
+    def register_handler(
+        response_type: str, handler: Type[ResponseTypeHandler]
+    ) -> None:
+        ResponseTypeHandlerFactory._handlers[response_type] = handler
+
+    @staticmethod
+    def get_handler(response_type: str) -> Optional[ResponseTypeHandler]:
+        handler = ResponseTypeHandlerFactory._handlers.get(response_type)
+        return (
+            handler() if handler else None
+        )  # TODO instead of None raise Exception -> unsupported_response_type
+
+
+# Register the response type handlers with the factory
+ResponseTypeHandlerFactory.register_handler("code", CodeResponseTypeHandler)
+ResponseTypeHandlerFactory.register_handler("token", TokenResponseTypeHandler)
+ResponseTypeHandlerFactory.register_handler(
+    "id_token token", IdTokenTokenResponseTypeHandler
+)
+ResponseTypeHandlerFactory.register_handler(
+    "urn:ietf:params:oauth:grant-type:device_code",
+    DeviceCodeResponseTypeHandler,
+)
 
 
 class AuthorizationService:
@@ -52,39 +108,22 @@ class AuthorizationService:
         ) and await self._validate_client_redirect_uri(
             self.request_model.client_id, self.request_model.redirect_uri
         ):
-            password = self.request_model.password
-            username = self.request_model.username
-
             (
-                user_hash_password,
+                hashed_password,
                 user_id,
-            ) = await self.user_repo.get_hash_password(username)
+            ) = await self.user_repo.get_hash_password(
+                self.request_model.username
+            )
             validated = self.password_service.validate_password(
-                password, user_hash_password
+                self.request_model.password, hashed_password
             )
 
-            if user_hash_password and validated:
-                if self.request_model.response_type == "code":
-                    return await self.get_redirect_url_code_response_type(
-                        user_id=user_id
-                    )
-                elif self.request_model.response_type == "token":
-                    return await self.get_redirect_url_token_response_type(
-                        user_id=user_id
-                    )
-                elif self.request_model.response_type == "id_token token":
-                    return await self.get_redirect_url_id_token_token_response_type(
-                        user_id=user_id
-                    )
-                elif (
+            if hashed_password and validated:
+                handler = ResponseTypeHandlerFactory.get_handler(
                     self.request_model.response_type
-                    == "urn:ietf:params:oauth:grant-type:device_code"
-                ):
-                    return (
-                        await self.get_redirect_url_device_code_response_type(
-                            user_id=user_id
-                        )
-                    )
+                )
+                if handler:
+                    return await handler.get_redirect_url(user_id=user_id)
 
     async def get_redirect_url_code_response_type(
         self, user_id: int
@@ -130,24 +169,6 @@ class AuthorizationService:
     ) -> Optional[str]:
         if self.request_model is None:
             return None
-
-        expiration_time = 600
-        scope = {"scopes": self.request_model.scope}
-        access_token = await get_single_token(
-            user_id=user_id,
-            client_id=self.request_model.client_id,
-            additional_data=scope,
-            jwt_service=self.jwt_service,
-            expiration_time=expiration_time,
-            aud=["userinfo", "introspection", "revoke"],
-        )
-
-        uri_data = (
-            f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
-            f"&token_type=Bearer"
-        )
-        result_uri = self.request_model.redirect_uri + "?" + uri_data
-        return result_uri
 
     async def get_redirect_url_id_token_token_response_type(
         self, user_id: int
