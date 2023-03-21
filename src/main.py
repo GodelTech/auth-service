@@ -52,6 +52,11 @@ def get_application(test: bool = False) -> NewFastApi:
     application.container = container
 
     application.include_router(router)
+    application.mount(
+        "/static",
+        StaticFiles(directory="src/presentation/api/templates/static"),
+        name="static",
+    )
 
     return application
 
