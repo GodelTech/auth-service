@@ -2,7 +2,7 @@ from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
-from src.dyna_config import BASE_URL
+from src.dyna_config import DOMAIN_NAME
 from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
@@ -53,7 +53,7 @@ class WellKnownServices:
 
         # REQUIRED
         result: dict[str, Any] = {}
-        result["issuer"] = f"http://{BASE_URL}"
+        result["issuer"] = f"http://{DOMAIN_NAME}"
 
         urls_dict = self.get_all_urls(result)
 

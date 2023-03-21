@@ -2,7 +2,7 @@ import logging
 import secrets
 from typing import Any, Dict, Optional
 
-from src.dyna_config import BASE_URL
+from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.tokens import get_single_token
@@ -117,7 +117,7 @@ class AuthorizationService:
             )
             await self.device_repo.delete_by_user_code(user_code=user_code)
 
-            return f"http://{BASE_URL}/device/auth/success"
+            return f"http://{DOMAIN_NAME}/device/auth/success"
         return None
 
     async def get_redirect_url_token_response_type(
