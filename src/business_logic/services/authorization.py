@@ -44,6 +44,14 @@ class AuthorizationService:
     def request_model(self, request_model: DataRequestModel) -> None:
         self._request_model = request_model
 
+    @property
+    def request_model(self) -> Optional[DataRequestModel]:
+        return self._request_model
+
+    @request_model.setter
+    def request_model(self, request_model: DataRequestModel) -> None:
+        self._request_model = request_model
+
     async def get_redirect_url(self) -> Optional[str]:
         if self.request_model is None or self.request_model.scope is None:
             return None
@@ -55,7 +63,24 @@ class AuthorizationService:
         ):
             password = self.request_model.password
             username = self.request_model.username
+        if self.request_model is None or self.request_model.scope is None:
+            return None
 
+        if await self._validate_client(
+            self.request_model.client_id
+        ) and await self._validate_client_redirect_uri(
+            self.request_model.client_id, self.request_model.redirect_uri
+        ):
+            password = self.request_model.password
+            username = self.request_model.username
+
+            (
+                user_hash_password,
+                user_id,
+            ) = await self.user_repo.get_hash_password(username)
+            validated = self.password_service.validate_password(
+                password, user_hash_password
+            )
             (
                 user_hash_password,
                 user_id,
@@ -83,8 +108,28 @@ class AuthorizationService:
                 ):
                     return (
                         await self.get_redirect_url_device_code_response_type(
+            if user_hash_password and validated:
+                if self.request_model.response_type == "code":
+                    return await self.get_redirect_url_code_response_type(
+                        user_id=user_id
+                    )
+                elif self.request_model.response_type == "token":
+                    return await self.get_redirect_url_token_response_type(
+                        user_id=user_id
+                    )
+                elif self.request_model.response_type == "id_token token":
+                    return await self.get_redirect_url_id_token_token_response_type(
+                        user_id=user_id
+                    )
+                elif (
+                    self.request_model.response_type
+                    == "urn:ietf:params:oauth:grant-type:device_code"
+                ):
+                    return (
+                        await self.get_redirect_url_device_code_response_type(
                             user_id=user_id
                         )
+                    )
                     )
 
     async def get_redirect_url_code_response_type(
@@ -94,6 +139,14 @@ class AuthorizationService:
             return None
 
         secret_code = secrets.token_urlsafe(32)
+        await self.persistent_grant_repo.create(
+            client_id=self.request_model.client_id,
+            grant_data=secret_code,
+            user_id=user_id,
+        )
+        return await self._update_redirect_url_with_params(
+            secret_code=secret_code
+        )
         await self.persistent_grant_repo.create(
             client_id=self.request_model.client_id,
             grant_data=secret_code,
@@ -125,32 +178,13 @@ class AuthorizationService:
         )
         await self.device_repo.delete_by_user_code(user_code=user_code)
         return f"http://{DOMAIN_NAME}/device/auth/success"
-        if (
-            self.request_model is not None
-            and self.request_model.scope is not None
-        ):
-            scope_data = await self._parse_scope_data(
-                scope=self.request_model.scope
-            )
-            user_code = scope_data["user_code"]
-            device = await self.device_repo.get_device_by_user_code(
-                user_code=user_code
-            )
-            secret_code = device.device_code
-            await self.persistent_grant_repo.create(
-                client_id=self.request_model.client_id,
-                grant_data=secret_code,
-                user_id=user_id,
-                grant_type="urn:ietf:params:oauth:grant-type:device_code",
-            )
-            await self.device_repo.delete_by_user_code(user_code=user_code)
-
-            return f"http://{DOMAIN_NAME}/device/auth/success"
-        return None
 
     async def get_redirect_url_token_response_type(
         self, user_id: int
     ) -> Optional[str]:
+        if self.request_model is None:
+            return None
+
         if self.request_model is None:
             return None
 
@@ -164,7 +198,22 @@ class AuthorizationService:
             expiration_time=expiration_time,
             aud=["userinfo", "introspection", "revoke"],
         )
+        scope = {"scopes": self.request_model.scope}
+        access_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.request_model.client_id,
+            additional_data=scope,
+            jwt_service=self.jwt_service,
+            expiration_time=expiration_time,
+            aud=["userinfo", "introspection", "revoke"],
+        )
 
+        uri_data = (
+            f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
+            f"&token_type=Bearer"
+        )
+        result_uri = self.request_model.redirect_uri + "?" + uri_data
+        return result_uri
         uri_data = (
             f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
             f"&token_type=Bearer"
@@ -198,7 +247,36 @@ class AuthorizationService:
             jwt_service=self.jwt_service,
             expiration_time=expiration_time,
         )
+        if self.request_model is None:
+            return None
 
+        expiration_time = 600
+        scope = {"scopes": self.request_model.scope}
+        claims = await self.user_repo.get_claims(
+            id=1
+        )  # change to user_id when database will be ready
+        access_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.request_model.client_id,
+            additional_data=scope,
+            jwt_service=self.jwt_service,
+            expiration_time=expiration_time,
+            aud=["userinfo", "introspection", "revoke"],
+        )
+        id_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.request_model.client_id,
+            additional_data=claims,
+            jwt_service=self.jwt_service,
+            expiration_time=expiration_time,
+        )
+
+        uri_data = (
+            f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
+            f"&id_token={id_token}&token_type=Bearer"
+        )
+        result_uri = self.request_model.redirect_uri + "?" + uri_data
+        return result_uri
         uri_data = (
             f"access_token={access_token}&expires_in={expiration_time}&state={self.request_model.state}"
             f"&id_token={id_token}&token_type=Bearer"
@@ -210,6 +288,13 @@ class AuthorizationService:
         """
         Checks if the client is in the database.
         """
+        if self.request_model is None:
+            return None
+
+        client = await self.client_repo.get_client_by_client_id(
+            client_id=client_id
+        )
+        return client
         if self.request_model is None:
             return None
 
@@ -240,8 +325,13 @@ class AuthorizationService:
         self, secret_code: str
     ) -> Optional[str]:
         if self.request_model is None:
+        if self.request_model is None:
             return None
 
+        redirect_uri = f"{self.request_model.redirect_uri}?code={secret_code}"
+        if self.request_model.state:
+            redirect_uri += f"&state={self.request_model.state}"
+        return redirect_uri
         redirect_uri = f"{self.request_model.redirect_uri}?code={secret_code}"
         if self.request_model.state:
             redirect_uri += f"&state={self.request_model.state}"
