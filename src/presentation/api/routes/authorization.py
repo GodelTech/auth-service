@@ -85,7 +85,6 @@ async def post_authorize(
     auth_class: AuthorizationService = Depends(provide_auth_service_stub),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        request_model = RequestModel(**request_body.__dict__)
         auth_class = auth_class
         auth_class.request_model = request_body
         firmed_redirect_uri = await auth_class.get_redirect_url()
