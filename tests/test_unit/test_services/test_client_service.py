@@ -17,8 +17,10 @@ class ClientRequestModel():
 
 @pytest.mark.asyncio
 class TestClientService:
-    async def test_create(self, client_service: ClientService) -> None:
+    async def test_registration(self, client_service: ClientService) -> None:
        client_service.request_model = ClientRequestModel()
        result = await client_service.registration()
        assert "client_secret" in result.keys()
        assert "client_id" in result.keys()
+       client = await client_service.client_repo.get_client_by_client_id(client_id=result["client_id"])
+       assert client.client_name == "Example app"

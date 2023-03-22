@@ -2,9 +2,7 @@ from typing import Any, Optional
 
 from jwt.exceptions import PyJWTError
 
-from src.business_logic.dependencies.database import get_repository_no_depends
-from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.tokens import TokenService
+from src.data_access.postgresql.tables import Client
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,

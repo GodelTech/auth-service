@@ -94,8 +94,6 @@ class ClientRepository(BaseRepository):
             secrete = await session.execute(
                 select(ClientSecret)
                 .join(Client, ClientSecret.client_id == Client.id)
-                .join(Client, ClientScope.client_id == Client.id)
-                .join(Client, ClientRedirectUri.client_id == Client.id)
                 .where(Client.client_id == client_id)
             )
             secrete = secrete.first()
@@ -338,7 +336,7 @@ class ClientRepository(BaseRepository):
             if result is None:
                 ValueError
             return result[0].id
-
+    
     def __repr__(self) -> str:
         return "Client Repository"
 
