@@ -25,6 +25,7 @@ from .clients import (
     ProtocolTypeController,
     RefreshTokenExpirationTypeController,
     RefreshTokenUsageTypeController,
+    ClientScopeController,
 )
 from .device import DeviceAdminController
 from .group import GroupAdminController, PermissionAdminController
