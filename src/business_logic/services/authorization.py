@@ -67,9 +67,7 @@ class AuthorizationService:
         handler = ResponseTypeHandlerFactory.get_handler(
             self.request_model.response_type, auth_service=self
         )
-        return await handler.get_redirect_url(
-            user_id, request_model=self.request_model
-        )
+        return await handler.get_redirect_url(user_id)
 
 
 class ResponseTypeHandler(ABC):
@@ -77,18 +75,110 @@ class ResponseTypeHandler(ABC):
         self.auth_service = auth_service
 
     @abstractmethod
-    async def get_redirect_url(
-        self, user_id: int, request_model: DataRequestModel
-    ) -> str:
+    async def get_redirect_url(self, user_id: int) -> str:
         pass
 
-    async def _update_redirect_url_with_params(
-        self, secret_code: str, request_model: DataRequestModel
-    ) -> str:
-        redirect_uri = f"{request_model.redirect_uri}?code={secret_code}"
-        if request_model.state:
-            redirect_uri += f"&state={request_model.state}"
-        return redirect_uri
+    async def _update_redirect_url(self, redirect_url: str) -> str:
+        if self.auth_service.request_model.state:
+            redirect_url += f"&state={self.auth_service.request_model.state}"
+        return redirect_url
+
+
+class CodeResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> str:
+        secret_code = secrets.token_urlsafe(32)
+        await self.auth_service.persistent_grant_repo.create(
+            client_id=self.auth_service.request_model.client_id,
+            grant_data=secret_code,
+            user_id=user_id,
+        )
+        redirect_url = f"{self.auth_service.request_model.redirect_uri}?code={secret_code}"
+        return await self._update_redirect_url(redirect_url)
+
+
+class TokenResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> str:
+        expiration_time = 600
+        access_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.auth_service.request_model.client_id,
+            additional_data={"scopes": self.auth_service.request_model.scope},
+            jwt_service=self.auth_service.jwt_service,
+            expiration_time=expiration_time,
+        )
+        query_params = f"access_token={access_token}&token_type=Bearer&expires_in={expiration_time}"
+        redirect_url = (
+            f"{self.auth_service.request_model.redirect_uri}?{query_params}"
+        )
+        return await self._update_redirect_url(redirect_url)
+
+
+class IdTokenResponseType(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> str:
+        expiration_time = 600
+        claims = await self.auth_service.user_repo.get_claims(user_id)
+        id_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.auth_service.request_model.client_id,
+            additional_data=claims,
+            jwt_service=self.auth_service.jwt_service,
+            expiration_time=expiration_time,
+        )
+        redirect_url = f"{self.auth_service.request_model.redirect_uri}?id_token={id_token}"
+        return await self._update_redirect_url(redirect_url)
+
+
+class IdTokenTokenResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> str:
+        expiration_time = 600
+        access_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.auth_service.request_model.client_id,
+            additional_data={"scopes": self.auth_service.request_model.scope},
+            jwt_service=self.auth_service.jwt_service,
+            expiration_time=expiration_time,
+            aud=["userinfo", "introspection", "revoke"],
+        )
+        claims = await self.auth_service.user_repo.get_claims(user_id)
+        id_token = await get_single_token(
+            user_id=user_id,
+            client_id=self.auth_service.request_model.client_id,
+            additional_data=claims,
+            jwt_service=self.auth_service.jwt_service,
+            expiration_time=expiration_time,
+        )
+        query_params = (
+            f"access_token={access_token}&token_type=Bearer&expires_in={expiration_time}"
+            f"&id_token={id_token}"
+        )
+        redirect_url = (
+            f"{self.auth_service.request_model.redirect_uri}?{query_params}"
+        )
+        return await self._update_redirect_url(redirect_url)
+
+
+class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
+    async def get_redirect_url(self, user_id: int) -> str:
+        scope_data = await self._parse_scope_data(
+            self.auth_service.request_model.scope
+        )
+        user_code = scope_data["user_code"]
+        device = await self.auth_service.device_repo.get_device_by_user_code(
+            user_code=user_code
+        )
+        secret_code = device.device_code.value
+        await self.auth_service.persistent_grant_repo.create(
+            client_id=self.auth_service.request_model.client_id,
+            grant_data=secret_code,
+            user_id=user_id,
+            grant_type="urn:ietf:params:oauth:grant-type:device_code",
+        )
+        await self.auth_service.device_repo.delete_by_user_code(
+            user_code=user_code
+        )
+        return f"http://{BASE_URL}/device/auth/success"
+
+    # TODO is it hardcoded value or we should update url with scope too?
 
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         return {
@@ -96,96 +186,6 @@ class ResponseTypeHandler(ABC):
             for item in scope.split("&")
             if len(item.split("=")) == 2
         }
-
-
-class CodeResponseTypeHandler(ResponseTypeHandler):
-    async def get_redirect_url(
-        self, user_id: int, request_model: DataRequestModel
-    ) -> str:
-        secret_code = secrets.token_urlsafe(32)
-        await self.auth_service.persistent_grant_repo.create(
-            client_id=request_model.client_id,
-            grant_data=secret_code,
-            user_id=user_id,
-        )
-        return await self._update_redirect_url_with_params(
-            secret_code, request_model
-        )
-
-
-class TokenResponseTypeHandler(ResponseTypeHandler):
-    async def get_redirect_url(
-        self, user_id: int, request_model: DataRequestModel
-    ) -> str:
-        expiration_time = 600
-        scope = {"scopes": request_model.scope}
-        access_token = await get_single_token(
-            user_id=user_id,
-            client_id=request_model.client_id,
-            additional_data=scope,
-            jwt_service=self.jwt_service,
-            expiration_time=expiration_time,
-        )
-
-        uri_data = (
-            f"access_token={access_token}&expires_in={expiration_time}&state={request_model.state}"
-            f"&token_type=Bearer"
-        )
-        result_uri = request_model.redirect_uri + "?" + uri_data
-        return result_uri
-
-
-class IdTokenTokenResponseTypeHandler(ResponseTypeHandler):
-    async def get_redirect_url(
-        self, user_id: int, request_model: DataRequestModel
-    ) -> str:
-        expiration_time = 600
-        scope = {"scopes": request_model.scope}
-        claims = await self.user_repo.get_claims(
-            id=1
-        )  # change to user_id when database will be ready
-        access_token = await get_single_token(
-            user_id=user_id,
-            client_id=request_model.client_id,
-            additional_data=scope,
-            jwt_service=self.jwt_service,
-            expiration_time=expiration_time,
-            aud=["userinfo", "introspection", "revoke"],
-        )
-        id_token = await get_single_token(
-            user_id=user_id,
-            client_id=request_model.client_id,
-            additional_data=claims,
-            jwt_service=self.jwt_service,
-            expiration_time=expiration_time,
-        )
-
-        uri_data = (
-            f"access_token={access_token}&expires_in={expiration_time}&state={request_model.state}"
-            f"&id_token={id_token}&token_type=Bearer"
-        )
-        result_uri = request_model.redirect_uri + "?" + uri_data
-        return result_uri
-
-
-class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
-    async def get_redirect_url(
-        self, user_id: int, request_model: DataRequestModel
-    ) -> str:
-        scope_data = await self._parse_scope_data(scope=request_model.scope)
-        user_code = scope_data["user_code"]
-        device = await self.device_repo.get_device_by_user_code(
-            user_code=user_code
-        )
-        secret_code = device.device_code.value
-        await self.persistent_grant_repo.create(
-            client_id=request_model.client_id,
-            grant_data=secret_code,
-            user_id=user_id,
-            grant_type="urn:ietf:params:oauth:grant-type:device_code",
-        )
-        await self.device_repo.delete_by_user_code(user_code=user_code)
-        return f"http://{BASE_URL}/device/auth/success"
 
 
 class ResponseTypeHandlerFactory:
@@ -207,9 +207,11 @@ class ResponseTypeHandlerFactory:
         return handler(auth_service)
 
 
-# Register the response type handlers with the factory
+# To add new response_type create new class which inherits from ResponseTypeHandler
+# and register it like below
 ResponseTypeHandlerFactory.register_handler("code", CodeResponseTypeHandler)
 ResponseTypeHandlerFactory.register_handler("token", TokenResponseTypeHandler)
+ResponseTypeHandlerFactory.register_handler("id_token", IdTokenResponseType)
 ResponseTypeHandlerFactory.register_handler(
     "id_token token", IdTokenTokenResponseTypeHandler
 )
