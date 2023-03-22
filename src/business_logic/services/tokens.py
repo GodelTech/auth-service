@@ -26,7 +26,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
-from src.dyna_config import BASE_URL
+from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import (
     BodyRequestRevokeModel,
     BodyRequestTokenModel,
@@ -51,7 +51,7 @@ def get_base_payload(
         kwargs.pop("user_id")
 
     base_payload = {
-        "iss": f"http://{BASE_URL}",
+        "iss": f"http://{DOMAIN_NAME}",
         "client_id": client_id,
         "iat": int(time.time()),
         "exp": int(time.time() + expiration_time),
@@ -480,7 +480,7 @@ class ClientCredentialsMaker(BaseMaker):
                 "typ": "Bearer",
                 "exp": time.time() + self.expiration_time,
                 "iat": time.time(),
-                "iss": f"http://{BASE_URL}"
+                "iss": f"http://{DOMAIN_NAME}"
                 # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1
             }
         )
