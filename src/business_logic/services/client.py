@@ -108,13 +108,30 @@ class ClientService:
         self,
         client_id:str,
     ) -> None:
-        if ',' in self.request_model.redirect_uris[0]:
-            self.request_model.redirect_uris = self.request_model.redirect_uris[0].split(',')
+        if self.request_model.redirect_uris:
+            if ',' in self.request_model.redirect_uris[0]:
+                self.request_model.redirect_uris = self.request_model.redirect_uris[0].split(',')
         client = await self.client_repo.get_client_by_client_id(client_id=client_id)
         
-        await self.client_repo.update()
+        params ={}
+        if self.request_model.client_name:
+            params["client_name"] = self.request_model.client_name
+        if self.request_model.client_uri:
+            params["client_uri"] = self.request_model.client_uri
+        if self.request_model.logo_uri:
+            params["logo_uri"] = self.request_model.logo_uri
+        if self.request_model.grant_types:
+            params["grant_types"] = self.request_model.grant_types
+        if self.request_model.response_types:
+            params["response_types"] = self.request_model.response_types
+        if self.request_model.token_endpoint_auth_method:
+            params["token_endpoint_auth_method"] = self.request_model.token_endpoint_auth_method
+
+        await self.client_repo.update(client_id=client_id, **params)
     
         if self.request_model.scope is not None:
+            await self.client_repo.delete_scope(client_id_int=client.id)
             await self.client_repo.add_scope(client_id_int=client.id, scope=self.request_model.scope)
         if self.request_model.redirect_uris is not None:
+            await self.client_repo.delete_redirect_uris(client_id_int=client.id)
             await self.client_repo.add_redirect_uris(client_id_int=client.id, redirect_uris=self.request_model.redirect_uris)

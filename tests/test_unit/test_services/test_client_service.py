@@ -15,12 +15,28 @@ class ClientRequestModel():
         token_endpoint_auth_method = "client_secret_post"
         scope = "openid profile"
 
+class ClientRequestModel2():
+        client_name = "Real app"
+        client_uri = None
+        logo_uri = None
+        redirect_uris = ["reaapp.com", "real__app.com/callback"]
+        grant_types = None
+        response_types = None
+        token_endpoint_auth_method = None
+        scope = "email"
+
 @pytest.mark.asyncio
 class TestClientService:
-    async def test_registration(self, client_service: ClientService) -> None:
-       client_service.request_model = ClientRequestModel()
-       result = await client_service.registration()
-       assert "client_secret" in result.keys()
-       assert "client_id" in result.keys()
-       client = await client_service.client_repo.get_client_by_client_id(client_id=result["client_id"])
-       assert client.client_name == "Example app"
+        async def test_registration_and_update(self, client_service: ClientService) -> None:
+                client_service.request_model = ClientRequestModel()
+                result = await client_service.registration()
+                assert "client_secret" in result.keys()
+                assert "client_id" in result.keys()
+                client_id = result["client_id"]
+                client = await client_service.client_repo.get_client_by_client_id(client_id=result["client_id"])
+                assert client.client_name == "Example app"
+
+                client_service.request_model = ClientRequestModel2()
+                result = await client_service.update(client_id=client_id)
+                client = await client_service.client_repo.get_client_by_client_id(client_id=client_id)
+                assert client.client_name == "Real app"

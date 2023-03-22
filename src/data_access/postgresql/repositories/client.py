@@ -1,4 +1,4 @@
-from sqlalchemy import exists, select, insert
+from sqlalchemy import exists, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -337,6 +337,50 @@ class ClientRepository(BaseRepository):
                 ValueError
             return result[0].id
     
+    async def update(self, client_id, **kwargs):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            updates = (
+                        update(Client)
+                        .values(**kwargs)
+                        .where(Client.client_id == client_id)
+                    )
+            await session.execute(updates)
+            await session.commit()
+
+
+    async def delete_scope(
+        self, 
+        client_id_int:int,
+    ) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            await session.execute(
+                delete(ClientScope).where(ClientScope.client_id == client_id_int)
+            )
+            await session.commit()
+
+    async def delete_redirect_uris(
+        self, 
+        client_id_int:int,
+    ) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            await session.execute(
+                delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
+            )
+            await session.commit()
+
+
     def __repr__(self) -> str:
         return "Client Repository"
 
