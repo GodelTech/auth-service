@@ -22,7 +22,7 @@ userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 @cache(
     expire=CacheTimeSettings.USERINFO,
     coder=JsonCoder,
-    key_builder=builder_with_parametr,
+    # key_builder=builder_with_parametr,
 )
 async def get_userinfo(
     request: Request,
@@ -37,7 +37,7 @@ async def get_userinfo(
         userinfo_class.authorization = token
         logger.debug("Collecting Claims from DataBase.")
         result = await userinfo_class.get_user_info()
-        
+
         return {k: v for k, v in result.items() if v is not None}
 
     except ClaimsNotFoundError:
@@ -106,9 +106,7 @@ async def get_userinfo_jwt(
         logger.info("Collecting Claims from DataBase.")
         result = await userinfo_class.get_user_info()
         result = {k: v for k, v in result.items() if v is not None}
-        return await userinfo_class.jwt.encode_jwt(
-            payload=result
-        )
+        return await userinfo_class.jwt.encode_jwt(payload=result)
 
     except ValueError:
         raise HTTPException(
@@ -126,7 +124,7 @@ async def get_userinfo_jwt(
 async def get_default_token(
     with_iss_me: Optional[bool] = None,
     with_aud: Optional[bool] = None,
-    scope: str = 'profile',
+    scope: str = "profile",
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
     try:
