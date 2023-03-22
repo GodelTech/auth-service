@@ -3,6 +3,7 @@ import secrets
 from typing import Any, Dict, Optional
 
 from src.dyna_config import DOMAIN_NAME
+from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.tokens import get_single_token
@@ -124,6 +125,28 @@ class AuthorizationService:
         )
         await self.device_repo.delete_by_user_code(user_code=user_code)
         return f"http://{DOMAIN_NAME}/device/auth/success"
+        if (
+            self.request_model is not None
+            and self.request_model.scope is not None
+        ):
+            scope_data = await self._parse_scope_data(
+                scope=self.request_model.scope
+            )
+            user_code = scope_data["user_code"]
+            device = await self.device_repo.get_device_by_user_code(
+                user_code=user_code
+            )
+            secret_code = device.device_code
+            await self.persistent_grant_repo.create(
+                client_id=self.request_model.client_id,
+                grant_data=secret_code,
+                user_id=user_id,
+                grant_type="urn:ietf:params:oauth:grant-type:device_code",
+            )
+            await self.device_repo.delete_by_user_code(user_code=user_code)
+
+            return f"http://{DOMAIN_NAME}/device/auth/success"
+        return None
 
     async def get_redirect_url_token_response_type(
         self, user_id: int
