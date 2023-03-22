@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from sqlalchemy import exists, select, insert, update, delete, text
+=======
+from sqlalchemy import exists, select, insert
+>>>>>>> e77a875 (works)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -18,11 +22,15 @@ from src.data_access.postgresql.tables.client import (
     AccessTokenType,
     RefreshTokenExpirationType,
     RefreshTokenUsageType,
+<<<<<<< HEAD
     ResponseType,
     clients_response_types,
     clients_grant_types,
 )
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
+=======
+)
+>>>>>>> e77a875 (works)
 from typing import Optional, Any, Union
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from src.data_access.postgresql.errors import DuplicationError
@@ -94,6 +102,8 @@ class ClientRepository(BaseRepository):
             secrete = await session.execute(
                 select(ClientSecret)
                 .join(Client, ClientSecret.client_id == Client.id)
+                .join(Client, ClientScope.client_id == Client.id)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
                 .where(Client.client_id == client_id)
             )
             secrete = secrete.first()
@@ -314,7 +324,11 @@ class ClientRepository(BaseRepository):
         except:
             raise DuplicationError
 
+<<<<<<< HEAD
     async def get_access_token_type_id(self, str_type) -> int:
+=======
+    async def get_access_token_type_id(self, str_type):
+>>>>>>> e77a875 (works)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -330,7 +344,11 @@ class ClientRepository(BaseRepository):
                 ValueError
             return result[0].id
     
+<<<<<<< HEAD
     async def get_refresh_token_usage_type_id(self, str_type) -> int:
+=======
+    async def get_refresh_token_usage_type_id(self, str_type):
+>>>>>>> e77a875 (works)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -346,7 +364,11 @@ class ClientRepository(BaseRepository):
                 ValueError
             return result[0].id
 
+<<<<<<< HEAD
     async def get_refresh_token_expiration_type_id(self, str_type) -> int:
+=======
+    async def get_refresh_token_expiration_type_id(self, str_type):
+>>>>>>> e77a875 (works)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -361,6 +383,7 @@ class ClientRepository(BaseRepository):
             if result is None:
                 ValueError
             return result[0].id
+<<<<<<< HEAD
     
     async def update(self, client_id, **kwargs):
         session_factory = sessionmaker(
@@ -495,6 +518,8 @@ class ClientRepository(BaseRepository):
             await session.execute(text(sql))
             await session.commit()
         
+=======
+>>>>>>> e77a875 (works)
 
     def __repr__(self) -> str:
         return "Client Repository"

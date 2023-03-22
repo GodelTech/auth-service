@@ -150,6 +150,13 @@ class ClientRedirectUriController(ModelView, model=ClientRedirectUri):
     column_list = [ClientRedirectUri.id, ClientRedirectUri.redirect_uri]
 
 class ClientScopeController(ModelView, model=ClientScope):
+<<<<<<< HEAD
+=======
+    icon = "fa-solid fa-mobile-screen-button"
+    column_list = [ClientScope.id, ClientScope.scope]
+
+class ClientGrantTypeController(ModelView, model=ClientGrantType):
+>>>>>>> e77a875 (works)
     icon = "fa-solid fa-mobile-screen-button"
     column_list = [ClientScope.id, ClientScope.scope]
 

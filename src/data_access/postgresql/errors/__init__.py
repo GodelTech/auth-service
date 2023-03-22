@@ -26,4 +26,7 @@ from .third_party_oidc import (
     WrongDataError,
 )
 from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError
+<<<<<<< HEAD
 from .authorization import IncorrectAuthTokenError
+=======
+>>>>>>> e77a875 (works)

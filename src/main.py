@@ -108,7 +108,10 @@ def setup_di(app: FastAPI) -> None:
 
     # Client 
     admin.add_view(ui.ClientAdminController)
+<<<<<<< HEAD
     admin.add_view(ui.ResponseTypeAdminController)
+=======
+>>>>>>> e77a875 (works)
     admin.add_view(ui.ClientScopeController)
     admin.add_view(ui.AccessTokenTypeAdminController)
     admin.add_view(ui.ProtocolTypeController)
@@ -361,6 +364,14 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
+    nodepends_provide_client_service = (
+        lambda: prov.provide_client_service(
+            client_repo=prov.provide_client_repo(db_engine),
+        )
+    )
+    app.dependency_overrides[
+        prov.provide_client_service_stub
+    ] = nodepends_provide_client_service
     nodepends_provide_token_service_factory = (
         lambda: prov.provide_token_service_factory(
             client_repo=prov.provide_client_repo(db_engine),

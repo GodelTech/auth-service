@@ -25,7 +25,10 @@ from .clients import (
     RefreshTokenExpirationTypeController,
     RefreshTokenUsageTypeController,
     ClientScopeController,
+<<<<<<< HEAD
     ResponseTypeAdminController,
+=======
+>>>>>>> e77a875 (works)
 )
 from .device import DeviceAdminController
 from .group import GroupAdminController, PermissionAdminController
