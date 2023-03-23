@@ -63,8 +63,6 @@ async def get_tokens(
         response_class = exception_response_mapper.get(type(e))
         if response_class:
             return response_class()
-        else:
-            raise e
 
 
 exception_response_mapper = {
