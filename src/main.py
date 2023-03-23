@@ -97,15 +97,15 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.IdentityClaimAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    # Client
+    # Client 
     admin.add_view(ui.ClientAdminController)
+    admin.add_view(ui.ResponseTypeAdminController)
     admin.add_view(ui.ClientScopeController)
     admin.add_view(ui.AccessTokenTypeAdminController)
     admin.add_view(ui.ProtocolTypeController)
     admin.add_view(ui.RefreshTokenUsageTypeController)
     admin.add_view(ui.RefreshTokenExpirationTypeController)
     admin.add_view(ui.ClientSecretController)
-    admin.add_view(ui.ClientGrantTypeController)
     admin.add_view(ui.ClientRedirectUriController)
     admin.add_view(ui.ClientCorsOriginController)
     admin.add_view(ui.ClientPostLogoutRedirectUriController)

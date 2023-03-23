@@ -79,6 +79,17 @@ class ClientAdminController(ModelView, model=Client):
             form_include_pk=self.form_include_pk,
         )
 
+class ResponseTypeAdminController(ModelView, model=ResponseType):
+    icon = "fa-solid fa-mobile-screen-button"
+    can_create = False
+    can_delete = False
+    can_edit = False
+    column_list = [
+        ResponseType.id,
+        ResponseType.type,
+        ResponseType.clients
+    ]
+
 
 class AccessTokenTypeAdminController(ModelView, model=AccessTokenType):
     icon = "fa-solid fa-mobile-screen-button"
@@ -141,10 +152,6 @@ class ClientRedirectUriController(ModelView, model=ClientRedirectUri):
 class ClientScopeController(ModelView, model=ClientScope):
     icon = "fa-solid fa-mobile-screen-button"
     column_list = [ClientScope.id, ClientScope.scope]
-
-class ClientGrantTypeController(ModelView, model=ClientGrantType):
-    icon = "fa-solid fa-mobile-screen-button"
-    column_list = [ClientGrantType.id, ClientGrantType.grant_type]
 
 
 class ClientSecretController(ModelView, model=ClientSecret):

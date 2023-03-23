@@ -1,4 +1,4 @@
-from sqlalchemy import exists, select, insert, update, delete
+from sqlalchemy import exists, select, insert, update, delete, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -18,7 +18,11 @@ from src.data_access.postgresql.tables.client import (
     AccessTokenType,
     RefreshTokenExpirationType,
     RefreshTokenUsageType,
+    ResponseType,
+    clients_response_types,
+    clients_grant_types,
 )
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
 from typing import Optional, Any, Union
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from src.data_access.postgresql.errors import DuplicationError
@@ -58,10 +62,10 @@ class ClientRepository(BaseRepository):
                 )
             )
             result = result.first()
-            if not result[0]:
-                raise ClientNotFoundError(
-                    "Client you are looking for does not exist"
-                )
+            # if not result[0]:
+            #     raise ClientNotFoundError(
+            #         "Client you are looking for does not exist"
+            #     )
             return result[0]
 
     async def validate_client_by_int_id(self, client_id: int) -> bool:
@@ -351,7 +355,6 @@ class ClientRepository(BaseRepository):
             await session.execute(updates)
             await session.commit()
 
-
     async def delete_scope(
         self, 
         client_id_int:int,
@@ -395,9 +398,7 @@ class ClientRepository(BaseRepository):
             )
             await session.commit()
 
-    async def get_all(
-        self, 
-    ) -> None:
+    async def get_all(self) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -405,13 +406,74 @@ class ClientRepository(BaseRepository):
             session = sess
             result = await session.execute(
                     select(Client)
-                    .join(ClientSecret, Client.id == ClientSecret.client_id, isouter=True)
-                    .join(ClientScope, Client.id == ClientScope.client_id, isouter=True)
-                    #.join(ClientRedirectUri, Client.id == ClientRedirectUri.client_id, isouter=True)
                 )
             result = result.all()
             return [client[0] for client in result]
 
+    async def add_response_type(self, client_id_int, response_type):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )  
+        async with session_factory() as sess:
+            session = sess
+            response_type_id = (await session.execute(
+                        select(ResponseType.id).where(
+                            ResponseType.type == response_type
+                        )
+                    )).first()[0]
+            await session.execute(
+                        insert(clients_response_types).values(
+                            client_id=client_id_int, 
+                            response_type_id=response_type_id
+                        )
+                    )
+            await session.commit()
+
+    async def add_grant_type(self, client_id_int, grant_type):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )  
+        async with session_factory() as sess:
+            session = sess
+            grant_type_id = (await session.execute(
+                        select(PersistentGrantType.id).where(
+                            PersistentGrantType.type_of_grant == grant_type
+                        )
+                    )).first()[0]
+            await session.execute(
+                        insert(clients_grant_types).values(
+                            client_id=client_id_int, 
+                            persistent_grant_type_id=grant_type_id
+                        )
+                    )
+            await session.commit()
+
+    async def delete_clients_response_types(self, client_id_int):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )  
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            sql = f"DELETE FROM clients_response_types WHERE client_id = {client_id_int}"
+            await session.execute(text(sql))
+            await session.commit()
+    
+    async def delete_clients_grant_types(self, client_id_int):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )  
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            sql = f"DELETE FROM clients_grant_types WHERE client_id = {client_id_int}"
+            await session.execute(text(sql))
+            await session.commit()
+        
 
     def __repr__(self) -> str:
         return "Client Repository"

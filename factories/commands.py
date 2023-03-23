@@ -19,6 +19,7 @@ class DataBasePopulation:
         cls.clean_data_from_database()
 
         # populate database
+        cls.populate_response_types_table()
         cls.populate_identity_providers_table()
         cls.populate_user_claim_types_table()
         cls.populate_api_claim_types_table()
@@ -48,6 +49,9 @@ class DataBasePopulation:
 
     @classmethod
     def clean_data_from_database(cls) -> None:
+        sess.session.execute(
+            text("TRUNCATE TABLE response_types RESTART IDENTITY CASCADE")
+        )
         sess.session.execute(
             text("TRUNCATE TABLE user_passwords RESTART IDENTITY CASCADE")
         )
@@ -107,7 +111,7 @@ class DataBasePopulation:
         sess.session.execute(
             text("TRUNCATE TABLE identity_providers RESTART IDENTITY CASCADE")
         )
-
+            
         sess.session.commit()
 
     @classmethod
@@ -155,6 +159,13 @@ class DataBasePopulation:
             )
             grant_factory.sess.session.commit()
             grant_factory.sess.session.close()
+
+    @classmethod
+    def populate_response_types_table(cls) -> None:
+        for val in data.RESPONSE_TYPES:
+            smth = cl_factory.ResponseTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
 
     @classmethod
     def populate_client_table(cls) -> None:

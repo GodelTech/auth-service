@@ -21,13 +21,13 @@ class ClientRequestModel2():
         logo_uri = None
         redirect_uris = ["realapp.com", "real__app.com/callback"]
         grant_types = None
-        response_types = None
+        response_types = ['token', 'id_token', 'code']
         token_endpoint_auth_method = None
         scope = "email"
 
 @pytest.mark.asyncio
 class TestClientService:
-        async def test_registration_and_update(self, client_service: ClientService) -> None:
+        async def test_all(self, client_service: ClientService) -> None:
                 client_service.request_model = ClientRequestModel()
                 result = await client_service.registration()
                 assert "client_secret" in result.keys()
@@ -41,8 +41,18 @@ class TestClientService:
                 client = await client_service.client_repo.get_client_by_client_id(client_id=client_id)
                 assert client.client_name == "Real app"
 
-        async def test_get_all(self, client_service: ClientService) -> None:
                 client_service.request_model = ClientRequestModel()
                 result = await client_service.get_all()
-                assert result
+                for client in result:
+                        if client['client_id'] == client_id:
+                                assert client['client_name'] == "Real app"
+                                assert client['scope'] == "email"
+                                assert client['response_types'] ==['token', 'id_token', 'code']
+                                assert client['redirect_uris'] == ["realapp.com", "real__app.com/callback"]
+                                break
+                else:
+                        raise AssertionError
                 
+                client = await client_service.get_client_by_client_id(client_id=client_id)
+                assert client['client_name'] == "Real app"
+                assert client['redirect_uris'] == ["realapp.com", "real__app.com/callback"]

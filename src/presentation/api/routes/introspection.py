@@ -8,7 +8,7 @@ from src.business_logic.services.introspection import IntrospectionServies
 from src.di.providers import provide_introspection_service_stub
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
-    ResponceIntrospectionModel,
+    ResponseIntrospectionModel,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ introspection_router = APIRouter(
 )
 
 
-@introspection_router.post("/", response_model=ResponceIntrospectionModel)
+@introspection_router.post("/", response_model=ResponseIntrospectionModel)
 async def post_introspection(
     request: Request,
     auth_swagger: Optional[str] = Header(

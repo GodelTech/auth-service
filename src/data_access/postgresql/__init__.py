@@ -4,7 +4,6 @@ from .tables import (
     Client,
     ClientClaim,
     ClientCorsOrigin,
-    ClientGrantType,
     ClientIdRestriction,
     ClientPostLogoutRedirectUri,
     ClientRedirectUri,
@@ -20,7 +19,6 @@ __all__ = [
     ClientPostLogoutRedirectUri,
     ClientCorsOrigin,
     ClientSecret,
-    ClientGrantType,
     ClientRedirectUri,
     Base,
 ]

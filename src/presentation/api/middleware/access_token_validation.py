@@ -22,9 +22,11 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
         self.jwt_service = jwt_service
         self.blacklisted_repo = blacklisted_repo
 
-    async def dispatch_func(self, request: Any, call_next:Callable[..., Any]) -> Any:
+    async def dispatch_func(self, request: Request, call_next:Callable[..., Any]) -> Any:
 
-        if "/administration/" in request.url.path:
+        if "/administration/" in request.url.path or (
+            request.url.path == "/clients" and request.method == 'GET'
+            ):
             token = request.headers.get("access-token")
 
             try:

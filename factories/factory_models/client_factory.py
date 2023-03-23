@@ -120,21 +120,6 @@ class ClientSecretFactory(SQLAlchemyModelFactory):
     value = factory.Faker("word")
     client_id = factory.SubFactory(ClientFactory)
 
-
-class ClientGrantTypeFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = client.ClientGrantType
-        sqlalchemy_session = sess.session
-
-    grant_type = FuzzyChoice(
-        [
-            "authorization_code",
-            "refresh_token",
-        ]
-    )
-    client_id = factory.SubFactory(ClientFactory)
-
-
 class AccessTokenTypeFactory(SQLAlchemyModelFactory):
     class Meta:
         model = client.AccessTokenType
@@ -143,6 +128,13 @@ class AccessTokenTypeFactory(SQLAlchemyModelFactory):
     id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["jwt", "reference"])
 
+class ResponseTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = client.ResponseType
+        sqlalchemy_session = sess.session
+
+    id = factory.Sequence(lambda n: n + 1)
+    type = factory.Iterator(data.RESPONSE_TYPES)
 
 class ProtocolTypeFactory(SQLAlchemyModelFactory):
     class Meta:
