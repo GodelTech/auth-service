@@ -1,7 +1,7 @@
 import logging
 import secrets
-from typing import Optional, Type
-from abc import ABC, abstractmethod
+from typing import Optional, Type, Protocol, Dict
+from functools import wraps
 
 from src.dyna_config import BASE_URL
 from src.business_logic.services.jwt_token import JWTService
@@ -39,7 +39,9 @@ class AuthorizationService:
         self.jwt_service = jwt_service
 
     @property
-    def request_model(self) -> Optional[DataRequestModel]:
+    def request_model(self) -> DataRequestModel:
+        if self._request_model is None:
+            raise ValueError("Invalid request")
         return self._request_model
 
     @request_model.setter
@@ -74,9 +76,6 @@ class AuthorizationService:
         return user_id
 
     async def get_redirect_url(self) -> Optional[str]:
-        if self.request_model is None or self.request_model.scope is None:
-            return None
-
         user_id = await self._validate_authentication_data()
         handler = ResponseTypeHandlerFactory.get_handler(
             self.request_model.response_type, auth_service=self
@@ -84,13 +83,20 @@ class AuthorizationService:
         return await handler.get_redirect_url(user_id)
 
 
-class ResponseTypeHandler(ABC):
+class IResponseTypeHandler(Protocol):
+    def __init__(self, auth_service: AuthorizationService) -> None:
+        ...
+
+    async def get_redirect_url(self, user_id: int) -> str:
+        ...
+
+    async def _update_redirect_url(self, redirect_url: str) -> str:
+        ...
+
+
+class ResponseTypeHandlerBase:
     def __init__(self, auth_service: AuthorizationService) -> None:
         self.auth_service = auth_service
-
-    @abstractmethod
-    async def get_redirect_url(self, user_id: int) -> str:
-        pass
 
     async def _update_redirect_url(self, redirect_url: str) -> str:
         if self.auth_service.request_model.state:
@@ -98,7 +104,7 @@ class ResponseTypeHandler(ABC):
         return redirect_url
 
 
-class CodeResponseTypeHandler(ResponseTypeHandler):
+class CodeResponseTypeHandler(ResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         secret_code = secrets.token_urlsafe(32)
         await self.auth_service.persistent_grant_repo.create(
@@ -110,7 +116,7 @@ class CodeResponseTypeHandler(ResponseTypeHandler):
         return await self._update_redirect_url(redirect_url)
 
 
-class TokenResponseTypeHandler(ResponseTypeHandler):
+class TokenResponseTypeHandler(ResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         expiration_time = 600
         access_token = await get_single_token(
@@ -127,7 +133,7 @@ class TokenResponseTypeHandler(ResponseTypeHandler):
         return await self._update_redirect_url(redirect_url)
 
 
-class IdTokenResponseType(ResponseTypeHandler):
+class IdTokenResponseType(ResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         expiration_time = 600
         claims = await self.auth_service.user_repo.get_claims(user_id)
@@ -142,7 +148,7 @@ class IdTokenResponseType(ResponseTypeHandler):
         return await self._update_redirect_url(redirect_url)
 
 
-class IdTokenTokenResponseTypeHandler(ResponseTypeHandler):
+class IdTokenTokenResponseTypeHandler(ResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         expiration_time = 600
         access_token = await get_single_token(
@@ -171,7 +177,7 @@ class IdTokenTokenResponseTypeHandler(ResponseTypeHandler):
         return await self._update_redirect_url(redirect_url)
 
 
-class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
+class DeviceCodeResponseTypeHandler(ResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         scope_data = await self._parse_scope_data(
             self.auth_service.request_model.scope
@@ -190,9 +196,11 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
         await self.auth_service.device_repo.delete_by_user_code(
             user_code=user_code
         )
+        # TODO if it's not hardcoded url Base class needs to be redefined, because this class
+        # TODO is not using _update_redirect_url method
         return f"http://{BASE_URL}/device/auth/success"
 
-    async def _parse_scope_data(self, scope: str) -> dict[str, str]:
+    async def _parse_scope_data(self, scope: str) -> Dict[str, str]:
         return {
             item.split("=")[0]: item.split("=")[1]
             for item in scope.split("&")
@@ -201,18 +209,18 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
 
 
 class ResponseTypeHandlerFactory:
-    _handlers = {}
+    _handlers: Dict[str, Type[IResponseTypeHandler]] = {}
 
     @staticmethod
     def register_handler(
-        response_type: str, handler: Type[ResponseTypeHandler]
+        response_type: str, handler: Type[IResponseTypeHandler]
     ) -> None:
         ResponseTypeHandlerFactory._handlers[response_type] = handler
 
     @staticmethod
     def get_handler(
         response_type: str, auth_service: AuthorizationService
-    ) -> ResponseTypeHandler:
+    ) -> IResponseTypeHandler:
         handler = ResponseTypeHandlerFactory._handlers.get(response_type)
         if not handler:
             raise WrongResponseTypeError
