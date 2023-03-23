@@ -5,11 +5,16 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
-
+from data_access.postgresql.errors.device import DeviceBaseException
+from src.data_access.postgresql.errors import ClientBaseException
 from src.business_logic.services import DeviceService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
+)
+from src.presentation.api.routes.utils import (
+    InvalidClientResponse,
+    UserCodeNotFoundErrorResponse,
 )
 from src.di.providers import provide_device_service_stub
 from src.presentation.api.models import (
@@ -41,12 +46,11 @@ async def post_device_authorize(
             content=response_data,
         )
 
-    except ClientNotFoundError as exception:
+    except ClientBaseException as exception:
         logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
+        response_class = exception_response_mapper.get(type(exception))
+        if response_class:
+            return response_class()
 
 
 @device_auth_router.get(
@@ -77,12 +81,11 @@ async def post_device_user_code(
         )
         return response
 
-    except UserCodeNotFoundError as exception:
+    except DeviceBaseException as exception:
         logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong user code"},
-        )
+        response_class = exception_response_mapper.get(type(exception))
+        if response_class:
+            return response_class()
 
 
 @device_auth_router.get(
@@ -110,18 +113,11 @@ async def delete_device(
 
         return firmed_redirect_uri
 
-    except UserCodeNotFoundError as exception:
+    except (ClientBaseException, DeviceBaseException) as exception:
         logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong user code"},
-        )
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
+        response_class = exception_response_mapper.get(type(exception))
+        if response_class:
+            return response_class()
 
 
 @device_auth_router.get(
@@ -135,3 +131,9 @@ async def get_device_cancel_form(
     return templates.TemplateResponse(
         "cancel_device_form.html", {"request": request}, status_code=200
     )
+
+
+exception_response_mapper = {
+    ClientNotFoundError: InvalidClientResponse,
+    UserCodeNotFoundError: UserCodeNotFoundErrorResponse,
+}

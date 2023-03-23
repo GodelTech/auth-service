@@ -75,8 +75,6 @@ async def get_authorize(
         response_class = exception_response_mapper.get(type(exception))
         if response_class:
             return response_class()
-        else:
-            raise exception
 
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
