@@ -46,24 +46,38 @@ class AuthorizationService:
     def request_model(self, request_model: DataRequestModel) -> None:
         self._request_model = request_model
 
+    async def _validate_authentication_data(self) -> int:
+        """
+        Validates the client_id and client_redirect_uri, retrieves the hashed_password for the given username,
+        and validates the provided password. If validation is successful, returns the user_id associated with the
+        provided username.
+
+        Raises:
+            ClientRedirectUriError: If provided client_redirect_uri is invalid.
+            ClientNotFoundError: If provided client_id is invalid.
+            UserNotFoundError: If provided username is invalid.
+            WrongPasswordError: If the provided password is invalid.
+
+        Returns:
+            int: The user_id associated with the provided username.
+        """
+        # TODO this method actually validates both client_id and redirect_uri -> we need to refactor client repo for sure
+        await self.client_repo.validate_client_redirect_uri(
+            self.request_model.client_id, self.request_model.redirect_uri
+        )
+        hashed_password, user_id = await self.user_repo.get_hash_password(
+            self.request_model.username
+        )
+        self.password_service.validate_password(
+            self.request_model.password, hashed_password
+        )
+        return user_id
+
     async def get_redirect_url(self) -> Optional[str]:
         if self.request_model is None or self.request_model.scope is None:
             return None
 
-        # TODO this method actually validates both client_id and redirect_uri -> we need to refactor client repo for sure
-        # validate client_id and client_redirect_uri
-        await self.client_repo.validate_client_redirect_uri(
-            self.request_model.client_id, self.request_model.redirect_uri
-        )
-        # get hashed_password and validate it
-        (
-            hashed_password,
-            user_id,
-        ) = await self.user_repo.get_hash_password(self.request_model.username)
-        self.password_service.validate_password(
-            self.request_model.password, hashed_password
-        )
-
+        user_id = await self._validate_authentication_data()
         handler = ResponseTypeHandlerFactory.get_handler(
             self.request_model.response_type, auth_service=self
         )
@@ -177,8 +191,6 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandler):
             user_code=user_code
         )
         return f"http://{BASE_URL}/device/auth/success"
-
-    # TODO is it hardcoded value or we should update url with scope too?
 
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         return {
