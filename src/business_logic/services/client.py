@@ -135,3 +135,10 @@ class ClientService:
         if self.request_model.redirect_uris is not None:
             await self.client_repo.delete_redirect_uris(client_id_int=client.id)
             await self.client_repo.add_redirect_uris(client_id_int=client.id, redirect_uris=self.request_model.redirect_uris)
+
+    async def get_all(self):
+        clients = await self.client_repo.get_all()
+        return clients
+    
+    def client_to_dict():
+        return []

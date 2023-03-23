@@ -107,13 +107,13 @@ class Client(BaseModel):
         back_populates="client",
         foreign_keys="PersistentGrant.client_id",
     )  # lazy = "joined")
-    secrets = relationship("ClientSecret", back_populates="client")
-    redirect_uris = relationship("ClientRedirectUri", back_populates="client")
+    secrets = relationship("ClientSecret", back_populates="client", lazy = "joined")
+    redirect_uris = relationship("ClientRedirectUri", back_populates="client", lazy = "joined")
     claims = relationship("ClientClaim", back_populates="client")
     post_logout_redirect_uris = relationship(
         "ClientPostLogoutRedirectUri", back_populates="client"
     )
-    scopes = relationship("ClientScope", back_populates="client")
+    scopes = relationship("ClientScope", back_populates="client", lazy = "joined")
     grant_types = relationship("ClientGrantType", back_populates="client")
     devices = relationship(
         "Device",

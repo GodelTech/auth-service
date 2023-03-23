@@ -19,7 +19,7 @@ class ClientRequestModel2():
         client_name = "Real app"
         client_uri = None
         logo_uri = None
-        redirect_uris = ["reaapp.com", "real__app.com/callback"]
+        redirect_uris = ["realapp.com", "real__app.com/callback"]
         grant_types = None
         response_types = None
         token_endpoint_auth_method = None
@@ -40,3 +40,9 @@ class TestClientService:
                 result = await client_service.update(client_id=client_id)
                 client = await client_service.client_repo.get_client_by_client_id(client_id=client_id)
                 assert client.client_name == "Real app"
+
+        async def test_get_all(self, client_service: ClientService) -> None:
+                client_service.request_model = ClientRequestModel()
+                result = await client_service.get_all()
+                assert result
+                

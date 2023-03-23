@@ -380,6 +380,38 @@ class ClientRepository(BaseRepository):
             )
             await session.commit()
 
+    async def delete_client_by_client_id(
+        self, 
+        client_id:str,
+    ) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            await session.execute(
+                delete(Client)
+                .where(ClientRedirectUri.client_id == client_id)
+            )
+            await session.commit()
+
+    async def get_all(
+        self, 
+    ) -> None:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                    select(Client)
+                    .join(ClientSecret, Client.id == ClientSecret.client_id, isouter=True)
+                    .join(ClientScope, Client.id == ClientScope.client_id, isouter=True)
+                    #.join(ClientRedirectUri, Client.id == ClientRedirectUri.client_id, isouter=True)
+                )
+            result = result.all()
+            return [client[0] for client in result]
+
 
     def __repr__(self) -> str:
         return "Client Repository"
