@@ -8,7 +8,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
-
+from src.data_access.postgresql.errors.client import ClientNotFoundError
 logger = logging.getLogger(__name__)
 
 
@@ -78,6 +78,8 @@ class LoginFormService:
                         "provider_link": provider_link,
                     }
                 return providers_data
+            else:
+                raise ClientNotFoundError
         return None
 
     async def _validate_client(self, client_id: str) -> bool:

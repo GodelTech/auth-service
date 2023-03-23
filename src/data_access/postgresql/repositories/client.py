@@ -62,10 +62,6 @@ class ClientRepository(BaseRepository):
                 )
             )
             result = result.first()
-            # if not result[0]:
-            #     raise ClientNotFoundError(
-            #         "Client you are looking for does not exist"
-            #     )
             return result[0]
 
     async def validate_client_by_int_id(self, client_id: int) -> bool:

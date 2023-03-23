@@ -24,8 +24,7 @@ class TestLoginFormService:
     async def test_validate_client_error(
         self, login_form_service: LoginFormService
     ) -> None:
-        with pytest.raises(ClientNotFoundError):
-            await login_form_service._validate_client(
+        assert not await login_form_service._validate_client(
                 client_id="test_client_not_exist"
             )
 

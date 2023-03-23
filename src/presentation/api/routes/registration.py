@@ -30,7 +30,7 @@ async def update_client(
 
 @client_router.get("", response_model=dict)
 async def get_all_clients(
-    access_token: str = Header(description="Access token"),
+        access_token: str = Header(description="Access token"),
     client_service: ClientService = Depends(provide_client_service_stub)
     )->dict[str,list[dict[str, Any]]]:
     return{"all_clients": await client_service.get_all()}
