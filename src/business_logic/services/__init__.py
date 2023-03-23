@@ -1,5 +1,4 @@
-from src.business_logic.services.authorization import AuthorizationService
-
+from .authorization.authorization_service import AuthorizationService
 from .admin_api import AdminGroupService, AdminRoleService, AdminUserService
 from .admin_auth import AdminAuthService
 from .device_auth import DeviceService

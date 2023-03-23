@@ -5,7 +5,10 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from src.business_logic.services import AuthorizationService, LoginFormService
+from src.business_logic.services import LoginFormService
+from src.business_logic.services.authorization.authorization_service import (
+    AuthorizationService,
+)
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientRedirectUriError,
