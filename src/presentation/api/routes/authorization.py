@@ -1,17 +1,25 @@
 import logging
 from typing import Any, Dict, Optional, Union
 from starlette.templating import _TemplateResponse
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from src.business_logic.services import AuthorizationService, LoginFormService
 from src.data_access.postgresql.errors import (
+    ClientBaseException,
     ClientNotFoundError,
     ClientRedirectUriError,
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
+)
+from src.presentation.api.routes.utils import (
+    InvalidClientResponse,
+    UnsupportedResponseType,
+    UserNotFoundResponse,
+    WrongPasswordResponse,
+    ClientRedirectUriErrorResponse,
 )
 from src.di.providers import (
     provide_auth_service_stub,
@@ -58,25 +66,17 @@ async def get_authorize(
             )
         else:
             raise ValueError
-
-    except ClientNotFoundError as exception:
+    except (
+        ClientBaseException,
+        WrongResponseTypeError,
+        ValueError,
+    ) as exception:
         logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
-    except ClientRedirectUriError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Redirect Uri not found"},
-        )
-    except WrongResponseTypeError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "Bad response type"},
-        )
+        response_class = exception_response_mapper.get(type(exception))
+        if response_class:
+            return response_class()
+        else:
+            raise exception
 
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
@@ -98,38 +98,26 @@ async def post_authorize(
         )
 
         return response
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
-    except UserNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "User not found"},
-        )
-    except WrongPasswordError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Bad password"},
-        )
-    except ClientRedirectUriError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Redirect Uri not found"},
-        )
-    except KeyError as exception:
-        message = (
-            f"KeyError: key {exception} does not exist is not in the scope"
-        )
-        logger.exception(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "message": "The scope is missing a password, or a username"
-            },
-        )
+    except (
+        ClientBaseException,
+        UserNotFoundError,
+        WrongPasswordError,
+        KeyError,
+    ) as exception:
+        logging.exception(exception)
+        response_class = exception_response_mapper.get(type(exception))
+        if response_class:
+            return response_class()
+
+
+exception_response_mapper = {
+    ClientNotFoundError: InvalidClientResponse,
+    ClientRedirectUriError: ClientRedirectUriErrorResponse,
+    WrongResponseTypeError: UnsupportedResponseType,
+    UserNotFoundError: UserNotFoundResponse,
+    WrongPasswordError: WrongPasswordResponse,
+    KeyError: HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="The scope is missing a password, or a username",
+    ),
+}
