@@ -1,8 +1,6 @@
 import secrets
 
-from src.business_logic.services.authorization.response_type_handlers.base import (
-    ResponseTypeHandlerBase,
-)
+from .base import ResponseTypeHandlerBase
 
 
 class CodeResponseTypeHandler(ResponseTypeHandlerBase):

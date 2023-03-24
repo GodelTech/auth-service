@@ -1,9 +1,8 @@
 from typing import Dict
 
-from src.business_logic.services.authorization.response_type_handlers.base import (
-    ResponseTypeHandlerBase,
-)
 from src.dyna_config import BASE_URL
+
+from .base import ResponseTypeHandlerBase
 
 
 class DeviceCodeResponseTypeHandler(ResponseTypeHandlerBase):

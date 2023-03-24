@@ -1,28 +1,22 @@
 from __future__ import annotations
-from typing import Dict, Type, TYPE_CHECKING
-from src.business_logic.services.authorization.response_type_handlers.interface import (
-    IResponseTypeHandler,
-)
-from src.data_access.postgresql.errors import WrongResponseTypeError
-from src.business_logic.services.authorization.response_type_handlers.code import (
+
+from typing import TYPE_CHECKING, Dict, Type
+
+from src.business_logic.services.authorization.response_type_handlers import (
     CodeResponseTypeHandler,
-)
-from src.business_logic.services.authorization.response_type_handlers.token import (
+    DeviceCodeResponseTypeHandler,
+    IdTokenResponseType,
+    IdTokenTokenResponseTypeHandler,
     TokenResponseTypeHandler,
 )
-from src.business_logic.services.authorization.response_type_handlers.id_token import (
-    IdTokenResponseType,
-)
-from src.business_logic.services.authorization.response_type_handlers.id_token_token import (
-    IdTokenTokenResponseTypeHandler,
-)
-from src.business_logic.services.authorization.response_type_handlers.device_code import (
-    DeviceCodeResponseTypeHandler,
-)
+from src.data_access.postgresql.errors import WrongResponseTypeError
 
 if TYPE_CHECKING:
     from src.business_logic.services.authorization.authorization_service import (
         AuthorizationService,
+    )
+    from src.business_logic.services.authorization.response_type_handlers import (
+        IResponseTypeHandler,
     )
 
 

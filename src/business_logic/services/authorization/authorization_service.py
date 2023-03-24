@@ -1,5 +1,9 @@
 import logging
 from typing import Optional
+
+from src.business_logic.services.authorization.response_type_handlers.factory import (
+    ResponseTypeHandlerFactory,
+)
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import (
@@ -9,9 +13,6 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import DataRequestModel
-from src.business_logic.services.authorization.response_type_handlers.factory import (
-    ResponseTypeHandlerFactory,
-)
 
 logger = logging.getLogger(__name__)
 

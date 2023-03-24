@@ -1,10 +1,7 @@
-from src.business_logic.services.authorization.response_type_handlers.base import (
-    ResponseTypeHandlerBase,
-)
-from src.business_logic.services.authorization.response_type_handlers.constants import (
-    TokenExpirationTime,
-)
 from src.business_logic.services.tokens import get_single_token
+
+from .base import ResponseTypeHandlerBase
+from .constants import TokenExpirationTime
 
 
 class IdTokenResponseType(ResponseTypeHandlerBase):
