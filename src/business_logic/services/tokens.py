@@ -90,15 +90,14 @@ async def get_single_token(
 
 class TokenService:
     def __init__(
-        self,
-        client_repo: ClientRepository,
-        persistent_grant_repo: PersistentGrantRepository,
-        user_repo: UserRepository,
-        device_repo: DeviceRepository,
-        jwt_service: JWTService,
-        blacklisted_repo: BlacklistedTokenRepository,
+            self,
+            client_repo: ClientRepository,
+            persistent_grant_repo: PersistentGrantRepository,
+            user_repo: UserRepository,
+            device_repo: DeviceRepository,
+            jwt_service: JWTService,
+            blacklisted_repo: BlacklistedTokenRepository,
     ) -> None:
-        self.request: Optional[Request] = None
         self.request_model: Optional[BodyRequestTokenModel] = None
         self.request_body: Optional[BodyRequestRevokeModel] = None
         self.authorization: Optional[str] = None

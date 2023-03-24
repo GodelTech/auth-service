@@ -46,7 +46,6 @@ async def get_tokens(
     token_class: TokenService = Depends(provide_token_service_stub),
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        token_class = token_class
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
