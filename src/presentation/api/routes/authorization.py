@@ -15,6 +15,7 @@ from src.data_access.postgresql.errors import (
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
+    ClientScopesError,
 )
 from src.di.providers import (
     provide_auth_service_stub,
@@ -41,7 +42,6 @@ async def get_authorize(
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ) -> Union[JSONResponse, _TemplateResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
         external_logins: Optional[Dict[str, Dict[str, Any]]] = {}
@@ -59,8 +59,7 @@ async def get_authorize(
                 },
                 status_code=200,
             )
-        else:
-            raise ValueError
+        raise ValueError
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -88,17 +87,11 @@ async def post_authorize(
     auth_class: AuthorizationService = Depends(provide_auth_service_stub),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_body
         firmed_redirect_uri = await auth_class.get_redirect_url()
-
-        if not firmed_redirect_uri:
-            raise UserNotFoundError
-
-        response = RedirectResponse(
+        return RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -124,14 +117,9 @@ async def post_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Redirect Uri not found"},
         )
-    except KeyError as exception:
-        message = (
-            f"KeyError: key {exception} does not exist is not in the scope"
-        )
-        logger.exception(message)
+    except ClientScopesError as e:  # ! temporary
+        logger.exception(e)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "message": "The scope is missing a password, or a username"
-            },
+            content={"message": "Invalid scope"},
         )

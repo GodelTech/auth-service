@@ -85,7 +85,7 @@ class AuthorizationService:
         )
         return user_id
 
-    async def get_redirect_url(self) -> Optional[str]:
+    async def get_redirect_url(self) -> str:
         user_id = await self._validate_auth_data()
         handler = ResponseTypeHandlerFactory.get_handler(
             self.request_model.response_type, auth_service=self
