@@ -390,7 +390,7 @@ class ClientRepository(BaseRepository):
             session = sess
             await session.execute(
                 delete(Client)
-                .where(ClientRedirectUri.client_id == client_id)
+                .where(Client.client_id == client_id)
             )
             await session.commit()
 

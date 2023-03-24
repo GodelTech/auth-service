@@ -72,3 +72,13 @@ async def get_client(
     )->dict[str, Any]:
 
     return await client_service.get_client_by_client_id(client_id=client_id)
+
+@client_router.delete("/{client_id}", status_code=status.HTTP_200_OK)
+@exceptions_wrapper
+async def delete_client(
+    client_id:str,
+    client_service: ClientService = Depends(provide_client_service_stub)
+    )->dict[str, Any]:
+    if not await client_service.client_repo.validate_client_by_client_id(client_id=client_id):
+        raise ClientNotFoundError
+    await client_service.client_repo.delete_client_by_client_id(client_id=client_id)
