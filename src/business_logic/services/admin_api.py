@@ -144,3 +144,17 @@ class AdminUserService():
 
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
         return await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+    
+    async def create_user_for_user(self, kwargs):
+        password = kwargs['password']
+        email = kwargs['email']
+        del kwargs['password']
+        kwargs = kwargs | {
+            "email_confirmed": False,
+            "phone_number_confirmed": False,
+            "access_failed_count":0,
+            }
+        await self.user_repo.create(**kwargs)
+        user_id = (await self.user_repo.get_user_by_email(email=email)).id
+        password_hashed = PasswordHash.hash_password(password=password)
+        await self.user_repo.change_password(user_id=user_id, password=password_hashed)

@@ -172,6 +172,33 @@ class UserRepository(BaseRepository):
                 return user[0]
         except:
             raise ValueError
+        
+    async def get_user_by_email(self, email:str,) -> User:
+        try:
+            session_factory = sessionmaker(
+                self.engine, expire_on_commit=False, class_=AsyncSession
+            )
+            async with session_factory() as sess:
+                session = sess
+                user = await session.execute(
+                    select(User)
+                    .join(
+                        UserPassword,
+                        User.password_hash_id == UserPassword.id,
+                        isouter=True,
+                    )
+                    .join(
+                        IdentityProvider,
+                        User.identity_provider_id == IdentityProvider.id,
+                        isouter=True,
+                    )
+                    .where(User.email == email)
+                )
+                user = user.first()
+
+                return user[0]
+        except:
+            raise ValueError
 
     async def get_all_users(
         self, group_id: Optional[int] = None, role_id: Optional[int] = None

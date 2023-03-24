@@ -89,3 +89,33 @@ class RequestPasswordUserModel:
 
     class Config:
         orm_mode = True
+
+@dataclass
+class RequestPasswordUserModelForUser:
+
+    old_password: str = Form(...)
+    new_password: str = Form(...)
+    confirmed_new_password: str = Form(...)
+    class Config:
+        orm_mode = True
+
+@dataclass
+class RequestCreateUserModelForUser:
+    email:str = Form(...)
+    security_stamp:str = Form(...)
+    phone_number:str = Form(...)
+    two_factors_enabled:bool = Form(default=False)
+    username:str = Form(...)
+    password:str = Form(...)
+
+    def dictionary(self) -> dict[str, Any]:
+        return{
+            "email":self.email,
+            "security_stamp":self.security_stamp,
+            "phone_number":self.phone_number,
+            "two_factors_enabled":self.two_factors_enabled,
+            "username":self.username,
+        }
+
+    class Config:
+        orm_mode = True
