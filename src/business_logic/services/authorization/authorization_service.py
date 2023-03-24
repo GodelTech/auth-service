@@ -6,6 +6,7 @@ from src.business_logic.services.authorization.response_type_handlers.factory im
 )
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
+from src.data_access.postgresql.errors import ClientScopesError
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
@@ -45,6 +46,17 @@ class AuthorizationService:
     def request_model(self, request_model: DataRequestModel) -> None:
         self._request_model = request_model
 
+    async def _validate_scope(self) -> None:
+        # TODO this method also needs to be fixed in client repo I need to make many calls to db to complete an easy task right know
+        client_from_db = await self.client_repo.get_client_by_client_id(
+            client_id=self.request_model.client_id
+        )
+        client_scopes = await self.client_repo.get_client_scopes(
+            client_id=client_from_db.id  # TODO it should be possible to pass self.request.client_id here directly
+        )
+        if self.request_model.scope != client_scopes:
+            raise ClientScopesError
+
     async def _validate_auth_data(self) -> int:
         """
         Validates the client_id and client_redirect_uri, retrieves the hashed_password for the given username,
@@ -64,6 +76,7 @@ class AuthorizationService:
         await self.client_repo.validate_client_redirect_uri(
             self.request_model.client_id, self.request_model.redirect_uri
         )
+        await self._validate_scope()
         hashed_password, user_id = await self.user_repo.get_hash_password(
             self.request_model.username
         )
