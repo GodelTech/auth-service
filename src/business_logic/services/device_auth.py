@@ -74,7 +74,7 @@ class DeviceService:
             user_code = scope_data["user_code"]
             if await self._validate_user_code(user_code=user_code):
                 await self.device_repo.delete_by_user_code(user_code=user_code)
-            else:
+        else:
                 raise ClientNotFoundError
         return f"http://{DOMAIN_NAME}/device/auth/cancel"
 
