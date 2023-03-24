@@ -10,3 +10,4 @@ max_connection_count = 10
 [development.server]
 base_url_host = "192.168.80.98"
 base_url_port = "8000"
+domain_name = "rnd-identityserver-dev.godeltech.com"
