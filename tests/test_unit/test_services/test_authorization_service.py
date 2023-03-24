@@ -12,7 +12,9 @@ from tests.test_unit.fixtures import (
     DEFAULT_CLIENT,
     authorization_post_request_model,
 )
-from src.business_logic.services.authorization import AuthorizationService
+from src.business_logic.services.authorization.authorization_service import (
+    AuthorizationService,
+)
 from src.presentation.api.models.authorization import DataRequestModel
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from typing import Any
