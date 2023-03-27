@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     )
 
 
-class IResponseTypeHandler(Protocol):
+class ResponseTypeHandler(Protocol):
     def __init__(self, auth_service: AuthorizationService) -> None:
         ...
 
