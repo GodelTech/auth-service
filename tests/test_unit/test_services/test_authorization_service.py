@@ -1,65 +1,231 @@
-from h11 import Data
+from tokenize import Token
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import pytest
 from sqlalchemy import delete, insert, text
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
-from src.data_access.postgresql.errors import (
-    ClientNotFoundError,
-    UserNotFoundError,
-    WrongPasswordError,
-)
-from src.data_access.postgresql.tables.client import Client
-from tests.test_unit.fixtures import (
-    DEFAULT_CLIENT,
-    authorization_post_request_model,
-)
 from src.business_logic.services.authorization.authorization_service import (
     AuthorizationService,
 )
+from src.business_logic.services.authorization.response_type_handlers import (
+    TokenResponseTypeHandler,
+    IdTokenResponseType,
+    IdTokenTokenResponseTypeHandler,
+    DeviceCodeResponseTypeHandler,
+)
+from src.data_access.postgresql.errors import (
+    ClientNotFoundError,
+    ClientScopesError,
+)
+from src.data_access.postgresql.tables.client import Client
 from src.presentation.api.models.authorization import DataRequestModel
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
-from typing import Any
+from tests.test_unit.fixtures import (  # TODO shouldn't it be just in conftest files?
+    DEFAULT_CLIENT,
+    auth_post_request_model,
+)
+
+# TODO move it somewhere else
+
+
+@pytest.fixture
+def client_repository_mock():
+    client_repo = AsyncMock()
+    client_repo.validate_client_redirect_uri.return_value = None
+    # Create a mock object for the client with an 'id' attribute
+    mock_client = MagicMock()
+    mock_client.id = 1
+    client_repo.get_client_by_client_id.return_value = mock_client
+    client_repo.get_client_scopes.return_value = "openid"
+    yield client_repo
+    del client_repo
+
+
+@pytest.fixture
+def user_repository_mock():
+    user_repo = AsyncMock()
+    user_repo.get_hash_password.return_value = (
+        "hashed_password",
+        1,
+    )
+    yield user_repo
+    del user_repo
+
+
+@pytest.fixture
+def persistent_grant_repository_mock():
+    return AsyncMock()
+
+
+@pytest.fixture
+def device_repository_mock():
+    return AsyncMock()
+
+
+@pytest.fixture
+def password_hash_mock():
+    return Mock()
+
+
+@pytest.fixture
+def jwt_service_mock():
+    return AsyncMock()
+
+
+@pytest.fixture
+def auth_service_with_mocked_dependencies(
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    device_repository_mock,
+    password_hash_mock,
+    jwt_service_mock,
+):
+    auth_service = AuthorizationService(
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        device_repo=device_repository_mock,
+        password_service=password_hash_mock,
+        jwt_service=jwt_service_mock,
+    )
+    yield auth_service
+    del auth_service
+
+
+@pytest.fixture
+def token_response_type_handler(
+    auth_service_with_mocked_dependencies, auth_post_request_model
+):
+    auth_service_with_mocked_dependencies.request_model = (
+        auth_post_request_model
+    )
+    handler = TokenResponseTypeHandler(auth_service_with_mocked_dependencies)
+    yield handler
+    del handler
+
+
+@pytest.fixture
+def id_token_response_type_handler(
+    auth_service_with_mocked_dependencies, auth_post_request_model
+):
+    auth_service_with_mocked_dependencies.request_model = (
+        auth_post_request_model
+    )
+    handler = IdTokenResponseType(auth_service_with_mocked_dependencies)
+    yield handler
+    del handler
 
 
 @pytest.mark.asyncio
 class TestAuthorizationService:
-    async def test_get_redirect_url_code(
+    async def test_request_model_not_provided(
+        self, auth_service_with_mocked_dependencies
+    ):
+        with pytest.raises(ValueError):
+            await auth_service_with_mocked_dependencies.request_model
+
+    async def test_validate_scope(
+        self, auth_service_with_mocked_dependencies, auth_post_request_model
+    ):
+        auth_service_with_mocked_dependencies.request_model = (
+            auth_post_request_model
+        )
+        await auth_service_with_mocked_dependencies._validate_scope()
+
+    async def test_validate_scope_with_incorrect_scope(
+        self, auth_service_with_mocked_dependencies, auth_post_request_model
+    ):
+        auth_service_with_mocked_dependencies.request_model = (
+            auth_post_request_model
+        )
+        auth_service_with_mocked_dependencies.request_model.scope = (
+            "incorrect_scope"
+        )
+        with pytest.raises(ClientScopesError):
+            await auth_service_with_mocked_dependencies._validate_scope()
+
+    @patch.object(
+        AuthorizationService, "_validate_scope", new_callable=AsyncMock
+    )
+    async def test_validate_auth_data(
         self,
-        authorization_service: AuthorizationService,
-        authorization_post_request_model: DataRequestModel,
-    ) -> None:
-        service = authorization_service
-        service.request_model = authorization_post_request_model
-        expected_url = "https://www.google.com/"
-        redirect_url = await service.get_redirect_url()
-        if not redirect_url:
-            raise AssertionError
-        redirect_url = redirect_url.split("?")[0]
+        _validate_scope_mock,
+        auth_service_with_mocked_dependencies,
+        auth_post_request_model,
+    ):
+        auth_service_with_mocked_dependencies.request_model = (
+            auth_post_request_model
+        )
+        result = (
+            await auth_service_with_mocked_dependencies._validate_auth_data()
+        )
+        assert result is 1
 
-        assert expected_url == redirect_url
+    @patch("secrets.token_urlsafe")
+    async def test_get_redirect_url_code_response_type(
+        self,
+        token_urlsafe_mock,
+        auth_service_with_mocked_dependencies,
+        auth_post_request_model,
+    ):
+        auth_service_with_mocked_dependencies.request_model = (
+            auth_post_request_model
+        )
+        token_urlsafe_mock.return_value = "test_code"
+        redirect_url = (
+            await auth_service_with_mocked_dependencies.get_redirect_url()
+        )
+        assert (
+            redirect_url
+            == "https://test.com/redirect?code=test_code&state=test_state"
+        )
 
+
+@pytest.mark.asyncio
+class TestResponseTypeHandlers:
+    @patch(
+        "src.business_logic.services.authorization.response_type_handlers.token.get_single_token",
+        new_callable=AsyncMock,
+    )
     async def test_get_redirect_url_token(
         self,
-        authorization_service: AuthorizationService,
-        authorization_post_request_model: DataRequestModel,
-    ) -> None:
-        authorization_post_request_model.response_type = "token"
-        service = authorization_service
-        service.request_model = authorization_post_request_model
-        expected_url = "https://www.google.com/"
-        redirect_url = await service.get_redirect_url()
-        if not redirect_url:
-            raise AssertionError
-        data = {
-            item.split("=")[0]: item.split("=")[1]
-            for item in redirect_url.split("?")[1].split("&")
-        }
+        get_single_token_mock,
+        token_response_type_handler,
+    ):
+        token_mock = "test_token"
+        get_single_token_mock.return_value = token_mock
+        redirect_url = await token_response_type_handler.get_redirect_url(
+            user_id=1
+        )
+        assert (
+            redirect_url
+            == f"https://test.com/redirect?access_token={token_mock}"
+            "&token_type=Bearer&expires_in=600&state=test_state"
+        )
 
-        redirect_url = redirect_url.split("?")[0]
-        assert expected_url == redirect_url
-        assert "access_token" in data
-        assert "id_token" not in data
-        assert data["token_type"] in "Bearer"
+    @patch(
+        "src.business_logic.services.authorization.response_type_handlers.id_token.get_single_token",
+        new_callable=AsyncMock,
+    )
+    async def test_get_redirect_url_id_token(
+        self, get_single_token_mock, id_token_response_type_handler
+    ):
+        token_mock = "test_token"
+        get_single_token_mock.return_value = token_mock
+        redirect_url = await id_token_response_type_handler.get_redirect_url(
+            user_id=1
+        )
+        assert (
+            redirect_url
+            == f"https://test.com/redirect?id_token={token_mock}&state=test_state"
+        )
 
+
+# ! Depracated
+@pytest.mark.asyncio
+class TestAuth:
     async def test_get_redirect_url_id_token_token(
         self,
         authorization_service: AuthorizationService,

@@ -109,18 +109,17 @@ def authorization_get_request_model() -> RequestModel:
         acr_values="test_data",
         user_code="test_data",
     )
-
     return request_model
 
 
 @pytest_asyncio.fixture
-def authorization_post_request_model() -> DataRequestModel:
+def auth_post_request_model() -> DataRequestModel:
     request_model = DataRequestModel(
         client_id="test_client",
         response_type="code",
         scope="openid",
-        redirect_uri="https://www.google.com/",
-        state="state",
+        redirect_uri="https://test.com/redirect",
+        state="test_state",
         response_mode="mode",
         nonce="test_data",
         display="test_data",
@@ -130,10 +129,9 @@ def authorization_post_request_model() -> DataRequestModel:
         id_token_hint="test_data",
         login_hint="test_data",
         acr_values="test_data",
-        username="TestClient",
+        username="test_user",
         password=SecretStr("test_password"),
     )
-
     return request_model
 
 
