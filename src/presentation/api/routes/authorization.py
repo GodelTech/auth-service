@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 from starlette.templating import _TemplateResponse
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -44,7 +44,7 @@ async def get_authorize(
     try:
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
-        external_logins: Optional[Dict[str, Dict[str, Any]]] = {}
+        external_logins: Optional[dict[str, dict[str, Any]]] = {}
         if request_model.response_type == "code":
             external_logins = await auth_class.form_providers_data_for_auth()
 

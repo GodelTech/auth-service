@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Type
+from typing import TYPE_CHECKING, Type
 
 from src.business_logic.services.authorization.response_type_handlers import (
     CodeResponseTypeHandler,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 class ResponseTypeHandlerFactory:
-    _handlers: Dict[str, Type[IResponseTypeHandler]] = {}
+    _handlers: dict[str, Type[IResponseTypeHandler]] = {}
 
     @staticmethod
     def register_handler(

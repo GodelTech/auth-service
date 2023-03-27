@@ -1,5 +1,3 @@
-from typing import Dict
-
 from src.dyna_config import BASE_URL
 
 from .base import ResponseTypeHandlerBase
@@ -28,7 +26,7 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandlerBase):
         # TODO is not using _update_redirect_url method
         return f"http://{BASE_URL}/device/auth/success"
 
-    async def _parse_scope_data(self, scope: str) -> Dict[str, str]:
+    async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         return {
             item.split("=")[0]: item.split("=")[1]
             for item in scope.split("&")
