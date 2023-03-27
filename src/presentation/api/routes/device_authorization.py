@@ -81,7 +81,7 @@ async def post_device_user_code(
         )
         return response
 
-    except DeviceBaseException as exception:
+    except UserCodeNotFoundError as exception:
         logger.exception(exception)
         response_class = exception_response_mapper.get(type(exception))
         if response_class:
@@ -113,7 +113,7 @@ async def delete_device(
 
         return firmed_redirect_uri
 
-    except (ClientBaseException, DeviceBaseException) as exception:
+    except (ClientBaseException, UserCodeNotFoundError) as exception:
         logger.exception(exception)
         response_class = exception_response_mapper.get(type(exception))
         if response_class:

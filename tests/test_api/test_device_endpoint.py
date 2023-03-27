@@ -84,8 +84,6 @@ class TestDeviceEndpoint:
     async def test_unsuccessful_post_device_user_code(
         self, client: AsyncClient
     ) -> None:
-        # expected_content = '{"message":"Wrong user code"}'
-
         param_next = {"user_code": "user_code_not_exists_1245"}
         response = await client.request(
             "POST",
@@ -150,8 +148,6 @@ class TestDeviceEndpoint:
     async def test_unsuccessful_post_device_cancel_bad_user_code(
         self, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Wrong user code"}'
-
         param = {
             "client_id": "test_client",
             "scope": "user_code=user_code_not_exists_1245",
@@ -163,13 +159,14 @@ class TestDeviceEndpoint:
             headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert json.loads(response.content) == {
+            "error": "invalid_request",
+            "error_description": "The client user code could not be found in the database.",
+        }
 
     async def test_unsuccessful_post_device_cancel_bad_client(
         self, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Client not found"}'
-
         param = {
             "client_id": "client_not_exists_1245",
             "scope": "user_code=user_code_not_exists_1245",
