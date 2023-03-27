@@ -87,6 +87,40 @@ class TestClientRepository:
                 client_id=999
             )
 
+    @pytest.mark.parametrize("client_id, boolean",
+                             [("test_client", True),
+                              ("test_client_not_exist", False)])
+    async def test_validate_client_by_client_id(self, engine: AsyncEngine,
+                                                client_id,
+                                                boolean) -> None:
+        client_repo = ClientRepository(engine)
+        result = await client_repo.validate_client_by_client_id(
+            client_id=client_id
+        )
+        assert result == boolean
+
+    # validate_client_by_int_id differ for validate_client_by_client_id by
+    # containing ClientNotFoundError. Do we need one? Check in docs: 
+    # https://connect2id.com/products/server/docs/api/client-registration
+    @pytest.mark.parametrize("int_id, boolean",
+                             [(1, True),])
+                              # (999, False)])
+    async def test_validate_client_by_int_id(self, engine: AsyncEngine,
+                                                int_id,
+                                                boolean) -> None:
+        client_repo = ClientRepository(engine)
+        result = await client_repo.validate_client_by_int_id(
+            client_id=int_id
+        )
+        assert result == boolean
+
+    async def test_validate_client_by_int_id_not_exists(self, engine: AsyncEngine) -> None:
+        client_repo_error = ClientRepository(engine)
+        with pytest.raises(ClientNotFoundError):
+            await client_repo_error.validate_client_by_int_id(
+                client_id=999
+            )
+
     async def test_get_client_secret_by_client_id(self, engine: AsyncEngine) -> None:
         client_repo = ClientRepository(engine)
         expected = "past"
@@ -110,6 +144,7 @@ class TestClientRepository:
         )
         assert result
 
+    #### !!!!!!!!!!!!!mock ClientPostLogoutRedirectUriError ########################
     async def test_validate_post_logout_redirect_uri_not_exists(self, engine: AsyncEngine) -> None:
         client_repo_error = ClientRepository(engine)
         with pytest.raises(ClientPostLogoutRedirectUriError):
@@ -118,14 +153,7 @@ class TestClientRepository:
                 logout_redirect_uri="http://redirect-uri-not-exists.com/",
             )
 
-    async def test_validate_client_redirect_uri(self,
-                                                engine: AsyncEngine,
-                                                monkeypatch) -> None:
-        mock_get_client_by_client_id = AsyncMock()
-        mock_get_client_by_client_id.return_value = AsyncMock(id=1)
-        monkeypatch.setattr(ClientRepository,
-                            "get_client_by_client_id",
-                            mock_get_client_by_client_id)
+    async def test_validate_client_redirect_uri(self, engine: AsyncEngine) -> None:
         client_repo = ClientRepository(engine)
         uri = await client_repo.validate_client_redirect_uri(
             client_id="test_client", redirect_uri="https://www.google.com/"
