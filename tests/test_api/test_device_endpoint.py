@@ -84,7 +84,7 @@ class TestDeviceEndpoint:
     async def test_unsuccessful_post_device_user_code(
         self, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Wrong user code"}'
+        # expected_content = '{"message":"Wrong user code"}'
 
         param_next = {"user_code": "user_code_not_exists_1245"}
         response = await client.request(
@@ -95,7 +95,10 @@ class TestDeviceEndpoint:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert json.loads(response.content) == {
+            "error": "invalid_request",
+            "error_description": "The client user code could not be found in the database.",
+        }
 
     async def test_get_device_login_confirm(self, client: AsyncClient) -> None:
         response = await client.request("GET", "/device/auth/success")
@@ -177,8 +180,11 @@ class TestDeviceEndpoint:
             data=param,
             headers={"Content-Type": self.content_type},
         )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert json.loads(response.content) == {
+            "error": "invalid_client",
+            "error_description": "Client authentication failed.",
+        }
 
     async def test_get_device_cancel(self, client: AsyncClient) -> None:
         response = await client.request("GET", "/device/auth/cancel")

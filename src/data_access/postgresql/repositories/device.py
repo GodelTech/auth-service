@@ -78,7 +78,7 @@ class DeviceRepository(BaseRepository):
             )
             result = result.first()
             if not result[0]:
-                raise UserCodeNotFoundError("Wrong User Code")
+                raise UserCodeNotFoundError
 
             return result[0]
 
