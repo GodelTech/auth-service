@@ -16,3 +16,11 @@ class ResponseTypeHandlerBase:
         if self.auth_service.request_model.state:
             redirect_url += f"&state={self.auth_service.request_model.state}"
         return redirect_url
+
+
+class TokenResponseTypeHandlerBase(ResponseTypeHandlerBase):
+    """Response type handler for responses with access_token or id_token."""
+
+    def __init__(self, auth_service: AuthorizationService) -> None:
+        self.expiration_time = 600
+        super().__init__(auth_service)

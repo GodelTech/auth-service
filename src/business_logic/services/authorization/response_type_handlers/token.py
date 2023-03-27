@@ -1,20 +1,18 @@
 from src.business_logic.services.tokens import get_single_token
 
-from .base import ResponseTypeHandlerBase
-from .constants import TokenExpirationTime
+from .base import TokenResponseTypeHandlerBase
 
 
-class TokenResponseTypeHandler(ResponseTypeHandlerBase):
+class TokenResponseTypeHandler(TokenResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
-        expiration_time = TokenExpirationTime.SHORT.value
         access_token = await get_single_token(
             user_id=user_id,
             client_id=self.auth_service.request_model.client_id,
             additional_data={"scopes": self.auth_service.request_model.scope},
             jwt_service=self.auth_service.jwt_service,
-            expiration_time=expiration_time,
+            expiration_time=self.expiration_time,
         )
-        query_params = f"access_token={access_token}&token_type=Bearer&expires_in={expiration_time}"
+        query_params = f"access_token={access_token}&token_type=Bearer&expires_in={self.expiration_time}"
         redirect_url = (
             f"{self.auth_service.request_model.redirect_uri}?{query_params}"
         )
