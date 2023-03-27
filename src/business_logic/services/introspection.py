@@ -4,7 +4,6 @@ from typing import Any, Optional
 from fastapi import Request
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
 
-from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.client import ClientRepository
