@@ -4,6 +4,7 @@ from starlette.templating import _TemplateResponse
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+import urllib
 
 from src.business_logic.services import AuthorizationService, LoginFormService
 from src.data_access.postgresql.errors import (
@@ -16,7 +17,7 @@ from src.data_access.postgresql.errors import (
 )
 from src.presentation.api.routes.utils import (
     InvalidClientResponse,
-    UnsupportedResponseType,
+    UnsupportedResponseTypeRespons,
     UserNotFoundResponse,
     WrongPasswordResponse,
     ClientRedirectUriErrorResponse,
@@ -68,13 +69,22 @@ async def get_authorize(
             raise ValueError
     except (
         ClientBaseException,
-        WrongResponseTypeError,
         ValueError,
     ) as exception:
         logger.exception(exception)
         response_class = exception_response_mapper.get(type(exception))
         if response_class:
             return response_class()
+    except WrongResponseTypeError as exception:
+        logger.exception(exception)
+        response_class = exception_response_mapper.get(type(exception))
+        encoded_error_dict_to_url_query = urllib.parse.urlencode(
+            response_class.detail
+        )
+        response = RedirectResponse(
+            f"{request_model.redirect_uri}?{encoded_error_dict_to_url_query}"
+        )
+        return response
 
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
@@ -94,24 +104,29 @@ async def post_authorize(
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-
         return response
-    except (
-        ClientBaseException,
-        UserNotFoundError,
-        WrongPasswordError,
-        KeyError,
-    ) as exception:
+
+    except (ClientBaseException, KeyError) as exception:
         logging.exception(exception)
         response_class = exception_response_mapper.get(type(exception))
         if response_class:
             return response_class()
+    except (UserNotFoundError, WrongPasswordError) as exception:
+        logger.exception(exception)
+        response_class = exception_response_mapper.get(type(exception))
+        encoded_error_dict_to_url_query = urllib.parse.urlencode(
+            response_class.detail
+        )
+        response = RedirectResponse(
+            f"{request_model.redirect_uri}?{encoded_error_dict_to_url_query}"
+        )
+        return response
 
 
 exception_response_mapper = {
     ClientNotFoundError: InvalidClientResponse,
     ClientRedirectUriError: ClientRedirectUriErrorResponse,
-    WrongResponseTypeError: UnsupportedResponseType,
+    WrongResponseTypeError: UnsupportedResponseTypeRespons,
     UserNotFoundError: UserNotFoundResponse,
     WrongPasswordError: WrongPasswordResponse,
     KeyError: HTTPException(

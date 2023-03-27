@@ -1,3 +1,4 @@
+import json
 import pytest
 from fastapi import status
 from httpx import AsyncClient
@@ -9,35 +10,42 @@ from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 @pytest.mark.asyncio
 class TestDeviceEndpoint:
+    content_type = "application/x-www-form-urlencoded"
 
-    content_type = 'application/x-www-form-urlencoded'
-
-    async def test_successful_post_device_authorize(self, client: AsyncClient, connection: AsyncSession) -> None:
-        params = {
-            "client_id": "test_client",
-            "scope": "scope"
-        }
-        response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
+    async def test_successful_post_device_authorize(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+        params = {"client_id": "test_client", "scope": "scope"}
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=params,
+            headers={"Content-Type": self.content_type},
+        )
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
             select(exists().where(Device.client_id == 1))
         )
         device = device.first()
         assert device[0] is True
-        await connection.execute(
-            delete(Device).where(Device.client_id == 1)
-        )
+        await connection.execute(delete(Device).where(Device.client_id == 1))
         await connection.commit()
 
-    async def test_unsuccessful_post_device_authorize(self, client: AsyncClient) -> None:
-        expected_content = '{"message":"Client not found"}'
-        params = {
-            "client_id": "client_not_exists_1245",
-            "scope": "scope"
+    async def test_unsuccessful_post_device_authorize(
+        self, client: AsyncClient
+    ) -> None:
+        params = {"client_id": "client_not_exists_1245", "scope": "scope"}
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=params,
+            headers={"Content-Type": self.content_type},
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert json.loads(response.content) == {
+            "error": "invalid_client",
+            "error_description": "Client authentication failed.",
         }
-        response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
 
     async def test_get_device_user_code(self, client: AsyncClient) -> None:
         response = await client.request("GET", "/device/auth")
@@ -45,12 +53,16 @@ class TestDeviceEndpoint:
         assert response.status_code == status.HTTP_200_OK
         assert type(response.content) == bytes
 
-    async def test_successful_post_device_user_code(self, client: AsyncClient, connection: AsyncSession) -> None:
-        params = {
-            "client_id": "test_client",
-            "scope": "scope"
-        }
-        response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
+    async def test_successful_post_device_user_code(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+        params = {"client_id": "test_client", "scope": "scope"}
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=params,
+            headers={"Content-Type": self.content_type},
+        )
         assert response.status_code == status.HTTP_200_OK
         device = await connection.execute(
             select(Device).where(Device.client_id == 1)
@@ -59,21 +71,27 @@ class TestDeviceEndpoint:
         user_code = device.user_code
         param_next = {"user_code": user_code}
         response = await client.request(
-            "POST", "/device/auth", data=param_next, headers={'Content-Type': self.content_type}
+            "POST",
+            "/device/auth",
+            data=param_next,
+            headers={"Content-Type": self.content_type},
         )
 
         assert response.status_code == status.HTTP_302_FOUND
-        await connection.execute(
-            delete(Device).where(Device.client_id == 1)
-        )
+        await connection.execute(delete(Device).where(Device.client_id == 1))
         await connection.commit()
 
-    async def test_unsuccessful_post_device_user_code(self, client: AsyncClient) -> None:
+    async def test_unsuccessful_post_device_user_code(
+        self, client: AsyncClient
+    ) -> None:
         expected_content = '{"message":"Wrong user code"}'
 
         param_next = {"user_code": "user_code_not_exists_1245"}
         response = await client.request(
-            "POST", "/device/auth", data=param_next, headers={'Content-Type': self.content_type}
+            "POST",
+            "/device/auth",
+            data=param_next,
+            headers={"Content-Type": self.content_type},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -85,12 +103,16 @@ class TestDeviceEndpoint:
         assert response.status_code == status.HTTP_200_OK
         assert type(response.content) == bytes
 
-    async def test_successful_post_device_cancel(self, client: AsyncClient, connection: AsyncSession) -> None:
-        params = {
-            "client_id": "test_client",
-            "scope": "scope"
-        }
-        response = await client.request("POST", "/device/", data=params, headers={'Content-Type': self.content_type})
+    async def test_successful_post_device_cancel(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+        params = {"client_id": "test_client", "scope": "scope"}
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=params,
+            headers={"Content-Type": self.content_type},
+        )
         assert response.status_code == status.HTTP_200_OK
 
         device = await connection.execute(
@@ -109,7 +131,10 @@ class TestDeviceEndpoint:
             "scope": f"user_code={user_code}",
         }
         response = await client.request(
-            "DELETE", "/device/auth/cancel", data=param_next, headers={'Content-Type': self.content_type}
+            "DELETE",
+            "/device/auth/cancel",
+            data=param_next,
+            headers={"Content-Type": self.content_type},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -119,7 +144,9 @@ class TestDeviceEndpoint:
         device = device.first()
         assert device[0] is False
 
-    async def test_unsuccessful_post_device_cancel_bad_user_code(self, client: AsyncClient) -> None:
+    async def test_unsuccessful_post_device_cancel_bad_user_code(
+        self, client: AsyncClient
+    ) -> None:
         expected_content = '{"message":"Wrong user code"}'
 
         param = {
@@ -127,12 +154,17 @@ class TestDeviceEndpoint:
             "scope": "user_code=user_code_not_exists_1245",
         }
         response = await client.request(
-            "DELETE", "/device/auth/cancel", data=param, headers={'Content-Type': self.content_type}
+            "DELETE",
+            "/device/auth/cancel",
+            data=param,
+            headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content
 
-    async def test_unsuccessful_post_device_cancel_bad_client(self, client: AsyncClient) -> None:
+    async def test_unsuccessful_post_device_cancel_bad_client(
+        self, client: AsyncClient
+    ) -> None:
         expected_content = '{"message":"Client not found"}'
 
         param = {
@@ -140,7 +172,10 @@ class TestDeviceEndpoint:
             "scope": "user_code=user_code_not_exists_1245",
         }
         response = await client.request(
-            "DELETE", "/device/auth/cancel", data=param, headers={'Content-Type': self.content_type}
+            "DELETE",
+            "/device/auth/cancel",
+            data=param,
+            headers={"Content-Type": self.content_type},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.content.decode("UTF-8") == expected_content

@@ -5,4 +5,9 @@ from .error_responses import (
     InvalidScopeResponse,
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
+    ClientRedirectUriErrorResponse,
+    UnsupportedResponseTypeRespons,
+    UserNotFoundResponse,
+    WrongPasswordResponse,
+    UserCodeNotFoundErrorResponse,
 )

@@ -1,3 +1,4 @@
+import json
 import pytest
 from fastapi import status
 from httpx import AsyncClient
@@ -37,11 +38,13 @@ class TestAuthorizeEndpointGET:
             "scope": "openid",
             "redirect_uri": "https://www.google.com/",
         }
-        expected_content = '{"message":"Client not found"}'
         response = await client.request("GET", "/authorize/", params=params)
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert json.loads(response.content) == {
+            "error": "invalid_client",
+            "error_description": "Client authentication failed.",
+        }
 
     async def test_unsuccessful_authorize_request_bad_uri(
         self, client: AsyncClient
@@ -52,11 +55,14 @@ class TestAuthorizeEndpointGET:
             "scope": "local_scope",
             "redirect_uri": "just_uri",
         }
-        expected_content = '{"message":"Redirect Uri not found"}'
+        expected_content = '{"error": "invalid_request","error_description": "The client redirect_uri could not be found in the database."}'
         response = await client.request("GET", "/authorize/", params=params)
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert json.loads(response.content) == {
+            "error": "invalid_request",
+            "error_description": "The client redirect_uri could not be found in the database.",
+        }
 
     async def test_unsuccessful_authorize_request_bad_response_type(
         self, client: AsyncClient
@@ -67,11 +73,9 @@ class TestAuthorizeEndpointGET:
             "scope": "openid",
             "redirect_uri": "https://www.google.com/",
         }
-        expected_content = '{"message":"Bad response type"}'
         response = await client.request("GET", "/authorize/", params=params)
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
 
 
 @pytest.mark.asyncio
@@ -124,7 +128,6 @@ class TestAuthorizeEndpointPOST:
             "username": "TestClient",
             "password": "test_password",
         }
-        expected_content = '{"message":"Client not found"}'
         response = await client.request(
             "POST",
             "/authorize/",
@@ -132,8 +135,11 @@ class TestAuthorizeEndpointPOST:
             headers={"Content-Type": self.content_type},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert json.loads(response.content) == {
+            "error": "invalid_client",
+            "error_description": "Client authentication failed.",
+        }
 
     async def test_unsuccessful_authorize_request_badpassword(
         self, client: AsyncClient
@@ -146,7 +152,6 @@ class TestAuthorizeEndpointPOST:
             "username": "TestClient",
             "password": "Wrong",
         }
-        expected_content = '{"message":"Bad password"}'
         response = await client.request(
             "POST",
             "/authorize/",
@@ -154,8 +159,7 @@ class TestAuthorizeEndpointPOST:
             headers={"Content-Type": self.content_type},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
 
     async def test_unsuccessful_authorize_request_bad_username(
         self, client: AsyncClient
@@ -168,7 +172,6 @@ class TestAuthorizeEndpointPOST:
             "username": "WrongUsername",
             "password": "password",
         }
-        expected_content = '{"message":"User not found"}'
         response = await client.request(
             "POST",
             "/authorize/",
@@ -176,5 +179,4 @@ class TestAuthorizeEndpointPOST:
             headers={"Content-Type": self.content_type},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
