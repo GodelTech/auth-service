@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Union, TypeAlias
+from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -12,7 +12,7 @@ from src.presentation.api.models.tokens import (
 )
 
 
-TokensResponse: TypeAlias = Union[JSONResponse, Dict[str, Any]]
+TokenEndpointResponse = Union[JSONResponse, Dict[str, Any]]
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ async def get_tokens(
         request: Request,
         request_body: BodyRequestTokenModel = Depends(),
         token_class: TokenService = Depends(provide_token_service_stub),
-) -> TokensResponse:
+) -> TokenEndpointResponse:
     token_class.request = request
     token_class.request_model = request_body
     result = await token_class.get_tokens()
