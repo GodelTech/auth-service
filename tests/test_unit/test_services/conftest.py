@@ -38,6 +38,9 @@ def persistent_grant_repository_mock():
 def device_repository_mock():
     device_repo = AsyncMock()
     device_repo.delete_by_user_code.return_value = None
+    mock_device = MagicMock(device_code=MagicMock)
+    mock_device.device_code.value = 1
+    device_repo.get_device_by_user_code.return_value = mock_device
     yield device_repo
     del device_repo
 
