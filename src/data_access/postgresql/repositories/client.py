@@ -1,4 +1,5 @@
 from sqlalchemy import exists, select, insert, update, delete, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -180,8 +181,8 @@ class ClientRepository(BaseRepository):
             session = sess
             uris = await session.execute(
                 select(ClientRedirectUri)
-                .join(Client, ClientSecret.client_id == Client.id)
-                .where(Client.client_id == client_id)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
+                .where(Client.id == client_id)
             )
 
             result = []
@@ -206,9 +207,10 @@ class ClientRepository(BaseRepository):
 
             return result
 
+    ####!!!!!!!!!!!!!!!!!!!!!!!!!!!#############
     async def create(
         self, 
-        params:dict[str:Any],
+        params: dict[str:Any],
     ) -> None:
         try:
             session_factory = sessionmaker(
@@ -219,8 +221,8 @@ class ClientRepository(BaseRepository):
 
                 await session.execute(insert(Client).values(**params))
                 await session.commit()
-        except:
-            raise DuplicationError
+        except IntegrityError:
+            raise DuplicationError("Duplicated client_id detected")
     
     async def add_secret(
         self, 
