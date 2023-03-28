@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from src.business_logic.services.authorization.authorization_service import (
@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     )
 
 
+@runtime_checkable
 class ResponseTypeHandler(Protocol):
     def __init__(self, auth_service: AuthorizationService) -> None:
         ...
