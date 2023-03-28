@@ -3,7 +3,7 @@ from src.business_logic.services.tokens import get_single_token
 from .base import TokenResponseTypeHandlerBase
 
 
-class IdTokenResponseType(TokenResponseTypeHandlerBase):
+class IdTokenResponseTypeHandler(TokenResponseTypeHandlerBase):
     async def get_redirect_url(self, user_id: int) -> str:
         claims = await self.auth_service.user_repo.get_claims(user_id)
         id_token = await get_single_token(

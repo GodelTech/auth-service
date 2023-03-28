@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Type
 from src.business_logic.services.authorization.response_type_handlers import (
     CodeResponseTypeHandler,
     DeviceCodeResponseTypeHandler,
-    IdTokenResponseType,
+    IdTokenResponseTypeHandler,
     IdTokenTokenResponseTypeHandler,
     TokenResponseTypeHandler,
 )
@@ -43,7 +43,9 @@ class ResponseTypeHandlerFactory:
 # and register it like below
 ResponseTypeHandlerFactory.register_handler("code", CodeResponseTypeHandler)
 ResponseTypeHandlerFactory.register_handler("token", TokenResponseTypeHandler)
-ResponseTypeHandlerFactory.register_handler("id_token", IdTokenResponseType)
+ResponseTypeHandlerFactory.register_handler(
+    "id_token", IdTokenResponseTypeHandler
+)
 ResponseTypeHandlerFactory.register_handler(
     "id_token token", IdTokenTokenResponseTypeHandler
 )
