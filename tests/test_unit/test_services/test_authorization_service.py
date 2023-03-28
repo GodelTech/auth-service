@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, Mock
 import pytest_asyncio
 import pytest
 from src.dyna_config import BASE_URL
@@ -8,22 +8,21 @@ from src.business_logic.services.authorization.authorization_service import (
 )
 from src.business_logic.services.authorization.response_type_handlers import (
     TokenResponseTypeHandler,
-    IdTokenResponseType,
+    IdTokenResponseTypeHandler,
     IdTokenTokenResponseTypeHandler,
     DeviceCodeResponseTypeHandler,
     ResponseTypeHandlerBase,
-    TokenResponseTypeHandlerBase,
     ResponseTypeHandler,
+    ResponseTypeHandlerFactory,
 )
 from src.data_access.postgresql.errors import (
     UserNotFoundError,
-    ClientRedirectUriError,
     ClientNotFoundError,
     ClientScopesError,
     WrongPasswordError,
+    WrongResponseTypeError,
 )
 from tests.test_unit.fixtures import (  # TODO shouldn't it be just in conftest files?
-    DEFAULT_CLIENT,
     auth_post_request_model,
 )
 
@@ -61,125 +60,116 @@ def auth_service_with_post_request_model_and_mocked_dependencies(
 
 
 @pytest.fixture
-def token_response_type_handler(
+def response_type_handler(
     auth_service_with_post_request_model_and_mocked_dependencies,
 ):
-    handler = TokenResponseTypeHandler(
-        auth_service_with_post_request_model_and_mocked_dependencies
-    )
-    yield handler
-    del handler
+    def create_handler(handler_class):
+        handler = handler_class(
+            auth_service_with_post_request_model_and_mocked_dependencies
+        )
+        yield handler
+        del handler
+
+    return create_handler
 
 
 @pytest.fixture
-def id_token_response_type_handler(
-    auth_service_with_post_request_model_and_mocked_dependencies,
-):
-    handler = IdTokenResponseType(
-        auth_service_with_post_request_model_and_mocked_dependencies
-    )
-    yield handler
-    del handler
+def token_response_type_handler(response_type_handler):
+    yield from response_type_handler(TokenResponseTypeHandler)
 
 
 @pytest.fixture
-def id_token_token_response_type_handler(
-    auth_service_with_post_request_model_and_mocked_dependencies,
-):
-    handler = IdTokenTokenResponseTypeHandler(
-        auth_service_with_post_request_model_and_mocked_dependencies
-    )
-    yield handler
-    del handler
+def id_token_response_type_handler(response_type_handler):
+    yield from response_type_handler(IdTokenResponseTypeHandler)
 
 
 @pytest.fixture
-def device_code_response_type_handler(
-    auth_service_with_post_request_model_and_mocked_dependencies,
-):
-    handler = DeviceCodeResponseTypeHandler(
-        auth_service_with_post_request_model_and_mocked_dependencies
-    )
-    yield handler
-    del handler
+def id_token_token_response_type_handler(response_type_handler):
+    yield from response_type_handler(IdTokenTokenResponseTypeHandler)
+
+
+@pytest.fixture
+def device_code_response_type_handler(response_type_handler):
+    yield from response_type_handler(DeviceCodeResponseTypeHandler)
+
+
+@pytest.fixture
+def response_type_handler_base(response_type_handler):
+    yield from response_type_handler(ResponseTypeHandlerBase)
+
+
+@pytest.fixture
+def response_type_handler_factory():
+    factory = ResponseTypeHandlerFactory()
+    yield factory
+    del factory
 
 
 @pytest.mark.asyncio
 class TestAuthorizationService:
-    async def test_request_model_not_provided(
-        self, auth_service_with_mocked_dependencies
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(
+        self,
+        auth_service_with_post_request_model_and_mocked_dependencies,
     ):
-        with pytest.raises(ValueError):
-            await auth_service_with_mocked_dependencies.request_model
-
-    async def test_validate_scope(
-        self, auth_service_with_post_request_model_and_mocked_dependencies
-    ):
-        await auth_service_with_post_request_model_and_mocked_dependencies._validate_scope()
-
-    async def test_validate_scope_with_invalid_scope(
-        self, auth_service_with_post_request_model_and_mocked_dependencies
-    ):
-        auth_service_with_post_request_model_and_mocked_dependencies.request_model.scope = (
-            "invalid_scope"
+        self.auth_service = (
+            auth_service_with_post_request_model_and_mocked_dependencies
         )
+
+    async def test_request_model_not_provided(self):
+        self.auth_service.request_model = None
+        with pytest.raises(ValueError):
+            self.auth_service.request_model
+
+    async def test_validate_scope(self):
+        await self.auth_service._validate_scope()
+
+    async def test_validate_scope_with_invalid_scope(self):
+        self.auth_service.request_model.scope = "invalid_scope"
         with pytest.raises(ClientScopesError):
-            await auth_service_with_post_request_model_and_mocked_dependencies._validate_scope()
+            await self.auth_service._validate_scope()
 
     @patch.object(
         AuthorizationService, "_validate_scope", new_callable=AsyncMock
     )
-    async def test_validate_auth_data(
-        self,
-        _validate_scope_mock,
-        auth_service_with_post_request_model_and_mocked_dependencies,
-    ):
-        result = (
-            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
-        )
+    async def test_validate_auth_data(self, _validate_scope_mock):
+        result = await self.auth_service._validate_auth_data()
         assert result is 1
 
-    async def test_validate_auth_data_invalid_password(
-        self, auth_service_with_post_request_model_and_mocked_dependencies
-    ):
-        auth_service_with_post_request_model_and_mocked_dependencies.user_repo.get_hash_password.side_effect = (
+    async def test_validate_auth_data_invalid_password(self):
+        self.auth_service.password_service.validate_password.side_effect = (
             WrongPasswordError
         )
         with pytest.raises(WrongPasswordError):
-            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
+            await self.auth_service._validate_auth_data()
 
-    async def test_validate_auth_data_invalid_client(
-        self, auth_service_with_post_request_model_and_mocked_dependencies
-    ):
-        auth_service_with_post_request_model_and_mocked_dependencies.client_repo.validate_client_redirect_uri.side_effect = (
+    async def test_validate_auth_data_invalid_client(self):
+        self.auth_service.client_repo.validate_client_redirect_uri.side_effect = (
             ClientNotFoundError
         )
         with pytest.raises(ClientNotFoundError):
-            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
+            await self.auth_service._validate_auth_data()
 
-    async def test_validate_auth_data_invalid_username(
-        self, auth_service_with_post_request_model_and_mocked_dependencies
-    ):
-        auth_service_with_post_request_model_and_mocked_dependencies.user_repo.get_hash_password.side_effect = (
+    async def test_validate_auth_data_invalid_username(self):
+        self.auth_service.user_repo.get_hash_password.side_effect = (
             UserNotFoundError
         )
         with pytest.raises(UserNotFoundError):
-            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
+            await self.auth_service._validate_auth_data()
 
     @patch("secrets.token_urlsafe")
-    async def test_get_redirect_url(
-        self,
-        token_urlsafe_mock,
-        auth_service_with_post_request_model_and_mocked_dependencies,
-    ):
+    async def test_get_redirect_url(self, token_urlsafe_mock):
         token_urlsafe_mock.return_value = "test_code"
-        redirect_url = (
-            await auth_service_with_post_request_model_and_mocked_dependencies.get_redirect_url()
-        )
+        redirect_url = await self.auth_service.get_redirect_url()
         assert (
             redirect_url
             == "https://test.com/redirect?code=test_code&state=test_state"
         )
+
+    async def test_get_redirect_url_invalid_response_type(self):
+        self.auth_service.request_model.response_type = "invalid_response_type"
+        with pytest.raises(WrongResponseTypeError):
+            await self.auth_service.get_redirect_url()
 
 
 @pytest.mark.asyncio
@@ -189,9 +179,7 @@ class TestTokenResponseTypeHandler:
         new_callable=AsyncMock,
     )
     async def test_get_redirect_url(
-        self,
-        get_single_token_mock,
-        token_response_type_handler,
+        self, get_single_token_mock, token_response_type_handler
     ):
         token_mock = "test_token"
         get_single_token_mock.return_value = token_mock
@@ -306,158 +294,44 @@ class TestDeviceResponseTypeHandler:
         )
 
 
-# ! Depracated
+@pytest.mark.asyncio
+class TestResponseTypeHandlerBase:
+    async def test_update_redirect_url_with_state(
+        self, response_type_handler_base
+    ):
+        redirect_url = "https://www.test.com/redirect?test_param=test"
+        result = await response_type_handler_base._update_redirect_url(
+            redirect_url=redirect_url
+        )
+        assert result == f"{redirect_url}&state=test_state"
 
-#     async def test_update_redirect_url_with_state(
-#         self,
-#         authorization_service: AuthorizationService,
-#         authorization_post_request_model: DataRequestModel,
-#     ) -> None:
-#         authorization_service.request_model = authorization_post_request_model
-#         expected_url = "https://www.google.com/?code=secret&state=state"
-#         redirect_url = (
-#             await authorization_service._update_redirect_url_with_params(
-#                 "secret"
-#             )
-#         )
+    async def test_update_redirect_url_without_state(
+        self, response_type_handler_base
+    ):
+        response_type_handler_base.auth_service.request_model.state = None
+        redirect_url = "https://www.test.com/redirect?test_param=test"
+        result = await response_type_handler_base._update_redirect_url(
+            redirect_url=redirect_url
+        )
+        assert result == redirect_url
 
-#         assert redirect_url == expected_url
 
-#     async def test_update_redirect_url_without_request_model(
-#         self, authorization_service: AuthorizationService
-#     ) -> None:
-#         result = await authorization_service._update_redirect_url_with_params(
-#             "secret"
-#         )
-#         assert result is None
+class TestResponseTypeHandlerFactory:
+    @pytest.fixture(autouse=True)
+    def setup(self, response_type_handler_factory):
+        self.factory = response_type_handler_factory
 
-#     async def test_update_redirect_url_without_state(
-#         self,
-#         authorization_service: AuthorizationService,
-#         authorization_post_request_model: DataRequestModel,
-#     ) -> None:
-#         authorization_service.request_model = authorization_post_request_model
-#         authorization_service.request_model.state = None
-#         expected_url = "https://www.google.com/?code=secret"
-#         redirect_url = (
-#             await authorization_service._update_redirect_url_with_params(
-#                 "secret"
-#             )
-#         )
+    def test_register_handler(self):
+        self.factory.register_handler("test", TokenResponseTypeHandler)
+        assert self.factory._handlers["test"] == TokenResponseTypeHandler
 
-#         assert redirect_url == expected_url
+    def test_get_handler(self):
+        self.factory.register_handler("test", TokenResponseTypeHandler)
+        auth_service = Mock(spec=AuthorizationService)
+        handler = self.factory.get_handler("test", auth_service)
+        assert isinstance(handler, TokenResponseTypeHandler)
+        assert handler.auth_service == auth_service
 
-#     async def test_get_redirect_url_code_response_type(
-#         self,
-#         authorization_service: AuthorizationService,
-#         authorization_post_request_model: DataRequestModel,
-#     ) -> None:
-#         expected_start = "https://www.google.com/"
-#         authorization_service.request_model = authorization_post_request_model
-#         result_uri = (
-#             await authorization_service.get_redirect_url_code_response_type(
-#                 user_id=2
-#             )
-#         )
-#         if not result_uri:
-#             raise AssertionError
-#         if not result_uri:
-#             raise AssertionError
-#         start_uri = result_uri.split("?")[0]
-#         data = {
-#             item.split("=")[0]: item.split("=")[1]
-#             for item in result_uri.split("?")[1].split("&")
-#         }
-
-#         assert start_uri == expected_start
-#         assert data["state"] == "state"
-#         assert "access_token" not in data
-#         assert "code" in data
-
-#         await authorization_service.persistent_grant_repo.delete(
-#             grant_data=data["code"], grant_type="code"
-#         )
-
-#     async def test_get_redirect_url_code_response_type_without_request_model(
-#         self, authorization_service: AuthorizationService
-#     ) -> None:
-#         result = (
-#             await authorization_service.get_redirect_url_code_response_type(
-#                 user_id=2
-#             )
-#         )
-#         assert result is None
-
-#     async def test_get_redirect_url_device_code_response_type_without_request_model(
-#         self, authorization_service: AuthorizationService
-#     ) -> None:
-#         result = await authorization_service.get_redirect_url_device_code_response_type(
-#             user_id=2
-#         )
-#         assert result is None
-
-#     async def test_get_redirect_url_token_response_type(
-#         self,
-#         authorization_service: AuthorizationService,
-#         authorization_post_request_model: DataRequestModel,
-#     ) -> None:
-#         expected_start = "https://www.google.com/"
-#         authorization_post_request_model.response_type = "token"
-#         authorization_service.request_model = authorization_post_request_model
-#         result_uri = (
-#             await authorization_service.get_redirect_url_token_response_type(
-#                 user_id=2
-#             )
-#         )
-#         if not result_uri:
-#             raise AssertionError
-#         start_uri = result_uri.split("?")[0]
-#         data = {
-#             item.split("=")[0]: item.split("=")[1]
-#             for item in result_uri.split("?")[1].split("&")
-#         }
-#         assert start_uri == expected_start
-#         assert "access_token" in data
-#         assert "id_token" not in data
-#         assert data["token_type"] in "Bearer"
-
-#     async def test_get_redirect_url_token_response_type_without_request_model(
-#         self, authorization_service: AuthorizationService
-#     ) -> None:
-#         result = (
-#             await authorization_service.get_redirect_url_token_response_type(
-#                 user_id=2
-#             )
-#         )
-#         assert result is None
-
-#     async def test_get_redirect_url_id_token_token_response_type(
-#         self,
-#         authorization_service: AuthorizationService,
-#         authorization_post_request_model: DataRequestModel,
-#     ) -> None:
-#         expected_start = "https://www.google.com/"
-#         authorization_post_request_model.response_type = "id_token token"
-#         authorization_service.request_model = authorization_post_request_model
-#         result_uri = await authorization_service.get_redirect_url_id_token_token_response_type(
-#             user_id=2
-#         )
-#         if not result_uri:
-#             raise AssertionError
-#         start_uri = result_uri.split("?")[0]
-#         data = {
-#             item.split("=")[0]: item.split("=")[1]
-#             for item in result_uri.split("?")[1].split("&")
-#         }
-#         assert start_uri == expected_start
-#         assert "access_token" in data
-#         assert "id_token" in data
-#         assert data["token_type"] in "Bearer"
-
-#     async def test_get_redirect_url_id_token_token_response_type_without_request_model(
-#         self, authorization_service: AuthorizationService
-#     ) -> None:
-#         result = await authorization_service.get_redirect_url_id_token_token_response_type(
-#             user_id=2
-#         )
-#         assert result is None
+    def test_get_non_existing_handler(self):
+        with pytest.raises(WrongResponseTypeError):
+            self.factory.get_handler("non_existing_handler", None)
