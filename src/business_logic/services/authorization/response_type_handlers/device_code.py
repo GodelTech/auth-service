@@ -26,6 +26,8 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandlerBase):
         # TODO is not using _update_redirect_url method
         return f"http://{BASE_URL}/device/auth/success"
 
+    # TODO this method need to be fixed(scope data is like "openid email profile", etc.
+    # not like "test=first_scope&test_second=second_scope")
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
         return {
             item.split("=")[0]: item.split("=")[1]
