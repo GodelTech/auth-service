@@ -144,7 +144,6 @@ class TestClientRepository:
         )
         assert result
 
-    #### !!!!!!!!!!!!!mock ClientPostLogoutRedirectUriError ########################
     async def test_validate_post_logout_redirect_uri_not_exists(self, engine: AsyncEngine) -> None:
         client_repo_error = ClientRepository(engine)
         with pytest.raises(ClientPostLogoutRedirectUriError):
@@ -153,7 +152,14 @@ class TestClientRepository:
                 logout_redirect_uri="http://redirect-uri-not-exists.com/",
             )
 
-    async def test_validate_client_redirect_uri(self, engine: AsyncEngine) -> None:
+    async def test_validate_client_redirect_uri(self,
+                                                engine: AsyncEngine,
+                                                monkeypatch) -> None:
+        mock_get_client_by_client_id = AsyncMock()
+        mock_get_client_by_client_id.return_value = AsyncMock(id=1)
+        monkeypatch.setattr(ClientRepository,
+                            "get_client_by_client_id",
+                            mock_get_client_by_client_id)
         client_repo = ClientRepository(engine)
         uri = await client_repo.validate_client_redirect_uri(
             client_id="test_client", redirect_uri="https://www.google.com/"
