@@ -26,6 +26,7 @@ from .third_party_oidc import (
     WrongDataError,
 )
 
-from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError
+
+from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError, NotCompleteScopeError
 from .authorization import IncorrectAuthTokenError
 
