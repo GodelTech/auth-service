@@ -8,6 +8,8 @@ from src.presentation.api import router
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from typing import Any
+from src.data_access.postgresql.errors import IncorrectAuthTokenError
+
 
 async def new_decode_token(*args: Any, **kwargs: Any) -> bool:
     if "Bearer AccessToken" in kwargs.values():
@@ -51,8 +53,9 @@ class TestAccessTokenMiddleware:
     async def test_without_token(self, engine: AsyncEngine) -> None:
         request = NewRequest()
         middleware = AccessTokenMiddleware(app = ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine), jwt_service=NewJWTService())
-        response = await middleware.dispatch_func(request=request, call_next=new_call_next) 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        with pytest.raises(IncorrectAuthTokenError):
+            await middleware.dispatch_func(request=request, call_next=new_call_next) 
+        
 
     async def test_incorrect_token(self,  engine: AsyncEngine) -> None:
         with mock.patch.object(
@@ -61,8 +64,7 @@ class TestAccessTokenMiddleware:
             request = NewRequest()
             request.headers["authorization"] = "Bearer FALSE_accessToken"
             middleware = AccessTokenMiddleware(app = ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine), jwt_service=NewJWTService())
-            response = await middleware.dispatch_func(request=request, call_next=new_call_next) 
-            assert response.status_code == status.HTTP_403_FORBIDDEN
-
+            with pytest.raises(IncorrectAuthTokenError):
+                await middleware.dispatch_func(request=request, call_next=new_call_next) 
 
     

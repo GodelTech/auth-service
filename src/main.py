@@ -11,7 +11,8 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware, 
-    AccessTokenMiddleware
+    AccessTokenMiddleware,
+    ExceptionsMiddleware
 )
 
 from src.presentation.api import router
@@ -19,7 +20,6 @@ from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-
 import logging
 from src.log import LOGGING_CONFIG
 
@@ -66,7 +66,8 @@ def setup_di(app: FastAPI) -> None:
     db_engine = prov.provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-
+    
+    app.add_middleware(middleware_class=ExceptionsMiddleware)
     app.add_middleware(
         middleware_class=AuthorizationMiddleware,
         blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
@@ -75,7 +76,8 @@ def setup_di(app: FastAPI) -> None:
         middleware_class=AccessTokenMiddleware,
         blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
-
+    
+    
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,

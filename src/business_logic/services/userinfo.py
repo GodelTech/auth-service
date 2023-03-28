@@ -37,7 +37,7 @@ class UserInfoServices:
         try:
             decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
             sub = int(decoded_token["sub"])
-        except (PyJWTError, KeyError):
+        except PyJWTError:
             raise ValueError
         
         claims_dict = await self.user_repo.get_claims(id=sub)

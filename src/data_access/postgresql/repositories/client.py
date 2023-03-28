@@ -289,7 +289,7 @@ class ClientRepository(BaseRepository):
         except:
             raise DuplicationError
 
-    async def get_access_token_type_id(self, str_type):
+    async def get_access_token_type_id(self, str_type) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -305,7 +305,7 @@ class ClientRepository(BaseRepository):
                 ValueError
             return result[0].id
     
-    async def get_refresh_token_usage_type_id(self, str_type):
+    async def get_refresh_token_usage_type_id(self, str_type) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -321,7 +321,7 @@ class ClientRepository(BaseRepository):
                 ValueError
             return result[0].id
 
-    async def get_refresh_token_expiration_type_id(self, str_type):
+    async def get_refresh_token_expiration_type_id(self, str_type) -> int:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -394,7 +394,7 @@ class ClientRepository(BaseRepository):
             )
             await session.commit()
 
-    async def get_all(self) -> None:
+    async def get_all(self) -> list[Client]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -406,7 +406,7 @@ class ClientRepository(BaseRepository):
             result = result.all()
             return [client[0] for client in result]
 
-    async def add_response_type(self, client_id_int, response_type):
+    async def add_response_type(self, client_id_int, response_type) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )  
@@ -425,7 +425,7 @@ class ClientRepository(BaseRepository):
                     )
             await session.commit()
 
-    async def add_grant_type(self, client_id_int, grant_type):
+    async def add_grant_type(self, client_id_int, grant_type) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )  
@@ -444,7 +444,7 @@ class ClientRepository(BaseRepository):
                     )
             await session.commit()
 
-    async def delete_clients_response_types(self, client_id_int):
+    async def delete_clients_response_types(self, client_id_int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )  
@@ -457,7 +457,7 @@ class ClientRepository(BaseRepository):
             await session.execute(text(sql))
             await session.commit()
     
-    async def delete_clients_grant_types(self, client_id_int):
+    async def delete_clients_grant_types(self, client_id_int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )  
