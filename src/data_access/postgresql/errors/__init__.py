@@ -26,7 +26,10 @@ from .third_party_oidc import (
     WrongDataError,
 )
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9d894f3 (exceptions_middleware)
 from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError, NotCompleteScopeError
 from .authorization import IncorrectAuthTokenError
 

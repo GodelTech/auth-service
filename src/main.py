@@ -25,9 +25,6 @@ from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 from src.business_logic.common.errors import InvalidClientIdError
 from src.business_logic.get_tokens.errors import (
     InvalidGrantError, 
@@ -35,9 +32,6 @@ from src.business_logic.get_tokens.errors import (
     UnsupportedGrantTypeError
 )
 
->>>>>>> ef028ca (Added exception handlers, jwt_manager dto and custom validators)
-=======
->>>>>>> 3cfca3c (exceptions_middleware)
 import logging
 from src.log import LOGGING_CONFIG
 
