@@ -180,8 +180,8 @@ class ClientRepository(BaseRepository):
             session = sess
             uris = await session.execute(
                 select(ClientRedirectUri)
-                .join(Client, ClientSecret.client_id == Client.id)
-                .where(Client.client_id == client_id)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
+                .where(Client.id == client_id)
             )
 
             result = []
@@ -206,9 +206,10 @@ class ClientRepository(BaseRepository):
 
             return result
 
+    ####specify Exeptions#############
     async def create(
         self, 
-        params:dict[str:Any],
+        params: dict[str:Any],
     ) -> None:
         try:
             session_factory = sessionmaker(
@@ -221,7 +222,7 @@ class ClientRepository(BaseRepository):
                 await session.commit()
         except:
             raise DuplicationError
-    
+
     async def add_secret(
         self, 
         client_id_int:int,
@@ -302,7 +303,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
     
     async def get_refresh_token_usage_type_id(self, str_type):
@@ -318,7 +319,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
 
     async def get_refresh_token_expiration_type_id(self, str_type):
@@ -334,7 +335,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
     
     async def update(self, client_id, **kwargs):
