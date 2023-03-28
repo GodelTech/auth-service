@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 import pytest_asyncio
 import pytest
 from src.dyna_config import BASE_URL
@@ -16,6 +16,8 @@ from src.business_logic.services.authorization.response_type_handlers import (
     ResponseTypeHandler,
 )
 from src.data_access.postgresql.errors import (
+    UserNotFoundError,
+    ClientRedirectUriError,
     ClientNotFoundError,
     ClientScopesError,
     WrongPasswordError,
@@ -115,11 +117,11 @@ class TestAuthorizationService:
     ):
         await auth_service_with_post_request_model_and_mocked_dependencies._validate_scope()
 
-    async def test_validate_scope_with_incorrect_scope(
+    async def test_validate_scope_with_invalid_scope(
         self, auth_service_with_post_request_model_and_mocked_dependencies
     ):
         auth_service_with_post_request_model_and_mocked_dependencies.request_model.scope = (
-            "incorrect_scope"
+            "invalid_scope"
         )
         with pytest.raises(ClientScopesError):
             await auth_service_with_post_request_model_and_mocked_dependencies._validate_scope()
@@ -144,6 +146,24 @@ class TestAuthorizationService:
             WrongPasswordError
         )
         with pytest.raises(WrongPasswordError):
+            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
+
+    async def test_validate_auth_data_invalid_client(
+        self, auth_service_with_post_request_model_and_mocked_dependencies
+    ):
+        auth_service_with_post_request_model_and_mocked_dependencies.client_repo.validate_client_redirect_uri.side_effect = (
+            ClientNotFoundError
+        )
+        with pytest.raises(ClientNotFoundError):
+            await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
+
+    async def test_validate_auth_data_invalid_username(
+        self, auth_service_with_post_request_model_and_mocked_dependencies
+    ):
+        auth_service_with_post_request_model_and_mocked_dependencies.user_repo.get_hash_password.side_effect = (
+            UserNotFoundError
+        )
+        with pytest.raises(UserNotFoundError):
             await auth_service_with_post_request_model_and_mocked_dependencies._validate_auth_data()
 
     @patch("secrets.token_urlsafe")
