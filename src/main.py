@@ -31,7 +31,6 @@ from src.business_logic.get_tokens.errors import (
     InvalidRedirectUriError,
     UnsupportedGrantTypeError
 )
-
 import logging
 from src.log import LOGGING_CONFIG
 
