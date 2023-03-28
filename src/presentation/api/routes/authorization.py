@@ -117,7 +117,7 @@ async def post_authorize(
             response_class.detail
         )
         response = RedirectResponse(
-            f"{request_model.redirect_uri}?{encoded_error_dict_to_url_query}"
+            f"{request_body.redirect_uri}?{encoded_error_dict_to_url_query}"
         )
         return response
 
