@@ -26,7 +26,7 @@ from src.di.providers import (
     provide_auth_service_stub,
     provide_login_form_service_stub,
 )
-from src.dyna_config import BASE_URL
+from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import DataRequestModel, RequestModel
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ async def get_authorize(
                     "request": request,
                     "request_model": request_model,
                     "external_logins": external_logins,
-                    "base_url": BASE_URL,
+                    "base_url": DOMAIN_NAME,
                 },
                 status_code=200,
             )
@@ -93,7 +93,6 @@ async def post_authorize(
     auth_class: AuthorizationService = Depends(provide_auth_service_stub),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        request_model = RequestModel(**request_body.__dict__)
         auth_class = auth_class
         auth_class.request_model = request_body
         firmed_redirect_uri = await auth_class.get_redirect_url()

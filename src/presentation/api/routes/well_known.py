@@ -26,12 +26,8 @@ well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 logger = logging.getLogger(__name__)
 
 
-@well_known_router.get(
-    "/openid-configuration", response_model=ResponseOpenIdConfiguration
-)
-# @cache(
-#     expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG,
-# )
+@well_known_router.get("/openid-configuration", response_model=ResponseOpenIdConfiguration)
+@cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
     request: Request,
     well_known_info_class: WellKnownServices = Depends(

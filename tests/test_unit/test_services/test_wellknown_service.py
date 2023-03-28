@@ -4,7 +4,7 @@ import pytest
 from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 
-from src.dyna_config import BASE_URL
+from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.well_known import WellKnownServices
 from typing import Any, no_type_check
@@ -38,19 +38,19 @@ class TestWellKnownServices:
 
     def new_get_all_urls(self, *args:Any, **kwargs:Any) -> dict[str, str]:
         return {
-            "openapi": f"http://{BASE_URL}...enapi.json",
-            "swagger_ui_html": f"http://{BASE_URL}0/docs",
-            "swagger_ui_redirect": f"http://{BASE_URL}...2-redirect",
-            "redoc_html": f"http://{BASE_URL}0/redoc",
-            "get_authorize": f"http://{BASE_URL}...authorize/",
-            "post_authorize": f"http://{BASE_URL}...authorize/",
-            "get_userinfo": f"http://{BASE_URL}.../userinfo/",
-            "get_userinfo_jwt": f"http://{BASE_URL}...erinfo/jwt",
-            "get_default_token": f"http://{BASE_URL}...ault_token",
-            "get_openid_configuration": f"http://{BASE_URL}...figuration",
-            "get_tokens": f"http://{BASE_URL}...token",
-            "get_jwks": f"http://{BASE_URL}...jwks",
-            "end_session": f"http://{BASE_URL}...end",
+            "openapi": f"http://{DOMAIN_NAME}...enapi.json",
+            "swagger_ui_html": f"http://{DOMAIN_NAME}0/docs",
+            "swagger_ui_redirect": f"http://{DOMAIN_NAME}...2-redirect",
+            "redoc_html": f"http://{DOMAIN_NAME}0/redoc",
+            "get_authorize": f"http://{DOMAIN_NAME}...authorize/",
+            "post_authorize": f"http://{DOMAIN_NAME}...authorize/",
+            "get_userinfo": f"http://{DOMAIN_NAME}.../userinfo/",
+            "get_userinfo_jwt": f"http://{DOMAIN_NAME}...erinfo/jwt",
+            "get_default_token": f"http://{DOMAIN_NAME}...ault_token",
+            "get_openid_configuration": f"http://{DOMAIN_NAME}...figuration",
+            "get_tokens": f"http://{DOMAIN_NAME}...token",
+            "get_jwks": f"http://{DOMAIN_NAME}...jwks",
+            "end_session": f"http://{DOMAIN_NAME}...end",
             "false": "/ Not ready yet",
         }
 
