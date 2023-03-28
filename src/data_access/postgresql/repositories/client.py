@@ -325,10 +325,14 @@ class ClientRepository(BaseRepository):
             raise DuplicationError
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     async def get_access_token_type_id(self, str_type) -> int:
 =======
     async def get_access_token_type_id(self, str_type):
 >>>>>>> e77a875 (works)
+=======
+    async def get_access_token_type_id(self, str_type) -> int:
+>>>>>>> 3c2056b (exceptions_middleware)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -345,10 +349,14 @@ class ClientRepository(BaseRepository):
             return result[0].id
     
 <<<<<<< HEAD
+<<<<<<< HEAD
     async def get_refresh_token_usage_type_id(self, str_type) -> int:
 =======
     async def get_refresh_token_usage_type_id(self, str_type):
 >>>>>>> e77a875 (works)
+=======
+    async def get_refresh_token_usage_type_id(self, str_type) -> int:
+>>>>>>> 3c2056b (exceptions_middleware)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -365,10 +373,14 @@ class ClientRepository(BaseRepository):
             return result[0].id
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     async def get_refresh_token_expiration_type_id(self, str_type) -> int:
 =======
     async def get_refresh_token_expiration_type_id(self, str_type):
 >>>>>>> e77a875 (works)
+=======
+    async def get_refresh_token_expiration_type_id(self, str_type) -> int:
+>>>>>>> 3c2056b (exceptions_middleware)
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

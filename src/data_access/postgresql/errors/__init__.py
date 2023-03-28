@@ -27,6 +27,10 @@ from .third_party_oidc import (
 )
 from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .authorization import IncorrectAuthTokenError
 =======
 >>>>>>> e77a875 (works)
+=======
+from .authorization import IncorrectAuthTokenError
+>>>>>>> 3c2056b (exceptions_middleware)

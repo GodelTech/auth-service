@@ -25,7 +25,10 @@ from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3c2056b (exceptions_middleware)
 import logging
 from src.log import LOGGING_CONFIG
 
