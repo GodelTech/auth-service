@@ -205,6 +205,31 @@ class ClientRepository(BaseRepository):
                 result.append(uri[0].type + ":" + uri[0].value)
 
             return result
+    
+    async def list_all_redirect_uris_by_client(self, client_id: str) -> list[str]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.scalars(
+                select(ClientRedirectUri.redirect_uri)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return result.all()
+    
+    async def exists(self, client_id: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client)
+                .where(
+                    Client.client_id == client_id
+                ).exists().select()
+            )
+            return result.scalar()
 
     async def create(
         self, 

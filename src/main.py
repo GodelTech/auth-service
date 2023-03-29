@@ -354,14 +354,6 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
-    nodepends_provide_client_service = (
-        lambda: prov.provide_client_service(
-            client_repo=prov.provide_client_repo(db_engine),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_client_service_stub
-    ] = nodepends_provide_client_service
 
 app = get_application()
 

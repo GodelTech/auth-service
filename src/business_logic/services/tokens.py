@@ -27,10 +27,9 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.dyna_config import DOMAIN_NAME
-from src.presentation.api.models import (
-    BodyRequestRevokeModel,
-    BodyRequestTokenModel,
-)
+from src.presentation.api.models import BodyRequestRevokeModel
+from src.business_logic.get_tokens.dto import RequestTokenModel
+
 
 logger = logging.getLogger(__name__)
 from jwt.exceptions import ExpiredSignatureError
@@ -98,7 +97,7 @@ class TokenService:
             jwt_service: JWTService,
             blacklisted_repo: BlacklistedTokenRepository,
     ) -> None:
-        self.request_model: Optional[BodyRequestTokenModel] = None
+        self.request_model: Optional[RequestTokenModel] = None
         self.request_body: Optional[BodyRequestRevokeModel] = None
         self.authorization: Optional[str] = None
         self.client_repo = client_repo
@@ -166,7 +165,7 @@ class TokenService:
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel = token_service.request_model  # type: ignore
+        self.request_model: RequestTokenModel = token_service.request_model  # type: ignore
         self.client_repo: ClientRepository = token_service.client_repo
         self.persistent_grant_repo: PersistentGrantRepository = (
             token_service.persistent_grant_repo

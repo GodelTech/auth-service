@@ -1,18 +1,16 @@
 import logging
-from typing import Any, Dict, Union
-
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from src.di.providers import provide_token_service_factory_stub
+from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenModel
+from src.business_logic.get_tokens import TokenServiceFactory
 
-from src.business_logic.services import TokenService
-from src.di.providers import provide_token_service_stub
-from src.presentation.api.models.tokens import (
-    BodyRequestTokenModel,
-    ResponseTokenModel,
-)
+from typing import Union, Any, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.business_logic.get_tokens.interfaces import TokenServiceProto
 
 
-TokenEndpointResponse = Union[JSONResponse, Dict[str, Any]]
+TokenEndpointResponse = Union[JSONResponse, dict[str, Any]]
 
 
 logger = logging.getLogger(__name__)
@@ -23,12 +21,10 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 
 @token_router.post("/", response_model=ResponseTokenModel)
 async def get_tokens(
-        request: Request,
-        request_body: BodyRequestTokenModel = Depends(),
-        token_class: TokenService = Depends(provide_token_service_stub),
+        request_body: RequestTokenModel = Depends(),
+        token_service_factory: TokenServiceFactory = Depends(provide_token_service_factory_stub),
 ) -> TokenEndpointResponse:
-    token_class.request = request
-    token_class.request_model = request_body
-    result = await token_class.get_tokens()
+    token_service: TokenServiceProto = token_service_factory.get_service_impl(request_body.grant_type)
+    result = await token_service.get_tokens(request_body)
     headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
     return JSONResponse(content=result, headers=headers)
