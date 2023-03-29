@@ -9,6 +9,8 @@ The project uses [poetry](https://github.com/python-poetry/poetry) to manage dep
 ```bash
 poetry install
 ```
+**Note:** the project has a [`.python-version`](https://github.com/GodelTech/auth-service/blob/main/.python-version) file - if you use [pyenv](https://github.com/pyenv/pyenv) to manage your python versions, it will try to use the version pinned in the file.
+
 - To activate the virtual environment run:
 ```bash
 poetry shell
@@ -18,8 +20,6 @@ Poetry keeps virtualenvs in `$HOME/.cache/pypoetry/virtualenvs` by default. If y
 ```bash
 poetry config virtualenvs.in-project true
 ```
-
-**Note:** the project has a [`.python-version`](https://github.com/GodelTech/auth-service/blob/main/.python-version) file - if you use [pyenv](https://github.com/pyenv/pyenv) to manage your python versions, it will try to use the version pinned in the file.
 
 ## Running the project locally
 
