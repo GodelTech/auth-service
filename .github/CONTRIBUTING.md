@@ -13,9 +13,9 @@ poetry install
 ```bash
 poetry shell
 ```
-Poetry keeps virtualenvs in `$HOME/.cache/pypoetry/virtualenvs` by default. If you use VSCode, you'll need to point it at this path for it to recognize the virtualenv.
+Poetry keeps virtualenvs in `$HOME/.cache/pypoetry/virtualenvs` by default. If you use VSCode, you'll need to point it at this path for it to recognize the virtualenv: add `"python.venvPath": "$HOME/.cache/pypoetry/virtualenvs"` to your settings.
 
-**Note:** the project has a [`.python-version`](https://github.com/GodelTech/auth-service/blob/main/.python-version) file - if you use `pyenv` to manage your python versions, it will use the version pinned in the file.
+**Note:** the project has a [`.python-version`](https://github.com/GodelTech/auth-service/blob/main/.python-version) file - if you use `pyenv` to manage your python versions, it will try to use the version pinned in the file.
 
 ## Running the project locally
 
@@ -56,15 +56,15 @@ alembic revision --autogenerate -m "YOUR_MESSAGE"
 
 When you first log in, use **username**:*admin@example.com*, **password**:*admin*. Then create your personal account.
 
-Register the project db with:
+Register the db server with:
   - **name:** *is_db*
-  -  **address:** *172.20.0.1*
+  - **address:** *172.20.0.1*
   - **username:** *postgres*
   - **password:** *postgres*
 
 ## Running tests
 
-Tests run inside `postgres` container.
+Tests run inside `postgres` container. Remember to set `ENV_FOR_DYNACONF` to `test` inside your `.env` file.
 To run tests, use:
 ```bash
 poetry run pytest
