@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Union
 
-from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from httpx import AsyncClient
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from src.business_logic.services import (
     AuthThirdPartyOIDCService,
@@ -15,9 +14,7 @@ from src.business_logic.services import (
     ThirdPartyMicrosoftService,
 )
 from src.data_access.postgresql.errors import (
-    ClientNotFoundError,
     ThirdPartyStateDuplicationError,
-    ThirdPartyStateNotFoundError,
     WrongDataError,
 )
 from src.di.providers import (
@@ -43,8 +40,6 @@ auth_oidc_router = APIRouter(
     prefix="/authorize/oidc", tags=["OIDC Authorization"]
 )
 
-# http://127.0.0.1:8000/authorize/oidc/github
-
 
 @auth_oidc_router.get(
     "/github",
@@ -57,17 +52,15 @@ async def get_github_authorize(
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_github_redirect_uri(
             provider_name="github"
         )
         if github_redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -91,17 +84,15 @@ async def get_linkedin_authorize(
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         linkedin_redirect_uri = await auth_class.get_redirect_uri(
             provider_name="linkedin"
         )
         if linkedin_redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             linkedin_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -128,17 +119,15 @@ async def get_facebook_authorize(
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_facebook_redirect_uri(
             provider_name="facebook"
         )
         if github_redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -165,17 +154,15 @@ async def get_google_authorize(
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_google_redirect_uri(
             provider_name="google"
         )
         if github_redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -202,17 +189,15 @@ async def get_gitlab_authorize(
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_redirect_uri(
             provider_name="gitlab"
         )
         if github_redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -246,10 +231,9 @@ async def get_microsoft_authorize(
         )
         if redirect_uri is None:
             raise WrongDataError
-        response = RedirectResponse(
+        return RedirectResponse(
             redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except WrongDataError as exception:
         logger.exception(exception)
@@ -276,7 +260,6 @@ async def post_create_state(
     ),
 ) -> Union[None, JSONResponse, int]:
     try:
-        auth_class = auth_class
         auth_class.state_request_model = state_request_model
         await auth_class.create_provider_state()
         return status.HTTP_200_OK
