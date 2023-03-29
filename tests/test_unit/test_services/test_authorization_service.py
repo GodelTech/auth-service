@@ -133,8 +133,9 @@ class TestAuthorizationService:
         AuthorizationService, "_validate_scope", new_callable=AsyncMock
     )
     async def test_validate_auth_data(self, _validate_scope_mock):
+        user_id = 1
         result = await self.auth_service._validate_auth_data()
-        assert result is 1
+        assert result == user_id
 
     async def test_validate_auth_data_invalid_password(self):
         self.auth_service.password_service.validate_password.side_effect = (
