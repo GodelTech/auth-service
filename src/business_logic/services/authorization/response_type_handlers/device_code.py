@@ -12,7 +12,7 @@ class DeviceCodeResponseTypeHandler(ResponseTypeHandlerBase):
         device = await self.auth_service.device_repo.get_device_by_user_code(
             user_code=user_code
         )
-        secret_code = device.device_code.value
+        secret_code = device.device_code
         await self.auth_service.persistent_grant_repo.create(
             client_id=self.auth_service.request_model.client_id,
             grant_data=secret_code,

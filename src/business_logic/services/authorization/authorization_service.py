@@ -54,7 +54,10 @@ class AuthorizationService:
         client_scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id  # TODO it should be possible to pass self.request.client_id here directly
         )
-        if self.request_model.scope != client_scopes:
+        if (
+            "user_code" not in self.request_model.scope
+            and self.request_model.scope != client_scopes
+        ):
             raise ClientScopesError
 
     async def _validate_auth_data(self) -> int:

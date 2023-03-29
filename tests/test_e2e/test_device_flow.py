@@ -69,7 +69,9 @@ class TestDeviceFlow:
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
             "redirect_uri": "https://www.google.com/",
         }
-        response = await client.request("GET", "/authorize/", params=params_4th)
+        response = await client.request(
+            "GET", "/authorize/", params=params_4th
+        )
         assert response.status_code == status.HTTP_200_OK
 
         # 5th stage: suppose we press confirm, this requests the redirect to authorization endpoint with POST
@@ -202,7 +204,9 @@ class TestDeviceFlow:
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
             "redirect_uri": "https://www.google.com/",
         }
-        response = await client.request("GET", "/authorize/", params=params_4th)
+        response = await client.request(
+            "GET", "/authorize/", params=params_4th
+        )
         assert response.status_code == status.HTTP_200_OK
 
         # 5th stage: suppose we press cancel, then uoe code cleans the device table
