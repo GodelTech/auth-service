@@ -206,7 +206,6 @@ class ClientRepository(BaseRepository):
 
             return result
 
-    ####specify Exeptions#############
     async def create(
         self, 
         params: dict[str:Any],
@@ -222,7 +221,7 @@ class ClientRepository(BaseRepository):
                 await session.commit()
         except:
             raise DuplicationError
-
+    
     async def add_secret(
         self, 
         client_id_int:int,
@@ -303,7 +302,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                raise ValueError
+                ValueError
             return result[0].id
     
     async def get_refresh_token_usage_type_id(self, str_type):
@@ -319,7 +318,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                raise ValueError
+                ValueError
             return result[0].id
 
     async def get_refresh_token_expiration_type_id(self, str_type):
@@ -335,7 +334,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                raise ValueError
+                ValueError
             return result[0].id
     
     async def update(self, client_id, **kwargs):
