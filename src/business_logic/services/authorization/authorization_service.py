@@ -55,7 +55,8 @@ class AuthorizationService:
             client_id=client_from_db.id  # TODO it should be possible to pass self.request.client_id here directly
         )
         if (
-            "user_code" not in self.request_model.scope
+            "user_code"
+            not in self.request_model.scope  # TODO first part of this condition needs to be deleted after device auth refactor
             and self.request_model.scope != client_scopes
         ):
             raise ClientScopesError

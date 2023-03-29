@@ -22,9 +22,7 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
     WrongResponseTypeError,
 )
-from tests.test_unit.fixtures import (  # TODO shouldn't it be just in conftest files?
-    auth_post_request_model,
-)
+from tests.test_unit.fixtures import auth_post_request_model
 
 
 @pytest_asyncio.fixture
