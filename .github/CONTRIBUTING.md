@@ -13,7 +13,11 @@ poetry install
 ```bash
 poetry shell
 ```
-Poetry keeps virtualenvs in `$HOME/.cache/pypoetry/virtualenvs` by default. If you use VSCode, you'll need to point it at this path for it to recognize the virtualenv: add `"python.venvPath": "$HOME/.cache/pypoetry/virtualenvs"` to your settings.
+
+Poetry keeps virtualenvs in `$HOME/.cache/pypoetry/virtualenvs` by default. If you use VSCode, you'll need to point it at this path for it to recognize the virtualenv: add `"python.venvPath": "$HOME/.cache/pypoetry/virtualenvs"` to your settings. Alternatively, you can make it create virtualenvs in a classic per-project `.venv` directory:
+```bash
+poetry config virtualenvs.in-project true
+```
 
 **Note:** the project has a [`.python-version`](https://github.com/GodelTech/auth-service/blob/main/.python-version) file - if you use [pyenv](https://github.com/pyenv/pyenv) to manage your python versions, it will try to use the version pinned in the file.
 
