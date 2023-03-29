@@ -351,6 +351,21 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
+    nodepends_provide_token_service_factory = (
+        lambda: prov.provide_token_service_factory(
+            client_repo=prov.provide_client_repo(db_engine),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
+            user_repo=prov.provide_user_repo(db_engine),
+            device_repo=prov.provide_device_repo(db_engine),
+            blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+            jwt_service=prov.provide_jwt_manager(),
+        )
+    )
+
+    app.dependency_overrides[
+        prov.provide_token_service_factory_stub
+    ] = nodepends_provide_token_service_factory
+
 
 app = get_application()
 

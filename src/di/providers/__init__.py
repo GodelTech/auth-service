@@ -60,3 +60,11 @@ from .services import (
     provide_userinfo_service,
     provide_userinfo_service_stub,
 )
+from .services_factory import (
+    provide_token_service_factory_stub,
+    provide_token_service_factory,
+)
+from .jwt_manager import (
+    provide_jwt_manager,
+    provide_jwt_manager_stub,
+)

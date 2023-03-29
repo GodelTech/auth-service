@@ -17,6 +17,7 @@ from src.data_access.postgresql.tables import (
 )
 from sqlalchemy.engine.result import ChunkedIteratorResult
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -75,24 +76,20 @@ class PersistentGrantRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        async with session_factory() as sess:
-            session = sess
-
+        async with session_factory() as session:
             result = await session.execute(
                 select(PersistentGrant)
                 .join(
                     PersistentGrantType,
-                    PersistentGrantType.id
-                    == PersistentGrant.persistent_grant_type_id,
+                    PersistentGrant.persistent_grant_type_id ==
+                    PersistentGrantType.id,
                 )
                 .where(
-                    PersistentGrantType.type_of_grant == grant_type,
                     PersistentGrant.grant_data == grant_data,
-                )
+                    PersistentGrantType.type_of_grant == grant_type,
+                ).exists().select()
             )
-
-            result = result.first()
-            return bool(result)
+            return result.scalar()
 
     async def get(self, grant_type: str, grant_data: str) -> PersistentGrant:
         grant_type_id = await self.get_type_id(type_of_grant=grant_type)
