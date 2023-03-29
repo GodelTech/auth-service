@@ -11,6 +11,7 @@ class TokenResponseTypeHandler(TokenResponseTypeHandlerBase):
             additional_data={"scopes": self.auth_service.request_model.scope},
             jwt_service=self.auth_service.jwt_service,
             expiration_time=self.expiration_time,
+            aud=["userinfo", "introspection", "revoke"],
         )
         query_params = f"access_token={access_token}&token_type=Bearer&expires_in={self.expiration_time}"
         redirect_url = (
