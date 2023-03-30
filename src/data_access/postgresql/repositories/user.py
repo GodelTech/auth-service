@@ -120,6 +120,18 @@ class UserRepository(BaseRepository):
 
         return result
 
+    async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            
+            await session.execute(
+                insert(UserClaim).values(claims)
+            )
+            await session.commit()
+
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -502,6 +514,30 @@ class UserRepository(BaseRepository):
             )
             result = result.first()
             return result[0]
+    
+    async def validate_user_by_email(self, email: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                select(exists().where(User.email == email))
+            )
+            result = result.first()
+            return result[0]
+    
 
+    async def get_all_claim_types(self) -> dict[str, int]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                select(UserClaimType.id, UserClaimType.type_of_claim)
+            )
+            return {value[1]:int(value[0]) for value in result.all()}
+         
     def __repr__(self) -> str:  # pragma: no cover
         return "User repository"
