@@ -1,5 +1,5 @@
 from .factory import TokenServiceFactory
-from .interfaces import TokenServiceProto
+from .interfaces import TokenServiceProtocol
 
 
-__all__ = ['TokenServiceFactory', 'TokenServiceProto']
+__all__ = ['TokenServiceFactory', 'TokenServiceProtocol']
