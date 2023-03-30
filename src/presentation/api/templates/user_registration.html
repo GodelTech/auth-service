@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/user_register.css')}}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+  </head>
+  <body>
+    <h1>Registration Form</h1>
+    <form method="POST" action="/user/register">
+      <div class="form-group">
+        <label for="name">First Name:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="given-name">Given Name:</label>
+        <input type="text" id="given-name" name="given_name">
+    </div>
+    <div class="form-group">
+        <label for="family-name">Family Name:</label>
+        <input type="text" id="family-name" name="family_name">
+    </div>
+    <div class="form-group">
+        <label for="middle-name">Middle Name:</label>
+        <input type="text" id="middle-name" name="middle_name">
+    </div>
+    <div class="form-group">
+        <label for="preferred-username">Preferred Username:</label>
+        <input type="text" id="preferred-username" name="preferred_username">
+    </div>
+      <div class="form-group">
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="profile">Profile URL:</label>
+        <input type="url" id="profile" name="profile">
+    </div>
+    <div class="form-group">
+        <label for="picture">Picture URL:</label>
+        <input type="url" id="picture" name="picture">
+    </div>
+    <div class="form-group">
+        <label for="website">Website URL:</label>
+        <input type="url" id="website" name="website">
+    </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+        <span class="error-message" id="password-error"></span>
+      </div>
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" class="form-control" required>
+          <option value="">Your gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="non-binary">Non-binary</option>
+          <option value="genderqueer">Genderqueer</option>
+          <option value="transgender">Transgender</option>
+          <option value="intersex">Intersex</option>
+          <option value="agender">Agender</option>
+          <option value="bigender">Bigender</option>
+          <option value="demigender">Demigender</option>
+          <option value="pangender">Pangender</option>
+          <option value="androgyne">Androgyne</option>
+          <option value="neutrois">Neutrois</option>
+          <option value="two-spirit">Two-spirit</option>
+          <option value="third gender">Third gender</option>
+          <option value="transmasculine">Transmasculine</option>
+          <option value="transfeminine">Transfeminine</option>
+          <option value="genderfluid">Genderfluid</option>
+          <option value="gender questioning">Gender questioning</option>
+          <option value="other">Other</option>
+          <option value="none">Prefer not to say</option>
+          <option value="cisgender male">Cisgender male</option>
+          <option value="cisgender female">Cisgender female</option>
+          <option value="cisgender">Cisgender</option>
+          <option value="transsexual">Transsexual</option>
+          <option value="transvestite">Transvestite</option>
+          <option value="cross-dresser">Cross-dresser</option>
+          <option value="drag king">Drag king</option>
+          <option value="drag queen">Drag queen</option>
+          <option value="androgynous">Androgynous</option>
+          <option value="other-gendered">Other gendered</option>
+          <option value="other-identified">Other identified</option>
+          <option value="prefer not to disclose">Prefer not to disclose</option>
+          <option value="queer">Queer</option>
+          <option value="questioning">Questioning</option>
+          <option value="fluid">Fluid</option>
+          <option value="nonconforming">Non-conforming</option>
+          <option value="neither">Neither</option>
+          <option value="don't know">Don't know</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="phone_number">Phone Number:</label>
+        <div class="phone-number-group">
+          <select id="country_code" name="country_code">
+            <option value="+1">+1</option>
+            <option value="+44">+44</option>
+            <option value="+375">+375</option>
+            <option value="+48">+48</option>
+          </select>
+          <input type="text" id="phone_number" name="phone_number" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="birthdate">Birthdate</label>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" required>
+      </div>
+      <div class="form-group">
+        <label for="zoneinfo">Timezone:</label>
+        <select name="zoneinfo" id="zoneinfo" required>
+          <option value="">Select Timezone</option>
+          <!-- generate options for all timezones using Moment.js -->
+          <script>
+            var timezones = moment.tz.names();
+            for (var i = 0; i < timezones.length; i++) {
+              document.write("<option value=\"" + timezones[i] + "\">" + timezones[i] + "</option>");
+            }
+          </script>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required>
+      </div>
+      <div class="form-group">
+        <input type="checkbox" id="terms" name="terms" required>
+        <label for="terms">I agree to the terms and conditions.</label>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Register">
+      </div>
+    </form>
+    <script src="{{ url_for('static', path='/user_register.js')}}"></script>
+  </body>
+</html>

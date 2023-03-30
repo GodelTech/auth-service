@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registration Successful</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/user_register.css')}}">
+    <style>
+      /* CSS for confetti animation */
+      .form-group p {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        }
+
+      .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100vw;
+        z-index: -1;
+        overflow: hidden;
+      }
+
+      .confetti {
+        position: absolute;
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        box-shadow: 1px 1px 5px #e6e6e6, -1px -1px 5px #e6e6e6;
+        animation: confetti 3s ease-in-out infinite;
+      }
+
+      .confetti:nth-child(1) {
+        left: 5%;
+        animation-delay: 0.1s;
+        background-color: #f0e68c;
+      }
+
+      .confetti:nth-child(2) {
+        left: 15%;
+        animation-delay: 0.3s;
+        background-color: #f0e68c;
+      }
+
+      .confetti:nth-child(3) {
+        left: 25%;
+        animation-delay: 0.5s;
+        background-color: #f0e68c;
+      }
+
+      .confetti:nth-child(4) {
+        left: 35%;
+        animation-delay: 0.7s;
+        background-color: #f0e68c;
+      }
+      .confetti:nth-child(5) {
+        left: 45%;
+        animation-delay: 0.1s;
+        background-color: #f0e68c;
+      }
+
+      .confetti:nth-child(6) {
+        left: 55%;
+        animation-delay: 1.3s;
+        background-color: #f0e68c;
+      }
+
+      .confetti:nth-child(7) {
+        left: 65%;
+        animation-delay: 0.5s;
+        background-color: #8cf0ca;
+      }
+
+      .confetti:nth-child(8) {
+        left: 75%;
+        animation-delay: 1.7s;
+        background-color: #8cacf0;
+      }
+      .confetti:nth-child(9) {
+        left: 85%;
+        animation-delay: 0.1s;
+        background-color: #8cf094;
+      }
+
+      .confetti:nth-child(10) {
+        left: 95%;
+        animation-delay: 0.3s;
+        background-color: #b78cf0;
+      }
+
+      .confetti:nth-child(11) {
+        left: 20%;
+        animation-delay: 1.5s;
+        background-color: #8cf099;
+      }
+
+      .confetti:nth-child(12) {
+        left: 32%;
+        animation-delay: 1.7s;
+        background-color: #f18f8c;
+      }
+
+      @keyframes confetti {
+        0% {
+          top: 0;
+          transform: rotateZ(0);
+        }
+        100% {
+          top: 100%;
+          transform: rotateZ(720deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="confetti-container">
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+      <div class="confetti"></div>
+
+    </div>
+    <!-- <h1>Registration Successful</h1> -->
+    <div class="container">
+        <div class="form-container">
+          <h1>OIDC Registration Success</h1>
+          <div class="form-group">
+            <p>Thank you for registering with our OIDC service.</p>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
+

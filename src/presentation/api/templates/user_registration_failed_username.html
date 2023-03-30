@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registration Successful</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/user_register.css')}}">
+    <style>
+      /* CSS for confetti animation */
+      .form-group p {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <div class="form-container">
+          <h1>OIDC Registration Failed</h1>
+          <div class="form-group">
+            <p>User with this username already exists</p>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
+
