@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class ResponseTypeHandler(Protocol):
+class ResponseTypeHandlerProtocol(Protocol):
     def __init__(self, auth_service: AuthorizationService) -> None:
         ...
 

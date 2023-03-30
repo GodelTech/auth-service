@@ -12,7 +12,7 @@ from src.business_logic.services.authorization.response_type_handlers import (
     IdTokenTokenResponseTypeHandler,
     DeviceCodeResponseTypeHandler,
     ResponseTypeHandlerBase,
-    ResponseTypeHandler,
+    ResponseTypeHandlerProtocol,
     ResponseTypeHandlerFactory,
 )
 from src.data_access.postgresql.errors import (
@@ -193,7 +193,7 @@ class TestTokenResponseTypeHandler:
         assert isinstance(
             token_response_type_handler,
             (
-                ResponseTypeHandler,
+                ResponseTypeHandlerProtocol,
                 ResponseTypeHandlerBase,
                 TokenResponseTypeHandler,
             ),
@@ -221,7 +221,7 @@ class TestIdTokenResponseTypeHandler:
         assert isinstance(
             id_token_response_type_handler,
             (
-                ResponseTypeHandler,
+                ResponseTypeHandlerProtocol,
                 ResponseTypeHandlerBase,
                 TokenResponseTypeHandler,
             ),
@@ -252,7 +252,7 @@ class TestIdTokenTokenResponseTypeHandler:
         assert isinstance(
             id_token_token_response_type_handler,
             (
-                ResponseTypeHandler,
+                ResponseTypeHandlerProtocol,
                 ResponseTypeHandlerBase,
                 TokenResponseTypeHandler,
             ),
@@ -287,7 +287,7 @@ class TestDeviceResponseTypeHandler:
         assert isinstance(
             device_code_response_type_handler,
             (
-                ResponseTypeHandler,
+                ResponseTypeHandlerProtocol,
                 ResponseTypeHandlerBase,
             ),
         )

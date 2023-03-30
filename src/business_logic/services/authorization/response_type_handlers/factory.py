@@ -16,23 +16,23 @@ if TYPE_CHECKING:
         AuthorizationService,
     )
     from src.business_logic.services.authorization.response_type_handlers import (
-        ResponseTypeHandler,
+        ResponseTypeHandlerProtocol,
     )
 
 
 class ResponseTypeHandlerFactory:
-    _handlers: dict[str, Type[ResponseTypeHandler]] = {}
+    _handlers: dict[str, Type[ResponseTypeHandlerProtocol]] = {}
 
     @staticmethod
     def register_handler(
-        response_type: str, handler: Type[ResponseTypeHandler]
+        response_type: str, handler: Type[ResponseTypeHandlerProtocol]
     ) -> None:
         ResponseTypeHandlerFactory._handlers[response_type] = handler
 
     @staticmethod
     def get_handler(
         response_type: str, auth_service: AuthorizationService
-    ) -> ResponseTypeHandler:
+    ) -> ResponseTypeHandlerProtocol:
         handler = ResponseTypeHandlerFactory._handlers.get(response_type)
         if not handler:
             raise WrongResponseTypeError
