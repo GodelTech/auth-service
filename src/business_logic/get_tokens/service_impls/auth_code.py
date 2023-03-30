@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.business_logic.get_tokens.dto import RequestTokenModel, ResponseTokenModel
-    from src.business_logic.common.interfaces import ValidatorProto
+    from src.business_logic.common.interfaces import ValidatorProtocol
     from src.business_logic.jwt_manager.interfaces import JWTServiceProto
 
 
@@ -13,9 +13,9 @@ class AuthorizationCodeTokenService:
     """
     def __init__(
             self,
-            grant_validator: 'ValidatorProto',
-            redirect_uri_validator: 'ValidatorProto',
-            client_validator: 'ValidatorProto',
+            grant_validator: 'ValidatorProtocol',
+            redirect_uri_validator: 'ValidatorProtocol',
+            client_validator: 'ValidatorProtocol',
             jwt_manager: 'JWTServiceProto',
     ):
         self._grant_validator = grant_validator

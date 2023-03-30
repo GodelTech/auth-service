@@ -7,7 +7,7 @@ from src.business_logic.get_tokens import TokenServiceFactory
 
 from typing import Union, Any, TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.business_logic.get_tokens.interfaces import TokenServiceProto
+    from src.business_logic.get_tokens.interfaces import TokenServiceProtocol
 
 
 TokenEndpointResponse = Union[JSONResponse, dict[str, Any]]
@@ -24,7 +24,7 @@ async def get_tokens(
         request_body: RequestTokenModel = Depends(),
         token_service_factory: TokenServiceFactory = Depends(provide_token_service_factory_stub),
 ) -> TokenEndpointResponse:
-    token_service: TokenServiceProto = token_service_factory.get_service_impl(request_body.grant_type)
+    token_service: 'TokenServiceProtocol' = token_service_factory.get_service_impl(request_body.grant_type)
     result = await token_service.get_tokens(request_body)
     headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
     return JSONResponse(content=result, headers=headers)

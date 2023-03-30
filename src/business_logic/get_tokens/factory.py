@@ -1,11 +1,10 @@
 from src.business_logic.get_tokens.service_impls import AuthorizationCodeTokenService
 from src.business_logic.get_tokens.validators import ValidatePersistentGrant, ValidateRedirectUri
 from src.business_logic.common.validators import ValidateClient
-from src.business_logic.jwt_manager import JWTManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .interfaces import TokenServiceProto
+    from .interfaces import TokenServiceProtocol
     from src.data_access.postgresql.repositories import (
         BlacklistedTokenRepository,
         ClientRepository,
@@ -34,7 +33,7 @@ class TokenServiceFactory:
         self._jwt_manager = jwt_manager
         self._blacklisted_repo = blacklisted_repo
 
-    def get_service_impl(self, grant_type: str) -> 'TokenServiceProto':
+    def get_service_impl(self, grant_type: str) -> 'TokenServiceProtocol':
         if grant_type == 'authorization_code':
             return AuthorizationCodeTokenService(
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
