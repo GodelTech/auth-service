@@ -302,7 +302,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
     
     async def get_refresh_token_usage_type_id(self, str_type):
@@ -318,7 +318,7 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
 
     async def get_refresh_token_expiration_type_id(self, str_type):
@@ -334,9 +334,9 @@ class ClientRepository(BaseRepository):
             result = result.first()
 
             if result is None:
-                ValueError
+                raise ValueError
             return result[0].id
-    
+
     async def update(self, client_id, **kwargs):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -447,9 +447,6 @@ class ClientRepository(BaseRepository):
     async def delete_clients_response_types(self, client_id_int):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
-        )  
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
@@ -458,9 +455,6 @@ class ClientRepository(BaseRepository):
             await session.commit()
     
     async def delete_clients_grant_types(self, client_id_int):
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )  
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )

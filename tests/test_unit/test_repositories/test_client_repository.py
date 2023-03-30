@@ -1,18 +1,12 @@
 import uuid
 from unittest.mock import AsyncMock
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import exists, select, insert, update, delete, text
 
 import pytest
 from sqlalchemy.orm import sessionmaker
 
-from data_access.postgresql.errors import DuplicationError
-from src.data_access.postgresql.errors.client import (
-    ClientNotFoundError,
-    ClientRedirectUriError,
-)
 from src.data_access.postgresql.repositories.client import ClientRepository
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -25,17 +19,15 @@ from src.data_access.postgresql.errors.client import (
 from src.data_access.postgresql.tables.client import (
     Client,
     ClientClaim,
-    ClientPostLogoutRedirectUri,
     ClientRedirectUri,
     ClientScope,
     ClientSecret,
-    AccessTokenType,
-    RefreshTokenExpirationType,
-    RefreshTokenUsageType,
     ResponseType,
     clients_response_types,
     clients_grant_types,
 )
+from data_access.postgresql.tables.persistent_grant import PersistentGrantType
+
 
 @pytest.mark.asyncio
 class TestClientRepository:
@@ -65,20 +57,13 @@ class TestClientRepository:
         )
         assert result == boolean
 
-    # validate_client_by_int_id differ for validate_client_by_client_id by
-    # containing ClientNotFoundError. Do we need one? Check in docs: 
-    # https://connect2id.com/products/server/docs/api/client-registration
-    @pytest.mark.parametrize("int_id, boolean",
-                             [(1, True),])
-                              # (999, False)])
-    async def test_validate_client_by_int_id(self, engine: AsyncEngine,
-                                                int_id,
-                                                boolean) -> None:
+
+    async def test_validate_client_by_int_id(self, engine: AsyncEngine) -> None:
         client_repo = ClientRepository(engine)
         result = await client_repo.validate_client_by_int_id(
-            client_id=int_id
+            client_id=1
         )
-        assert result == boolean
+        assert result == True
 
     async def test_validate_client_by_int_id_not_exists(self, engine: AsyncEngine) -> None:
         client_repo_error = ClientRepository(engine)
@@ -132,9 +117,7 @@ class TestClientRepository:
         )
         assert uri is True
 
-    async def test_validate_client_redirect_uri_error(self,
-                                                      engine: AsyncEngine,
-                                                      monkeypatch) -> None:
+    async def test_validate_client_redirect_uri_error(self, engine: AsyncEngine, monkeypatch) -> None:
         mock_get_client_by_client_id = AsyncMock()
         mock_get_client_by_client_id.return_value = AsyncMock(id=1)
         monkeypatch.setattr(ClientRepository,
@@ -175,16 +158,6 @@ class TestClientRepository:
         assert isinstance(result, list)
         assert len(result) == 0
 
-######################async def test_get_client_claims#################################
-    # test_client = (await session.execute(
-    #     select(Client).where(Client.client_id == "test_client")
-    # )).scalar_one_or_none()
-    # test_client_claim = ClientClaim(type="",
-    #                                 value="",
-    #                                 client_id=1,
-    #                                 client=test_client)
-    # session.add(test_client_claim)
-
     async def test_get_client_claims(self, engine: AsyncEngine) -> None:
         session_factory = sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
@@ -209,7 +182,6 @@ class TestClientRepository:
 
         assert isinstance(result, list)
         assert len(result) == 0
-
 
     async def test_create(self, engine: AsyncEngine) -> None:
         client_repo = ClientRepository(engine)
@@ -272,7 +244,6 @@ class TestClientRepository:
 
         unique_client_id = f"test_client_{uuid.uuid4()}"
         new_client = {
-            # "id": 99,
             "client_id": unique_client_id,
             "client_name": "regtestent",
             "client_uri": "http://regtestent.com/",
@@ -284,7 +255,6 @@ class TestClientRepository:
             "refresh_token_expiration_type_id": 1,
             "access_token_type_id": 1,
             "protocol_type_id": 1,
-
         }
 
         session_factory = sessionmaker(
@@ -293,8 +263,7 @@ class TestClientRepository:
         async with session_factory() as session:
             result = await session.execute(insert(Client).values(**new_client).returning(Client.id))
             client_id_int = result.scalar_one()
-            # await session.execute(insert(Client).values(**new_client))
-            # client_id_int = await session.
+
             await session.commit()
 
         await client_repo.add_secret(client_id_int=client_id_int, value="test_secret")
@@ -319,7 +288,6 @@ class TestClientRepository:
 
         unique_client_id = f"test_client_{uuid.uuid4()}"
         new_client = {
-            # "id": 101,
             "client_id": unique_client_id,
             "client_name": "regtestent",
             "client_uri": "http://regtestent.com/",
@@ -337,7 +305,6 @@ class TestClientRepository:
             engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as session:
-            # await session.execute(insert(Client).values(**new_client))
             result = await session.execute(insert(Client).values(**new_client).returning(Client.id))
             client_id_int = result.scalar_one()
             await session.commit()
@@ -391,18 +358,10 @@ class TestClientRepository:
                                             redirect_uris=insert_redirect_uris)
 
         async with session_factory() as session:
-            # uris_object = await session.execute(
-            #     select(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
-            # )
-            # # res_redirect_uris = [uri_obj.redirect_uri for uri_obj in uris_object.scalars()]
-            # res_redirect_uris = [uri_obj[0].redirect_uri for uri_obj in uris_object.all()]
-
             uris_object = await session.scalars(
                 select(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
             )
             res_redirect_uris = [uri_obj.redirect_uri for uri_obj in uris_object.all()]
-
-            # uris = uris_object.scalar_one_or_none()
 
             assert res_redirect_uris is not None
             assert res_redirect_uris == insert_redirect_uris
@@ -607,6 +566,247 @@ class TestClientRepository:
             redirect_uri = redirect_uri.scalar_one_or_none()
 
             assert redirect_uri is None
+
+
+    async def test_delete_client_by_client_id(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+
+        unique_client_id = f"test_client_{uuid.uuid4()}"
+        new_client = {
+            "client_id": unique_client_id,
+            "client_name": "regtestent",
+            "client_uri": "http://regtestent.com/",
+            "logo_uri": "https://www.regtestent-logo.com/",
+            "token_endpoint_auth_method": "client_secret_post",
+            "require_consent": False,
+            "require_pkce": True,
+            "refresh_token_usage_type_id": 2,
+            "refresh_token_expiration_type_id": 1,
+            "access_token_type_id": 1,
+            "protocol_type_id": 1,
+        }
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            await session.execute(insert(Client).values(**new_client))
+            await session.commit()
+
+        async with session_factory() as session:
+            client = await session.execute(
+                select(Client).where(Client.client_id == unique_client_id)
+            )
+            client = client.scalar_one_or_none()
+
+        assert client is not None
+
+        await client_repo.delete_client_by_client_id(client_id=unique_client_id)
+
+        async with session_factory() as session:
+            client = await session.execute(
+                select(Client).where(Client.client_id == unique_client_id)
+            )
+            client = client.scalar_one_or_none()
+
+            assert client is None
+
+    async def test_get_all(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            clients = await session.scalars(select(Client))
+            repo_clients_lst = [str(client) for client in clients.all()]
+            await session.commit()
+
+        function_clients_lst = [str(client) for client in await client_repo.get_all()]
+
+        assert isinstance(repo_clients_lst, list)
+        assert repo_clients_lst == function_clients_lst
+
+
+    async def test_add_response_type(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+
+        await client_repo.add_response_type(client_id_int=1, response_type="code")
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        async with session_factory() as session:
+            query = select(
+                clients_response_types.c.client_id,
+                clients_response_types.c.response_type_id
+            ).select_from(
+                clients_response_types
+                .join(Client, Client.id == clients_response_types.c.client_id)
+                .join(ResponseType, ResponseType.id == clients_response_types.c.response_type_id)
+            ).where(clients_response_types.c.client_id == 1)
+
+            result = await session.execute(query)
+            row = result.fetchone()
+
+            assert row is not None
+            assert row.client_id == 1
+            assert row.response_type_id == 1
+
+
+    async def test_add_response_type_for_non_existent_client(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+        with pytest.raises(Exception):
+            await client_repo.add_response_type(client_id_int=99, response_type="code")
+
+    async def test_add_response_type_for_non_existent_response_type(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+        with pytest.raises(Exception):
+            await client_repo.add_response_type(client_id_int=1, response_type="non_existent_response_type")
+
+    async def test_add_grant_type(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+
+        await client_repo.add_grant_type(client_id_int=1, grant_type="authorization_code")
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        async with session_factory() as session:
+            query = select(
+                clients_grant_types.c.client_id,
+                clients_grant_types.c.persistent_grant_type_id
+            ).select_from(
+                clients_grant_types
+                .join(Client, Client.id == clients_grant_types.c.client_id)
+                .join(PersistentGrantType, PersistentGrantType.id == clients_grant_types.c.persistent_grant_type_id)
+            ).where(clients_grant_types.c.client_id == 1)
+
+            result = await session.execute(query)
+            row = result.fetchone()
+
+            assert row is not None
+            assert row.client_id == 1
+            assert row.persistent_grant_type_id == 1
+
+    async def test_add_grant_type_for_non_existent_client(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+        with pytest.raises(Exception):
+            await client_repo.add_grant_type(client_id_int=99, grant_type="authorization_code")
+
+    async def test_add_grant_type_for_non_existent_grant_type(self, engine: AsyncEngine) -> None:
+        client_repo = ClientRepository(engine)
+        with pytest.raises(Exception):
+            await client_repo.add_grant_type(client_id_int=1, grant_type="non_existent_grant_type")
+
+    async def test_delete_clients_response_types(self, engine: AsyncEngine) -> None:
+        unique_client_id = f"test_client_{uuid.uuid4()}"
+        new_client = {
+            "client_id": unique_client_id,
+            "client_name": "regtestent",
+            "client_uri": "http://regtestent.com/",
+            "logo_uri": "https://www.regtestent-logo.com/",
+            "token_endpoint_auth_method": "client_secret_post",
+            "require_consent": False,
+            "require_pkce": True,
+            "refresh_token_usage_type_id": 2,
+            "refresh_token_expiration_type_id": 1,
+            "access_token_type_id": 1,
+            "protocol_type_id": 1,
+        }
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(insert(Client).values(**new_client).returning(Client.id))
+            client_id_int = result.scalar_one()
+            await session.execute(
+                insert(clients_response_types).values(
+                    client_id=client_id_int,
+                    response_type_id=1
+                )
+            )
+            await session.commit()
+
+        async with session_factory() as session:
+            clients_resp_type = await session.scalars(
+                select(clients_response_types).where(clients_response_types.c.client_id == client_id_int)
+            )
+            clients_resp_type = clients_resp_type.one_or_none()
+
+        assert clients_resp_type is not None
+
+        client_repo = ClientRepository(engine)
+
+        await client_repo.delete_clients_response_types(client_id_int=client_id_int)
+
+        async with session_factory() as session:
+            clients_resp_type = await session.scalars(
+                select(clients_response_types).where(clients_response_types.c.client_id == client_id_int)
+            )
+            clients_resp_type = clients_resp_type.one_or_none()
+
+        assert clients_resp_type is None
+
+    async def test_delete_clients_grant_types(self, engine: AsyncEngine) -> None:
+        unique_client_id = f"test_client_{uuid.uuid4()}"
+        new_client = {
+            "client_id": unique_client_id,
+            "client_name": "regtestent",
+            "client_uri": "http://regtestent.com/",
+            "logo_uri": "https://www.regtestent-logo.com/",
+            "token_endpoint_auth_method": "client_secret_post",
+            "require_consent": False,
+            "require_pkce": True,
+            "refresh_token_usage_type_id": 2,
+            "refresh_token_expiration_type_id": 1,
+            "access_token_type_id": 1,
+            "protocol_type_id": 1,
+        }
+
+        session_factory = sessionmaker(
+            engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(insert(Client).values(**new_client).returning(Client.id))
+            client_id_int = result.scalar_one()
+            await session.execute(
+                insert(clients_grant_types).values(
+                    client_id=client_id_int,
+                    persistent_grant_type_id=1
+                )
+            )
+            await session.commit()
+
+        async with session_factory() as session:
+            clients_grant_type = await session.scalars(
+                select(clients_grant_types).where(clients_grant_types.c.client_id == client_id_int)
+            )
+            clients_grant_type = clients_grant_type.one_or_none()
+
+        assert clients_grant_type is not None
+
+        client_repo = ClientRepository(engine)
+
+        await client_repo.delete_clients_grant_types(client_id_int=client_id_int)
+
+        async with session_factory() as session:
+            clients_grant_type = await session.scalars(
+                select(clients_grant_types).where(clients_grant_types.c.client_id == client_id_int)
+            )
+            clients_grant_type = clients_grant_type.one_or_none()
+
+        assert clients_grant_type is None
+
+
+
+
+
+
+
 
 
 
