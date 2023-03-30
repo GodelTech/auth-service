@@ -56,3 +56,13 @@ class TestClientService:
                 client = await client_service.get_client_by_client_id(client_id=client_id)
                 assert client['client_name'] == "Real app"
                 assert client['redirect_uris'] == ["realapp.com", "real__app.com/callback"]
+
+        async def test_generate_credentials(self, client_service: ClientService) -> None:
+                result = await client_service.generate_credentials()
+
+                assert isinstance(result, tuple)
+                assert [isinstance(elem, str) for elem in result]
+
+        async def test_registration(self, client_service: ClientService) -> None:
+                result = await client_service.registration()
+                assert isinstance(result, dict)
