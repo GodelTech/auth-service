@@ -476,5 +476,27 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
 
+    async def get_hashed_password_by_username(self, username: str) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            user = await session.execute(
+                select(User.password_hash)
+                .join(UserPassword, User.password_hash_id == UserPassword.id)
+                .where(User.username == username)
+            )
+            return user.first()
+
+    async def exists(self, username: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(User).where(User.username == username).exists().select()
+            )
+            return result.scalar()
+
     def __repr__(self) -> str:  # pragma: no cover
         return "User repository"

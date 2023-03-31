@@ -167,18 +167,6 @@ class ClientRepository(BaseRepository):
             )
             return scopes.first()[-1].scope
 
-    async def get_client_scopes_by_client_id(self, client_id: str) -> str:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            scopes = await sess.execute(
-                select(ClientScope)
-                .join(Client, ClientScope.client_id == Client.id)
-                .where(Client.client_id == client_id)
-            )
-            return scopes.first()[-1].scope
-
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -212,6 +200,45 @@ class ClientRepository(BaseRepository):
                 result.append(uri[0].type + ":" + uri[0].value)
 
             return result
+
+    async def list_all_redirect_uris_by_client(
+        self, client_id: str
+    ) -> list[str]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.scalars(
+                select(ClientRedirectUri.redirect_uri)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return result.all()
+
+    async def list_all_scopes_by_client(self, client_id: str) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            scopes = await session.execute(
+                select(ClientScope.scope)
+                .join(Client, ClientScope.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return scopes.all()
+
+    async def exists(self, client_id: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client)
+                .where(Client.client_id == client_id)
+                .exists()
+                .select()
+            )
+            return result.scalar()
 
     def __repr__(self) -> str:
         return "Client Repository"

@@ -16,7 +16,7 @@ from .repositories import (
     provide_user_repo,
     provide_user_repo_stub,
     provide_blacklisted_repo,
-    provide_blacklisted_repo_stub
+    provide_blacklisted_repo_stub,
 )
 from .services import (
     provide_wellknown_service,
@@ -59,4 +59,8 @@ from .services import (
     provide_token_service_stub,
     provide_userinfo_service,
     provide_userinfo_service_stub,
+)
+from .services_factory import (
+    provide_auth_service_factory,
+    provide_auth_service_factory_stub,
 )
