@@ -167,6 +167,18 @@ class ClientRepository(BaseRepository):
             )
             return scopes.first()[-1].scope
 
+    async def get_client_scopes_by_client_id(self, client_id: str) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            scopes = await sess.execute(
+                select(ClientScope)
+                .join(Client, ClientScope.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return scopes.first()[-1].scope
+
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession

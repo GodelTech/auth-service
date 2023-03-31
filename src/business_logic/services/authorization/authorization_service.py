@@ -47,16 +47,12 @@ class AuthorizationService:
         self._request_model = request_model
 
     async def _validate_scope(self) -> None:
-        # TODO this method also needs to be fixed in client repo I need to make many calls to db to complete an easy task right know
-        client_from_db = await self.client_repo.get_client_by_client_id(
+        client_scopes = await self.client_repo.get_client_scopes_by_client_id(
             client_id=self.request_model.client_id
-        )
-        client_scopes = await self.client_repo.get_client_scopes(
-            client_id=client_from_db.id  # TODO it should be possible to pass self.request.client_id here directly
         )
         if (
             "user_code"
-            not in self.request_model.scope  # TODO first part of this condition needs to be deleted after device auth refactor
+            not in self.request_model.scope  # TODO remove it after device auth refactor
             and self.request_model.scope != client_scopes
         ):
             raise ClientScopesError
@@ -91,7 +87,5 @@ class AuthorizationService:
 
     async def get_redirect_url(self) -> str:
         user_id = await self._validate_auth_data()
-        handler = ResponseTypeHandlerFactory.get_handler(
-            self.request_model.response_type, auth_service=self
-        )
+        handler = ResponseTypeHandlerFactory.get_handler(auth_service=self)
         return await handler.get_redirect_url(user_id)

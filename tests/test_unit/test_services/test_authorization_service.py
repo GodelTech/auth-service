@@ -14,6 +14,7 @@ from src.business_logic.services.authorization.response_type_handlers import (
     ResponseTypeHandlerBase,
     ResponseTypeHandlerProtocol,
     ResponseTypeHandlerFactory,
+    CodeResponseTypeHandler,
 )
 from src.data_access.postgresql.errors import (
     UserNotFoundError,
@@ -317,20 +318,27 @@ class TestResponseTypeHandlerBase:
 
 class TestResponseTypeHandlerFactory:
     @pytest.fixture(autouse=True)
-    def setup(self, response_type_handler_factory):
+    def setup(
+        self,
+        response_type_handler_factory,
+        auth_service_with_post_request_model_and_mocked_dependencies,
+    ):
         self.factory = response_type_handler_factory
+        self.auth_service = (
+            auth_service_with_post_request_model_and_mocked_dependencies
+        )
 
     def test_register_handler(self):
         self.factory.register_handler("test", TokenResponseTypeHandler)
         assert self.factory._handlers["test"] == TokenResponseTypeHandler
 
     def test_get_handler(self):
-        self.factory.register_handler("test", TokenResponseTypeHandler)
-        auth_service = Mock(spec=AuthorizationService)
-        handler = self.factory.get_handler("test", auth_service)
-        assert isinstance(handler, TokenResponseTypeHandler)
-        assert handler.auth_service == auth_service
+        self.factory.register_handler("code", CodeResponseTypeHandler)
+        handler = self.factory.get_handler(self.auth_service)
+        assert isinstance(handler, CodeResponseTypeHandler)
+        assert handler.auth_service == self.auth_service
+        self.factory._handlers.clear()
 
     def test_get_non_existing_handler(self):
         with pytest.raises(WrongResponseTypeError):
-            self.factory.get_handler("non_existing_handler", None)
+            self.factory.get_handler(self.auth_service)

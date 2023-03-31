@@ -23,24 +23,22 @@ if TYPE_CHECKING:
 class ResponseTypeHandlerFactory:
     _handlers: dict[str, Type[ResponseTypeHandlerProtocol]] = {}
 
-    @staticmethod
+    @classmethod
     def register_handler(
-        response_type: str, handler: Type[ResponseTypeHandlerProtocol]
+        cls, response_type: str, handler: Type[ResponseTypeHandlerProtocol]
     ) -> None:
-        ResponseTypeHandlerFactory._handlers[response_type] = handler
+        cls._handlers[response_type] = handler
 
-    @staticmethod
+    @classmethod
     def get_handler(
-        response_type: str, auth_service: AuthorizationService
+        cls, auth_service: AuthorizationService
     ) -> ResponseTypeHandlerProtocol:
-        handler = ResponseTypeHandlerFactory._handlers.get(response_type)
+        handler = cls._handlers.get(auth_service.request_model.response_type)
         if not handler:
             raise WrongResponseTypeError
         return handler(auth_service)
 
 
-# To add new response_type create new class which inherits from ResponseTypeHandler
-# and register it like below
 ResponseTypeHandlerFactory.register_handler("code", CodeResponseTypeHandler)
 ResponseTypeHandlerFactory.register_handler("token", TokenResponseTypeHandler)
 ResponseTypeHandlerFactory.register_handler(

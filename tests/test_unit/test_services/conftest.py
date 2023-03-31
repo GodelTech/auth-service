@@ -10,7 +10,7 @@ def client_repository_mock():
     # Create a mock object for the client with an 'id' attribute
     mock_client = MagicMock(id=1)
     client_repo.get_client_by_client_id.return_value = mock_client
-    client_repo.get_client_scopes.return_value = "openid"
+    client_repo.get_client_scopes_by_client_id.return_value = "openid"
     yield client_repo
     del client_repo
 
