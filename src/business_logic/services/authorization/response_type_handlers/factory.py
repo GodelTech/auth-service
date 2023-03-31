@@ -35,7 +35,7 @@ class ResponseTypeHandlerFactory:
     ) -> ResponseTypeHandlerProtocol:
         handler = cls._handlers.get(auth_service.request_model.response_type)
         if not handler:
-            raise WrongResponseTypeError
+            raise WrongResponseTypeError("Provided response_type is invalid.")
         return handler(auth_service)
 
 

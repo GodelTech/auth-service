@@ -57,26 +57,18 @@ class AuthorizationService:
         ):
             raise ClientScopesError
 
-    async def _validate_auth_data(self) -> int:
+    async def _get_user_id(self) -> int:
         """
-        Validates the client_id and client_redirect_uri, retrieves the hashed_password for the given username,
-        and validates the provided password. If validation is successful, returns the user_id associated with the
-        provided username.
+        Validates the provided username and password. If validation is successful, returns the user_id
+        associated with the provided username.
 
         Raises:
-            ClientRedirectUriError: If provided client_redirect_uri is invalid.
-            ClientNotFoundError: If provided client_id is invalid.
             UserNotFoundError: If provided username is invalid.
             WrongPasswordError: If the provided password is invalid.
 
         Returns:
             int: The user_id associated with the provided username.
         """
-        # TODO this method actually validates both client_id and redirect_uri -> we need to refactor client repo for sure
-        await self.client_repo.validate_client_redirect_uri(
-            self.request_model.client_id, self.request_model.redirect_uri
-        )
-        await self._validate_scope()
         hashed_password, user_id = await self.user_repo.get_hash_password(
             self.request_model.username
         )
@@ -85,7 +77,15 @@ class AuthorizationService:
         )
         return user_id
 
+    async def _validate_client_data(self) -> None:
+        # TODO this method actually validates both client_id and redirect_uri -> we need to refactor client repo for sure
+        await self.client_repo.validate_client_redirect_uri(
+            self.request_model.client_id, self.request_model.redirect_uri
+        )
+        await self._validate_scope()
+
     async def get_redirect_url(self) -> str:
-        user_id = await self._validate_auth_data()
+        await self._validate_client_data()
+        user_id = await self._get_user_id()
         handler = ResponseTypeHandlerFactory.get_handler(auth_service=self)
         return await handler.get_redirect_url(user_id)
