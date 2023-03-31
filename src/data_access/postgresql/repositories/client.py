@@ -220,7 +220,7 @@ class ClientRepository(BaseRepository):
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as session:
-            scopes = await session.execute(
+            scopes = await session.scalars(
                 select(ClientScope.scope)
                 .join(Client, ClientScope.client_id == Client.id)
                 .where(Client.client_id == client_id)

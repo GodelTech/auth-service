@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 import secrets
 
@@ -21,8 +22,10 @@ class CodeAuthService:
 
     async def _validate_request_data(self, request_data: AuthRequestModel):
         await self._client_validator(request_data.client_id)
-        await self._redirect_uri_validator(request_data.redirect_uri)
-        await self._scope_validator(request_data.scope)
+        await self._redirect_uri_validator(
+            request_data.redirect_uri, request_data.client_id
+        )
+        await self._scope_validator(request_data.scope, request_data.client_id)
         await self._user_credentials_validator(
             request_data.username, request_data.password
         )

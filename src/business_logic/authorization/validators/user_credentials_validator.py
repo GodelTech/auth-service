@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 from src.data_access.postgresql.errors import (
     UserNotFoundError,
@@ -18,7 +19,7 @@ class UserCredentialsValidator:
         self._password_service = password_service
 
     async def __call__(self, username: str, password: SecretStr) -> None:
-        if not await self._user_repo.exists(username):
+        if not await self._user_repo.exists_user(username):
             raise UserNotFoundError("Invalid username or password.")
 
         hashed_password = (

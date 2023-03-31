@@ -1,10 +1,12 @@
+from __future__ import annotations
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, TYPE_CHECKING
 from starlette.templating import _TemplateResponse
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
+from src.business_logic.authorization.dto import AuthRequestModel
+from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.services import LoginFormService
 from src.business_logic.services.authorization.authorization_service import (
     AuthorizationService,
@@ -18,11 +20,16 @@ from src.data_access.postgresql.errors import (
     ClientScopesError,
 )
 from src.di.providers import (
-    provide_auth_service_stub,
+    provide_auth_service_factory_stub,
     provide_login_form_service_stub,
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import DataRequestModel, RequestModel
+
+if TYPE_CHECKING:
+    from src.business_logic.authorization import (
+        AuthServiceProtocol,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -83,15 +90,17 @@ async def get_authorize(
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
-    request_body: DataRequestModel = Depends(),
-    auth_class: AuthorizationService = Depends(provide_auth_service_stub),
+    request_body: AuthRequestModel = Depends(),
+    auth_service_factory: AuthServiceFactory = Depends(
+        provide_auth_service_factory_stub
+    ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class.request_model = request_body
-        firmed_redirect_uri = await auth_class.get_redirect_url()
-        return RedirectResponse(
-            firmed_redirect_uri, status_code=status.HTTP_302_FOUND
+        auth_service: AuthServiceProtocol = (
+            auth_service_factory.get_service_impl(request_body.response_type)
         )
+        result = await auth_service.get_redirect_url(request_body)
+        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
     except ClientNotFoundError as exception:
         logger.exception(exception)

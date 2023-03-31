@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.business_logic.authorization.service_impls import CodeAuthService

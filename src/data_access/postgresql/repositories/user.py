@@ -481,14 +481,14 @@ class UserRepository(BaseRepository):
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as session:
-            user = await session.execute(
-                select(User.password_hash)
-                .join(UserPassword, User.password_hash_id == UserPassword.id)
+            result = await session.execute(
+                select(UserPassword.value)
+                .join(User, User.password_hash_id == UserPassword.id)
                 .where(User.username == username)
             )
-            return user.first()
+            return result.scalar()
 
-    async def exists(self, username: str) -> bool:
+    async def exists_user(self, username: str) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
