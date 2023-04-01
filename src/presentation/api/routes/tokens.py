@@ -1,6 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+
 from src.di.providers import provide_token_service_factory_stub
 from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenModel
 from src.business_logic.get_tokens import TokenServiceFactory
