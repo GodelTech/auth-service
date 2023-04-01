@@ -16,10 +16,16 @@ from src.presentation.api.middleware import (
 )
 
 from src.presentation.api import router
+from src.presentation.api.exception_handlers import (
+    http400_invalid_grant_handler,
+    http400_unsupported_grant_type_handler,
+    http400_invalid_client_handler
+)
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
+
 import logging
 from src.log import LOGGING_CONFIG
 
@@ -46,6 +52,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_headers=["*"],
     )
 
+    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
@@ -353,6 +360,21 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
+
+    nodepends_provide_token_service_factory = (
+        lambda: prov.provide_token_service_factory(
+            client_repo=prov.provide_client_repo(db_engine),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
+            user_repo=prov.provide_user_repo(db_engine),
+            device_repo=prov.provide_device_repo(db_engine),
+            blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+            jwt_service=prov.provide_jwt_manager(),
+        )
+    )
+
+    app.dependency_overrides[
+        prov.provide_token_service_factory_stub
+    ] = nodepends_provide_token_service_factory
 
 
 app = get_application()

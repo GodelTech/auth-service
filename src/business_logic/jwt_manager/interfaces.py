@@ -1,7 +1,7 @@
 from typing import Protocol, Any
 
 
-class JWTServiceProto(Protocol):
+class JWTManagerProtocol(Protocol):
     def encode(self) -> None:
         raise NotImplementedError
     

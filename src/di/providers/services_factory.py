@@ -6,7 +6,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
-from src.business_logic.jwt_manager.interfaces import JWTServiceProto
+from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
 
 
 def provide_token_service_factory_stub() -> None:
@@ -18,7 +18,7 @@ def provide_token_service_factory(
         persistent_grant_repo: PersistentGrantRepository,
         user_repo: UserRepository,
         device_repo: DeviceRepository,
-        jwt_service: JWTServiceProto,
+        jwt_service: JWTManagerProtocol,
         blacklisted_repo: BlacklistedTokenRepository,
 ) -> TokenServiceFactory:
     return TokenServiceFactory(

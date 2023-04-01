@@ -1,5 +1,10 @@
 from src.business_logic.get_tokens.service_impls import AuthorizationCodeTokenService
-from src.business_logic.get_tokens.validators import ValidatePersistentGrant, ValidateRedirectUri
+from src.business_logic.get_tokens.validators import (
+    ValidatePersistentGrant, 
+    ValidateRedirectUri, 
+    ValidateGrantByClient,
+)
+from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
 from src.business_logic.common.validators import ValidateClient
 
 from typing import TYPE_CHECKING
@@ -12,8 +17,7 @@ if TYPE_CHECKING:
         PersistentGrantRepository,
         UserRepository,
     )
-    from src.business_logic.services import JWTService
-    from src.business_logic.jwt_manager.interfaces import JWTServiceProto
+    from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
 
 
 class TokenServiceFactory:
@@ -23,7 +27,7 @@ class TokenServiceFactory:
             persistent_grant_repo: 'PersistentGrantRepository',
             user_repo: 'UserRepository',
             device_repo: 'DeviceRepository',
-            jwt_manager: 'JWTServiceProto',
+            jwt_manager: 'JWTManagerProtocol',
             blacklisted_repo: 'BlacklistedTokenRepository',
     ) -> None:
         self._client_repo = client_repo
@@ -39,5 +43,8 @@ class TokenServiceFactory:
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
                 redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
                 client_validator=ValidateClient(client_repo=self._client_repo),
+                code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 jwt_manager=self._jwt_manager
             )
+        else:
+            raise UnsupportedGrantTypeError

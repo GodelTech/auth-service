@@ -1,3 +1,5 @@
+from src.business_logic.common.errors import InvalidClientIdError
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.data_access.postgresql.repositories import ClientRepository
@@ -12,4 +14,4 @@ class ValidateClient:
     
     async def __call__(self, client_id: str) -> None:
         if not await self._client_repo.exists(client_id=client_id):
-            raise ValueError('Incorrect client_id.')
+            raise InvalidClientIdError('Client with specified client_id doesn\'t exists')
