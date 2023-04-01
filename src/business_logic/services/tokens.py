@@ -247,7 +247,7 @@ class BaseMaker:
             scope=scopes,
             jwt_service=self.jwt_service,
             expiration_time=self.expiration_time * 6,
-            aud=["introspection", "revocation", 'userinfo'] 
+            aud=["introspection", "revocation", 'userinfo']
         )
         # ID TOKEN
         new_id_token = None

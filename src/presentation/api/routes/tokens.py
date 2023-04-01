@@ -3,6 +3,20 @@ from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+<<<<<<< HEAD
+=======
+
+from src.di.providers import provide_token_service_factory_stub
+from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenModel
+from src.business_logic.get_tokens import TokenServiceFactory
+
+from typing import Union, Any, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.business_logic.get_tokens.interfaces import TokenServiceProtocol
+
+
+TokenEndpointResponse = Union[JSONResponse, dict[str, Any]]
+>>>>>>> ef028ca (Added exception handlers, jwt_manager dto and custom validators)
 
 from src.business_logic.services import TokenService
 from src.data_access.postgresql.errors import (
