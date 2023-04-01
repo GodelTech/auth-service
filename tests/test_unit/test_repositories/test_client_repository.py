@@ -36,6 +36,7 @@ class TestClientRepository:
         client = await client_repo.get_client_by_client_id(
             client_id="test_client"
         )
+        assert isinstance(client, Client)
         assert client.client_id == "test_client"
 
     async def test_get_client_by_client_id_not_exists(self, engine: AsyncEngine) -> None:
@@ -309,7 +310,7 @@ class TestClientRepository:
             client_id_int = result.scalar_one()
             await session.commit()
 
-        await client_repo.add_scope(client_id_int=client_id_int, scope="test_scope")
+        await client_repo.add_scope(client_id_int=client_id_int, scope="openid profile email")
 
         async with session_factory() as session:
             scope = await session.execute(
@@ -319,7 +320,7 @@ class TestClientRepository:
 
             assert scope is not None
             assert scope.client_id == client_id_int
-            assert scope.scope == "test_scope"
+            assert scope.scope == "openid profile email"
 
     async def test_add_scope_incorrect_parameters(self, engine: AsyncEngine) -> None:
         client_repo = ClientRepository(engine)

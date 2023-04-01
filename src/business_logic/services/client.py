@@ -143,7 +143,7 @@ class ClientService:
         if self.request_model.grant_types:
             await self.client_repo.delete_clients_grant_types(client_id_int=client.id) 
             for grant_type in self.request_model.grant_types:
-                await self.client_repo.add_response_type(client_id_int=client.id, grant_type=grant_type)
+                await self.client_repo.add_grant_type(client_id_int=client.id, grant_type=grant_type)
 
         if self.request_model.scope is not None:
             await self.client_repo.delete_scope(client_id_int=client.id)
@@ -166,7 +166,7 @@ class ClientService:
             "grant_types": [grant_type.type_of_grant for grant_type in client.grant_types],
             "response_types": [r_type.type for r_type in client.response_types], 
             "token_endpoint_auth_method": client.token_endpoint_auth_method, 
-            "scope" : client.scopes[0].scope
+            "scope" : client.scopes[0].scope if client.scopes else ""
         } 
     
     async def get_client_by_client_id(self, client_id):
