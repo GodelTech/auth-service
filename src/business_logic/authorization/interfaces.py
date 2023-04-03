@@ -4,9 +4,24 @@ from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.business_logic.authorization.dto import AuthRequestModel
+    from src.data_access.postgresql.repositories import (
+        PersistentGrantRepository,
+        UserRepository,
+    )
 
 
-# * What about _update_redirect_url?
 class AuthServiceProtocol(Protocol):
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
+        ...
+
+
+class HasPersistentGrantAndUserRepoProtocol(Protocol):
+    """Protocol for type hinting mixin methods."""
+
+    @property
+    def _persistent_grant_repo(self) -> PersistentGrantRepository:
+        ...
+
+    @property
+    def _user_repo(self) -> UserRepository:
         ...

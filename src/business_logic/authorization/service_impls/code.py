@@ -43,5 +43,5 @@ class CodeAuthService(CreateGrantMixin):
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
         await self._validate_request_data(request_data)
         await self.create_grant(self._secret_code, request_data)
-        return f"{request_data.redirect_uri}?code={self._secret_code}"
+        redirect_url = f"{request_data.redirect_uri}?code={self._secret_code}"
         # * add state feature
