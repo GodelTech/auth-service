@@ -49,6 +49,8 @@ class AuthServiceFactory:
                     user_repo=self._user_repo,
                     password_service=self._password_service,
                 ),
+                persistent_grant_repo=self._persistent_grant_repo,
+                user_repo=self._user_repo,
             )
         raise WrongResponseTypeError(
             "Provided response_type is not supported."

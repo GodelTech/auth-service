@@ -25,8 +25,7 @@ class UserCredentialsValidator:
         hashed_password = (
             await self._user_repo.get_hashed_password_by_username(username)
         )
-        is_password_valid = self._password_service.is_password_valid(
+        if not self._password_service.is_password_valid(
             password, hashed_password
-        )
-        if not is_password_valid:
+        ):
             raise WrongPasswordError("Invalid username or password.")

@@ -498,5 +498,15 @@ class UserRepository(BaseRepository):
             )
             return result.scalar()
 
+    async def get_user_id_by_username(self, username: str) -> int:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(User.id).where(User.username == username)
+            )
+            return result.scalar()
+
     def __repr__(self) -> str:  # pragma: no cover
         return "User repository"
