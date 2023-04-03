@@ -82,3 +82,4 @@ async def delete_client(
     if not await client_service.client_repo.validate_client_by_client_id(client_id=client_id):
         raise ClientNotFoundError
     await client_service.client_repo.delete_client_by_client_id(client_id=client_id)
+    return {"message": "Client deleted successfully"}
