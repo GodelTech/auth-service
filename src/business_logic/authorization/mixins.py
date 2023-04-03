@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class CreateGrantMixin:
-    async def create_grant(
+    async def _create_grant(
         self: HasPersistentGrantAndUserRepoProtocol,
         code: str,
         request_data: AuthRequestModel,
@@ -20,11 +20,12 @@ class CreateGrantMixin:
         )
 
 
-class UpdateRedirectUriMixin:
-    async def update_redirect_uri(
+class UpdateRedirectUrlMixin:
+    async def _update_redirect_url(
         self: HasPersistentGrantAndUserRepoProtocol,
         request_data: AuthRequestModel,
+        redirect_url: str,
     ) -> str:
         if request_data.state:
-            request_data.redirect_uri += f"&state={request_data.state}"
-        return request_data.redirect_uri
+            redirect_url += f"&state={request_data.state}"
+        return redirect_url
