@@ -3,14 +3,15 @@ from pydantic import BaseModel
 from dataclasses import dataclass
 from fastapi import Form
 from datetime import date
+from pydantic import SecretStr
+
+
 
 @dataclass
 class RequestUserModel:
-
     username: str = Form(...)
     email: str  = Form(...)
     password: str  = Form(...)
-    
     name: str  = Form(...)
     given_name: Optional[str]  = Form(None)
     family_name: Optional[str] = Form(None)
@@ -19,13 +20,20 @@ class RequestUserModel:
     profile: Optional[str] = Form(None)
     picture: Optional[str] = Form(None)
     website: Optional[str] = Form(None)
-    
     gender: str = Form(...)
     birthdate: date = Form(...)
     zoneinfo: Optional[str] = Form(None)
     phone_number: str = Form(...)
     address: str = Form(...)
 
+    class Config:
+        orm_mode = True
+
+
+@dataclass
+class RequestLoginModel:
+    email: str  = Form(...)
+    password: SecretStr  = Form(...)
 
     class Config:
         orm_mode = True
