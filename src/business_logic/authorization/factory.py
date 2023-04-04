@@ -10,6 +10,7 @@ from src.business_logic.authorization.validators import (
     ScopeValidator,
     UserCredentialsValidator,
 )
+from src.business_logic.authorization.constants import ResponseType
 
 if TYPE_CHECKING:
     from .interfaces import AuthServiceProtocol
@@ -40,7 +41,7 @@ class AuthServiceFactory:
         self._jwt_service = jwt_service
 
     def get_service_impl(self, response_type: str) -> AuthServiceProtocol:
-        if response_type == "code":
+        if response_type == ResponseType.CODE.value:
             return CodeAuthService(
                 client_validator=ClientValidator(self._client_repo),
                 redirect_uri_validator=RedirectUriValidator(self._client_repo),
@@ -52,6 +53,8 @@ class AuthServiceFactory:
                 persistent_grant_repo=self._persistent_grant_repo,
                 user_repo=self._user_repo,
             )
+        if response_type == ResponseType.DEVICE.value:
+            ...
         raise WrongResponseTypeError(
             "Provided response_type is not supported."
         )
