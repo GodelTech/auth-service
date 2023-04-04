@@ -1,7 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from src.data_access.postgresql.errors import WrongResponseTypeError
-from src.business_logic.authorization.service_impls import CodeAuthService
+from src.business_logic.authorization.service_impls import (
+    CodeAuthService,
+    DeviceAuthService,
+)
 from src.business_logic.common.validators import (
     ClientValidator,
     RedirectUriValidator,
@@ -54,7 +57,15 @@ class AuthServiceFactory:
                 user_repo=self._user_repo,
             )
         if response_type == ResponseType.DEVICE.value:
-            ...
+            return DeviceAuthService(
+                client_validator=ClientValidator(self._client_repo),
+                redirect_uri_validator=RedirectUriValidator(self._client_repo),
+                scope_validator=ScopeValidator(self._client_repo),
+                user_credentials_validator=UserCredentialsValidator(
+                    user_repo=self._user_repo,
+                    password_service=self._password_service,
+                ),
+            )
         raise WrongResponseTypeError(
             "Provided response_type is not supported."
         )
