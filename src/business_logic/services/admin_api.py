@@ -171,3 +171,14 @@ class AdminUserService():
                 claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":kwargs[key]})
         
         await self.user_repo.add_claims(claims=claims)
+
+    async def validate_password(self, email:str, password:str):
+        user:User = await self.user_repo.get_user_by_email(email=email)
+        return PasswordHash.validate_password(str_password=password,hash_password=user.password_hash.value), user
+    
+    def user_to_dict(self, user:User)->dict[str, str]:
+        user_data = user.__dict__
+        for claim in user.claims:
+            user_data[claim.claim_type.type_of_claim] = claim.claim_value
+        return user_data
+
