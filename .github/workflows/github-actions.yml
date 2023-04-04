@@ -1,6 +1,6 @@
 name: Build and Test Auth Server
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -8,16 +8,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-#      - name: Build Docker image
-#        run: docker build -t auth-server-image .
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-#      - name: Run tests
-#        run: |
-#          docker run -d --name auth-server-container --network host --env ENVIRONMENT_NAME=test --env ENV_FOR_DYNACONF=test -v /var/run/docker.sock:/var/run/docker.sock auth-server-image
-#          docker exec -i auth-server-container sh -c "pytest --cov=src"
-
-      - name: Push image to Amazon ECR
-        run: bash deploy/deploy.sh
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: auth-service
+          IMAGE_TAG: dev
+        run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
