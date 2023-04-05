@@ -8,7 +8,14 @@ settings = Dynaconf(
     envvar_prefix=False,
     preload=[os.path.join(APP_DIR, "default.toml")],
     includes=["../configs/*.toml"],
-    environments=["local", "development", "docker", "test", "pipeline"],
+    environments=[
+        "local",
+        "development",
+        "docker",
+        "test",
+        "pipeline",
+        "amazon",
+    ],
     env_switcher="identity_server_poc_env",
     load_dotenv=True,
 )
@@ -22,7 +29,7 @@ DB_MAX_CONNECTION_COUNT = settings.db.get("max_connection_count")
 BASE_URL_HOST = settings.server.get("base_url_host")
 BASE_URL_PORT = settings.server.get("base_url_port")
 BASE_URL = f"{BASE_URL_HOST}:{BASE_URL_PORT}"
-DOMAIN_NAME = BASE_URL #settings.server.get("domain_name")
+DOMAIN_NAME = BASE_URL  # settings.server.get("domain_name")
 
 REDIS_SCHEME = settings.redis.get("scheme")
 REDIS_HOST = settings.redis.get("host")
