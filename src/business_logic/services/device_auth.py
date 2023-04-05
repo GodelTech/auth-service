@@ -1,20 +1,19 @@
 import logging
 import random
-from string import ascii_uppercase
 import secrets
+from string import ascii_uppercase
 from typing import Any, Optional, Union
 
-from src.dyna_config import DOMAIN_NAME
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
 )
+from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import (
+    DeviceCancelModel,
     DeviceRequestModel,
     DeviceUserCodeModel,
-    DeviceCancelModel,
 )
-
 
 logger = logging.getLogger("is_app")
 
@@ -69,21 +68,13 @@ class DeviceService:
         return (
             uri_start + f"client_id={device.client.client_id}"
             f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
-            f"&redirect_uri={redirect_uri}&scope=user_code={self.request_model.user_code}"
+            f"&redirect_uri={redirect_uri}"
         )
 
-    async def clean_device_data(self) -> str:
+    async def clean_device_data(self, user_code: str) -> str:
         if type(self.request_model) != DeviceCancelModel:
             raise ValueError
         if await self._validate_client(client_id=self.request_model.client_id):
-            scope_data = {}
-            if self.request_model.scope is None:
-                scope_data = {"scope": "no_scope"}
-            else:
-                scope_data = await self._parse_scope_data(
-                    scope=self.request_model.scope
-                )
-            user_code = scope_data["user_code"]
             if await self._validate_user_code(user_code=user_code):
                 await self.device_repo.delete_by_user_code(user_code=user_code)
         return f"http://{DOMAIN_NAME}/device/auth/cancel"

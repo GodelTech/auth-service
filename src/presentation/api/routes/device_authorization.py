@@ -1,7 +1,7 @@
 import logging
-from typing import Union
+from typing import Optional, Union
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
@@ -12,6 +12,7 @@ from src.data_access.postgresql.errors import (
     UserCodeNotFoundError,
 )
 from src.di.providers import provide_device_service_stub
+from src.dyna_config import BASE_URL_HOST
 from src.presentation.api.models import (
     DeviceCancelModel,
     DeviceRequestModel,
@@ -61,7 +62,9 @@ async def get_device_user_code(
     )
 
 
-@device_auth_router.post("/auth", status_code=status.HTTP_302_FOUND)
+@device_auth_router.post(
+    "/auth", status_code=status.HTTP_302_FOUND, response_class=RedirectResponse
+)
 async def post_device_user_code(
     request_model: DeviceUserCodeModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
@@ -73,9 +76,12 @@ async def post_device_user_code(
         response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+
         response.set_cookie(
             key="user_code",
             value=request_model.user_code,
+            expires=600,
+            domain=BASE_URL_HOST,
             httponly=True,
         )  # TODO add secure=True when we'll have https
         return response
@@ -105,12 +111,11 @@ async def get_device_login_confirm(
 async def delete_device(
     request_model: DeviceCancelModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
+    user_code: Optional[str] = Cookie(None),
 ) -> Union[str, JSONResponse]:
     try:
         auth_service.request_model = request_model
-        firmed_redirect_uri = await auth_service.clean_device_data()
-
-        return firmed_redirect_uri
+        return await auth_service.clean_device_data(user_code)
 
     except UserCodeNotFoundError as exception:
         logger.exception(exception)

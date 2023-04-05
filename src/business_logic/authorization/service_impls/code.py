@@ -1,10 +1,12 @@
 from __future__ import annotations
+
+import secrets
 from typing import TYPE_CHECKING
+
 from src.business_logic.authorization.mixins import (
     CreateGrantMixin,
     UpdateRedirectUrlMixin,
 )
-import secrets
 
 if TYPE_CHECKING:
     from src.business_logic.authorization.dto import AuthRequestModel

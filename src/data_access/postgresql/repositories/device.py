@@ -1,15 +1,14 @@
 from datetime import datetime
 
-from sqlalchemy import select, exists, insert, delete
+from sqlalchemy import delete, exists, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from .client import Client
+
+from src.data_access.postgresql.errors import UserCodeNotFoundError
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.device import Device
-from src.data_access.postgresql.errors import (
-    UserCodeNotFoundError,
-    DeviceCodeNotFoundError,
-)
+
+from .client import Client
 
 
 class DeviceRepository(BaseRepository):
@@ -140,3 +139,26 @@ class DeviceRepository(BaseRepository):
             raise ValueError
         else:
             return client_id_int[0].id
+
+    async def get_device_code_by_user_code(self, user_code: str) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Device.device_code).where(Device.user_code == user_code)
+            )
+            return result.scalar()
+
+    async def exists(self, user_code: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Device)
+                .where(Device.user_code == user_code)
+                .exists()
+                .select()
+            )
+            return result.scalar()

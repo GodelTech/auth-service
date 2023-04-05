@@ -1,35 +1,36 @@
 from __future__ import annotations
+
 import logging
-from typing import Any, Optional, Union, TYPE_CHECKING
-from starlette.templating import _TemplateResponse
-from fastapi import APIRouter, Depends, Request, status, Cookie
+from typing import TYPE_CHECKING, Any, Optional, Union
+
+from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from src.business_logic.authorization.dto import AuthRequestModel
+from starlette.templating import _TemplateResponse
+
 from src.business_logic.authorization import AuthServiceFactory
+from src.business_logic.authorization.dto import AuthRequestModel
 from src.business_logic.services import LoginFormService
-from src.business_logic.services.authorization.authorization_service import (
-    AuthorizationService,
-)
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientRedirectUriError,
+    ClientScopesError,
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
-    ClientScopesError,
 )
 from src.di.providers import (
     provide_auth_service_factory_stub,
     provide_login_form_service_stub,
 )
 from src.dyna_config import DOMAIN_NAME
-from src.presentation.api.models import DataRequestModel, RequestModel
+from src.presentation.api.models import RequestModel
 
 if TYPE_CHECKING:
-    from src.business_logic.authorization import (
-        AuthServiceProtocol,
-    )
+    from src.business_logic.authorization import AuthServiceProtocol
+
+AuthorizeEndpointPostResponse = Union[RedirectResponse, JSONResponse]
+AuthorizeEndpointGetResponse = Union[JSONResponse, _TemplateResponse]
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> Union[JSONResponse, _TemplateResponse]:
+) -> AuthorizeEndpointGetResponse:
     try:
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
@@ -95,10 +96,9 @@ async def post_authorize(
         provide_auth_service_factory_stub
     ),
     user_code: Optional[str] = Cookie(None),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> AuthorizeEndpointPostResponse:
     try:
-        if user_code:
-            request_body.user_code = user_code
+        setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)
         )
@@ -129,7 +129,7 @@ async def post_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Redirect Uri not found"},
         )
-    except ClientScopesError as e:  # ! temporary
+    except ClientScopesError as e:
         logger.exception(e)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,

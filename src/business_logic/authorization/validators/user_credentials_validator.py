@@ -1,14 +1,17 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 from src.data_access.postgresql.errors import (
     UserNotFoundError,
     WrongPasswordError,
 )
 
 if TYPE_CHECKING:
-    from src.data_access.postgresql.repositories import UserRepository
-    from src.business_logic.services.password import PasswordHash
     from pydantic import SecretStr
+
+    from src.business_logic.services.password import PasswordHash
+    from src.data_access.postgresql.repositories import UserRepository
 
 
 class UserCredentialsValidator:

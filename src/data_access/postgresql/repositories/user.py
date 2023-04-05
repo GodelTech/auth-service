@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
-from sqlalchemy import exists, insert, join, select, text, update
+from sqlalchemy import exists, insert, select, text, update
 from sqlalchemy.engine.result import ChunkedIteratorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
     DuplicationError,
-    NoPasswordError,
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository

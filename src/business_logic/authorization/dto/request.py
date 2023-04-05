@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from fastapi import Form
-from pydantic import SecretStr, BaseModel
 from typing import Optional
+
+from fastapi import Form
+from pydantic import BaseModel, SecretStr
 
 
 class RequestModel(BaseModel):

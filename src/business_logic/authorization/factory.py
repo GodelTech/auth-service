@@ -1,29 +1,33 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from src.data_access.postgresql.errors import WrongResponseTypeError
+
+from src.business_logic.authorization.constants import ResponseType
 from src.business_logic.authorization.service_impls import (
     CodeAuthService,
     DeviceAuthService,
+)
+from src.business_logic.authorization.validators import (
+    ScopeValidator,
+    UserCredentialsValidator,
+    UserCodeValidator,
 )
 from src.business_logic.common.validators import (
     ClientValidator,
     RedirectUriValidator,
 )
-from src.business_logic.authorization.validators import (
-    ScopeValidator,
-    UserCredentialsValidator,
-)
-from src.business_logic.authorization.constants import ResponseType
+from src.data_access.postgresql.errors import WrongResponseTypeError
 
 if TYPE_CHECKING:
-    from .interfaces import AuthServiceProtocol
+    from src.business_logic.services import JWTService, PasswordHash
     from src.data_access.postgresql.repositories import (
         ClientRepository,
-        UserRepository,
-        PersistentGrantRepository,
         DeviceRepository,
+        PersistentGrantRepository,
+        UserRepository,
     )
-    from src.business_logic.services import JWTService, PasswordHash
+
+    from .interfaces import AuthServiceProtocol
 
 
 class AuthServiceFactory:
@@ -65,6 +69,7 @@ class AuthServiceFactory:
                     user_repo=self._user_repo,
                     password_service=self._password_service,
                 ),
+                user_code_validator=UserCodeValidator(self._device_repo),
                 persistent_grant_repo=self._persistent_grant_repo,
                 device_repo=self._device_repo,
                 user_repo=self._user_repo,
