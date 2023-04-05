@@ -33,7 +33,6 @@ async def post_device_authorize(
     auth_service: DeviceService = Depends(provide_device_service_stub),
 ) -> JSONResponse:
     try:
-        auth_service = auth_service
         auth_service.request_model = request_model
         response_data = await auth_service.get_response()
         return JSONResponse(
@@ -68,14 +67,12 @@ async def post_device_user_code(
     auth_service: DeviceService = Depends(provide_device_service_stub),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_service = auth_service
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.get_redirect_uri()
 
-        response = RedirectResponse(
+        return RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
-        return response
 
     except UserCodeNotFoundError as exception:
         logger.exception(exception)
