@@ -10,8 +10,8 @@ from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
 from src.presentation.api.middleware import (
-    AuthorizationMiddleware, 
-    AccessTokenMiddleware
+    AuthorizationMiddleware,
+    AccessTokenMiddleware,
 )
 
 from src.presentation.api import router
@@ -355,8 +355,9 @@ def setup_di(app: FastAPI) -> None:
 app = get_application()
 
 
-# TODO: Move this code to setup_di() function.
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
+@app.get("/health")
+async def health_check() -> Any:
+    return {"status": "healthy"}
 
 
 # Redis activation
