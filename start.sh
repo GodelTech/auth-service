@@ -9,7 +9,7 @@ echo "Environment: $ENV_FOR_DYNACONF"
 
 if [ "$ENV_FOR_DYNACONF" = "test" ] || [ "$ENV_FOR_DYNACONF" = "pipeline" ]; then
   echo "Test or Pipeline environment. Migration and population of database done inside the tests execution"
-elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" ]; then
+elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" ] || [ "$ENV_FOR_DYNACONF" = "amazon" ]; then
   echo "Migrations"
   alembic upgrade head
   echo "Population of database"

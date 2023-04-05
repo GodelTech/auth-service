@@ -5,3 +5,4 @@ dynaconf_merge = true
 [amazon.db]
 echo = true
 url = "postgresql+asyncpg://postgres:postgres@isp-db.cii5mpefqnjk.us-east-1.rds.amazonaws.com:5432/isp_db"
+max_connection_count = 10
