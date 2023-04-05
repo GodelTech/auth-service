@@ -34,7 +34,7 @@ async def register_user(
     if await user_service.user_repo.validate_user_by_username(username=kwargs['username']):
         return templates.TemplateResponse("user_registration_failed_username.html", {'request': request})
     await user_service.registration(kwargs)
-    return templates.TemplateResponse("user.html", {'request': request})
+    return templates.TemplateResponse("user_registration_success.html", {'request': request})
     
 
 @user_router.get("/register", response_class=HTMLResponse)
@@ -50,9 +50,7 @@ def login(request: Request) -> _TemplateResponse:
 async def get_user(
     email: str,
     request: Request,
-    auth_swagger: Union[str, None] = Header(
-    default=None, description="Authorization"
-    ),  # crutch for swagger
+    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  # crutch for swagger
     user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     )  -> _TemplateResponse:
     token =auth_swagger or request.headers.get('Authorization')
@@ -61,7 +59,7 @@ async def get_user(
         user = await user_service.user_repo.get_user_by_email(email=email)
         user_data = user_service.user_to_dict(user=user)
 
-        return templates.TemplateResponse("user.html", {'request': request, 'user':user_data})
+        return templates.TemplateResponse("user_2.html", {'request': request, 'user':user_data})
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Auth Token")
 
