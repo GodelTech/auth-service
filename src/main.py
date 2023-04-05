@@ -357,7 +357,7 @@ app = get_application()
 
 @app.get("/health")
 async def health_check() -> Any:
-    return {"status": "healthy"}
+    return {"status": "healthy and happy"}
 
 
 # Redis activation
