@@ -70,9 +70,15 @@ async def post_device_user_code(
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.get_redirect_uri()
 
-        return RedirectResponse(
+        response = RedirectResponse(
             firmed_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        response.set_cookie(
+            key="user_code",
+            value=request_model.user_code,
+            httponly=True,
+        )  # TODO add secure=True when we'll have https
+        return response
 
     except UserCodeNotFoundError as exception:
         logger.exception(exception)
@@ -101,7 +107,6 @@ async def delete_device(
     auth_service: DeviceService = Depends(provide_device_service_stub),
 ) -> Union[str, JSONResponse]:
     try:
-        auth_service = auth_service
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.clean_device_data()
 

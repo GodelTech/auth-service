@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional, Union, TYPE_CHECKING
 from starlette.templating import _TemplateResponse
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, Cookie
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from src.business_logic.authorization.dto import AuthRequestModel
@@ -94,8 +94,11 @@ async def post_authorize(
     auth_service_factory: AuthServiceFactory = Depends(
         provide_auth_service_factory_stub
     ),
+    user_code: Optional[str] = Cookie(None),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        if user_code:
+            request_body.user_code = user_code
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)
         )

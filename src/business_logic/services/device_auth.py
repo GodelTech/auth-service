@@ -58,23 +58,19 @@ class DeviceService:
         return None
 
     async def get_redirect_uri(self) -> str:
-        if type(self.request_model) == DeviceUserCodeModel:
-            uri_start = f"http://{DOMAIN_NAME}/authorize/?"
-            redirect_uri = "https://www.google.com/"
-            if self.request_model.user_code is None:
-                raise ValueError
-            device = await self.device_repo.get_device_by_user_code(
-                user_code=self.request_model.user_code
-            )
-            final_uri = (
-                uri_start + f"client_id={device.client.client_id}"
-                f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
-                f"&redirect_uri={redirect_uri}&scope=user_code={self.request_model.user_code}"
-            )
-
-            return final_uri
-        else:
+        if not isinstance(self.request_model, DeviceUserCodeModel):
             raise ValueError
+
+        uri_start = f"http://{DOMAIN_NAME}/authorize/?"
+        redirect_uri = "https://www.google.com/"
+        device = await self.device_repo.get_device_by_user_code(
+            user_code=self.request_model.user_code
+        )
+        return (
+            uri_start + f"client_id={device.client.client_id}"
+            f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
+            f"&redirect_uri={redirect_uri}&scope=user_code={self.request_model.user_code}"
+        )
 
     async def clean_device_data(self) -> str:
         if type(self.request_model) != DeviceCancelModel:

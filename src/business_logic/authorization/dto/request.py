@@ -36,6 +36,7 @@ class AuthRequestModel:
     redirect_uri: str = Form(...)
     username: str = Form(...)
     password: SecretStr = Form(...)
+    user_code: str = Form(None)
     state: str = Form(None)
     response_mode: str = Form(None)
     nonce: str = Form(None)
