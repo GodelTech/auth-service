@@ -2,7 +2,7 @@ import logging
 
 import jwt
 from typing import Any, no_type_check, Optional
-from src.config.rsa_keys import RSAKeypair
+from src.business_logic.dto.rsa_keys_dto import RSAKeypair
 from src.di import Container
 
 logger = logging.getLogger(__name__)

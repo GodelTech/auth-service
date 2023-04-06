@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import PostgresDsn, SecretStr
 
-from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
+from src.main import CreateRSAKeypair
+from src.business_logic.dto.rsa_keys_dto import RSAKeypair
+# from src.config.rsa_keys import CreateRSAKeypair #RSAKeypair
 from src.config.settings.base import BaseAppSettings
 
 
