@@ -1,5 +1,9 @@
+import logging
+
 from Crypto.PublicKey import RSA
 from src.business_logic.dto.rsa_keys_dto import RSAKeypair
+
+logger = logging.getLogger(__name__)
 
 class CreateRSAKeypair:
     def execute(self) -> RSAKeypair:

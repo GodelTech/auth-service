@@ -23,11 +23,6 @@ import src.di.providers as prov
 import logging
 from src.log import LOGGING_CONFIG
 
-# from Crypto.PublicKey import RSA
-# from src.business_logic.dto.rsa_keys_dto import RSAKeypair
-# from src.create_rsa_keypair import CreateRSAKeypair
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -67,20 +62,6 @@ def get_application(test: bool = False) -> NewFastApi:
 
 
 # TODO: move the creation of RSA keys here.
-#
-# class CreateRSAKeypair:
-#     def execute(self) -> RSAKeypair:
-#         key = RSA.generate(2048)
-#         private_key = key.export_key("PEM")
-#         public_key = key.public_key().export_key("PEM")
-#
-#         return RSAKeypair(
-#             private_key=private_key,
-#             public_key=public_key,
-#             n=key.n,
-#             e=key.e,
-#         )
-
 def setup_di(app: FastAPI) -> None:
     db_engine = prov.provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
