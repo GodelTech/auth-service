@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.business_logic.get_tokens.dto import RequestTokenModel, ResponseTokenModel
@@ -13,11 +14,11 @@ class AuthorizationCodeTokenService:
     """
     def __init__(
             self,
-            grant_validator: 'ValidatorProtocol',
-            redirect_uri_validator: 'ValidatorProtocol',
-            client_validator: 'ValidatorProtocol',
-            code_validator: 'ValidatorProtocol',
-            jwt_manager: 'JWTManagerProtocol',
+            grant_validator: ValidatorProtocol,
+            redirect_uri_validator: ValidatorProtocol,
+            client_validator: ValidatorProtocol,
+            code_validator: ValidatorProtocol,
+            jwt_manager: JWTManagerProtocol,
     ):
         self._grant_validator = grant_validator
         self._redirect_uri_validator = redirect_uri_validator

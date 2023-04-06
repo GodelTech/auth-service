@@ -8,7 +8,10 @@ from starlette.status import HTTP_400_BAD_REQUEST
 ExceptionsToHandle = Union[InvalidGrantError, InvalidRedirectUriError]
 
 
-async def http400_invalid_grant_handler(_: Request, exc: ExceptionsToHandle) -> JSONResponse:
+async def http400_invalid_grant_handler(
+        _: Request, 
+        exc: ExceptionsToHandle
+) -> JSONResponse:
     headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
     content = {"error": "invalid_grant"}
     return JSONResponse(

@@ -11,7 +11,6 @@ class ValidatePersistentGrant:
             persistent_grant_repo: 'PersistentGrantRepository' 
     ):
         self._persistent_grant_repo = persistent_grant_repo
-    
 
     async def __call__(self, code_to_validate: str, grant_type: str) -> None:
         if not await self._persistent_grant_repo.exists(code_to_validate, grant_type):
