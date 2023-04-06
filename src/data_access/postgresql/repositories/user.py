@@ -527,6 +527,17 @@ class UserRepository(BaseRepository):
             result = result.first()
             return result[0]
     
+    async def validate_user_by_phone_number(self, phone_number: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            session = sess
+            result = await session.execute(
+                select(exists().where(User.phone_number == phone_number))
+            )
+            result = result.first()
+            return result[0]
 
     async def get_all_claim_types(self) -> dict[str, int]:
         session_factory = sessionmaker(
