@@ -30,11 +30,13 @@ async def register_user(
 
     kwargs = request_body.__dict__
     if await user_service.user_repo.validate_user_by_email(email=kwargs['email']):
-        return templates.TemplateResponse("user_registration_failed_email.html", {'request': request})
+        return JSONResponse(status_code=400, content='email_duplication')
     if await user_service.user_repo.validate_user_by_username(username=kwargs['username']):
-        return templates.TemplateResponse("user_registration_failed_username.html", {'request': request})
+        return JSONResponse(status_code=400, content='username_duplication')
+    if await user_service.user_repo.validate_user_by_phone_number(phone_number=kwargs['phone_number']):
+        return JSONResponse(status_code=400, content='phone_number_duplication')
     await user_service.registration(kwargs)
-    return templates.TemplateResponse("user_registration_success.html", {'request': request})
+    return templates.TemplateResponse("user_registration_success.html", {'request': request})#{'username':kwargs['username'], 'password':kwargs['username']}
     
 
 @user_router.get("/register", response_class=HTMLResponse)

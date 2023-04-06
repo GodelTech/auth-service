@@ -19,7 +19,10 @@
         <label>Enter Password</label>
         <input id="pass" type="password" name="auth_pass" placeholder="Password" required >
         <button id="butt" class="form_auth_button" type="submit" name="form_auth_submit">Login</button>
-
+        <div class="register-link">
+          <p>Don't have an account?<br></p>
+          <a href="/user/register">Register here</a> 
+        </div>
       </form>
       {% if external_logins -%}
       <p class="sing_in">Sign in with</p>

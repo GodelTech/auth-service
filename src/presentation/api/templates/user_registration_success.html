@@ -137,7 +137,17 @@
           <h1>OIDC Registration Success</h1>
           <div class="form-group">
             <p>Thank you for registering with our OIDC service.</p>
-            <p><a href="/user/login">Back to the loging</a></p>
+            <p><a id="oidc_auth_link" href="#">Back to the loging</a></p>
+            <script>
+              // Получаем значение параметра oidc_auth из localStorage
+              var oidcAuth = localStorage.getItem('oidc_auth');
+        
+              // Находим ссылку, на которую нужно подставить значение
+              var link = document.getElementById('oidc_auth_link');
+        
+              // Устанавливаем значение параметра href ссылки равным значению oidc_auth
+              link.href = oidcAuth;
+            </script>
           </div>
         </div>
       </div>
