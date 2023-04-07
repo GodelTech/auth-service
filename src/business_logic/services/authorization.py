@@ -96,10 +96,12 @@ class AuthorizationService:
         if self.request_model is None:
             return None
 
-        fernet = Fernet(AppSettings().secret_key.get_secret_value())
-        encrypted_code_challenge = fernet.encrypt(
-            self.request_model.code_challenge.encode()
-        ).decode()
+        encrypted_code_challenge = None
+        if self.request_model.code_challenge:
+            fernet = Fernet(AppSettings().secret_key.get_secret_value())
+            encrypted_code_challenge = fernet.encrypt(
+                self.request_model.code_challenge.encode()
+            ).decode()
 
         secret_code = secrets.token_urlsafe(32)
         await self.persistent_grant_repo.create(

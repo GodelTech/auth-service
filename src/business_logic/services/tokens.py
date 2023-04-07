@@ -254,7 +254,7 @@ class BaseMaker:
                 but don't have provided grants"
             )
 
-        if str(grant.persistent_grant_type) == "authorization_code":
+        if str(grant.persistent_grant_type) == "authorization_code" and grant.code_challenge:
             fernet = Fernet(AppSettings().secret_key.get_secret_value())
             expected_code_challenge = fernet.decrypt(
                 grant.code_challenge.encode()
