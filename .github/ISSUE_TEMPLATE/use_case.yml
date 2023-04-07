@@ -1,0 +1,27 @@
+name: Discribe a new use case
+description: Request new functionality / extension of existing functionality
+body:
+  - type: textarea
+    attributes:
+      label: Describe the use case
+      description: A clear and concise description of what the use case is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Example Use
+      description: How is it going to be used? Ideally provide a code snippet.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context about the use case here.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: "**Have a nice day!**"
