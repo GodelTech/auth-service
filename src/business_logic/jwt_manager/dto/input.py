@@ -1,24 +1,24 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 
 
 class BaseJWTPayload(BaseModel):
-    sub: str
-    iss: str
-    iat: int
-    exp: int
-    aud: str
-    client_id: str
-    jti: str
-    acr: Optional[int]
+    sub: str  # user id
+    iss: str  # auth service uri
+    iat: int  # time of creation
+    exp: int  # time when token will expire
+    aud: str  # name for whom token was generated
+    client_id: str  # id of the client who issued a token
+    jti: str  # uniques identifier for token, UUID4
+    acr: Optional[int]  # default 0
 
 
 class AccessTokenPayload(BaseJWTPayload):
     typ: str = 'Bearer'
 
 
-class RefreshTokenPayload:
-    ...
+class RefreshTokenPayload(BaseModel):
+    jti: str
 
 
 class IdTokenPayload(BaseJWTPayload):

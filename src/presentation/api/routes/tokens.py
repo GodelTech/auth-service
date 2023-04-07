@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
-@token_router.post("/", response_model=ResponseTokenModel)
+@token_router.post("/")
 async def get_tokens(
         request_body: RequestTokenModel = Depends(),
         token_service_factory: TokenServiceFactory = Depends(provide_token_service_factory_stub),
 ) -> TokenEndpointResponse:
     token_service: 'TokenServiceProtocol' = token_service_factory.get_service_impl(request_body.grant_type)
-    result = await token_service.get_tokens(request_body)
+    result: ResponseTokenModel = await token_service.get_tokens(request_body)
     headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
-    return JSONResponse(content=result, headers=headers)
+    return JSONResponse(content=result.dict(exclude_none=True), headers=headers)

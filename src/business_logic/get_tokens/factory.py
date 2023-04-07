@@ -44,7 +44,8 @@ class TokenServiceFactory:
                 redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
                 client_validator=ValidateClient(client_repo=self._client_repo),
                 code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
-                jwt_manager=self._jwt_manager
+                jwt_manager=self._jwt_manager,
+                persistent_grant_repo=self._persistent_grant_repo
             )
         else:
             raise UnsupportedGrantTypeError

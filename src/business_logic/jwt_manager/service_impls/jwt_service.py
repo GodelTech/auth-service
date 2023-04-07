@@ -1,26 +1,32 @@
+from __future__ import annotations
 import logging
 import jwt
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
-
-from typing import Any, Optional
-
+from src.business_logic.jwt_manager.dto import (
+    AccessTokenPayload,
+    RefreshTokenPayload,
+    IdTokenPayload,
+)
+from typing import Any, Optional, Union
+from pprint import pprint
 
 logger = logging.getLogger(__name__)
 
 
+Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
+
+
 class JWTManager:
     def __init__(self, keys: RSAKeypair = Container().config().keys) -> None:
-        self.algorithm = "RS256"
-        self.algorithms = ["RS256"]
         self.keys = keys
     
-    def encode(self, payload: dict[str, Any]) -> str:
+    def encode(self, payload: Payload, algorithm: str) -> str:
         token = jwt.encode(
-            payload=payload, key=self.keys.private_key, algorithm=self.algorithm
+            payload=payload.dict(exclude_none=True), key=self.keys.private_key, algorithm=algorithm
         )
         return token
-    
+
     def decode(self, token: str, audience: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         token = token.replace("Bearer ", "")
         if audience:
