@@ -1,6 +1,9 @@
+import json
 import os
 
 from dynaconf import Dynaconf
+
+from src.scripts.rsa_keys.create_rsa_keypair import CreateRSAKeypair
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -12,6 +15,9 @@ settings = Dynaconf(
     env_switcher="identity_server_poc_env",
     load_dotenv=True,
 )
+
+rsa_keypair = CreateRSAKeypair().execute()
+settings.set("KEYS", rsa_keypair)
 
 
 DB_URL = settings.db.get("url")
