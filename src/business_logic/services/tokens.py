@@ -1,13 +1,19 @@
+import base64
 import datetime
+import hashlib
+import json
 import logging
 import time
 import uuid
 from typing import Any, Dict, Optional, Union
+from cryptography.fernet import Fernet
 
 from fastapi import Request
+from itsdangerous import base64_encode
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
+from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
     ClientGrantsError,
@@ -248,6 +254,25 @@ class BaseMaker:
                 but don't have provided grants"
             )
 
+        if str(grant.persistent_grant_type) == "authorization_code":
+            fernet = Fernet(AppSettings().secret_key.get_secret_value())
+            expected_code = fernet.decrypt(
+                base64.urlsafe_b64decode(grant.grant_data)
+            ).decode()
+            expected_code = json.loads(expected_code)
+            actual_code = fernet.decrypt(
+                base64.urlsafe_b64decode(self.request_model.code)
+            ).decode()
+            actual_code = json.loads(actual_code)
+            code_verifier = self.request_model.code_verifier
+            actual_code_challenge = base64_encode(
+                hashlib.sha256(code_verifier.encode("utf-8")).digest()
+            ).decode()
+            if not expected_code == actual_code:
+                raise ValueError("Code not match")
+            if not expected_code["code_challenge"] == actual_code_challenge:
+                raise ValueError("Code challenge not match")
+
         user_id = grant.user_id
         scopes = {"scope": self.request_model.scope}
 
@@ -366,9 +391,7 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError(
-                    "Device registration in progress"
-                )
+                raise DeviceRegistrationError("Device registration in progress")
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(

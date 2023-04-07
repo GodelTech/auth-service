@@ -268,5 +268,4 @@ class TestAuthorizationCodeFlowWithPKCE:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert len(response) == 0
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

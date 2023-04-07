@@ -55,3 +55,5 @@ class DataRequestModel:
     id_token_hint: str = Form(None)
     login_hint: str = Form(None)
     acr_values: str = Form(None)
+    code_challenge: str = Form(None)
+    code_challenge_method: str = Form(None)

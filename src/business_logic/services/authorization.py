@@ -1,6 +1,10 @@
+import base64
+import json
 import logging
 import secrets
 from typing import Any, Dict, Optional
+from cryptography.fernet import Fernet
+from src.config.settings.app import AppSettings
 
 from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
@@ -86,13 +90,26 @@ class AuthorizationService:
                         )
                     )
 
+    def _get_secret_code(self) -> str:
+        fernet = Fernet(AppSettings().secret_key.get_secret_value())
+        secret_code = secrets.token_urlsafe(32)
+        secret_code = {
+            "code": secret_code,
+            "code_challenge": self.request_model.code_challenge,
+            "code_challenge_method": self.request_model.code_challenge_method,
+        }
+        secret_code = json.dumps(secret_code)
+        secret_code = fernet.encrypt(secret_code.encode())
+        secret_code = base64.urlsafe_b64encode(secret_code).decode()
+        return secret_code
+
     async def get_redirect_url_code_response_type(
         self, user_id: int
     ) -> Optional[str]:
         if self.request_model is None:
             return None
 
-        secret_code = secrets.token_urlsafe(32)
+        secret_code = self._get_secret_code()
         await self.persistent_grant_repo.create(
             client_id=self.request_model.client_id,
             grant_data=secret_code,
