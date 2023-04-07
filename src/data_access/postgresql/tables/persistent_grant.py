@@ -54,6 +54,8 @@ class PersistentGrant(BaseModel):
         lazy="joined",
     )
 
+    code_challenge = Column(String, nullable=True)
+
     def __str__(self) -> str:  # pragma: no cover
         return f":{self.expiration}"
 

@@ -28,6 +28,7 @@ class PersistentGrantRepository(BaseRepository):
         user_id: int,
         grant_type: str = "authorization_code",
         expiration_time: int = 600,
+        code_challenge: str = None,
     ) -> None:
         grant_type_id = await self.get_type_id(grant_type)
         session_factory = sessionmaker(
@@ -49,6 +50,7 @@ class PersistentGrantRepository(BaseRepository):
                 "expiration": expiration_time,
                 "user_id": user_id,
                 "persistent_grant_type_id": grant_type_id,
+                "code_challenge": code_challenge,
             }
 
             await session.execute(

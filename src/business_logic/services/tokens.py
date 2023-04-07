@@ -256,21 +256,15 @@ class BaseMaker:
 
         if str(grant.persistent_grant_type) == "authorization_code":
             fernet = Fernet(AppSettings().secret_key.get_secret_value())
-            expected_code = fernet.decrypt(
-                base64.urlsafe_b64decode(grant.grant_data)
+            expected_code_challenge = fernet.decrypt(
+                grant.code_challenge.encode()
             ).decode()
-            expected_code = json.loads(expected_code)
-            actual_code = fernet.decrypt(
-                base64.urlsafe_b64decode(self.request_model.code)
+            actual_code_challenge = base64.urlsafe_b64encode(
+                hashlib.sha256(
+                    self.request_model.code_verifier.encode("utf-8")
+                ).digest()
             ).decode()
-            actual_code = json.loads(actual_code)
-            code_verifier = self.request_model.code_verifier
-            actual_code_challenge = base64_encode(
-                hashlib.sha256(code_verifier.encode("utf-8")).digest()
-            ).decode()
-            if not expected_code == actual_code:
-                raise ValueError("Code not match")
-            if not expected_code["code_challenge"] == actual_code_challenge:
+            if not expected_code_challenge == actual_code_challenge:
                 raise ValueError("Code challenge not match")
 
         user_id = grant.user_id
