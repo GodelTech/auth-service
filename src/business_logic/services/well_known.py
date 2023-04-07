@@ -6,7 +6,7 @@ from src.dyna_config import DOMAIN_NAME
 from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
-from typing import Any, Union
+from typing import Any, Dict, List, Union
 from src.data_access.postgresql.repositories import WellKnownRepository
 
 logger = logging.getLogger(__name__)
@@ -18,11 +18,11 @@ class WellKnownServices:
         self.wlk_repo = wlk_repo
 
     def get_list_of_types(
-        self, list_of_types: list[Any] = [("Not ready yet", "")]
-    ) -> list[str]:
+        self, list_of_types: List[Any] = [("Not ready yet", "")]
+    ) -> List[str]:
         return [claim[0] for claim in list_of_types]
 
-    def get_all_urls(self, result: dict[str, Any]) -> dict[str, Any]:
+    def get_all_urls(self, result: Dict[str, Any]) -> Dict[str, Any]:
         if self.request is None:
             raise ValueError
         return {
@@ -30,26 +30,24 @@ class WellKnownServices:
             for route in self.request.app.routes
         } | {"false": "/ Not ready yet"}
 
-    def get_algorithms(self):
+    def get_algorithms(self) -> List[str]:
         return JWTService().algorithms
 
-    async def get_claims(self):
+    async def get_claims(self) -> List[str]:
         result = await self.wlk_repo.get_user_claim_types()
         # result += await self.wlk_repo.get_client_claim_types()
         return result
 
-    async def get_grant_types(self):
+    async def get_grant_types(self) -> List[str]:
         result = await self.wlk_repo.get_grant_types()
         # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_openid_configuration(
         self,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         if self.request is None:
             raise ValueError
-
-        # For key description: https://ldapwiki.com/wiki/Openid-configuration
 
         # REQUIRED
         result: dict[str, Any] = {}
@@ -69,9 +67,9 @@ class WellKnownServices:
             "id_token token",
             "urn:ietf:params:oauth:grant-type:device_code",
         ]
+        result["token_endpoint"] = urls_dict["get_tokens"]
 
         # may be REQUIRED
-        result["token_endpoint"] = urls_dict["get_tokens"]
         result["end_session_endpoint"] = urls_dict["end_session"]
         result["check_session_iframe"] = urls_dict["false"]
 
@@ -92,7 +90,7 @@ class WellKnownServices:
 
         return result
 
-    async def get_jwks(self) -> dict[str, Any]:
+    async def get_jwks(self) -> Dict[str, Any]:
         jwt_service = JWTService()
         kty = ""
         if "RS" in jwt_service.algorithm:
