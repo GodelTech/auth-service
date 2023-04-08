@@ -19,7 +19,6 @@ settings = Dynaconf(
 rsa_keypair = CreateRSAKeypair().execute()
 settings.set("KEYS", rsa_keypair)
 
-
 DB_URL = settings.db.get("url")
 DB_MAX_CONNECTION_COUNT = settings.db.get("max_connection_count")
 # DB_PORT = settings.db.get("port")

@@ -30,5 +30,5 @@ base_url_host = "127.0.0.1"
 base_url_port = "8000"
 domain_name = "rnd-identityserver-dev.godeltech.com"
 
-#[default.rsa]
-#rsa_key_pair =
+[default.rsa]
+rsa_key_pair = ""
