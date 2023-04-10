@@ -1,7 +1,0 @@
-[pipeline]
-dynaconf_merge = true
-
-[pipeline.db]
-echo = true
-url = "postgresql+asyncpg://test:test@172.18.0.1:5465/test"
-max_connection_count = 10
