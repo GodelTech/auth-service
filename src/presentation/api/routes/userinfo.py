@@ -8,7 +8,8 @@ from fastapi_cache.decorator import cache
 from src.business_logic.cache.key_builders import builder_with_parametr
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
-from src.config.settings.cache_time import CacheTimeSettings
+# from src.config.settings.cache_time import CacheTimeSettings
+from src.dyna_config import CACHE_TIME_USERINFO, CACHE_TIME_USERINFO_JWT
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.di.providers import provide_userinfo_service_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
@@ -20,7 +21,7 @@ userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
 
 @userinfo_router.get("/", response_model=dict)
 @cache(
-    expire=CacheTimeSettings.USERINFO,
+    expire=CACHE_TIME_USERINFO,
     coder=JsonCoder,
     # key_builder=builder_with_parametr,
 )
@@ -54,7 +55,7 @@ async def get_userinfo(
 
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
 @cache(
-    expire=CacheTimeSettings.USERINFO,
+    expire=CACHE_TIME_USERINFO,
     coder=JsonCoder,
     key_builder=builder_with_parametr,
 )
@@ -87,7 +88,7 @@ async def post_userinfo(
 
 @userinfo_router.get("/jwt", response_model=str)
 @cache(
-    expire=CacheTimeSettings.USERINFO_JWT,
+    expire=CACHE_TIME_USERINFO_JWT,
     coder=JsonCoder,
     key_builder=builder_with_parametr,
 )

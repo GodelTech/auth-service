@@ -15,13 +15,21 @@ settings = Dynaconf(
     env_switcher="identity_server_poc_env",
     load_dotenv=True,
 )
-
 rsa_keypair = CreateRSAKeypair().execute()
 settings.set("KEYS", rsa_keypair)
+
+# print(settings.as_dict())  # Display all settings
+# print(settings.DATABASE_URL)  # Display the DATABASE_URL setting
+# print(settings.DB["database_url"])
+# print(settings.default.db.database_url)
+print(settings.db.database_url)
+# print(settings.db.get("database_url"))
 
 DB_URL = settings.db.get("url")
 DB_MAX_CONNECTION_COUNT = settings.db.get("max_connection_count")
 # DB_PORT = settings.db.get("port")
+# DATABASE_URL = settings.db.get("database_url")
+
 
 
 BASE_URL_HOST = settings.server.get("base_url_host")
@@ -34,6 +42,12 @@ REDIS_HOST = settings.redis.get("host")
 REDIS_PORT = settings.redis.get("port")
 REDIS_URL = f"{REDIS_SCHEME}{REDIS_HOST}:{REDIS_PORT}"
 
+
+CACHE_TIME_USERINFO = settings.info.get("userinfo")
+CACHE_TIME_USERINFO_JWT = CACHE_TIME_USERINFO
+CACHE_TIME_USERINFO_DEFAULT_TOKEN = settings.info.get("userinfo_default_token")
+
+CACHE_TIME_WELL_KNOWN_OPENID_CONFIG = settings.info.get("well_known_openid_config")
 
 # IS_CLIENT = settings.env_for_dynaconf not in (
 #     "local",
