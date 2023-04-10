@@ -9,8 +9,9 @@ from src.di import Container
 logger = logging.getLogger(__name__)
 
 class JWTService:
-    def __init__(self, keys: RSAKeypair = settings.KEYS) -> None:
-    # def __init__(self, keys: RSAKeypair = Container().config.KEYS) -> None:
+    # def __init__(self, keys: RSAKeypair = settings.KEYS) -> None:
+    def __init__(self, keys: RSAKeypair = Container().config().KEYS) -> None:
+    ##### def __init__(self, keys: RSAKeypair = Container().config().keys) -> None:
         self.algorithm = "RS256"
         self.algorithms = ["RS256"]
         self.keys = keys
