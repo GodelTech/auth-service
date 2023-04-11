@@ -97,7 +97,10 @@ class AuthorizationService:
             return None
 
         encrypted_code_challenge = None
-        if self.request_model.code_challenge:
+        if (
+            not hasattr(self.request_model.code_challenge, "default")
+            and self.request_model.code_challenge
+        ):  # Check if code_challenge was included in the request
             fernet = Fernet(AppSettings().secret_key.get_secret_value())
             encrypted_code_challenge = fernet.encrypt(
                 self.request_model.code_challenge.encode()
