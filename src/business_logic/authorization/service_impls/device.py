@@ -42,10 +42,10 @@ class DeviceAuthService(CreateGrantMixin):
             request_data.redirect_uri, request_data.client_id
         )
         await self._scope_validator(request_data.scope, request_data.client_id)
-        await self._user_code_validator(request_data.user_code)
         await self._user_credentials_validator(
             request_data.username, request_data.password
         )
+        await self._user_code_validator(request_data.user_code)
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
         await self._validate_request_data(request_data)

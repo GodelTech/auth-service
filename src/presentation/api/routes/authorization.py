@@ -29,8 +29,8 @@ from src.presentation.api.models import RequestModel
 if TYPE_CHECKING:
     from src.business_logic.authorization import AuthServiceProtocol
 
-AuthorizeEndpointPostResponse = Union[RedirectResponse, JSONResponse]
-AuthorizeEndpointGetResponse = Union[JSONResponse, _TemplateResponse]
+AuthorizePostEndpointResponse = Union[RedirectResponse, JSONResponse]
+AuthorizeGetEndpointResponse = Union[JSONResponse, _TemplateResponse]
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> AuthorizeEndpointGetResponse:
+) -> AuthorizeGetEndpointResponse:
     try:
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
@@ -96,7 +96,7 @@ async def post_authorize(
         provide_auth_service_factory_stub
     ),
     user_code: Optional[str] = Cookie(None),
-) -> AuthorizeEndpointPostResponse:
+) -> AuthorizePostEndpointResponse:
     try:
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (

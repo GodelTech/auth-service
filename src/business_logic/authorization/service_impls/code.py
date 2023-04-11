@@ -43,7 +43,7 @@ class CodeAuthService(CreateGrantMixin, UpdateRedirectUrlMixin):
         await self._scope_validator(request_data.scope, request_data.client_id)
         await self._user_credentials_validator(
             request_data.username, request_data.password
-        )
+        )  # TODO create mixin for validation with methods which are common for each service?
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
         await self._validate_request_data(request_data)

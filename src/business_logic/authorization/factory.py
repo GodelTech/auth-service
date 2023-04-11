@@ -6,6 +6,9 @@ from src.business_logic.authorization.constants import ResponseType
 from src.business_logic.authorization.service_impls import (
     CodeAuthService,
     DeviceAuthService,
+    TokenAuthService,
+    IdTokenAuthService,
+    IdTokenTokenAuthService,
 )
 from src.business_logic.authorization.validators import (
     ScopeValidator,
@@ -73,6 +76,36 @@ class AuthServiceFactory:
                 persistent_grant_repo=self._persistent_grant_repo,
                 device_repo=self._device_repo,
                 user_repo=self._user_repo,
+            )
+        if response_type == ResponseType.TOKEN.value:
+            return TokenAuthService(
+                client_validator=ClientValidator(self._client_repo),
+                redirect_uri_validator=RedirectUriValidator(self._client_repo),
+                scope_validator=ScopeValidator(self._client_repo),
+                user_credentials_validator=UserCredentialsValidator(
+                    user_repo=self._user_repo,
+                    password_service=self._password_service,
+                ),
+            )
+        if response_type == ResponseType.ID_TOKEN.value:
+            return IdTokenAuthService(
+                client_validator=ClientValidator(self._client_repo),
+                redirect_uri_validator=RedirectUriValidator(self._client_repo),
+                scope_validator=ScopeValidator(self._client_repo),
+                user_credentials_validator=UserCredentialsValidator(
+                    user_repo=self._user_repo,
+                    password_service=self._password_service,
+                ),
+            )
+        if response_type == ResponseType.ID_TOKEN_TOKEN.value:
+            return IdTokenTokenAuthService(
+                client_validator=ClientValidator(self._client_repo),
+                redirect_uri_validator=RedirectUriValidator(self._client_repo),
+                scope_validator=ScopeValidator(self._client_repo),
+                user_credentials_validator=UserCredentialsValidator(
+                    user_repo=self._user_repo,
+                    password_service=self._password_service,
+                ),
             )
         raise WrongResponseTypeError(
             "Provided response_type is not supported."
