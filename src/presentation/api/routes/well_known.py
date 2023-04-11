@@ -36,7 +36,7 @@ async def get_openid_configuration(
         well_known_info_class = well_known_info_class
         well_known_info_class.request = request
         result = await well_known_info_class.get_openid_configuration()
-        result_dict = {k: v for k, v in result.items() if v is not None}
+        result_dict = result.dict()
         return JSONResponse(content=result_dict)
     except Exception as exception:
         logger.exception(exception)

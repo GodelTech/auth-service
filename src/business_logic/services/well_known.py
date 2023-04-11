@@ -1,4 +1,4 @@
-from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
+from business_logic.dto.open_id_config import OpenIdConfiguration
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
@@ -35,22 +35,20 @@ class WellKnownServices:
 
     async def get_claims(self) -> List[str]:
         result = await self.wlk_repo.get_user_claim_types()
-        # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_grant_types(self) -> List[str]:
         result = await self.wlk_repo.get_grant_types()
-        # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_openid_configuration(
         self,
-    ) -> Dict[str, Any]:
+    ) -> OpenIdConfiguration:
         if self.request is None:
             raise ValueError
 
         # REQUIRED
-        result: dict[str, Any] = {}
+        result: Dict[str, Any] = {}
         result["issuer"] = DOMAIN_NAME
 
         urls_dict = self.get_all_urls(result)
@@ -87,8 +85,9 @@ class WellKnownServices:
             "client_credentials",
             "urn:ietf:params:oauth:grant-type:device_code",
         ]
+        result_model = OpenIdConfiguration(**result)
 
-        return result
+        return result_model
 
     async def get_jwks(self) -> Dict[str, Any]:
         jwt_service = JWTService()
@@ -111,4 +110,5 @@ class WellKnownServices:
         logger.info(
             f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"
         )
+
         return result

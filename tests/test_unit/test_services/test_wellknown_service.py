@@ -9,34 +9,34 @@ from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.well_known import WellKnownServices
 from typing import Any, no_type_check
 
+
 class UrlMock:
-    path = ''
+    path = ""
+
 
 class RequestMock:
     authorization = 0
-    url  = UrlMock()
+    url = UrlMock()
+
 
 @no_type_check
 async def decode_token(self, token: str) -> dict[str, Any]:
     token = token.replace("Bearer ", "")
 
     decoded = jwt.decode(
-        token,
-        key=self.keys.public_key,
-        algorithms=self.algorithms
+        token, key=self.keys.public_key, algorithms=self.algorithms
     )
     return decoded
 
 
 @pytest.mark.asyncio
 class TestWellKnownServices:
-
     # def setup_class(self) -> None:
     #     self.wks = WellKnownServices()
     #     self.wks.request = RequestMock()
     #     self.wks.request.url = "/localhost/.well-known/openid-configuration"
 
-    def new_get_all_urls(self, *args:Any, **kwargs:Any) -> dict[str, str]:
+    def new_get_all_urls(self, *args: Any, **kwargs: Any) -> dict[str, str]:
         return {
             "openapi": f"http://{DOMAIN_NAME}...enapi.json",
             "swagger_ui_html": f"http://{DOMAIN_NAME}0/docs",
@@ -55,15 +55,16 @@ class TestWellKnownServices:
         }
 
     async def test_well_known_openid_cofig(
-            self,  
-            wlk_services: WellKnownServices,
-        ) -> None:
+        self,
+        wlk_services: WellKnownServices,
+    ) -> None:
         with mock.patch.object(
-                WellKnownServices, "get_all_urls", new=self.new_get_all_urls
+            WellKnownServices, "get_all_urls", new=self.new_get_all_urls
         ):
             wks = wlk_services
             wks.request = RequestMock
             result = await wks.get_openid_configuration()
+            result_dict = result.dict()
             dict_of_parametrs_and_types = {
                 "issuer": str,
                 "jwks_uri": str,
@@ -105,9 +106,10 @@ class TestWellKnownServices:
                 "grant_types_supported": list,
                 "response_modes_supported": list,
             }
-
-            for key in result.keys():
-                assert type(result[key]) == dict_of_parametrs_and_types[key]
+            for key in result_dict:
+                assert (
+                    type(result_dict[key]) == dict_of_parametrs_and_types[key]
+                )
 
             KEYS_REQUIRED = (
                 "issuer",
@@ -120,9 +122,12 @@ class TestWellKnownServices:
             )
 
             for key in KEYS_REQUIRED:
-                assert key in result.keys()
+                assert key in result_dict
 
-    async def test_jwks_RSA(self, wlk_services: WellKnownServices,) -> None:
+    async def test_jwks_RSA(
+        self,
+        wlk_services: WellKnownServices,
+    ) -> None:
         wks = wlk_services
         jwt_service = JWTService()
         result = await wks.get_jwks()
@@ -134,12 +139,16 @@ class TestWellKnownServices:
 
             test_key = construct((n, e))
 
-            assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
-            assert result["kty"] == "RSA"
-            assert bool(await jwt_service.decode_token(
-                token=test_token,
-                # key=test_key.public_key().export_key('PEM'),
-                # algorithms=["RS256", ]
+            assert (
+                jwt_service.keys.public_key
+                == test_key.public_key().export_key("PEM")
             )
+            assert result["kty"] == "RSA"
+            assert bool(
+                await jwt_service.decode_token(
+                    token=test_token,
+                    # key=test_key.public_key().export_key('PEM'),
+                    # algorithms=["RS256", ]
+                )
             )
             assert result["use"] == "sig"
