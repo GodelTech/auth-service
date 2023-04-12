@@ -7,6 +7,7 @@ from src.business_logic.get_tokens.validators import (
 from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
 from src.business_logic.common.validators import ValidateClient
 
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .interfaces import TokenServiceProtocol

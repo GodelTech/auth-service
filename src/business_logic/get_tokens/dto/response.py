@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Union
+from typing import Optional
 
 
 class ResponseTokenModel(BaseModel):
@@ -10,8 +10,8 @@ class ResponseTokenModel(BaseModel):
     expires_in: Optional[int]
     id_token: Optional[str]
     refresh_expires_in : Optional[int]
-    not_before_policy : Optional[int]
-    scope : Optional[Union[list[str], str]]
+    not_before_policy : Optional[int] = None
+    scope : Optional[str] = None
     
     class Config:
         orm_mode = True

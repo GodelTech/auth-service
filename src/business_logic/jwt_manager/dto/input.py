@@ -23,11 +23,11 @@ class RefreshTokenPayload(BaseModel):
 
 class IdTokenPayload(BaseJWTPayload):
     typ: str = 'ID'
-    email: Optional[str]
-    email_verified: Optional[str]
-    given_name: Optional[str]
-    last_name: Optional[str]
-    preferred_username: Optional[str]
-    picture: Optional[str]
-    zoneinfo: Optional[str]
-    locale: Optional[str]
+    email: Optional[str] = None
+    email_verified: Optional[str] = None
+    given_name: Optional[str] = None
+    last_name: Optional[str] = None
+    preferred_username: Optional[str] = None
+    picture: Optional[str] = None
+    zoneinfo: Optional[str] = None
+    locale: Optional[str] = None

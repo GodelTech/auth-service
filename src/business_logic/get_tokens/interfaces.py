@@ -8,5 +8,5 @@ if TYPE_CHECKING:
 
 
 class TokenServiceProtocol(Protocol):
-    async def get_tokens(request_data: 'RequestTokenModel') -> 'ResponseTokenModel':
+    async def get_tokens(self, request_data: 'RequestTokenModel') -> 'ResponseTokenModel':
         raise NotImplementedError

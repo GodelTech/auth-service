@@ -9,7 +9,7 @@ from src.business_logic.jwt_manager.dto import (
     IdTokenPayload,
 )
 from typing import Any, Optional, Union
-from pprint import pprint
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,15 @@ Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
 class JWTManager:
     def __init__(self, keys: RSAKeypair = Container().config().keys) -> None:
         self.keys = keys
-    
-    def encode(self, payload: Payload, algorithm: str) -> str:
+
+    def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
+        if secret:
+            key = secret
+        else:
+            key = self.keys.private_key
+
         token = jwt.encode(
-            payload=payload.dict(exclude_none=True), key=self.keys.private_key, algorithm=algorithm
+            payload=payload.dict(exclude_none=True), key=key, algorithm=algorithm
         )
         return token
 
@@ -35,5 +40,5 @@ class JWTManager:
         else:
             decoded_info = jwt.decode(token, key=self.keys.public_key, algorithms=self.algorithms,
                                       **kwargs,)
-        
+
         return decoded_info    
