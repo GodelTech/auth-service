@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Dict, TypeVar, Any
+from typing_extensions import ParamSpec
 
 from src.business_logic.authorization.constants import ResponseType
 from src.business_logic.authorization.service_impls import (
@@ -20,6 +21,7 @@ from src.business_logic.common.validators import (
     RedirectUriValidator,
 )
 from src.data_access.postgresql.errors import WrongResponseTypeError
+from .interfaces import AuthServiceProtocol
 
 if TYPE_CHECKING:
     from src.business_logic.services import JWTService, PasswordHash
@@ -30,11 +32,22 @@ if TYPE_CHECKING:
         UserRepository,
     )
 
-    from .interfaces import AuthServiceProtocol
+
+F = TypeVar("F", bound=Callable[..., Any])
+FactoryMethod = Callable[..., AuthServiceProtocol]
+ResponseTypeToFactoryMethod = Dict[str, FactoryMethod]
+
+
+def register_factory(response_type: str) -> Callable[[F], F]:
+    def decorator(func: F) -> F:
+        AuthServiceFactory._register_factory(response_type, func)
+        return func
+
+    return decorator
 
 
 class AuthServiceFactory:
-    _response_type_service_mapper = {}
+    _response_type_to_factory_method: ResponseTypeToFactoryMethod = {}
 
     def __init__(
         self,
@@ -54,19 +67,19 @@ class AuthServiceFactory:
 
     @classmethod
     def _register_factory(
-        cls, response_type: str, factory_method: Callable
+        cls, response_type: str, factory_method: FactoryMethod
     ) -> None:
-        cls._response_type_service_mapper[response_type] = factory_method
+        cls._response_type_to_factory_method[response_type] = factory_method
 
     def get_service_impl(self, response_type: str) -> AuthServiceProtocol:
-        factory = self._response_type_service_mapper.get(response_type)
+        auth_service = self._response_type_to_factory_method.get(response_type)
 
-        if factory is None:
+        if auth_service is None:
             raise WrongResponseTypeError(
                 "Provided response_type is not supported."
             )
 
-        return factory(
+        return auth_service(
             client_repo=self._client_repo,
             user_repo=self._user_repo,
             persistent_grant_repo=self._persistent_grant_repo,
@@ -76,13 +89,13 @@ class AuthServiceFactory:
         )
 
 
+@register_factory(ResponseType.CODE.value)
 def _create_code_auth_service(
     client_repo: ClientRepository,
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
-    device_repo: DeviceRepository,
     password_service: PasswordHash,
-    jwt_service: JWTService,
+    **kwargs: Any,
 ) -> AuthServiceProtocol:
     return CodeAuthService(
         client_validator=ClientValidator(client_repo),
@@ -97,6 +110,82 @@ def _create_code_auth_service(
     )
 
 
-AuthServiceFactory._register_factory(
-    ResponseType.CODE.value, _create_code_auth_service
-)
+@register_factory(ResponseType.DEVICE.value)
+def _create_device_auth_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    device_repo: DeviceRepository,
+    password_service: PasswordHash,
+    **kwargs: Any,
+) -> AuthServiceProtocol:
+    return DeviceAuthService(
+        client_validator=ClientValidator(client_repo),
+        redirect_uri_validator=RedirectUriValidator(client_repo),
+        scope_validator=ScopeValidator(client_repo),
+        user_credentials_validator=UserCredentialsValidator(
+            user_repo=user_repo,
+            password_service=password_service,
+        ),
+        user_code_validator=UserCodeValidator(device_repo),
+        persistent_grant_repo=persistent_grant_repo,
+        device_repo=device_repo,
+        user_repo=user_repo,
+    )
+
+
+@register_factory(ResponseType.TOKEN.value)
+def _create_token_auth_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    password_service: PasswordHash,
+    jwt_service: JWTService,
+    **kwargs: Any,
+) -> AuthServiceProtocol:
+    return TokenAuthService(
+        client_validator=ClientValidator(client_repo),
+        redirect_uri_validator=RedirectUriValidator(client_repo),
+        scope_validator=ScopeValidator(client_repo),
+        user_credentials_validator=UserCredentialsValidator(
+            user_repo=user_repo,
+            password_service=password_service,
+        ),
+    )
+
+
+@register_factory(ResponseType.ID_TOKEN.value)
+def _create_id_token_auth_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    password_service: PasswordHash,
+    jwt_service: JWTService,
+    **kwargs: Any,
+) -> AuthServiceProtocol:
+    return IdTokenAuthService(
+        client_validator=ClientValidator(client_repo),
+        redirect_uri_validator=RedirectUriValidator(client_repo),
+        scope_validator=ScopeValidator(client_repo),
+        user_credentials_validator=UserCredentialsValidator(
+            user_repo=user_repo,
+            password_service=password_service,
+        ),
+    )
+
+
+@register_factory(ResponseType.ID_TOKEN_TOKEN.value)
+def _create_id_token_token_auth_service(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    password_service: PasswordHash,
+    jwt_service: JWTService,
+    **kwargs: Any,
+) -> AuthServiceProtocol:
+    return IdTokenTokenAuthService(
+        client_validator=ClientValidator(client_repo),
+        redirect_uri_validator=RedirectUriValidator(client_repo),
+        scope_validator=ScopeValidator(client_repo),
+        user_credentials_validator=UserCredentialsValidator(
+            user_repo=user_repo,
+            password_service=password_service,
+        ),
+    )
