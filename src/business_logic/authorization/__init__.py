@@ -1,2 +1,2 @@
-from .factory import AuthServiceFactory
+from .factories import AuthServiceFactory
 from .interfaces import AuthServiceProtocol
