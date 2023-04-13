@@ -16,7 +16,7 @@ from src.business_logic.common.validators import (
 
 
 if TYPE_CHECKING:
-    from src.business_logic.services import JWTService, PasswordHash
+    from src.business_logic.services import PasswordHash
     from src.data_access.postgresql.repositories import (
         ClientRepository,
         PersistentGrantRepository,
