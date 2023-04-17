@@ -13,7 +13,7 @@ from src.business_logic.services import (
     ThirdPartyGitLabService,
     ThirdPartyMicrosoftService,
     DeviceService,
-    EndSessionService,
+    # EndSessionService,
     IntrospectionServies,
     JWTService,
     LoginFormService,
@@ -26,6 +26,7 @@ from src.business_logic.services import (
     UserInfoServices,
     WellKnownServices,
 )
+from src.business_logic.endsession.endsession_service import EndSessionService
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,

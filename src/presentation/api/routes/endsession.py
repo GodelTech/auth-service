@@ -29,9 +29,7 @@ async def end_session(
     ),
 ) -> Union[int, RedirectResponse, JSONResponse]:
     try:
-        service_class = service_class
-        service_class.request_model = request_model
-        logout_redirect_uri = await service_class.end_session()
+        logout_redirect_uri = await service_class.end_session(request_model)
         if logout_redirect_uri is None:
             return status.HTTP_204_NO_CONTENT
 

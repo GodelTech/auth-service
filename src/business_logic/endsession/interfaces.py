@@ -8,11 +8,4 @@ class EndSessionServiceProtocol(Protocol):
     async def end_session(self) -> Optional[str]:
         raise NotImplementedError
 
-    @property
-    def request_model(self) -> Optional[RequestEndSessionModel]:
-        raise NotImplementedError
-
-    @request_model.setter
-    def request_model(self, request_model: RequestEndSessionModel) -> None:
-        raise NotImplementedError
 
