@@ -228,7 +228,7 @@ class AuthorizationService:
         self, scope:str, username: str
     ) -> None:
         user_id = (await self.user_repo.get_user_by_username(username=username)).id
-        claims = await self.user_repo.get_claims(user_id=user_id)
+        claims = await self.user_repo.get_claims(id=user_id)
         claim_types = claims.keys()
         if "profile" in scope:
             for claim_type in ('name', 'gender', 'birthdate', 'phone_number', 'address', 'zoneinfo'):
