@@ -96,7 +96,7 @@ async def post_authorize(
                 )
         except NotCompleteScopeError:
             return RedirectResponse(
-            f"https/{DOMAIN_NAME}/{auth_class.request_model.username}?scope={auth_class.request_model.scope}", status_code=status.HTTP_302_FOUND
+            f"/user/add_info/{auth_class.request_model.username}?scope={auth_class.request_model.scope}", status_code=status.HTTP_302_FOUND
         )
         if not firmed_redirect_uri:
             raise UserNotFoundError
