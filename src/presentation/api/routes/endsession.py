@@ -5,7 +5,7 @@ import jwt
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from src.business_logic.services.endsession import EndSessionService
+from src.business_logic.endsession.interfaces import EndSessionServiceProtocol
 from src.data_access.postgresql.errors.client import (
     ClientPostLogoutRedirectUriError,
 )
@@ -24,7 +24,7 @@ endsession_router = APIRouter(prefix="/endsession", tags=["End Session"])
 @endsession_router.get("/", status_code=status.HTTP_204_NO_CONTENT)
 async def end_session(
     request_model: RequestEndSessionModel = Depends(),
-    service_class: EndSessionService = Depends(
+    service_class: EndSessionServiceProtocol = Depends(
         provide_endsession_service_stub
     ),
 ) -> Union[int, RedirectResponse, JSONResponse]:
