@@ -21,8 +21,17 @@
         <button id="butt" class="form_auth_button" type="submit" name="form_auth_submit">Login</button>
         <div class="register-link">
           <p>Don't have an account?<br></p>
-          <a href="/user/register">Register here</a> 
+          <a >Register here</a> 
         </div>
+        <script>
+          const savedLink = localStorage.getItem('oidc_auth');
+          if (savedLink && savedLink.includes('scope=')) {
+            const urlParams = new URLSearchParams(savedLink);
+            const scope = urlParams.get('scope');
+            const registerLink = document.querySelector('.register-link a');
+            registerLink.href = `/user/register/${scope}`;
+          }
+        </script>
       </form>
       {% if external_logins -%}
       <p class="sing_in">Sign in with</p>

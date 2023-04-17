@@ -22,6 +22,7 @@ let credentialsModalWindow = document.querySelector(
 let deviceButtons = document.getElementsByClassName('device_button');
 let deviceButtonsArray = [...deviceButtons];
 
+localStorage.removeItem('oidc_auth');
 localStorage.setItem('oidc_auth', window.location.href);
 
 function formRequestModel() {

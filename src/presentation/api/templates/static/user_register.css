@@ -28,6 +28,11 @@ label {
   color: #333;
 }
 
+label[for][required]:after {
+  content: " *";
+  color: red;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],

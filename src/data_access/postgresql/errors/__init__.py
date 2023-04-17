@@ -25,4 +25,4 @@ from .third_party_oidc import (
     ThirdPartyStateNotFoundError,
     WrongDataError,
 )
-from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError
+from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError, NotCompleteScopeError

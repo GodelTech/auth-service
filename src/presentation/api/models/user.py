@@ -12,7 +12,7 @@ class RequestUserModel:
     username: str = Form(...)
     email: str  = Form(...)
     password: str  = Form(...)
-    name: str  = Form(...)
+    name: Optional[str] = Form(None)
     given_name: Optional[str]  = Form(None)
     family_name: Optional[str] = Form(None)
     middle_name: Optional[str] = Form(None)
@@ -20,15 +20,33 @@ class RequestUserModel:
     profile: Optional[str] = Form(None)
     picture: Optional[str] = Form(None)
     website: Optional[str] = Form(None)
-    gender: str = Form(...)
-    birthdate: date = Form(...)
+    gender: Optional[str] = Form(None)
+    birthdate: Optional[date] = Form(None)
     zoneinfo: Optional[str] = Form(None)
-    phone_number: str = Form(...)
-    address: str = Form(...)
+    phone_number: Optional[str] = Form(None)
+    address: Optional[str] = Form(None)
 
     class Config:
         orm_mode = True
 
+@dataclass
+class RequestAddInfoUserModel:
+    name: Optional[str] = Form(None)
+    given_name: Optional[str]  = Form(None)
+    family_name: Optional[str] = Form(None)
+    middle_name: Optional[str] = Form(None)
+    preferred_username: Optional[str] = Form(None)
+    profile: Optional[str] = Form(None)
+    picture: Optional[str] = Form(None)
+    website: Optional[str] = Form(None)
+    gender: Optional[str] = Form(None)
+    birthdate: Optional[date] = Form(None)
+    zoneinfo: Optional[str] = Form(None)
+    phone_number: Optional[str] = Form(None)
+    address: Optional[str] = Form(None)
+
+    class Config:
+        orm_mode = True
 
 @dataclass
 class RequestLoginModel:

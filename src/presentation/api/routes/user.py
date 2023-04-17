@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
-from src.presentation.api.models.user import RequestUserModel, RequestLoginModel
+from src.presentation.api.models.user import RequestUserModel, RequestLoginModel, RequestAddInfoUserModel
 from src.business_logic.services import AdminUserService
 from src.di.providers.services import provide_admin_user_service_stub
 from src.data_access.postgresql.errors import ClientNotFoundError
@@ -21,7 +21,7 @@ user_router = APIRouter(
 
 templates = Jinja2Templates(directory="src/presentation/api/templates/")
 
-@user_router.post("/register", status_code=200)
+@user_router.post("/register", response_class=HTMLResponse)
 async def register_user(
     request: Request,
     request_body: RequestUserModel = Depends(),
@@ -33,58 +33,146 @@ async def register_user(
         return JSONResponse(status_code=400, content='email_duplication')
     if await user_service.user_repo.validate_user_by_username(username=kwargs['username']):
         return JSONResponse(status_code=400, content='username_duplication')
-    if await user_service.user_repo.validate_user_by_phone_number(phone_number=kwargs['phone_number']):
-        return JSONResponse(status_code=400, content='phone_number_duplication')
+    if kwargs['phone_number']:
+        if await user_service.user_repo.validate_user_by_phone_number(phone_number=kwargs['phone_number']):
+            return JSONResponse(status_code=400, content='phone_number_duplication')
     await user_service.registration(kwargs)
-    return templates.TemplateResponse("user_registration_success.html", {'request': request})#{'username':kwargs['username'], 'password':kwargs['username']}
+    return templates.TemplateResponse("user_registration_success.html", {'request': request})
+
+@user_router.get("/add_info/{username}", response_class=HTMLResponse)
+async def addclaims(
+    username:str,
+    scope:str, 
+    request: Request, 
+    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
+    ) -> _TemplateResponse:
+    user_id = (await user_service.user_repo.get_user_by_username(username)).id
+    claim_types = (await user_service.user_repo.get_claims(id=user_id)).keys()
+    all_fields =[]
+    if "email" in scope:
+        all_fields += [
+                'email'
+                ]
+    if "profile" in scope:
+        all_fields += [
+                'name',
+                'given_name',
+                'family_name',
+                'middle_name',
+                'preferred_username',
+                'last_name',
+                'profile',
+                'picture',
+                'website',
+                'gender',
+                'phone_number',
+                'birthdate',
+                'zoneinfo',
+                'address'
+                ]
+    fields = []
+    for field in all_fields:
+        if field not in claim_types:
+            fields.append(field)
+    if len(fields)==0:
+        return JSONResponse(status_code=400, content='All data already exists')
+    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields})
+
+@user_router.post("/add_info/{username}", status_code=200)
+async def add_info(
+    username:str,
+    request_body:RequestAddInfoUserModel = Depends(),
+    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
+    ) -> None:
+    new_claims = request_body.__dict__
+    await user_service.add_user_info(data=new_claims, username=username)
     
 
-@user_router.get("/register", response_class=HTMLResponse)
-def register(request: Request) -> _TemplateResponse:
-    return templates.TemplateResponse("user_registration.html", {'request': request})
+
+@user_router.get("/register/{scope}", response_class=HTMLResponse)
+def register(scope:str, request: Request, ) -> _TemplateResponse:
+    fields = [
+        "email", 
+        "username",
+        "password",
+        ]
+    if scope == 'profile':
+        fields += [
+            'name',
+            'given_name',
+            'family_name',
+            'middle_name',
+            'preferred_username',
+            'last_name',
+            'profile',
+            'picture',
+            'website',
+            'gender',
+            'phone_number',
+            'birthdate',
+            'zoneinfo',
+            'address'
+            ]
+
+    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields})
 
 @user_router.get("/login", response_class=HTMLResponse)
 def login(request: Request) -> _TemplateResponse:
     template =  templates.TemplateResponse("login.html", {'request': request})
     return template
 
-@user_router.get("/{email}", response_class=HTMLResponse)
-async def get_user(
-    email: str,
-    request: Request,
-    auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  # crutch for swagger
-    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
-    )  -> _TemplateResponse:
-    token =auth_swagger or request.headers.get('Authorization')
-    email_from_token = (await JWTService().decode_token(token=token,  audience='user'))['sub']
-    if email_from_token == email:
-        user = await user_service.user_repo.get_user_by_email(email=email)
-        user_data = user_service.user_to_dict(user=user)
-
-        return templates.TemplateResponse("user_2.html", {'request': request, 'user':user_data})
-    else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Auth Token")
 
 
-@user_router.post("/login", response_class=JSONResponse, status_code=status.HTTP_200_OK)
-async def get_client(
-    request: Request,
-    request_body: RequestLoginModel = Depends(),
-    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
-    )-> _TemplateResponse:
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @user_router.get("/{email}", response_class=HTMLResponse)
+# async def get_user(
+#     email: str,
+#     request: Request,
+#     auth_swagger: Union[str, None] = Header(default=None, description="Authorization"),  # crutch for swagger
+#     user_service: AdminUserService = Depends(provide_admin_user_service_stub)
+#     )  -> _TemplateResponse:
+#     token =auth_swagger or request.headers.get('Authorization')
+#     email_from_token = (await JWTService().decode_token(token=token,  audience='user'))['sub']
+#     if email_from_token == email:
+#         user = await user_service.user_repo.get_user_by_email(email=email)
+#         user_data = user_service.user_to_dict(user=user)
+
+#         return templates.TemplateResponse("user_2.html", {'request': request, 'user':user_data})
+#     else:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Auth Token")
+
+
+# @user_router.post("/login", response_class=JSONResponse, status_code=status.HTTP_200_OK)
+# async def get_client(
+#     request: Request,
+#     request_body: RequestLoginModel = Depends(),
+#     user_service: AdminUserService = Depends(provide_admin_user_service_stub)
+#     )-> _TemplateResponse:
     
-    try:
-        flag, user = await user_service.validate_password(email=request_body.email, password=request_body.password)
-    except:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    user_data = user_service.user_to_dict(user=user)
-    #TODO: rework after new logic 
-    access_token = await JWTService().encode_jwt({'sub':request_body.email,'aud':'user', 'exp': time()+15*60})
-    return JSONResponse({"access_token":access_token, "token_type": "Bearer"})
+#     try:
+#         flag, user = await user_service.validate_password(email=request_body.email, password=request_body.password)
+#     except:
+#         raise HTTPException(status_code=400, detail="Incorrect email or password")
+#     user_data = user_service.user_to_dict(user=user)
+#     #TODO: rework after new logic 
+#     access_token = await JWTService().encode_jwt({'sub':request_body.email,'aud':'user', 'exp': time()+15*60})
+#     return JSONResponse({"access_token":access_token, "token_type": "Bearer"})
     
-@user_router.get("", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
-def get_redirection(
-    request: Request
-    ):
-    return templates.TemplateResponse("redirection_user.html", {'request': request})
+# @user_router.get("", response_class=HTMLResponse, status_code=status.HTTP_200_OK)
+# def get_redirection(
+#     request: Request
+#     ):
+#     return templates.TemplateResponse("redirection_user.html", {'request': request})
     

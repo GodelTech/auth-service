@@ -131,7 +131,6 @@
       <div class="confetti"></div>
 
     </div>
-    <!-- <h1>Registration Successful</h1> -->
     <div class="container">
         <div class="form-container">
           <h1>OIDC Registration Success</h1>
@@ -139,14 +138,10 @@
             <p>Thank you for registering with our OIDC service.</p>
             <p><a id="oidc_auth_link" href="#">Back to the loging</a></p>
             <script>
-              // Получаем значение параметра oidc_auth из localStorage
               var oidcAuth = localStorage.getItem('oidc_auth');
-        
-              // Находим ссылку, на которую нужно подставить значение
               var link = document.getElementById('oidc_auth_link');
-        
-              // Устанавливаем значение параметра href ссылки равным значению oidc_auth
               link.href = oidcAuth;
+              localStorage.removeItem('oidc_auth');
             </script>
           </div>
         </div>
