@@ -12,6 +12,7 @@ from src.data_access.postgresql.errors import (
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
+    NotCompleteScopeError
 )
 from src.di.providers import (
     provide_auth_service_stub,
@@ -88,7 +89,15 @@ async def post_authorize(
         auth_class = auth_class
         auth_class.request_model = request_body
         firmed_redirect_uri = await auth_class.get_redirect_url()
-
+        try:
+            await auth_class.validate_scope(
+                username=auth_class.request_model.username, 
+                scope = auth_class.request_model.scope, 
+                )
+        except NotCompleteScopeError:
+            return RedirectResponse(
+            f"https/{DOMAIN_NAME}/{auth_class.request_model.username}?scope={auth_class.request_model.scope}", status_code=status.HTTP_302_FOUND
+        )
         if not firmed_redirect_uri:
             raise UserNotFoundError
 
@@ -97,6 +106,7 @@ async def post_authorize(
         )
 
         return response
+    
     except ClientNotFoundError as exception:
         logger.exception(exception)
         return JSONResponse(

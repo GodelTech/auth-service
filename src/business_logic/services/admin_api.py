@@ -182,3 +182,12 @@ class AdminUserService():
             user_data[claim.claim_type.type_of_claim] = claim.claim_value
         return user_data
 
+    async def add_user_info(self, username:str, data:dict):
+        user_id = (await self.user_repo.get_user_by_username(username=username)).id
+        types = await self.user_repo.get_all_claim_types()
+        claims = []
+        for key in data:
+            if key in types.keys() and data[key]:
+                claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":data[key]})
+        
+        await self.user_repo.add_claims(claims=claims)
