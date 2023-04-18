@@ -25,14 +25,5 @@ from .third_party_oidc import (
     ThirdPartyStateNotFoundError,
     WrongDataError,
 )
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 9d894f3 (exceptions_middleware)
-=======
->>>>>>> 84e666a (exceptions_middleware)
 from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError, NotCompleteScopeError
 from .authorization import IncorrectAuthTokenError
-
