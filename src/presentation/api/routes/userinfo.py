@@ -65,24 +65,12 @@ async def post_userinfo(
     ),  # crutch for swagger
     userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> dict[str, Any]:
-    try:
-        userinfo_class = userinfo_class
-        token = request.headers.get("authorization") or auth_swagger
-        userinfo_class.authorization = token
-        logger.info("Collecting Claims from DataBase.")
-        result = await userinfo_class.get_user_info()
-        return {k: v for k, v in result.items() if v is not None}
-
-    except ClaimsNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission for this claims",
-        )
-
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
-        )
+    userinfo_class = userinfo_class
+    token = request.headers.get("authorization") or auth_swagger
+    userinfo_class.authorization = token
+    logger.info("Collecting Claims from DataBase.")
+    result = await userinfo_class.get_user_info()
+    return {k: v for k, v in result.items() if v is not None}
 
 
 @userinfo_router.get("/jwt", response_model=str)

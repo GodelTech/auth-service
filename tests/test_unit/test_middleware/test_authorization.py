@@ -11,6 +11,8 @@ from typing import Any, Callable, MutableMapping
 from fastapi import Request
 from src.presentation.api.middleware.authorization_validation import AuthorizationMiddleware, REQUESTS_WITH_AUTH
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
+from src.data_access.postgresql.errors import IncorrectAuthTokenError
+
 
 async def new_decode_token(*args:Any, **kwargs:Any) -> bool:
     return "Bearer AuthToken" in args or "Bearer AuthToken" in kwargs.values()
@@ -78,12 +80,11 @@ class TestAuthorizationMiddleware:
         request.method = REQUESTS_WITH_AUTH[0]["method"]
         request.url.path = REQUESTS_WITH_AUTH[0]["path"]
         middleware = AuthorizationMiddleware(app=ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine))
-        response = await middleware.dispatch_func(
-            request=request, call_next=new_call_next
-        )
-        response_content = json.loads(response.body.decode("utf-8"))
-        assert response_content == "Incorrect Authorization Token"
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        with pytest.raises(IncorrectAuthTokenError):
+            await middleware.dispatch_func(
+                request=request, call_next=new_call_next
+            )
+        
 
     async def test_incorrect_token(self, engine: AsyncEngine) -> None:
         with mock.patch.object(
@@ -94,12 +95,11 @@ class TestAuthorizationMiddleware:
             request.url.path = REQUESTS_WITH_AUTH[0]["path"]
             request.headers["authorization"] = "Bearer FALSE_AuthToken"
             middleware = AuthorizationMiddleware(app=ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine))
-            response = await middleware.dispatch_func(
-                request=request, call_next=new_call_next
-            )
-            response_content = json.loads(response.body.decode("utf-8"))
-            assert response_content == "Incorrect Authorization Token"
-            assert response.status_code == status.HTTP_401_UNAUTHORIZED
+            with pytest.raises(IncorrectAuthTokenError):
+                await middleware.dispatch_func(
+                    request=request, call_next=new_call_next
+                )
+            
 
 
     async def test_token_with_incorrect_signature(self, engine: AsyncEngine) -> None:
@@ -108,9 +108,7 @@ class TestAuthorizationMiddleware:
         request.url.path = REQUESTS_WITH_AUTH[0]["path"]
         request.headers["authorization"] = "incorrect-token"
         middleware = AuthorizationMiddleware(app=ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine))
-        response = await middleware.dispatch_func(
-            request=request, call_next=new_call_next
-        )
-        response_content = json.loads(response.body.decode("utf-8"))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response_content == "Incorrect Authorization Token"
+        with pytest.raises(IncorrectAuthTokenError):
+            await middleware.dispatch_func(
+                request=request, call_next=new_call_next
+            )

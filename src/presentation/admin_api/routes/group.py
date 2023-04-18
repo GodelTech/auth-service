@@ -13,32 +13,9 @@ logger = logging.getLogger(__name__)
 admin_group_router = APIRouter(prefix="/groups")
 
 
-def exceptions_wrapper(func:Callable[..., Any]) -> Callable[..., Any]:
-    @wraps(func)
-    async def inner(*args:Any, **kwargs:Any) -> Any:
-        try:
-            return await func(*args, **kwargs)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
-            )
-        except DuplicationError:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Duplication"
-            )
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="INTERNAL_SERVER_ERROR",
-            )
-
-    return inner
-
-
 @admin_group_router.get(
     "/{group_id}", response_model=dict, tags=["Administration Group"], description="Get the Group"
 )
-@exceptions_wrapper
 async def get_group(
     request: Request,
     group_id:int,
@@ -59,7 +36,6 @@ async def get_group(
 @admin_group_router.get(
     "", response_model=dict, tags=["Administration Group"], description="Get All Groups"
 )
-@exceptions_wrapper
 async def get_all_groups(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -72,7 +48,6 @@ async def get_all_groups(
 @admin_group_router.get(
     "/{group_id}/subgroups", response_model=dict, tags=["Administration Group"], description="Get Subgroups of the Group"
 )
-@exceptions_wrapper
 async def get_subgroups(
     request: Request,
     group_id:int,
@@ -87,7 +62,6 @@ async def get_subgroups(
 @admin_group_router.post(
     "", status_code=status.HTTP_200_OK, tags=["Administration Group"], description="Create a New Group"
 )
-@exceptions_wrapper
 async def create_group(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -106,7 +80,6 @@ async def create_group(
     tags=["Administration Group"],
     description="Update the Group"
 )
-@exceptions_wrapper
 async def update_group(
     request: Request,
     group_id:int,
@@ -128,7 +101,6 @@ async def update_group(
     tags=["Administration Group"],
     description="Delete the Group"
 )
-@exceptions_wrapper
 async def delete_group(
     request: Request,
     group_id:int,

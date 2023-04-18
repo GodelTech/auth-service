@@ -11,15 +11,30 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware, 
-    AccessTokenMiddleware
+    AccessTokenMiddleware,
+    ExceptionsMiddleware
 )
 
 from src.presentation.api import router
+from src.presentation.api.exception_handlers import (
+    http400_invalid_grant_handler,
+    http400_unsupported_grant_type_handler,
+    http400_invalid_client_handler
+)
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
+<<<<<<< HEAD
+=======
+from src.business_logic.common.errors import InvalidClientIdError
+from src.business_logic.get_tokens.errors import (
+    InvalidGrantError, 
+    InvalidRedirectUriError,
+    UnsupportedGrantTypeError
+)
 
+>>>>>>> ef028ca (Added exception handlers, jwt_manager dto and custom validators)
 import logging
 from src.log import LOGGING_CONFIG
 
@@ -46,6 +61,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_headers=["*"],
     )
 
+    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
@@ -66,7 +82,8 @@ def setup_di(app: FastAPI) -> None:
     db_engine = prov.provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-
+    
+    app.add_middleware(middleware_class=ExceptionsMiddleware)
     app.add_middleware(
         middleware_class=AuthorizationMiddleware,
         blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
@@ -75,7 +92,8 @@ def setup_di(app: FastAPI) -> None:
         middleware_class=AccessTokenMiddleware,
         blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
-
+    
+    
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
@@ -360,6 +378,14 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         prov.provide_client_service_stub
     ] = nodepends_provide_client_service
+
+def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
+    app.add_exception_handler(InvalidClientIdError, http400_invalid_client_handler)
+    app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
+    app.add_exception_handler(InvalidRedirectUriError, http400_invalid_grant_handler)
+    app.add_exception_handler(UnsupportedGrantTypeError, http400_unsupported_grant_type_handler)
+    return app
+
 
 app = get_application()
 

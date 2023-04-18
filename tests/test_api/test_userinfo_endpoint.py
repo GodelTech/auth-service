@@ -79,7 +79,7 @@ class TestUserInfoEndpoint:
             response_content = json.loads(response.content.decode("utf-8"))
 
             assert response.status_code == status.HTTP_403_FORBIDDEN
-            assert response_content == {"detail": "Incorrect Token"}
+            assert response_content == "Incorrect Token"
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
@@ -127,7 +127,7 @@ class TestUserInfoEndpoint:
         response_content = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response_content == {"detail": "Incorrect Token"}
+        assert response_content == "Incorrect Token"
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_user_without_claims(
@@ -141,9 +141,8 @@ class TestUserInfoEndpoint:
         response_content = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response_content == {
-            "detail": "You don't have permission for this claims"
-        }
+        assert response_content == "You don't have permission for this claims"
+        
 
     @pytest.mark.asyncio
     async def test_get_default_token(

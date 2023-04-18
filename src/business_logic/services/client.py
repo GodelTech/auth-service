@@ -28,7 +28,7 @@ class ClientService:
         self.client_repo = client_repo
         self.request_model:Union[ClientRequestModel, ClientUpdateRequestModel, None]
 
-    async def generate_credentials(self):
+    async def generate_credentials(self)-> tuple[str]:
         while True:
             client_id = secrets.token_urlsafe(16) 
             client_secret = secrets.token_urlsafe(32)
@@ -39,7 +39,7 @@ class ClientService:
 
     async def registration(
         self,
-    ) -> dict[str, Any]:
+    ) -> dict[str, str]:
         if ',' in self.request_model.redirect_uris[0]:
             self.request_model.redirect_uris = self.request_model.redirect_uris[0].split(',')
 
@@ -56,7 +56,8 @@ class ClientService:
             await self.client_repo.add_response_type(client_id_int=client_id_int, response_type=response_type)
         return {
             "client_id":client_id, 
-            "client_secret":client_secret
+            "client_secret":client_secret,
+            "client_secret_expires_at":'0',
         }
     
     async def get_params(self, client_id) -> dict[str:Any]:
@@ -152,11 +153,11 @@ class ClientService:
             await self.client_repo.delete_redirect_uris(client_id_int=client.id)
             await self.client_repo.add_redirect_uris(client_id_int=client.id, redirect_uris=self.request_model.redirect_uris)
 
-    async def get_all(self):
+    async def get_all(self) -> dict[str,Union[str,list[str]]]:
         clients:list[Client] = await self.client_repo.get_all()
         return [self.client_to_dict(client) for client in  clients]
     
-    def client_to_dict(self, client:Client):
+    def client_to_dict(self, client:Client) -> dict[str,Union[str,list[str]]]:
         return{
             "client_id":client.client_id,
             "client_name": client.client_name,
@@ -169,6 +170,6 @@ class ClientService:
             "scope" : client.scopes[0].scope
         } 
     
-    async def get_client_by_client_id(self, client_id):
+    async def get_client_by_client_id(self, client_id) -> dict[str,Union[str,list[str]]]:
         client:Client = await self.client_repo.get_client_by_client_id(client_id=client_id)
         return self.client_to_dict(client)

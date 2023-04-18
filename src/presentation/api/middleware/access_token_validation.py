@@ -1,5 +1,5 @@
 import logging
-
+from pydantic import ValidationError
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -8,6 +8,7 @@ from typing import Callable, Any, Union
 from src.business_logic.services import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.data_access.postgresql.errors import IncorrectAuthTokenError
 
 logger = logging.getLogger(__name__)
 
@@ -29,33 +30,16 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
             ):
             token = request.headers.get("access-token")
 
-            try:
-                if token is None:
-                    raise ValueError
-                if await self.blacklisted_repo.exists(
-                        token=token,
-                    ):
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        content="Token revoked"
-                    )
-                if not await self.jwt_service.verify_token(token, aud='admin'):
-                    logger.exception("403 Incorrect Access Token")
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        content="Incorrect Access Token",
-                    )
-                    
-                else:
-                    logger.info("Access Token Auth Passed")
-                    response = await call_next(request)
-                    return response
-            except:
-                logger.exception("403 Incorrect Access Token")
-                return JSONResponse(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    content="Incorrect Access Token",
-                )
-        else:
-            response = await call_next(request)
-            return response
+            if token is None:
+                raise IncorrectAuthTokenError
+            if await self.blacklisted_repo.exists(
+                    token=token,
+                ):
+                raise IncorrectAuthTokenError
+            
+            if not await self.jwt_service.verify_token(token, aud='admin'):
+                raise IncorrectAuthTokenError
+            
+            
+        response = await call_next(request)
+        return response

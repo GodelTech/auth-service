@@ -236,3 +236,19 @@ class PersistentGrantRepository(BaseRepository):
             )
 
             return types.all()
+    
+    async def exists_grant_for_client(self, authorization_code: str, client_id: str, grant_type: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            query = (select(PersistentGrant)
+                     .join(Client, PersistentGrant.client_id == Client.id)
+                     .join(PersistentGrantType, PersistentGrant.persistent_grant_type_id == PersistentGrantType.id)
+                     .where(PersistentGrant.grant_data == authorization_code,
+                            Client.client_id == client_id,
+                            PersistentGrantType.type_of_grant == grant_type)
+                     .exists().select()
+                    )
+            result = await session.execute(query)
+            return result.scalar()
