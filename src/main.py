@@ -97,14 +97,15 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.IdentityClaimAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    # Client
+    # Client 
     admin.add_view(ui.ClientAdminController)
+    admin.add_view(ui.ResponseTypeAdminController)
+    admin.add_view(ui.ClientScopeController)
     admin.add_view(ui.AccessTokenTypeAdminController)
     admin.add_view(ui.ProtocolTypeController)
     admin.add_view(ui.RefreshTokenUsageTypeController)
     admin.add_view(ui.RefreshTokenExpirationTypeController)
     admin.add_view(ui.ClientSecretController)
-    admin.add_view(ui.ClientGrantTypeController)
     admin.add_view(ui.ClientRedirectUriController)
     admin.add_view(ui.ClientCorsOriginController)
     admin.add_view(ui.ClientPostLogoutRedirectUriController)
@@ -351,6 +352,14 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
+    nodepends_provide_client_service = (
+        lambda: prov.provide_client_service(
+            client_repo=prov.provide_client_repo(db_engine),
+        )
+    )
+    app.dependency_overrides[
+        prov.provide_client_service_stub
+    ] = nodepends_provide_client_service
 
 app = get_application()
 

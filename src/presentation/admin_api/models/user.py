@@ -23,7 +23,7 @@ class RequestAllUserModel(BaseModel):
         orm_mode = True
 
 
-class ResponceAllUserModel(BaseModel):
+class ResponseAllUserModel(BaseModel):
     all_users: str
 
     class Config:

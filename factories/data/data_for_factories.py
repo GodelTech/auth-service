@@ -245,3 +245,5 @@ POST_LOGOUT_REDIRECT_URL = [
     "https://www.villarreal.com/",
     "https://meyer-berry.com/",
 ]
+
+RESPONSE_TYPES = ['code', 'id_token', 'token', 'code id_token']

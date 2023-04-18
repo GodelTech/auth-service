@@ -10,7 +10,7 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
 )
 from src.presentation.api.models import DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel
-
+from src.data_access.postgresql.errors.client import ClientNotFoundError
 
 logger = logging.getLogger('is_app')
 
@@ -43,6 +43,8 @@ class DeviceService:
                 await self.device_repo.create(client_id=self.request_model.client_id, **device_data)
 
                 return device_data
+            else:
+                raise ClientNotFoundError
         return None
     
     async def get_redirect_uri(self) -> str:
@@ -72,6 +74,8 @@ class DeviceService:
             user_code = scope_data["user_code"]
             if await self._validate_user_code(user_code=user_code):
                 await self.device_repo.delete_by_user_code(user_code=user_code)
+        else:
+                raise ClientNotFoundError
         return f"http://{DOMAIN_NAME}/device/auth/cancel"
 
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
@@ -92,6 +96,8 @@ class DeviceService:
         client = await self.client_repo.validate_client_by_client_id(
             client_id=client_id
         )
+        if not client:
+            raise ClientNotFoundError
         return client
 
     @property

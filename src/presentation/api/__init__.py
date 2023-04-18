@@ -13,9 +13,11 @@ from src.presentation.api.routes.tokens import token_router
 from src.presentation.api.routes.userinfo import userinfo_router
 from src.presentation.api.routes.well_known import well_known_router
 from src.presentation.api.routes.user import user_router
+from src.presentation.api.routes.registration import client_router
 
 router = APIRouter()
 router.include_router(user_router)
+router.include_router(client_router)
 router.include_router(admin_router)
 router.include_router(auth_router)
 router.include_router(device_auth_router)

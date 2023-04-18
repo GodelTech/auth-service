@@ -18,7 +18,7 @@ from src.main import get_application
 from src.business_logic.services.authorization import AuthorizationService
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
-from src.business_logic.services import DeviceService, WellKnownServices
+from src.business_logic.services import DeviceService, WellKnownServices, ClientService
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -41,8 +41,6 @@ from src.business_logic.services.third_party_oidc_service import (
     ThirdPartyGitLabService,
 )
 from src.data_access.postgresql.tables.base import Base
-
-
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
@@ -244,3 +242,10 @@ async def admin_auth_service(engine) -> AdminAuthService:
         jwt_service=JWTService()
     )
     return admin_auth_service
+
+@pytest_asyncio.fixture
+async def client_service(engine) -> ClientService:
+    client_service = ClientService(
+        client_repo=ClientRepository(engine),
+    )
+    return client_service
