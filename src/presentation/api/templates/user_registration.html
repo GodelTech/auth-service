@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  {% if "email" in fields %}
+  {% if purpose == 'registration' %}
   <title>Registration Form</title>
   {% else %}
   <title>We need to know something else</title>
@@ -15,7 +15,7 @@
 
 <body>
   
-  {% if "email" in fields %}
+  {% if purpose == 'registration' %}
   <h1>Registration Form</h1>
   {% else %}
   <h1>We need to know something else</h1>

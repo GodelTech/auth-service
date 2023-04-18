@@ -132,7 +132,6 @@ class AdminUserService():
         new_password = PasswordHash.hash_password(password=new_password)
         await self.user_repo.change_password(user_id=user_id, password = new_password)
     
-
     async def get_user(self, user_id:int) -> User:
         return await self.user_repo.get_user_by_id(user_id=user_id)
 
@@ -191,3 +190,25 @@ class AdminUserService():
                 claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":data[key]})
         
         await self.user_repo.add_claims(claims=claims)
+
+    def get_claims_from_scope(self, scope:str):
+        claims = []
+        if 'openid' in scope:
+            claims.append('sub')
+            claims.append('iss')
+            claims.append('auth_time')
+        if 'profile' in scope:
+            claims.append('name')
+            claims.append('given_name')
+            claims.append('family_name')
+            claims.append('picture')
+            claims.append('email')
+        if 'email' in scope:
+            claims.append('email')
+        if 'phone' in scope:
+            claims.append('phone_number')
+        scope_list = scope.split() 
+        for claim in scope_list:
+            if claim not in ['profile', 'email', 'phone', 'openid']:
+                claims.append(claim)
+        return claims

@@ -39,6 +39,7 @@ async def register_user(
     await user_service.registration(kwargs)
     return templates.TemplateResponse("user_registration_success.html", {'request': request})
 
+
 @user_router.get("/add_info/{username}", response_class=HTMLResponse)
 async def addclaims(
     username:str,
@@ -76,7 +77,9 @@ async def addclaims(
             fields.append(field)
     if len(fields)==0:
         return JSONResponse(status_code=400, content='All data already exists')
-    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields})
+    purpose ='add_info'
+    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields, 'purpose':purpose})
+
 
 @user_router.post("/add_info/{username}", status_code=200)
 async def add_info(
@@ -87,7 +90,6 @@ async def add_info(
     new_claims = request_body.__dict__
     await user_service.add_user_info(data=new_claims, username=username)
     
-
 
 @user_router.get("/register/{scope}", response_class=HTMLResponse)
 def register(scope:str, request: Request, ) -> _TemplateResponse:
@@ -113,13 +115,14 @@ def register(scope:str, request: Request, ) -> _TemplateResponse:
             'zoneinfo',
             'address'
             ]
+    purpose ='registration'
+    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields, 'purpose':purpose})
 
-    return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields})
 
-@user_router.get("/login", response_class=HTMLResponse)
-def login(request: Request) -> _TemplateResponse:
-    template =  templates.TemplateResponse("login.html", {'request': request})
-    return template
+# @user_router.get("/login", response_class=HTMLResponse)
+# def login(request: Request) -> _TemplateResponse:
+#     template =  templates.TemplateResponse("login.html", {'request': request})
+#     return template
 
 
 
