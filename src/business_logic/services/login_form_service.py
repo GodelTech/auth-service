@@ -67,11 +67,9 @@ class LoginFormService:
                         f"response_type={self.request_model.response_type}"
                     )
                     # TODO
-                    if provider[0] in ["google", "linkedin"]:
-                        provider_link += "&scope=openid profile email"
                     if provider[0] == "gitlab":
                         provider_link += "&scope=openid"
-                    if provider[0] == "microsoft":
+                    else:
                         provider_link += "&scope=openid+profile+email"
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
