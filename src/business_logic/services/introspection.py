@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import Request
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
@@ -17,7 +17,18 @@ from src.presentation.api.models.introspection import (
 )
 
 
-class IntrospectionServies:
+class IntrospectionService:
+    KEYS_TO_EXTRACT = [
+        "username",
+        "exp",
+        "iat",
+        "client_id",
+        "jti",
+        "aud",
+        "nbf",
+        "scope",
+    ]
+
     def __init__(
         self,
         jwt: JWTService,
@@ -32,16 +43,16 @@ class IntrospectionServies:
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.key_operations = {"username": self.get_username_by_id}
 
-    async def analyze_token(self) -> dict[str, Any]:
+    async def analyze_token(self) -> Dict[str, Any]:
         if self.request_body is None:
             raise ValueError
         decoded_token = {}
-        response: dict[str, Any] = {}
+        response: Dict[str, Any] = {}
         try:
             decoded_token = await self.jwt.decode_token(
-                token=self.request_body.token, 
-                audience = "introspection"
+                token=self.request_body.token, audience="introspection"
             )
         except ExpiredSignatureError:
             return {"active": False}
@@ -82,36 +93,46 @@ class IntrospectionServies:
             response["iss"] = self.slice_url()
             response["token_type"] = self.get_token_type()
 
-            try:
-                response["username"] = await self.user_repo.get_username_by_id(
-                    id=int(decoded_token["sub"])
-                )
-            except:
-                pass
+            for key in self.KEYS_TO_EXTRACT:
+                try:
+                    if key in self.key_operations:
+                        response[key] = await self.key_operations[key](
+                            decoded_token["sub"]
+                        )
+                    elif key in decoded_token:
+                        response[key] = decoded_token[key]
+                except:
+                    pass
+            # try:
+            #     response["username"] = await self.user_repo.get_username_by_id(
+            #         id=int(decoded_token["sub"])
+            #     )
+            # except:
+            #     pass
 
-            try:
-                response["exp"] = decoded_token["exp"]
-            except:
-                pass
+            # try:
+            #     response["exp"] = decoded_token["exp"]
+            # except:
+            #     pass
 
-            try:
-                response["iat"] = decoded_token["iat"]
-            except:
-                pass
+            # try:
+            #     response["iat"] = decoded_token["iat"]
+            # except:
+            #     pass
 
-            try:
-                response["client_id"] = decoded_token["client_id"]
-            except:
-                pass
+            # try:
+            #     response["client_id"] = decoded_token["client_id"]
+            # except:
+            #     pass
 
-            for claim in (
-                "jti",
-                "aud",
-                "nbf",
-                "scope",
-            ):
-                if claim in decoded_token.keys():
-                    response[claim] = decoded_token[claim]
+            # for claim in (
+            #     "jti",
+            #     "aud",
+            #     "nbf",
+            #     "scope",
+            # ):
+            #     if claim in decoded_token.keys():
+            #         response[claim] = decoded_token[claim]
 
         return response
 
@@ -139,3 +160,6 @@ class IntrospectionServies:
         start: datetime.datetime = datetime.datetime(1970, 1, 1),
     ) -> int:
         return int((finish - start).total_seconds())
+
+    async def get_username_by_id(self, id: int) -> str:
+        return await self.user_repo.get_username_by_id(id=id)
