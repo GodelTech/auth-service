@@ -12,5 +12,6 @@ class ValidateLogoutRedirectUri:
     ):
         self._client_repo = client_repo
 
-    async def __call__(self, client_id: str, logout_redirect_uri: str):
-        await self._client_repo.validate_post_logout_redirect_uri(client_id, logout_redirect_uri)
+    async def __call__(self, request_model, client_id):
+        if request_model.post_logout_redirect_uri:
+            await self._client_repo.validate_post_logout_redirect_uri(client_id, logout_redirect_uri)

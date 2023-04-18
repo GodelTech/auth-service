@@ -4,6 +4,11 @@ from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 
 from .dto.request import RequestEndSessionModel
+from .validators import (
+                        ValidateDecodedIdTokenHint,
+                        ValidateLogoutRedirectUri,
+                        ValidateIdTokenHint
+                        )
 
 from typing import Union, Optional, Any
 # from src.business_logic.common.interfaces import ValidatorProtocol
@@ -18,28 +23,27 @@ class EndSessionService:
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
         jwt_service: JWTService,
-        # id_token_hint_validator: ValidatorProtocol,
-        # logout_redirect_uri_validator: ValidatorProtocol,
     ) -> None:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
         # self._request_model: Optional[RequestEndSessionModel]= None
+        # id_token_hint_validator: ValidatorProtocol = ValidateIdTokenHint
+        # decoded_id_token_hint_validator: ValidatorProtocol = ValidateDecodedIdTokenHint
+        # logout_redirect_uri_validator: ValidatorProtocol = ValidateLogoutRedirectUri
 
     async def end_session(self, request_model: RequestEndSessionModel) -> Optional[str]:
-
+        # await id_token_hint_validator(request_model)
         decoded_id_token_hint = await self._decode_id_token_hint(id_token_hint=request_model.id_token_hint)
-        # validate decoded_id_token_hint
+        # await decoded_id_token_hint_validator(decoded_id_token_hint: dict[str, Any])
 
         await self._logout(
             client_id=decoded_id_token_hint['client_id'],
             user_id=decoded_id_token_hint['sub']
         )
-        # await ValidateLogoutRedirectUri()
-        # logout_redirect_uri = request_model.post_logout_redirect_uri
 
-        #
         if request_model.post_logout_redirect_uri:
+            # ? await logout_redirect_uri_validator(request_model, decoded_id_token_hint["client_id"]: str)
             if await self._validate_logout_redirect_uri(
                 logout_redirect_uri=request_model.post_logout_redirect_uri,
                 client_id=decoded_id_token_hint["client_id"]
