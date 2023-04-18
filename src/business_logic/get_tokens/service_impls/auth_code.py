@@ -23,6 +23,7 @@ class AuthorizationCodeTokenService:
             redirect_uri_validator: ValidatorProtocol,
             client_validator: ValidatorProtocol,
             code_validator: ValidatorProtocol,
+            grant_exp_validator: ValidatorProtocol,
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
     ):
@@ -30,6 +31,7 @@ class AuthorizationCodeTokenService:
         self._redirect_uri_validator = redirect_uri_validator
         self._client_validator = client_validator
         self._code_validator = code_validator
+        self._grant_expiration_validator = grant_exp_validator
         self._jwt_manager = jwt_manager
         self._persistent_grant_repo = persistent_grant_repo
 
@@ -40,6 +42,7 @@ class AuthorizationCodeTokenService:
         await self._redirect_uri_validator(request_data.redirect_uri, request_data.client_id)
 
         grant = await self._persistent_grant_repo.get_grant(grant_type=request_data.grant_type, grant_data=request_data.code)
+        print(grant)
         user_id = grant.user_id
         current_unix_time = int(time.time())
 

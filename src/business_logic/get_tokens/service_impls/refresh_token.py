@@ -17,14 +17,16 @@ class RefreshTokenGrantService:
             grant_validator: ValidatorProtocol,
             redirect_uri_validator: ValidatorProtocol,
             client_validator: ValidatorProtocol,
-            code_validator: ValidatorProtocol,
+            refresh_token_validator: ValidatorProtocol,
+            grant_exp_validator: ValidatorProtocol,
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
     ):
         self._grant_validator = grant_validator
         self._redirect_uri_validator = redirect_uri_validator
         self._client_validator = client_validator
-        self._code_validator = code_validator
+        self._code_validator = refresh_token_validator
+        self._grant_expiration_validator = grant_exp_validator
         self._jwt_manager = jwt_manager
         self._persistent_grant_repo = persistent_grant_repo
 
