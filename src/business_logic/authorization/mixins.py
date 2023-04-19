@@ -8,24 +8,6 @@ if TYPE_CHECKING:
     from .interfaces import HasPersistentGrantAndUserRepoProtocol
 
 
-class CreateGrantMixin:
-    async def _create_grant(
-        self: HasPersistentGrantAndUserRepoProtocol,
-        grant_type: str,
-        grant_data: str,
-        request_data: AuthRequestModel,
-    ) -> None:
-        user_id = await self._user_repo.get_user_id_by_username(
-            request_data.username
-        )
-        await self._persistent_grant_repo.create(
-            client_id=request_data.client_id,
-            grant_type=grant_type,
-            grant_data=grant_data,
-            user_id=user_id,
-        )
-
-
 class UpdateRedirectUrlMixin:
     async def _update_redirect_url(
         self: HasPersistentGrantAndUserRepoProtocol,

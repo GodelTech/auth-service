@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from src.business_logic.authorization.mixins import CreateGrantMixin
 from src.dyna_config import BASE_URL
 
 if TYPE_CHECKING:
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     )
 
 
-class DeviceAuthService(CreateGrantMixin):
+class DeviceAuthService:
     def __init__(
         self,
         client_validator: ValidatorProtocol,
@@ -47,16 +46,21 @@ class DeviceAuthService(CreateGrantMixin):
         )
         await self._user_code_validator(request_data.user_code)
 
+    async def _create_grant(self, request_data: AuthRequestModel):
+        await self._persistent_grant_repo.create(
+            client_id=request_data.client_id,
+            grant_type="urn:ietf:params:oauth:grant-type:device_code",
+            grant_data=await self._device_repo.get_device_code_by_user_code(
+                user_code=request_data.user_code
+            ),
+            user_id=await self._user_repo.get_user_id_by_username(
+                request_data.username
+            ),
+        )
+
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
         await self._validate_request_data(request_data)
-        device_code = await self._device_repo.get_device_code_by_user_code(
-            user_code=request_data.user_code
-        )
-        await self._create_grant(
-            grant_type="urn:ietf:params:oauth:grant-type:device_code",
-            grant_data=device_code,
-            request_data=request_data,
-        )
+        await self._create_grant(request_data=request_data)
         await self._device_repo.delete_by_user_code(
             user_code=request_data.user_code
         )
