@@ -48,7 +48,7 @@ DEFAULT_CLIENT = {
     "allow_remember_consent": True,
     "always_include_user_claims_id_token": False,
     "always_send_client_claims": False,
-    "authorisation_code_lifetime": 300,
+    "authorization_code_lifetime": 300,
     "client_name": "TestClient",
     "client_uri": "test_uri",
     "enable_local_login": True,
