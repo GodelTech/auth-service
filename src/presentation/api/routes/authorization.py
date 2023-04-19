@@ -91,7 +91,7 @@ async def get_authorize(
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
-    request_body: AuthRequestModel = Depends(),
+    request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     auth_service_factory: AuthServiceFactory = Depends(
         provide_auth_service_factory_stub
     ),
