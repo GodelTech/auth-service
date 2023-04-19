@@ -316,29 +316,29 @@ class UserRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-    # try:
-        kwargs = params_to_dict(
-            id=id,
-            username=username,
-            identity_provider_id=identity_provider_id,
-            security_stamp=security_stamp,
-            email=email,
-            email_confirmed=email_confirmed,
-            phone_number=phone_number,
-            phone_number_confirmed=phone_number_confirmed,
-            two_factors_enabled=two_factors_enabled,
-            lockout_end_date_utc=lockout_end_date_utc,
-            lockout_enabled=lockout_enabled,
-            password_hash_id=password_hash_id,
-            access_failed_count=access_failed_count,
-        )
-        async with session_factory() as sess:
-            session = sess
+        try:
+            kwargs = params_to_dict(
+                id=id,
+                username=username,
+                identity_provider_id=identity_provider_id,
+                security_stamp=security_stamp,
+                email=email,
+                email_confirmed=email_confirmed,
+                phone_number=phone_number,
+                phone_number_confirmed=phone_number_confirmed,
+                two_factors_enabled=two_factors_enabled,
+                lockout_end_date_utc=lockout_end_date_utc,
+                lockout_enabled=lockout_enabled,
+                password_hash_id=password_hash_id,
+                access_failed_count=access_failed_count,
+            )
+            async with session_factory() as sess:
+                session = sess
 
-            await session.execute(insert(User).values(**kwargs))
-            await session.commit()
-    # except:
-    #     raise DuplicationError
+                await session.execute(insert(User).values(**kwargs))
+                await session.commit()
+        except:
+            raise DuplicationError
 
     async def add_group(self, user_id: int, group_id: int) -> None:
         session_factory = sessionmaker(
