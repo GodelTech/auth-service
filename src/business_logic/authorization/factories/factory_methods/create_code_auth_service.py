@@ -41,5 +41,6 @@ def _create_code_auth_service(
             password_service=password_service,
         ),
         persistent_grant_repo=persistent_grant_repo,
+        client_repo=client_repo,
         user_repo=user_repo,
     )

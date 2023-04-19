@@ -240,5 +240,17 @@ class ClientRepository(BaseRepository):
             )
             return result.scalar()
 
+    async def get_auth_code_lifetime_by_client(self, client_id: str) -> int:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client.authorization_code_lifetime).where(
+                    Client.client_id == client_id
+                )
+            )
+            return result.scalar()
+
     def __repr__(self) -> str:
         return "Client Repository"
