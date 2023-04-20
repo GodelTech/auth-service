@@ -10,25 +10,29 @@ from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
 from src.presentation.api.middleware import (
-    AuthorizationMiddleware, 
-    AccessTokenMiddleware
+    AuthorizationMiddleware,
+    AccessTokenMiddleware,
 )
 
 from src.presentation.api import router
 from src.presentation.api.exception_handlers import (
     http400_invalid_grant_handler,
     http400_unsupported_grant_type_handler,
-    http400_invalid_client_handler
+    http400_invalid_client_handler,
+    http401_invalid_token_handler,
 )
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-from src.business_logic.common.errors import InvalidClientIdError
+from src.business_logic.common.errors import (
+    InvalidAuthorizationTokenError,
+    InvalidClientIdError,
+)
 from src.business_logic.get_tokens.errors import (
-    InvalidGrantError, 
+    InvalidGrantError,
     InvalidRedirectUriError,
-    UnsupportedGrantTypeError
+    UnsupportedGrantTypeError,
 )
 
 import logging
@@ -380,10 +384,19 @@ def setup_di(app: FastAPI) -> None:
 
 
 def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
-    app.add_exception_handler(InvalidClientIdError, http400_invalid_client_handler)
+    app.add_exception_handler(
+        InvalidClientIdError, http400_invalid_client_handler
+    )
     app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
-    app.add_exception_handler(InvalidRedirectUriError, http400_invalid_grant_handler)
-    app.add_exception_handler(UnsupportedGrantTypeError, http400_unsupported_grant_type_handler)
+    app.add_exception_handler(
+        InvalidRedirectUriError, http400_invalid_grant_handler
+    )
+    app.add_exception_handler(
+        UnsupportedGrantTypeError, http400_unsupported_grant_type_handler
+    )
+    app.add_exception_handler(
+        InvalidAuthorizationTokenError, http401_invalid_token_handler
+    )
     return app
 
 
