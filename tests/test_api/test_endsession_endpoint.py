@@ -1,12 +1,13 @@
 import jwt
 import pytest
-from fastapi import status
+from fastapi import status, FastAPI
 from httpx import AsyncClient
 from sqlalchemy import delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
+import src.di.providers as prov
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from tests.test_unit.fixtures import (
     end_session_request_model,
@@ -14,7 +15,7 @@ from tests.test_unit.fixtures import (
     TokenHint,
 )
 from src.presentation.api.models.endsession import RequestEndSessionModel
-from src.business_logic.services.endsession import EndSessionService
+from src.business_logic.endsession.endsession_service import EndSessionService
 from tests.test_unit.fixtures import (
     end_session_request_model,
     TOKEN_HINT_DATA,
@@ -28,11 +29,15 @@ class TestEndSessionEndpoint:
         self,
         engine: AsyncEngine,
         client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
+
     ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
+
+        service = prov.provide_endsession_service(
+            client_repo=prov.provide_client_repo(engine),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(engine),
+            jwt_service=prov.provide_jwt_service(),
+        )
+
         secret = await service.client_repo.get_client_secrete_by_client_id(
             client_id=TOKEN_HINT_DATA["client_id"]
         )
@@ -71,14 +76,10 @@ class TestEndSessionEndpoint:
             await session.commit()
 
     async def test_successful_authorize_request_without_uri(
-        self,
-        engine: AsyncEngine,
-        client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
+            self,
+            engine: AsyncEngine,
+            client: AsyncClient,
     ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
         session_factory = sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -105,14 +106,10 @@ class TestEndSessionEndpoint:
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     async def test_successful_authorize_request_wrong_uri(
-        self,
-        engine: AsyncEngine,
-        client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
+            self,
+            engine: AsyncEngine,
+            client: AsyncClient,
     ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
         session_factory = sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
         )
@@ -145,11 +142,7 @@ class TestEndSessionEndpoint:
     async def test_end_session_bad_token(
         self,
         client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
     ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
         expected_content = '{"message":"Bad id_token_hint"}'
         params = {
             "id_token_hint": "id_token_hint",
@@ -160,16 +153,11 @@ class TestEndSessionEndpoint:
         assert response.content.decode("UTF-8") == expected_content
 
     async def test_end_session_not_full_token(
-        self,
-        client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
+            self,
+            client: AsyncClient
     ) -> None:
         hint = TokenHint()
         short_token_hint = await hint.get_short_token_hint()
-        service = end_session_service
-        service.request_model = end_session_request_model
-        service.request_model.id_token_hint = short_token_hint
 
         expected_content = (
             '{"message":"The id_token_hint is missing something"}'
@@ -185,13 +173,9 @@ class TestEndSessionEndpoint:
     async def test_end_session_no_persistent_grant(
         self,
         client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
     ) -> None:
         hint = TokenHint()
         token_hint = await hint.get_token_hint()
-        service = end_session_service
-        service.request_model = end_session_request_model
         expected_content = '{"message":"You are not logged in"}'
         params = {
             "id_token_hint": token_hint,

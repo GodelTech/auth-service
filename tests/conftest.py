@@ -16,7 +16,8 @@ import pytest
 import asyncio
 from src.main import get_application
 from src.business_logic.services.authorization import AuthorizationService
-from src.business_logic.services.endsession import EndSessionService
+# from src.business_logic.services.endsession import EndSessionService
+from src.business_logic.endsession.endsession_service import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services import DeviceService, WellKnownServices
 
