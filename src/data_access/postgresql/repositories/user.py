@@ -159,7 +159,7 @@ class UserRepository(BaseRepository):
             return result
 
     async def get_user_by_username(self, username: str) -> User:
-        try:
+        #try:
             session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession
             )
@@ -182,8 +182,8 @@ class UserRepository(BaseRepository):
                 user = user.first()
 
                 return user[0]
-        except:
-            raise ValueError
+        # except:
+        #     raise ValueError
         
     async def get_user_by_email(self, email:str,) -> User:
         try:

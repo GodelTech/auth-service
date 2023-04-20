@@ -3,10 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  {% if "email" in fields %}
-  <title>Registration Form</title>
+  {% if 'add_info' in action_url%}
+  <title>Add Claims</title>
   {% else %}
-  <title>We need to know something else</title>
+  <title>Registration Form</title>
   {% endif %}
   <link rel="stylesheet" href="{{ url_for('static', path='/user_register.css')}}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -15,12 +15,12 @@
 
 <body>
   
-  {% if "email" in fields %}
-  <h1>Registration Form</h1>
-  {% else %}
+  {% if 'add_info' in action_url %}
   <h1>We need to know something else</h1>
+  {% else %}
+  <h1>Registration Form</h1>
   {% endif %}
-  <form method="POST" action="/user/register">
+  <form method="POST" action="{{ action_url }}">
     {% if "email" in fields %}
     <div class="form-group">
       <label for="email" required>Email:</label>
