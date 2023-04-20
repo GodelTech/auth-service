@@ -1,7 +1,6 @@
 from sqlalchemy import exists, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
@@ -247,6 +246,18 @@ class ClientRepository(BaseRepository):
         async with session_factory() as session:
             result = await session.execute(
                 select(Client.authorization_code_lifetime).where(
+                    Client.client_id == client_id
+                )
+            )
+            return result.scalar()
+
+    async def get_device_code_lifetime_by_client(self, client_id: str) -> int:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client.device_code_lifetime).where(
                     Client.client_id == client_id
                 )
             )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 from src.dyna_config import BASE_URL
@@ -46,7 +47,9 @@ class DeviceAuthService:
         )
         await self._user_code_validator(request_data.user_code)
 
-    async def _create_grant(self, request_data: AuthRequestModel):
+    async def _create_grant(
+        self, request_data: AuthRequestModel, grant_duration: int
+    ):
         await self._persistent_grant_repo.create(
             client_id=request_data.client_id,
             grant_type="urn:ietf:params:oauth:grant-type:device_code",
@@ -56,11 +59,12 @@ class DeviceAuthService:
             user_id=await self._user_repo.get_user_id_by_username(
                 request_data.username
             ),
+            expiration_time=int(time.time()) + grant_duration,
         )
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
         await self._validate_request_data(request_data)
-        await self._create_grant(request_data=request_data)
+        await self._create_grant(request_data=request_data, grant_duration=600)
         await self._device_repo.delete_by_user_code(
             user_code=request_data.user_code
         )

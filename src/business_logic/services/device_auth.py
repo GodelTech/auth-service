@@ -1,6 +1,7 @@
 import logging
 import random
 import secrets
+import time
 from string import ascii_uppercase
 from typing import Any, Optional, Union
 
@@ -41,16 +42,23 @@ class DeviceService:
             if await self._validate_client(
                 client_id=self.request_model.client_id
             ):
+                device_code_lifetime = (
+                    await self.client_repo.get_device_code_lifetime_by_client(
+                        self.request_model.client_id
+                    )
+                )
                 device_data: dict[str, Any] = {
                     "device_code": device_code,
                     "user_code": user_code,
                     "verification_uri": verification_uri,
                     "verification_uri_complete": verification_uri_complete,
-                    "expires_in": 600,
+                    "expires_in": device_code_lifetime,
                     "interval": 5,
                 }
                 await self.device_repo.create(
-                    client_id=self.request_model.client_id, **device_data
+                    client_id=self.request_model.client_id,
+                    **device_data
+                    | {"expires_in": device_code_lifetime + int(time.time())},
                 )
 
                 return device_data
