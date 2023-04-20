@@ -50,12 +50,6 @@ async def end_session(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "You are not logged in"},
         )
-    # except InvalidIdTokenHintError as exception:
-    #     logger.exception(exception)
-    #     return JSONResponse(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         content={"message": "Invalid id token hint provided"},
-    #     )
     except jwt.exceptions.DecodeError as exception:
         logger.exception(exception)
         return JSONResponse(

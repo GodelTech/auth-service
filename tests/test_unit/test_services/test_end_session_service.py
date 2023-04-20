@@ -3,17 +3,15 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy import insert, select, delete
 
-from business_logic.endsession.errors import InvalidLogoutRedirectUriError
-from business_logic.endsession.validators import ValidateLogoutRedirectUri
-from data_access.postgresql.repositories import ClientRepository
+from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA
+from src.business_logic.endsession.errors import InvalidLogoutRedirectUriError
+from src.business_logic.endsession.validators import ValidateLogoutRedirectUri
 from src.data_access.postgresql.errors import ClientPostLogoutRedirectUriError
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
 
-from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA
-# from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.endsession.endsession_service import EndSessionService
 
 from src.presentation.api.models.endsession import RequestEndSessionModel
@@ -198,22 +196,5 @@ class TestEndSessionServiceValidators:
         with pytest.raises(InvalidLogoutRedirectUriError, match="Invalid post logout redirect uri"):
             await validator(request_model=request_model, client_id="client_id")
 
-        # client_repo_mock.validate_post_logout_redirect_uri.assert_called_once_with(
-        #     "client_id", "https://invalid-logout-uri.com"
-        # )
-
-    # async def test_validate_logout_redirect_uri_error(
-    #         self,
-    #         end_session_service: EndSessionService,
-    #         end_session_request_model: RequestEndSessionModel,
-    # ) -> None:
-    #     service = end_session_service
-    #     service.request_model = end_session_request_model
-    #     service.request_model.post_logout_redirect_uri = "not_exist_uri"
-    #     with pytest.raises(ClientPostLogoutRedirectUriError):
-    #         await service._validate_logout_redirect_uri(
-    #             client_id="client_not_exist",
-    #             logout_redirect_uri=service.request_model.post_logout_redirect_uri,
-    #         )
 
 
