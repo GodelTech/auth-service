@@ -4,14 +4,14 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from src.presentation.api.models.user import RequestUserModel, RequestLoginModel, RequestAddInfoUserModel
 from src.business_logic.services import AdminUserService
 from src.di.providers.services import provide_admin_user_service_stub
-from src.data_access.postgresql.errors import ClientNotFoundError
+# from src.data_access.postgresql.errors import ClientNotFoundError
 from src.dyna_config import DOMAIN_NAME
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
-from pydantic import SecretStr
-from src.business_logic.services.jwt_token import JWTService
-from time import time
-from typing import Union
+# from pydantic import SecretStr
+# from src.business_logic.services.jwt_token import JWTService
+# from time import time
+# from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -66,11 +66,13 @@ async def add_info(
 @user_router.post("/add_info/{username}", status_code=200)
 async def add_info(
     username:str,
+    request:Request,
     request_body:RequestAddInfoUserModel = Depends(),
     user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     ) -> None:
     new_claims = request_body.__dict__
     await user_service.add_user_info(data=new_claims, username=username)
+    return templates.TemplateResponse("user_registration_success.html", {'request': request})
 
 @user_router.post("/register", response_class=HTMLResponse)
 async def register_user(
