@@ -29,17 +29,8 @@ class TestEndSessionEndpoint:
         self,
         engine: AsyncEngine,
         client: AsyncClient,
-        app: FastAPI,
-        # end_session_service: EndSessionService,
-        # end_session_request_model: RequestEndSessionModel,
+
     ) -> None:
-        # service = end_session_service
-        # service.request_model = end_session_request_model
-        # service = client.app.dependency_cache.get(provide_endsession_service_stub)()
-        # provide_endsession_service = app.dependency_overrides[provide_endsession_service_stub]
-        # service = provide_endsession_service_stub()
-        # service = provide_endsession_service()
-        # service = app.dependency_overrides[provide_endsession_service_stub]()
 
         service = prov.provide_endsession_service(
             client_repo=prov.provide_client_repo(engine),

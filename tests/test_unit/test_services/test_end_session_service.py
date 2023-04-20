@@ -1,7 +1,11 @@
 import jwt
 import pytest
+from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy import insert, select, delete
 
+from business_logic.endsession.errors import InvalidLogoutRedirectUriError
+from business_logic.endsession.validators import ValidateLogoutRedirectUri
+from data_access.postgresql.repositories import ClientRepository
 from src.data_access.postgresql.errors import ClientPostLogoutRedirectUriError
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.errors.persistent_grant import (
@@ -9,44 +13,15 @@ from src.data_access.postgresql.errors.persistent_grant import (
 )
 
 from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA
-from src.business_logic.services.endsession import EndSessionService
+# from src.business_logic.services.endsession import EndSessionService
+from src.business_logic.endsession.endsession_service import EndSessionService
+
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 
 @pytest.mark.asyncio
 class TestEndSessionService:
-    async def test_validate_logout_redirect_uri(
-        self,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
-    ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
-        if not service.request_model.post_logout_redirect_uri:
-            raise AssertionError
-        result = await service._validate_logout_redirect_uri(
-            client_id="test_client",
-            logout_redirect_uri=service.request_model.post_logout_redirect_uri,
-        )
-
-        assert result is True
-
-    async def test_validate_logout_redirect_uri_error(
-        self,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
-    ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "not_exist_uri"
-        with pytest.raises(ClientPostLogoutRedirectUriError):
-            await service._validate_logout_redirect_uri(
-                client_id="client_not_exist",
-                logout_redirect_uri=service.request_model.post_logout_redirect_uri,
-            )
-            a = 1
-
     async def test_logout(
         self,
         end_session_service: EndSessionService,
@@ -114,8 +89,7 @@ class TestEndSessionService:
         connection: AsyncEngine,
     ) -> None:
         service = end_session_service
-        service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
+        end_session_request_model.post_logout_redirect_uri = "https://www.cole.com/"
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
@@ -127,7 +101,7 @@ class TestEndSessionService:
             )
         )
         await connection.commit()
-        redirect_uri = await service.end_session()
+        redirect_uri = await service.end_session(end_session_request_model)
         assert redirect_uri == "https://www.cole.com/&state=test_state"
 
         await connection.execute(
@@ -142,9 +116,8 @@ class TestEndSessionService:
         connection: AsyncEngine,
     ) -> None:
         service = end_session_service
-        service.request_model = end_session_request_model
-        service.request_model.post_logout_redirect_uri = "https://www.cole.com/"
-        service.request_model.state = None
+        end_session_request_model.post_logout_redirect_uri = "https://www.cole.com/"
+        end_session_request_model.state = None
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
@@ -156,7 +129,7 @@ class TestEndSessionService:
             )
         )
         await connection.commit()
-        redirect_uri = await service.end_session()
+        redirect_uri = await service.end_session(end_session_request_model)
         assert redirect_uri == "https://www.cole.com/"
 
         await connection.execute(
@@ -171,7 +144,7 @@ class TestEndSessionService:
         connection: AsyncEngine,
     ) -> None:
         service = end_session_service
-        service.request_model = end_session_request_model
+        # service.request_model = end_session_request_model
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
@@ -185,9 +158,62 @@ class TestEndSessionService:
         await connection.commit()
 
         with pytest.raises(ClientPostLogoutRedirectUriError):
-            await service.end_session()
+            await service.end_session(end_session_request_model)
 
         await connection.execute(
             delete(PersistentGrant).where(PersistentGrant.client_id == 3)
         )
         await connection.commit()
+
+@pytest.mark.asyncio
+class TestEndSessionServiceValidators:
+    async def test_validate_logout_redirect_uri_valid_uri(self):
+        request_model = RequestEndSessionModel(
+            id_token_hint="some_id_token_hint",
+            post_logout_redirect_uri="https://valid-logout-uri.com",
+        )
+
+        client_repo_mock = AsyncMock()
+        client_repo_mock.validate_post_logout_redirect_uri.return_value = True
+
+        validator = ValidateLogoutRedirectUri(client_repo=client_repo_mock)
+        await validator(request_model=request_model, client_id="client_id")
+
+        client_repo_mock.validate_post_logout_redirect_uri.assert_called_once_with(
+            "client_id", "https://valid-logout-uri.com"
+        )
+
+    async def test_validate_logout_redirect_uri_invalid_uri(self):
+
+        client_repo_mock = AsyncMock()
+        client_repo_mock.validate_post_logout_redirect_uri.return_value = False
+        validator = ValidateLogoutRedirectUri(client_repo=client_repo_mock)
+
+        request_model = RequestEndSessionModel(
+            id_token_hint="some_id_token_hint",
+            post_logout_redirect_uri="invalid_uri",
+            state="some_state"
+        )
+
+        with pytest.raises(InvalidLogoutRedirectUriError, match="Invalid post logout redirect uri"):
+            await validator(request_model=request_model, client_id="client_id")
+
+        # client_repo_mock.validate_post_logout_redirect_uri.assert_called_once_with(
+        #     "client_id", "https://invalid-logout-uri.com"
+        # )
+
+    # async def test_validate_logout_redirect_uri_error(
+    #         self,
+    #         end_session_service: EndSessionService,
+    #         end_session_request_model: RequestEndSessionModel,
+    # ) -> None:
+    #     service = end_session_service
+    #     service.request_model = end_session_request_model
+    #     service.request_model.post_logout_redirect_uri = "not_exist_uri"
+    #     with pytest.raises(ClientPostLogoutRedirectUriError):
+    #         await service._validate_logout_redirect_uri(
+    #             client_id="client_not_exist",
+    #             logout_redirect_uri=service.request_model.post_logout_redirect_uri,
+    #         )
+
+
