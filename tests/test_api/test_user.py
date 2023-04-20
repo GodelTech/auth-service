@@ -52,7 +52,7 @@ class TestUserEndpoint:
         response_content = response.content.decode("utf-8")
         user_repo = UserRepository(engine)
         user = await user_repo.get_user_by_username("polnareff")
-        assert '<h1>OIDC Registration Success</h1>' in response_content
+        assert '<h1>Success</h1>' in response_content
 
         response = await client.request(
             "GET", "/user/add_info/polnareff?scope=profile", headers=headers, data=data
@@ -71,24 +71,19 @@ class TestUserEndpoint:
             "POST", "/user/add_info/polnareff", headers=headers, data=data
         )
         assert response.status_code == status.HTTP_200_OK
-        assert user_repo.get_claims(user.id)
+        claims = await user_repo.get_claims(user.id)
+        assert "family_name" in claims.keys()
 
     async def test_unsuccessful_post_register(self, client: AsyncClient, engine: AsyncEngine) -> None:
-        try:
-            user_repo = UserRepository(engine)
-            user = await user_repo.get_user_by_username("polnareff")
-            await user_repo.delete(user.id)
-        except:
-            pass
-        
+                
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
         data = {
-            "username": "polnareff",
-            "email":"polnareff@mail",
-            "password":"polnareff",
-            "phone_number":"123123132",
+            "username": "2polnareff",
+            "email":"2polnareff@mail",
+            "password":"2polnareff",
+            "phone_number":"2123123132",
             }
         response = await client.request(
             "POST", "/user/register", headers=headers, data=data
@@ -100,10 +95,10 @@ class TestUserEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
     
         data = {
-            "username": "2polnareff",
-            "email":"polnareff@mail",
+            "username": "3polnareff",
+            "email":"2polnareff@mail",
             "password":"polnareff",
-            "phone_number":"123123132",
+            "phone_number":"2123123132",
             }
         response = await client.request(
             "POST", "/user/register", headers=headers, data=data
@@ -111,10 +106,10 @@ class TestUserEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         data = {
-            "username": "2polnareff",
-            "email":"2polnareff@mail",
+            "username": "3polnareff",
+            "email":"3polnareff@mail",
             "password":"polnareff",
-            "phone_number":"123123132",
+            "phone_number":"2123123132",
             }
         response = await client.request(
             "POST", "/user/register", headers=headers, data=data

@@ -1,17 +1,12 @@
 import logging
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
-from src.presentation.api.models.user import RequestUserModel, RequestLoginModel, RequestAddInfoUserModel
+from src.presentation.api.models.user import RequestUserModel, RequestAddInfoUserModel
 from src.business_logic.services import AdminUserService
 from src.di.providers.services import provide_admin_user_service_stub
-# from src.data_access.postgresql.errors import ClientNotFoundError
 from src.dyna_config import DOMAIN_NAME
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
-# from pydantic import SecretStr
-# from src.business_logic.services.jwt_token import JWTService
-# from time import time
-# from typing import Union
 
 logger = logging.getLogger(__name__)
 
