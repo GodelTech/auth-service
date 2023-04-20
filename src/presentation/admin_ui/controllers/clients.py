@@ -1,9 +1,10 @@
+from typing import Optional, Type, no_type_check
+
 from sqladmin import ModelView
 from sqladmin.forms import get_model_form
-from typing import Type, no_type_check
-from src.data_access.postgresql.tables.client import *
-from typing import Optional
 from wtforms import Form
+
+from src.data_access.postgresql.tables.client import *
 
 
 class ClientAdminController(ModelView, model=Client):
@@ -39,6 +40,7 @@ class ClientAdminController(ModelView, model=Client):
         Client.sliding_refresh_token_lifetime,
         Client.update_access_token_claims_on_refresh,
         Client.authorization_code_lifetime,
+        Client.device_code_lifetime,
         Client.logout_uri,
         Client.always_include_user_claims_id_token,
         Client.redirect_uris,

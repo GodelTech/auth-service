@@ -15,3 +15,6 @@ class UserCodeValidator:
     async def __call__(self, user_code: str) -> None:
         if not await self._device_repo.exists(user_code):
             raise UserCodeNotFoundError("Incorrect user_code.")
+
+
+# TODO add validation to check if user_code did expire

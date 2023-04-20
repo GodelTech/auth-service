@@ -28,6 +28,7 @@ class ClientFactory(SQLAlchemyModelFactory):
     always_include_user_claims_id_token = factory.Faker("pybool")
     always_send_client_claims = factory.Faker("pybool")
     authorization_code_lifetime = factory.Faker("random_number")
+    device_code_lifetime = factory.Faker("random_number")
     client_name = factory.Faker("user_name")
     client_uri = factory.Faker("url")
     enable_local_login = factory.Faker("pybool")

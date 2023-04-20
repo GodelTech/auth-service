@@ -45,6 +45,7 @@ class Client(BaseModel):
     )
     always_send_client_claims = Column(Boolean, default=False, nullable=False)
     authorization_code_lifetime = Column(Integer, default=300, nullable=False)
+    device_code_lifetime = Column(Integer, default=600, nullable=False)
     client_name = Column(String(50), nullable=False)
     client_uri = Column(String(65), default="*enter_here*", nullable=False)
     enable_local_login = Column(Boolean, default=True)

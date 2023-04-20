@@ -1,23 +1,23 @@
 import datetime
-import pytest_asyncio
 
+import pytest_asyncio
+from pydantic import SecretStr
+
+from src.business_logic.services.jwt_token import JWTService
 from src.presentation.api.models import (
     DeviceCancelModel,
-    DeviceUserCodeModel,
     DeviceRequestModel,
-    ThirdPartyOIDCRequestModel,
+    DeviceUserCodeModel,
     StateRequestModel,
     ThirdPartyGoogleRequestModel,
     ThirdPartyMicrosoftRequestModel,
+    ThirdPartyOIDCRequestModel,
 )
-from pydantic import SecretStr
 from src.presentation.api.models.authorization import (
-    RequestModel,
     DataRequestModel,
+    RequestModel,
 )
 from src.presentation.api.models.endsession import RequestEndSessionModel
-from src.business_logic.services.jwt_token import JWTService
-
 
 TEST_VALIDATE_PASSWORD = [
     (
@@ -49,6 +49,7 @@ DEFAULT_CLIENT = {
     "always_include_user_claims_id_token": False,
     "always_send_client_claims": False,
     "authorization_code_lifetime": 300,
+    "device_code_lifetime": 600,
     "client_name": "TestClient",
     "client_uri": "test_uri",
     "enable_local_login": True,
