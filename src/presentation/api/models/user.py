@@ -35,6 +35,7 @@ class RequestAddInfoUserModel:
     given_name: Optional[str]  = Form(None)
     family_name: Optional[str] = Form(None)
     middle_name: Optional[str] = Form(None)
+    last_name: Optional[str] = Form(None)
     preferred_username: Optional[str] = Form(None)
     profile: Optional[str] = Form(None)
     picture: Optional[str] = Form(None)
