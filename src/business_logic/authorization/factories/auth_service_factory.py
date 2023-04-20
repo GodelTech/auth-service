@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, Dict
 
-from src.data_access.postgresql.errors import WrongResponseTypeError
-from ..interfaces import AuthServiceProtocol
-
 from src.business_logic.authorization.constants import ResponseType
+from src.data_access.postgresql.errors import WrongResponseTypeError
+
+from ..interfaces import AuthServiceProtocol
 from .factory_methods import (
-    _create_id_token_token_auth_service,
     _create_code_auth_service,
     _create_device_auth_service,
     _create_id_token_auth_service,
+    _create_id_token_token_auth_service,
     _create_token_auth_service,
 )
 
@@ -61,7 +61,7 @@ class AuthServiceFactory:
                 "Provided response_type is not supported."
             )
 
-        return auth_service(
+        return auth_service(  # keyword arguments are required
             client_repo=self._client_repo,
             user_repo=self._user_repo,
             persistent_grant_repo=self._persistent_grant_repo,

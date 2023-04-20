@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from src.business_logic.authorization.service_impls import (
-    DeviceAuthService,
-)
+from src.business_logic.authorization.service_impls import DeviceAuthService
 from src.business_logic.authorization.validators import (
     ScopeValidator,
-    UserCredentialsValidator,
     UserCodeValidator,
+    UserCredentialsValidator,
 )
 from src.business_logic.common.validators import (
     ClientValidator,
@@ -16,17 +14,18 @@ from src.business_logic.common.validators import (
 )
 
 if TYPE_CHECKING:
+    from src.business_logic.authorization.interfaces import AuthServiceProtocol
     from src.business_logic.services import PasswordHash
     from src.data_access.postgresql.repositories import (
         ClientRepository,
+        DeviceRepository,
         PersistentGrantRepository,
         UserRepository,
-        DeviceRepository,
     )
-    from src.business_logic.authorization.interfaces import AuthServiceProtocol
 
 
 def _create_device_auth_service(
+    *,
     client_repo: ClientRepository,
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
