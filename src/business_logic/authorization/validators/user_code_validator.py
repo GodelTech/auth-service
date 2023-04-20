@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
-from src.data_access.postgresql.errors import UserCodeNotFoundError
+from src.data_access.postgresql.errors import (
+    UserCodeExpirationTimeError,
+    UserCodeNotFoundError,
+)
 
 if TYPE_CHECKING:
     from src.data_access.postgresql.repositories import DeviceRepository
@@ -16,5 +20,11 @@ class UserCodeValidator:
         if not await self._device_repo.exists(user_code):
             raise UserCodeNotFoundError("Incorrect user_code.")
 
-
-# TODO add validation to check if user_code did expire
+        if int(
+            time.time()
+        ) > await self._device_repo.get_expiration_time_by_user_code(
+            user_code
+        ):
+            raise UserCodeExpirationTimeError(
+                "Provided user_code has expired."
+            )

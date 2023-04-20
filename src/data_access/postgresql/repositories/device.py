@@ -162,3 +162,13 @@ class DeviceRepository(BaseRepository):
                 .select()
             )
             return result.scalar()
+
+    async def get_expiration_time_by_user_code(self, user_code: str):
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Device.expires_in).where(Device.user_code == user_code)
+            )
+            return result.scalar()
