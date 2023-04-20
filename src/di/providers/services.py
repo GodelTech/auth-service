@@ -1,4 +1,5 @@
 from httpx import AsyncClient
+from business_logic.services.introspection import IntrospectionService
 
 from src.business_logic.services import (
     AdminAuthService,
@@ -14,7 +15,6 @@ from src.business_logic.services import (
     ThirdPartyMicrosoftService,
     DeviceService,
     EndSessionService,
-    IntrospectionServies,
     JWTService,
     LoginFormService,
     PasswordHash,
@@ -103,8 +103,8 @@ def provide_introspection_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> IntrospectionServies:
-    return IntrospectionServies(
+) -> IntrospectionService:
+    return IntrospectionService(
         jwt=jwt,
         # token_service=token_service,
         user_repo=user_repo,
@@ -131,7 +131,7 @@ def provide_token_service(
         user_repo=user_repo,
         device_repo=device_repo,
         jwt_service=jwt_service,
-        blacklisted_repo=blacklisted_repo
+        blacklisted_repo=blacklisted_repo,
     )
 
 
@@ -170,8 +170,10 @@ def provide_admin_role_service(
         role_repo=role_repo,
     )
 
+
 def provide_wellknown_service_stub() -> None:
     ...
+
 
 def provide_wellknown_service(
     wlk_repo: WellKnownRepository,

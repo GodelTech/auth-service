@@ -4,11 +4,11 @@ from typing import Any, Optional, Union
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from jwt.exceptions import ExpiredSignatureError
 
-from src.business_logic.services.introspection import IntrospectionServies
+from src.business_logic.services.introspection import IntrospectionService
 from src.di.providers import provide_introspection_service_stub
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
-    ResponceIntrospectionModel,
+    ResponseIntrospectionModel,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,14 +18,14 @@ introspection_router = APIRouter(
 )
 
 
-@introspection_router.post("/", response_model=ResponceIntrospectionModel)
+@introspection_router.post("/", response_model=ResponseIntrospectionModel)
 async def post_introspection(
     request: Request,
     auth_swagger: Optional[str] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
     request_body: BodyRequestIntrospectionModel = Depends(),
-    introspection_class: IntrospectionServies = Depends(
+    introspection_class: IntrospectionService = Depends(
         provide_introspection_service_stub
     ),
 ) -> dict[str, Any]:

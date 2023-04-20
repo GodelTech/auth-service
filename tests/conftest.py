@@ -31,7 +31,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.introspection import IntrospectionServies
+from src.business_logic.services.introspection import IntrospectionService
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
@@ -125,8 +125,8 @@ async def end_session_service(engine: AsyncEngine) -> EndSessionService:
 
 
 @pytest_asyncio.fixture
-async def introspection_service(engine: AsyncEngine) -> IntrospectionServies:
-    intro_service = IntrospectionServies(
+async def introspection_service(engine: AsyncEngine) -> IntrospectionService:
+    intro_service = IntrospectionService(
         client_repo=ClientRepository(engine),
         persistent_grant_repo=PersistentGrantRepository(engine),
         user_repo=UserRepository(engine),
@@ -234,13 +234,15 @@ async def wlk_services(engine) -> WellKnownServices:
     )
     return wlk_services
 
+
 from src.business_logic.services.admin_auth import AdminAuthService
+
 
 @pytest_asyncio.fixture
 async def admin_auth_service(engine) -> AdminAuthService:
     admin_auth_service = AdminAuthService(
         user_repo=UserRepository(engine),
         password_service=PasswordHash(),
-        jwt_service=JWTService()
+        jwt_service=JWTService(),
     )
     return admin_auth_service
