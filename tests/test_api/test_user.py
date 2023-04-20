@@ -1,7 +1,6 @@
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.user import UserRepository
 import logging
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
@@ -13,18 +12,8 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 class TestUserEndpoint:
-    async def setup_base(self, engine: AsyncEngine, user_id: int = 1000) -> None:
-        self.access_token = await JWTService().encode_jwt(
-            payload={
-                "stand": "CrazyDiamond",
-                "aud":["admin"]
-            }
-        )
-        self.user_repo = UserRepository(engine)
-
-
+   
     async def test_successful_get_HTML_register_add_info(self, engine: AsyncEngine, client: AsyncClient) -> None:
-       #  await self.setup_base(engine)
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -52,19 +41,9 @@ class TestUserEndpoint:
             "username": "polnareff",
             "email":"polnareff@mail",
             "password":"polnareff",
-            # "name":"polnareff",
-            # "given_name":"polnareff",
-            # "family_name":"polnareff",
-            # "middle_name":"polnareff",
-            # "preferred_username":"polnareff",
-            # "profile":"polnareff",
             "picture":"polnareff",
             "website":"polnareff",
             "gender":"polnareff",
-            # "birthdate":"12/12/1212",
-            # "zoneinfo":"ZTM1",
-            # "phone_number":"123123132",
-            # "address":"polnareff",
             }
         response = await client.request(
             "POST", "/user/register", headers=headers, data=data
@@ -87,8 +66,6 @@ class TestUserEndpoint:
             "given_name":"polnareff",
             "family_name":"polnareff",
             "middle_name":"polnareff",
-            # "preferred_username":"polnareff",
-            # "profile":"polnareff",
             }
         response = await client.request(
             "POST", "/user/add_info/polnareff", headers=headers, data=data
