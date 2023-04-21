@@ -33,6 +33,9 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
 
 
 class UserRepository(BaseRepository):
+    def __init__(self, session):
+        self.session = session
+        
     async def exists(self, user_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -133,19 +136,19 @@ class UserRepository(BaseRepository):
             await session.commit()
 
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            result = await session.execute(
-                select(UserClaim)
-                .where(UserClaim.user_id == sub)
-                .join(
-                    UserClaimType, UserClaimType.id == UserClaim.claim_type_id
-                )
+        # session_factory = sessionmaker(
+        #     self.engine, expire_on_commit=False, class_=AsyncSession
+        # )
+        # async with session_factory() as sess:
+        #     session = sess
+        result = await self.session.execute(
+            select(UserClaim)
+            .where(UserClaim.user_id == sub)
+            .join(
+                UserClaimType, UserClaimType.id == UserClaim.claim_type_id
             )
-            return result
+        )
+        return result
 
     async def get_username_by_id(self, id: int) -> str:
         session_factory = sessionmaker(
@@ -313,9 +316,9 @@ class UserRepository(BaseRepository):
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = 0,
     ) -> None:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
+        # session_factory = sessionmaker(
+        #     self.engine, expire_on_commit=False, class_=AsyncSession
+        # )
         try:
             kwargs = params_to_dict(
                 id=id,
@@ -332,11 +335,11 @@ class UserRepository(BaseRepository):
                 password_hash_id=password_hash_id,
                 access_failed_count=access_failed_count,
             )
-            async with session_factory() as sess:
-                session = sess
+            # async with session_factory() as sess:
+            # session = sess
 
-                await session.execute(insert(User).values(**kwargs))
-                await session.commit()
+            await self.session.execute(insert(User).values(**kwargs))
+            await self.session.commit()
         except:
             raise DuplicationError
 
@@ -516,12 +519,12 @@ class UserRepository(BaseRepository):
             return result[0]
     
     async def validate_user_by_email(self, email: str) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            result = await session.execute(
+        # session_factory = sessionmaker(
+        #     self.engine, expire_on_commit=False, class_=AsyncSession
+        # )
+        # async with session_factory() as sess:
+           # session = sess
+            result = await self.session.execute(
                 select(exists().where(User.email == email))
             )
             result = result.first()
