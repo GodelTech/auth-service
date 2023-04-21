@@ -1,6 +1,14 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
-from sqlalchemy import exists, insert, join, select, text, update
+from sqlalchemy import (
+    exists,
+    insert,
+    join,
+    select,
+    text,
+    update,
+    delete
+)
 from sqlalchemy.engine.result import ChunkedIteratorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -352,11 +360,18 @@ class UserRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
+        # prepare a list of ids for the IN statement
+        groups_id_list = list(map(int, group_ids.split(",")))
+
         try:
-            async with session_factory() as sess:
-                session = sess
-                sql = f"DELETE FROM users_groups WHERE user_id = {user_id} AND group_id IN ({group_ids})"
-                await session.execute(text(sql))
+            async with session_factory() as session:
+                query = (
+                    delete(users_groups)
+                    .where(users_groups.c.user_id == user_id)
+                    .where(users_groups.c.group_id.in_(groups_id_list))
+                )
+
+                await session.execute(query)
                 await session.commit()
         except:
             raise ValueError
