@@ -361,14 +361,14 @@ class UserRepository(BaseRepository):
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         # prepare a list of ids for the IN statement
-        groups_id_list = list(map(int, group_ids.split(",")))
+        group_ids_list = list(map(int, group_ids.split(",")))
 
         try:
             async with session_factory() as session:
                 query = (
                     delete(users_groups)
                     .where(users_groups.c.user_id == user_id)
-                    .where(users_groups.c.group_id.in_(groups_id_list))
+                    .where(users_groups.c.group_id.in_(group_ids_list))
                 )
 
                 await session.execute(query)
