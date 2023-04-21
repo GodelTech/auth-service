@@ -42,9 +42,11 @@ class AuthorizationCodeTokenService:
         await self._redirect_uri_validator(request_data.redirect_uri, request_data.client_id)
 
         grant = await self._persistent_grant_repo.get_grant(grant_type=request_data.grant_type, grant_data=request_data.code)
-        
+
+        print(grant)
+        print(self._grant_expiration_validator)
         await self._grant_expiration_validator(grant.expiration)
-        
+
         user_id = grant.user_id
         current_unix_time = int(time.time())
 
@@ -59,7 +61,7 @@ class AuthorizationCodeTokenService:
             grant_data=refresh_token,
             user_id=user_id,
             grant_type_id=2,
-            expiration_time=time.time() + 84700
+            expiration_time=current_unix_time + 84700
         )
 
         return ResponseTokenModel(

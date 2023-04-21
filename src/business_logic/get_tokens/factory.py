@@ -57,9 +57,9 @@ class TokenServiceFactory:
         elif grant_type == 'refresh_token':
             return RefreshTokenGrantService(
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
-                redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
                 client_validator=ValidateClient(client_repo=self._client_repo),
-                code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
+                refresh_token_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
+                grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,
                 persistent_grant_repo=self._persistent_grant_repo
             )
