@@ -185,6 +185,7 @@ def provide_wellknown_service(
 def provide_userinfo_service_stub() -> None:  # pragma: no cover
     ...
 
+from Y_draft.uow import UnitOfWork
 
 def provide_userinfo_service(
     jwt: JWTService,
@@ -192,6 +193,7 @@ def provide_userinfo_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
+    uow: UnitOfWork
 ) -> UserInfoServices:
     return UserInfoServices(
         jwt=jwt,
@@ -199,6 +201,7 @@ def provide_userinfo_service(
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
+        uow=uow
     )
 
 

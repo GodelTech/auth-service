@@ -67,14 +67,14 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
-    )
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
-    )
+    # app.add_middleware(
+    #     middleware_class=AuthorizationMiddleware,
+    #     blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+    # )
+    # app.add_middleware(
+    #     middleware_class=AccessTokenMiddleware,
+    #     blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+    # )
 
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
@@ -190,12 +190,14 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         prov.provide_token_service_stub
     ] = nodepends_provide_token_service
-
+    
+    from Y_draft.uow import UnitOfWork
     nodepends_provide_userinfo_service = lambda: prov.provide_userinfo_service(
         jwt=prov.provide_jwt_service(),
         user_repo=prov.provide_user_repo(db_engine),
         client_repo=prov.provide_client_repo(db_engine),
         persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
+        uow=UnitOfWork(db_engine)
     )
     app.dependency_overrides[
         prov.provide_userinfo_service_stub
