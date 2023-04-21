@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # * - Linkedin also use same data, but it is said, that it's mandatory, so i suppose we can use that model
 # * - Gitlab same as linkedin
 # TODO -> check if it'll be a good solution to add response_type here(linkedin, gitlab, microsoft, google)
-class ThirdPartyProviderAccessTokenRequestModelBase(BaseModel):
+class ThirdPartyAccessTokenRequestModelBase(BaseModel):
     code: str
     state: str
 

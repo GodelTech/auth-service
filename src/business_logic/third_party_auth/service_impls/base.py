@@ -1,15 +1,16 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Dict, Any
-import secrets
+
 import json
+import secrets
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
-    from src.business_logic.third_party_oidc.dto import (
-        StateRequestModel,
-        ThirdPartyProviderAccessTokenRequestModelBase,
-    )
 
+    from src.business_logic.third_party_auth.dto import (
+        StateRequestModel,
+        ThirdPartyAccessTokenRequestModelBase,
+    )
     from src.data_access.postgresql.repositories import (
         ClientRepository,
         PersistentGrantRepository,
@@ -33,16 +34,6 @@ class ThirdPartyOIDCService:
         self.oidc_repo = oidc_repo
         self.http_client = http_client
 
-    @staticmethod
-    def _parse_response_content(
-        response_content: str,
-    ) -> Dict[str, Any]:
-        return {
-            item.split("=")[0]: item.split("=")[1]
-            for item in response_content.split("&")
-            if len(item.split("=")) == 2
-        }
-
     async def _create_provider_state(
         self, state_request_model: StateRequestModel
     ) -> None:
@@ -50,7 +41,7 @@ class ThirdPartyOIDCService:
 
     async def get_redirect_uri(
         self,
-        request_data: ThirdPartyProviderAccessTokenRequestModelBase,
+        request_data: ThirdPartyAccessTokenRequestModelBase,
         provider_name: str,
     ) -> Optional[str]:
         provider_links = await self.get_provider_external_links(
@@ -126,6 +117,7 @@ class ThirdPartyOIDCService:
         response_content = json.loads(response_data.content)
         return response_content["access_token"]
 
+    # TODO this method will be different for each provider I guess
     async def get_user_data(
         self, access_url: str, headers: Dict[str, Any]
     ) -> str:

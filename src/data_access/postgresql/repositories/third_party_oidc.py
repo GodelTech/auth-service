@@ -159,3 +159,32 @@ class ThirdPartyOIDCRepository(BaseRepository):
                 return link_list[0][0]
             else:
                 return None
+
+    async def get_external_links_by_provider_name(
+        self, name: str
+    ) -> tuple[str, str]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(
+                    IdentityProvider.token_endpoint_link,
+                    IdentityProvider.userinfo_link,
+                ).where(IdentityProvider.name == name)
+            )
+            row = result.fetchone()
+            return row.token_endpoint_link, row.userinfo_link
+
+    async def is_state(self, state: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as sess:
+            result = await sess.execute(
+                select(IdentityProviderState.state)
+                .where(IdentityProviderState.state == state)
+                .exists()
+                .select()
+            )
+            return result.scalar()
