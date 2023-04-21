@@ -380,11 +380,18 @@ class UserRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
+        # prepare a list of ids for the IN statement
+        role_ids_list = list(map(int, role_ids.split(",")))
+
         try:
-            async with session_factory() as sess:
-                session = sess
-                sql = f"DELETE FROM users_roles WHERE user_id = {user_id} AND role_id IN ({role_ids})"
-                await session.execute(text(sql))
+            async with session_factory() as session:
+                query = (
+                    delete(users_roles)
+                    .where(users_roles.c.user_id == user_id)
+                    .where(users_roles.c.role_id.in_(role_ids_list))
+                )
+
+                await session.execute(query)
                 await session.commit()
         except:
             raise ValueError
