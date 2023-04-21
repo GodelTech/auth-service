@@ -43,8 +43,6 @@ class AuthorizationCodeTokenService:
 
         grant = await self._persistent_grant_repo.get_grant(grant_type=request_data.grant_type, grant_data=request_data.code)
 
-        print(grant)
-        print(self._grant_expiration_validator)
         await self._grant_expiration_validator(grant.expiration)
 
         user_id = grant.user_id
