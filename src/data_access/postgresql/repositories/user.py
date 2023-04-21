@@ -523,7 +523,7 @@ class UserRepository(BaseRepository):
         #     self.engine, expire_on_commit=False, class_=AsyncSession
         # )
         # async with session_factory() as sess:
-           # session = sess
+           
             result = await self.session.execute(
                 select(exists().where(User.email == email))
             )
