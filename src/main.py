@@ -194,9 +194,6 @@ def setup_di(app: FastAPI) -> None:
     from Y_draft.uow import UnitOfWork
     nodepends_provide_userinfo_service = lambda: prov.provide_userinfo_service(
         jwt=prov.provide_jwt_service(),
-        user_repo=prov.provide_user_repo(db_engine),
-        client_repo=prov.provide_client_repo(db_engine),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
         uow=UnitOfWork(db_engine)
     )
     app.dependency_overrides[
