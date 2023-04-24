@@ -76,14 +76,7 @@ async def register_user(
     user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     ) -> _TemplateResponse:
 
-    kwargs = request_body.__dict__
-    if await user_service.user_repo.validate_user_by_email(email=kwargs['email']):
-        return JSONResponse(status_code=400, content='email_duplication')
-    if await user_service.user_repo.validate_user_by_username(username=kwargs['username']):
-        return JSONResponse(status_code=400, content='username_duplication')
-    if kwargs['phone_number']:
-        if await user_service.user_repo.validate_user_by_phone_number(phone_number=kwargs['phone_number']):
-            return JSONResponse(status_code=400, content='phone_number_duplication')
+    kwargs = request_body.__dict__    
     await user_service.registration(kwargs)
     return templates.TemplateResponse("user_registration_success.html", {'request': request})
 

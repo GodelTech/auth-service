@@ -22,7 +22,7 @@ import src.di.providers as prov
 
 import logging
 from src.log import LOGGING_CONFIG
-
+from Y_draft.uow import UnitOfWork
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ def setup_di(app: FastAPI) -> None:
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
             auth_service=prov.provide_admin_auth_service(
-                user_repo=prov.provide_user_repo(db_engine),
+                uow=UnitOfWork(db_engine),
                 password_service=prov.provide_password_service(),
                 jwt_service=prov.provide_jwt_service(),
             ),
@@ -191,7 +191,6 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_token_service_stub
     ] = nodepends_provide_token_service
     
-    from Y_draft.uow import UnitOfWork
     nodepends_provide_userinfo_service = lambda: prov.provide_userinfo_service(
         jwt=prov.provide_jwt_service(),
         uow=UnitOfWork(db_engine)
@@ -213,7 +212,7 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_admin_user_service = (
         lambda: prov.provide_admin_user_service(
-            user_repo=prov.provide_user_repo(db_engine),
+            uow=UnitOfWork(db_engine)
         )
     )
 

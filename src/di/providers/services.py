@@ -38,7 +38,7 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     BlacklistedTokenRepository,
 )
-
+from Y_draft.uow import UnitOfWork
 
 def provide_auth_service_stub() -> None:  # pragma: no cover
     ...
@@ -141,10 +141,10 @@ def provide_admin_user_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_user_service(
-    user_repo: UserRepository,
+    uow: UnitOfWork,
 ) -> AdminUserService:
     return AdminUserService(
-        user_repo=user_repo,
+       uow = uow
     )
 
 
@@ -185,7 +185,7 @@ def provide_wellknown_service(
 def provide_userinfo_service_stub() -> None:  # pragma: no cover
     ...
 
-from Y_draft.uow import UnitOfWork
+
 
 def provide_userinfo_service(
     jwt: JWTService,
@@ -213,12 +213,12 @@ def provide_admin_auth_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_auth_service(
-    user_repo: UserRepository,
+    uow: UnitOfWork,
     password_service: PasswordHash,
     jwt_service: JWTService,
 ) -> AdminAuthService:
     return AdminAuthService(
-        user_repo=user_repo,
+        uow=uow,
         password_service=password_service,
         jwt_service=jwt_service,
     )

@@ -12,20 +12,23 @@ logger = logging.getLogger(__name__)
 class AdminAuthService:
     def __init__(
         self,
-        user_repo: UserRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+        uow, 
+        password_service = PasswordHash,
+        jwt_service = JWTService
     ) -> None:
-        self.user_repo = user_repo
+        self.uow = uow
+        
         self.password_service = password_service
         self.jwt_service = jwt_service
 
     async def authorize(
         self, credentials: AdminCredentialsDTO, exp_time: int = 900
     ) -> Union[str, None]:
-        user_hash_password, user_id = await self.user_repo.get_hash_password(
-            credentials.username
-        )
+        async with self.uow as session:
+            user_repo = UserRepository(session)
+            user_hash_password, user_id = await user_repo.get_hash_password(
+                credentials.username
+            )
         self.password_service.validate_password(
             credentials.password, 
             user_hash_password
