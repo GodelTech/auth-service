@@ -13,6 +13,13 @@ from src.business_logic.services import (
     ThirdPartyGitLabService,
     ThirdPartyMicrosoftService,
 )
+from src.business_logic.third_party_auth.dto import (
+    ThirdPartyAccessTokenRequestModelBase,
+)
+from src.business_logic.third_party_auth import (
+    ThirdPartyAuthServiceFactory,
+    ThirdPartyAuthServiceProtocol,
+)
 from src.data_access.postgresql.errors import (
     ThirdPartyStateDuplicationError,
     WrongDataError,
@@ -24,6 +31,7 @@ from src.di.providers import (
     provide_third_party_gitlab_service_stub,
     provide_third_party_google_service_stub,
     provide_third_party_microsoft_service_stub,
+    provide_third_party_auth_service_factory_stub,
 )
 from src.presentation.api.models import (
     StateRequestModel,
@@ -46,21 +54,18 @@ auth_oidc_router = APIRouter(
     status_code=status.HTTP_302_FOUND,
 )
 async def get_github_authorize(
-    request_model: ThirdPartyOIDCRequestModel = Depends(),
-    auth_class: AuthThirdPartyOIDCService = Depends(
-        provide_auth_third_party_oidc_service_stub
+    request_body: ThirdPartyAccessTokenRequestModelBase = Depends(),
+    auth_service_factory: ThirdPartyAuthServiceFactory = Depends(
+        provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        auth_class.request_model = request_model
-        github_redirect_uri = await auth_class.get_github_redirect_uri(
-            provider_name="github"
+        third_party_auth_service: ThirdPartyAuthServiceProtocol = (
+            auth_service_factory.get_service_impl("github")
         )
-        if github_redirect_uri is None:
-            raise WrongDataError
-        return RedirectResponse(
-            github_redirect_uri, status_code=status.HTTP_302_FOUND
-        )
+        result = await third_party_auth_service.get_redirect_url(request_body)
+
+        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
     except WrongDataError as exception:
         logger.exception(exception)

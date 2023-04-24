@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Type
 
+from src.business_logic.third_party_auth.validators import StateValidator
 from src.data_access.postgresql.errors import ThirdPartyAuthProviderNameError
-
+from .service_impls import GithubAuthService
 from .interfaces import ThirdPartyAuthServiceProtocol
 
 if TYPE_CHECKING:
@@ -58,6 +59,7 @@ class ThirdPartyAuthServiceFactory:
             )
 
         return third_party_auth_service(
+            state_validator=StateValidator(self._oidc_repo),
             client_repo=self._client_repo,
             user_repo=self._user_repo,
             persistent_grant_repo=self._persistent_grant_repo,
@@ -66,3 +68,6 @@ class ThirdPartyAuthServiceFactory:
         )
 
     # TODO add creating state here?
+
+
+ThirdPartyAuthServiceFactory._register_factory("github", GithubAuthService)

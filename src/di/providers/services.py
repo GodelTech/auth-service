@@ -7,11 +7,6 @@ from src.business_logic.services import (
     AdminUserService,
     AuthorizationService,
     AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
-    ThirdPartyFacebookService,
-    ThirdPartyLinkedinService,
-    ThirdPartyGitLabService,
-    ThirdPartyMicrosoftService,
     DeviceService,
     EndSessionService,
     IntrospectionServies,
@@ -22,11 +17,16 @@ from src.business_logic.services import (
     ThirdPartyGitLabService,
     ThirdPartyGoogleService,
     ThirdPartyLinkedinService,
+    ThirdPartyMicrosoftService,
     TokenService,
     UserInfoServices,
     WellKnownServices,
 )
+from src.business_logic.third_party_auth.factory import (
+    ThirdPartyAuthServiceFactory,
+)
 from src.data_access.postgresql.repositories import (
+    BlacklistedTokenRepository,
     ClientRepository,
     DeviceRepository,
     GroupRepository,
@@ -35,7 +35,6 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
     UserRepository,
     WellKnownRepository,
-    BlacklistedTokenRepository,
 )
 
 
@@ -131,7 +130,7 @@ def provide_token_service(
         user_repo=user_repo,
         device_repo=device_repo,
         jwt_service=jwt_service,
-        blacklisted_repo=blacklisted_repo
+        blacklisted_repo=blacklisted_repo,
     )
 
 
@@ -170,8 +169,10 @@ def provide_admin_role_service(
         role_repo=role_repo,
     )
 
+
 def provide_wellknown_service_stub() -> None:
     ...
+
 
 def provide_wellknown_service(
     wlk_repo: WellKnownRepository,
@@ -358,4 +359,26 @@ def provide_third_party_microsoft_service(
         persistent_grant_repo=persistent_grant_repo,
         oidc_repo=oidc_repo,
         http_client=http_client,
+    )
+
+
+def provide_third_party_auth_service_factory_stub() -> (
+    None
+):  # pragma: no cover
+    ...
+
+
+def provide_third_party_auth_service_factory(
+    client_repo: ClientRepository,
+    user_repo: UserRepository,
+    oidc_repo: ThirdPartyOIDCRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    async_http_client: AsyncClient,
+) -> ThirdPartyAuthServiceFactory:
+    return ThirdPartyAuthServiceFactory(
+        client_repo=client_repo,
+        user_repo=user_repo,
+        persistent_grant_repo=persistent_grant_repo,
+        oidc_repo=oidc_repo,
+        async_http_client=async_http_client,
     )

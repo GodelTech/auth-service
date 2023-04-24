@@ -180,11 +180,50 @@ class ThirdPartyOIDCRepository(BaseRepository):
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
-        async with session_factory() as sess:
-            result = await sess.execute(
+        async with session_factory() as session:
+            result = await session.execute(
                 select(IdentityProviderState.state)
                 .where(IdentityProviderState.state == state)
                 .exists()
                 .select()
+            )
+            return result.scalar()
+
+    async def get_credentials_by_provider_name(
+        self, name: str
+    ) -> Tuple[str, str, str]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(
+                    IdentityProviderMapped.provider_client_id,
+                    IdentityProviderMapped.provider_client_secret,
+                    IdentityProvider.internal_redirect_uri,
+                )
+                .join(IdentityProvider)
+                .where(
+                    IdentityProvider.name == name,
+                )
+            )
+            row = result.fetchone()
+            return (
+                row.provider_client_id,
+                row.provider_client_secret,
+                row.internal_redirect_uri,
+            )
+
+    async def get_id_by_provider_name(self, name: str) -> Optional[int]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(
+                    IdentityProvider.id,
+                ).where(
+                    IdentityProvider.name == name,
+                )
             )
             return result.scalar()

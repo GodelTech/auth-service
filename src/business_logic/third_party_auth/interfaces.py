@@ -13,7 +13,7 @@ class ThirdPartyAuthServiceProtocol(Protocol):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         ...
 
-    async def get_redirect_uri(
+    async def get_redirect_url(
         self,
         request_data: ThirdPartyAccessTokenRequestModelBase,
     ) -> str:
