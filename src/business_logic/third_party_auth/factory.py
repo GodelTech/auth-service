@@ -4,8 +4,15 @@ from typing import TYPE_CHECKING, Type
 
 from src.business_logic.third_party_auth.validators import StateValidator
 from src.data_access.postgresql.errors import ThirdPartyAuthProviderNameError
-from .service_impls import GithubAuthService
+from .service_impls import (
+    GithubAuthService,
+    GitlabAuthService,
+    GoogleAuthService,
+    LinkedinAuthService,
+    MicrosoftAuthService,
+)
 from .interfaces import ThirdPartyAuthServiceProtocol
+from src.business_logic.third_party_auth.constants import AuthProviderName
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -70,4 +77,18 @@ class ThirdPartyAuthServiceFactory:
     # TODO add creating state here?
 
 
-ThirdPartyAuthServiceFactory._register_factory("github", GithubAuthService)
+ThirdPartyAuthServiceFactory._register_factory(
+    AuthProviderName.GITHUB.value, GithubAuthService
+)
+ThirdPartyAuthServiceFactory._register_factory(
+    AuthProviderName.GITLAB.value, GitlabAuthService
+)
+ThirdPartyAuthServiceFactory._register_factory(
+    AuthProviderName.GOOGLE.value, GoogleAuthService
+)
+ThirdPartyAuthServiceFactory._register_factory(
+    AuthProviderName.LINKEDIN.value, LinkedinAuthService
+)
+ThirdPartyAuthServiceFactory._register_factory(
+    AuthProviderName.MICROSOFT.value, MicrosoftAuthService
+)

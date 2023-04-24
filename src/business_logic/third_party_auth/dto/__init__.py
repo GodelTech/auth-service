@@ -1,3 +1,9 @@
-from .request import StateRequestModel, ThirdPartyAccessTokenRequestModelBase
+from .request import (
+    StateRequestModel,
+    ThirdPartyAccessTokenRequestModel,
+)
 
-__all__ = ["ThirdPartyAccessTokenRequestModelBase", "StateRequestModel"]
+__all__ = [
+    "StateRequestModel",
+    "ThirdPartyAccessTokenRequestModel",
+]

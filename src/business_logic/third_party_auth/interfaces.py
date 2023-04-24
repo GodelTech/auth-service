@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 if TYPE_CHECKING:
     from src.business_logic.third_party_auth.dto import (
         StateRequestModel,
-        ThirdPartyAccessTokenRequestModelBase,
+        ThirdPartyAccessTokenRequestModel,
     )
 
 
@@ -15,6 +15,6 @@ class ThirdPartyAuthServiceProtocol(Protocol):
 
     async def get_redirect_url(
         self,
-        request_data: ThirdPartyAccessTokenRequestModelBase,
+        request_data: ThirdPartyAccessTokenRequestModel,
     ) -> str:
         ...
