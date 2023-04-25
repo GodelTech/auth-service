@@ -9,6 +9,9 @@ from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_user_service_stub
 from src.presentation.admin_api.models.user import *
 from typing import Callable
+from dependency_injector.wiring import inject, Provide
+from src.di.container import Container
+
 logger = logging.getLogger(__name__)
 
 admin_user_router = APIRouter(prefix="/users")
@@ -65,15 +68,15 @@ async def get_user(
 @admin_user_router.get(
     "", status_code=status.HTTP_200_OK, tags=["Administration User"]
 )
-# @exceptions_wrapper
+@inject
 async def get_all_users(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestAllUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
+    user_class: AdminUserService = Depends(Provide[Container.admin_user_service]),
 ) -> dict[str, Any]:
 
-    user_class = user_class
+    user_class = await user_class.provider()
     return {
         "all_users": await user_class.get_all_users(
             group_id=request_model.group_id, role_id=request_model.role_id

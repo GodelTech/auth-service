@@ -2,12 +2,10 @@
 from typing import Union, Optional, Any
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.user import UserRepository
-
-from src.business_logic.services.well_known import WellKnownServices
-from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 
 from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
@@ -15,13 +13,6 @@ from src.data_access.postgresql.repositories.persistent_grant import PersistentG
 from src.data_access.postgresql.tables import Group, Role, User
 from src.data_access.postgresql.errors.user import DuplicationError
 from Y_draft.uow import UnitOfWork
-
-class AdminService():
-    def __init__(
-        self,
-        jwt_service: JWTService,
-    ) -> None:
-        self.jwt_service = jwt_service
 
 
 class AdminTokenService():
@@ -96,10 +87,15 @@ class AdminGroupService():
 class AdminUserService():
     def __init__(
             self,
-            uow: UnitOfWork
+            user_repo: UserRepository,
+            client_repo: ClientRepository
 
         ) -> None:
-        self.uow=uow
+        self.user_repo=user_repo
+        self.client_repo=client_repo
+
+    def assert_sessions(self):
+        assert self.user_repo.session is self.client_repo.session
 
     async def registration_validation(self, kwargs):
         async with self.uow as session:
@@ -162,7 +158,6 @@ class AdminUserService():
             user_repo = UserRepository(session)
             await user_repo.change_password(user_id=user_id, password = new_password)
     
-
     async def get_user(self, user_id:int) -> User:
         async with self.uow as session:
             user_repo = UserRepository(session)
@@ -179,11 +174,11 @@ class AdminUserService():
             await user_repo.delete(user_id=user_id)
 
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
-        async with self.uow as session:
-            user_repo = UserRepository(session)
-            users:list[User] = await user_repo.get_all_users(group_id= group_id, role_id = role_id)
-            return [{"id":user.id,"username":user.username, 'email':user.email} for user in users]
+        users:list[User] = await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+        await self.user_repo.close()
+        return [{"id":user.id,"username":user.username, 'email':user.email} for user in users]
     
+        
     async def registration(self, kwargs:dict)->None:
         password = kwargs['password']
         email = kwargs['email']
