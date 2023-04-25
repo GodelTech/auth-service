@@ -9,10 +9,8 @@ from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-
 from src.data_access.postgresql.tables import Group, Role, User
 from src.data_access.postgresql.errors.user import DuplicationError
-from Y_draft.uow import UnitOfWork
 
 
 class AdminTokenService():
@@ -88,9 +86,6 @@ class AdminUserService():
     def __init__(
             self,
             user_repo: UserRepository,
-            client_repo: ClientRepository
-
-            user_repo: UserRepository
         ) -> None:
         self.user_repo= user_repo
 

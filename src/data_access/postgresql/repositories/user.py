@@ -33,18 +33,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
 
 
 class UserRepository(BaseRepository):
-    def __init__(self, session):
-        self.session:AsyncSession = session
     
-    async def commit(self):
-        await self.session.commit()
-    
-    async def rollback(self):
-        await self.session.rollback()
-    
-    async def close(self):
-        await self.session.close()
-
     async def exists(self, user_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -57,7 +46,7 @@ class UserRepository(BaseRepository):
             )
             result = result.first()
             return result[0]
-
+        
     async def delete(self, user_id: int) -> None:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession

@@ -39,7 +39,6 @@ class Container(containers.DeclarativeContainer):
     admin_user_service = providers.Factory(
         AdminUserService,
         user_repo=user_repo,
-        client_repo=client_repo
     )
 
   

@@ -67,14 +67,14 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
-    )
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
-    )
+    # app.add_middleware(
+    #     middleware_class=AuthorizationMiddleware,
+    #     blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+    # )
+    # app.add_middleware(
+    #     middleware_class=AccessTokenMiddleware,
+    #     blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+    # )
 
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
