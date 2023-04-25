@@ -2,24 +2,17 @@
 from typing import Union, Optional, Any
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.user import UserRepository
-
-from src.business_logic.services.well_known import WellKnownServices
-from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
 
 from src.data_access.postgresql.repositories.user import UserRepository
+from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
 from src.data_access.postgresql.tables import Group, Role, User
-
-class AdminService():
-    def __init__(
-        self,
-        jwt_service: JWTService,
-    ) -> None:
-        self.jwt_service = jwt_service
+from src.data_access.postgresql.errors.user import DuplicationError
+from Y_draft.uow import UnitOfWork
 
 
 class AdminTokenService():
@@ -94,6 +87,9 @@ class AdminGroupService():
 class AdminUserService():
     def __init__(
             self,
+            user_repo: UserRepository,
+            client_repo: ClientRepository
+
             user_repo: UserRepository
         ) -> None:
         self.user_repo= user_repo
@@ -132,7 +128,6 @@ class AdminUserService():
         new_password = PasswordHash.hash_password(password=new_password)
         await self.user_repo.change_password(user_id=user_id, password = new_password)
     
-
     async def get_user(self, user_id:int) -> User:
         return await self.user_repo.get_user_by_id(user_id=user_id)
 
@@ -143,4 +138,60 @@ class AdminUserService():
         await self.user_repo.delete(user_id=user_id)
 
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
-        return await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+        users:list[User] = await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+        await self.user_repo.close()
+        return [{"id":user.id,"username":user.username, 'email':user.email} for user in users]
+    
+        
+    async def registration(self, kwargs:dict)->None:
+        password = kwargs['password']
+        email = kwargs['email']
+        del kwargs['password']
+        kwargs = kwargs | {
+            "email_confirmed": False,
+            "phone_number_confirmed": False,
+            "access_failed_count":0,
+            }
+        async with self.uow as session:
+            user_repo = UserRepository(session)
+            await user_repo.create(
+                username = kwargs['username'],
+                email = kwargs['email'],
+                phone_number = kwargs['phone_number'],
+                )
+        
+            user_id = (await user_repo.get_user_by_email(email=email)).id
+            password_hashed = PasswordHash.hash_password(password=password)
+            await user_repo.change_password(user_id=user_id, password=password_hashed)
+            kwargs["birthdate"] = str(kwargs['birthdate'])
+            types = await user_repo.get_all_claim_types()
+            claims = []
+            for key in kwargs:
+                if key in types.keys() and kwargs[key]:
+                    claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":kwargs[key]})
+        
+            await user_repo.add_claims(claims=claims)
+
+    async def validate_password(self, email:str, password:str):
+        async with self.uow as session:
+            user_repo = UserRepository(session)
+            user:User = await user_repo.get_user_by_email(email=email)
+            return PasswordHash.validate_password(str_password=password,hash_password=user.password_hash.value), user
+    
+    def user_to_dict(self, user:User)->dict[str, str]:
+        user_data = user.__dict__
+        for claim in user.claims:
+            user_data[claim.claim_type.type_of_claim] = claim.claim_value
+        return user_data
+
+    async def add_user_info(self, username:str, data:dict):
+        async with self.uow as session:
+            user_repo = UserRepository(session)
+            user_id = (await user_repo.get_user_by_username(username=username)).id
+            types = await user_repo.get_all_claim_types()
+            claims = []
+            for key in data:
+                if key in types.keys() and data[key]:
+                    claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":data[key]})
+            
+            await user_repo.add_claims(claims=claims)

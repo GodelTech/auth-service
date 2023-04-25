@@ -20,6 +20,9 @@ from src.data_access.postgresql.tables.client import (
 
 
 class ClientRepository(BaseRepository):
+    def __init__(self, session):
+        self.session = session
+        
     async def get_client_by_client_id(self, client_id: str) -> Client:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession

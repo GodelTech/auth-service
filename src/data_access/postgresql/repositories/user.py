@@ -33,6 +33,18 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
 
 
 class UserRepository(BaseRepository):
+    def __init__(self, session):
+        self.session:AsyncSession = session
+    
+    async def commit(self):
+        await self.session.commit()
+    
+    async def rollback(self):
+        await self.session.rollback()
+    
+    async def close(self):
+        await self.session.close()
+
     async def exists(self, user_id: int) -> bool:
         session_factory = sessionmaker(
             self.engine, expire_on_commit=False, class_=AsyncSession
@@ -176,40 +188,34 @@ class UserRepository(BaseRepository):
     async def get_all_users(
         self, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        try:
-            async with session_factory() as sess:
-                session = sess
-                if group_id is None and role_id is None:
-                    query = await session.execute(select(User))
-                    query = query.all()
-                    return [user[0] for user in query]
-                elif group_id is None and role_id is not None:
-                    iterator = await session.execute(
-                        select(User)
-                        .join(Role, User.roles)
-                        .where(Role.id == role_id)
-                    )
-                    return [user[0] for user in iterator.all()]
-                elif group_id is not None and role_id is None:
-                    iterator = await session.execute(
-                        select(User)
-                        .join(Group, User.groups)
-                        .where(Group.id == group_id)
-                    )
-                    return [user[0] for user in iterator.all()]
-                else:
-                    iterator = await session.execute(
-                        select(User)
-                        .join(Group, User.groups)
-                        .join(Role, User.roles)
-                        .where(Group.id == group_id, Role.id == role_id)
-                    )
-                    return [user[0] for user in iterator.all()]
-        except:
-            raise ValueError
+    
+        if group_id is None and role_id is None:
+            query = await self.session.execute(select(User))
+            query = query.all()
+            return [user[0] for user in query]
+        elif group_id is None and role_id is not None:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Role, User.roles)
+                .where(Role.id == role_id)
+            )
+            return [user[0] for user in iterator.all()]
+        elif group_id is not None and role_id is None:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Group, User.groups)
+                .where(Group.id == group_id)
+            )
+            return [user[0] for user in iterator.all()]
+        else:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Group, User.groups)
+                .join(Role, User.roles)
+                .where(Group.id == group_id, Role.id == role_id)
+            )
+            return [user[0] for user in iterator.all()]
+    
 
     async def update(
         self,
