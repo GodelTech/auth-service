@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 import json
 import secrets
 from typing import TYPE_CHECKING
+
 from src.business_logic.third_party_auth.mixins import ThirdPartyAuthMixin
+
 from ..constants import AuthProviderName
 
 if TYPE_CHECKING:
@@ -10,7 +13,6 @@ if TYPE_CHECKING:
 
     from src.business_logic.common.interfaces import ValidatorProtocol
     from src.business_logic.third_party_auth.dto import (
-        StateRequestModel,
         ThirdPartyAccessTokenRequestModel,
     )
     from src.data_access.postgresql.repositories import (

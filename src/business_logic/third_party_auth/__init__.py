@@ -1,4 +1,13 @@
 from .factory import ThirdPartyAuthServiceFactory
-from .interfaces import ThirdPartyAuthServiceProtocol
+from .interfaces import (
+    ThirdPartyAuthMixinProtocol,
+    ThirdPartyAuthServiceProtocol,
+)
+from .mixins import ThirdPartyAuthMixin
 
-__all__ = ["ThirdPartyAuthServiceFactory", "ThirdPartyAuthServiceProtocol"]
+__all__ = [
+    "ThirdPartyAuthServiceFactory",
+    "ThirdPartyAuthMixin",
+    "ThirdPartyAuthServiceProtocol",
+    "ThirdPartyAuthMixinProtocol",
+]

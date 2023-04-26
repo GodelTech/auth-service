@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Type
 
+from src.business_logic.third_party_auth.constants import AuthProviderName
 from src.business_logic.third_party_auth.validators import StateValidator
 from src.data_access.postgresql.errors import ThirdPartyAuthProviderNameError
+
+from .interfaces import ThirdPartyAuthServiceProtocol
 from .service_impls import (
     GithubAuthService,
     GitlabAuthService,
@@ -11,8 +14,6 @@ from .service_impls import (
     LinkedinAuthService,
     MicrosoftAuthService,
 )
-from .interfaces import ThirdPartyAuthServiceProtocol
-from src.business_logic.third_party_auth.constants import AuthProviderName
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -74,7 +75,8 @@ class ThirdPartyAuthServiceFactory:
             async_http_client=self._async_http_client,
         )
 
-    # TODO add creating state here?
+    async def create_provider_state(self, state: str) -> None:
+        await self._oidc_repo.create_state(state)
 
 
 ThirdPartyAuthServiceFactory._register_factory(

@@ -4,7 +4,6 @@ from .google import GoogleAuthService
 from .linkedin import LinkedinAuthService
 from .microsoft import MicrosoftAuthService
 
-
 __all__ = [
     "GithubAuthService",
     "GitlabAuthService",

@@ -3,14 +3,17 @@ import time
 from src.business_logic.third_party_auth.dto import (
     ThirdPartyAccessTokenRequestModel,
 )
+from src.business_logic.third_party_auth.interfaces import (
+    ThirdPartyAuthMixinProtocol,
+)
 
 
 class ThirdPartyAuthMixin:
     async def _form_parameters_data(
-        self,
+        self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         provider_name: str,
-    ):
+    ) -> dict[str, str]:
         (
             provider_client_id,
             provider_client_secret,
@@ -27,7 +30,7 @@ class ThirdPartyAuthMixin:
         }
 
     async def _get_access_token(
-        self,
+        self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         token_url: str,
         provider_name: str,
@@ -42,7 +45,7 @@ class ThirdPartyAuthMixin:
         return json.loads(response.content)["access_token"]
 
     async def _get_username(
-        self,
+        self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         username_type: str,
         provider_name: str,
@@ -66,8 +69,10 @@ class ThirdPartyAuthMixin:
         return json.loads(response.content)[username_type]
 
     async def _create_user_if_not_exists(
-        self, username: str, provider_name: str
-    ):
+        self: ThirdPartyAuthMixinProtocol,
+        username: str,
+        provider_name: str,
+    ) -> None:
         if not await self._user_repo.exists_user(username):
             provider_id = await self._oidc_repo.get_id_by_provider_name(
                 provider_name
@@ -77,7 +82,7 @@ class ThirdPartyAuthMixin:
             )
 
     async def _create__grant(
-        self,
+        self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         username_type: str,
         provider_name: str,
@@ -89,20 +94,19 @@ class ThirdPartyAuthMixin:
         )
         await self._create_user_if_not_exists(username, provider_name)
         client_id = request_data.state.split("!_!")[1]
-        # auth_code_lifetime = (
-        #     await self._client_repo.get_auth_code_lifetime_by_client(client_id)
-        # )
-        grant_data = {
-            "client_id": client_id,
-            "grant_data": self._secret_code,
-            "user_id": await self._user_repo.get_user_id_by_username(username),
-            "grant_type": "authorization_code",
-            # "expiration_time": auth_code_lifetime + int(time.time()),
-        }
-        await self._persistent_grant_repo.create(**grant_data)
+        auth_code_lifetime = (
+            await self._client_repo.get_auth_code_lifetime_by_client(client_id)
+        )
+        await self._persistent_grant_repo.create(
+            client_id=client_id,
+            grant_data=self._secret_code,
+            user_id=await self._user_repo.get_user_id_by_username(username),
+            grant_type="authorization_code",
+            expiration_time=auth_code_lifetime + int(time.time()),
+        )
 
     async def _update_redirect_url(
-        self,
+        self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         redirect_url: str,
     ) -> str:

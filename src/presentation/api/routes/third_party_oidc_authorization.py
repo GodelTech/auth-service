@@ -4,34 +4,24 @@ from typing import Union
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from src.business_logic.services import (
-    AuthThirdPartyOIDCService,
-    ThirdPartyFacebookService,
-)
-from src.business_logic.third_party_auth.dto import (
-    ThirdPartyAccessTokenRequestModel,
-)
+from src.business_logic.services import ThirdPartyFacebookService
 from src.business_logic.third_party_auth import (
     ThirdPartyAuthServiceFactory,
     ThirdPartyAuthServiceProtocol,
+)
+from src.business_logic.third_party_auth.dto import (
+    StateRequestModel,
+    ThirdPartyAccessTokenRequestModel,
 )
 from src.data_access.postgresql.errors import (
     ThirdPartyStateDuplicationError,
     WrongDataError,
 )
 from src.di.providers import (
-    provide_third_party_facebook_service_stub,
     provide_third_party_auth_service_factory_stub,
-    provide_auth_third_party_oidc_service_stub,
+    provide_third_party_facebook_service_stub,
 )
-from src.presentation.api.models import (
-    StateRequestModel,
-    ThirdPartyFacebookRequestModel,
-    ThirdPartyGoogleRequestModel,
-    ThirdPartyLinkedinRequestModel,
-    ThirdPartyOIDCRequestModel,
-    ThirdPartyMicrosoftRequestModel,
-)
+from src.presentation.api.models import ThirdPartyFacebookRequestModel
 
 logger = logging.getLogger(__name__)
 
@@ -197,15 +187,17 @@ async def get_microsoft_authorize(
     status_code=status.HTTP_200_OK,
 )
 async def post_create_state(
-    state_request_model: StateRequestModel = Depends(),
-    auth_class: AuthThirdPartyOIDCService = Depends(
-        provide_auth_third_party_oidc_service_stub
+    request_body: StateRequestModel = Depends(StateRequestModel.as_form),
+    auth_service_factory: ThirdPartyAuthServiceFactory = Depends(
+        provide_third_party_auth_service_factory_stub
     ),
-) -> Union[None, JSONResponse, int]:
+) -> JSONResponse:
     try:
-        auth_class.state_request_model = state_request_model
-        await auth_class.create_provider_state()
-        return status.HTTP_200_OK
+        await auth_service_factory.create_provider_state(request_body.state)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "State created successfully"},
+        )
 
     except ThirdPartyStateDuplicationError as exception:
         logger.exception(exception)
