@@ -15,10 +15,29 @@ from src.presentation.api.middleware import (
 )
 
 from src.presentation.api import router
+from src.presentation.api.exception_handlers import (
+    http400_invalid_grant_handler,
+    http400_unsupported_grant_type_handler,
+    http400_invalid_client_handler,
+    http400_unsupported_third_party_auth_provider_handler,
+    http400_third_party_auth_invalid_state_handler,
+    http400_third_party_auth_invalid_request_data_handler,
+)
 from src.di import Container
 from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
+from src.business_logic.common.errors import InvalidClientIdError
+from src.business_logic.get_tokens.errors import (
+    InvalidGrantError,
+    InvalidRedirectUriError,
+    UnsupportedGrantTypeError,
+)
+from src.business_logic.third_party_auth.errors import (
+    UnsupportedThirdPartyAuthProviderError,
+    ThirdPartyAuthInvalidStateError,
+    ThirdPartyAuthProviderInvalidRequestDataError,
+)
 
 import logging
 from src.log import LOGGING_CONFIG
@@ -46,6 +65,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_headers=["*"],
     )
 
+    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
@@ -384,6 +404,32 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[
         prov.provide_third_party_auth_service_factory_stub
     ] = nodepends_provide_third_party_auth_service_factory
+
+
+def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
+    app.add_exception_handler(
+        InvalidClientIdError, http400_invalid_client_handler
+    )
+    app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
+    app.add_exception_handler(
+        InvalidRedirectUriError, http400_invalid_grant_handler
+    )
+    app.add_exception_handler(
+        UnsupportedGrantTypeError, http400_unsupported_grant_type_handler
+    )
+    app.add_exception_handler(
+        UnsupportedThirdPartyAuthProviderError,
+        http400_unsupported_third_party_auth_provider_handler,
+    )
+    app.add_exception_handler(
+        ThirdPartyAuthInvalidStateError,
+        http400_third_party_auth_invalid_state_handler,
+    )
+    app.add_exception_handler(
+        ThirdPartyAuthProviderInvalidRequestDataError,
+        http400_third_party_auth_invalid_request_data_handler,
+    )
+    return app
 
 
 app = get_application()

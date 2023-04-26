@@ -3,8 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Type
 
 from src.business_logic.third_party_auth.constants import AuthProviderName
-from src.business_logic.third_party_auth.validators import StateValidator
-from src.data_access.postgresql.errors import ThirdPartyAuthProviderNameError
+from src.business_logic.third_party_auth.validators import (
+    StateValidator,
+    StateValidatorBase,
+)
+from src.business_logic.third_party_auth.errors import (
+    UnsupportedThirdPartyAuthProviderError,
+)
 
 from .interfaces import ThirdPartyAuthServiceProtocol
 from .service_impls import (
@@ -62,8 +67,8 @@ class ThirdPartyAuthServiceFactory:
         )
 
         if third_party_auth_service is None:
-            raise ThirdPartyAuthProviderNameError(
-                f"'{provider_name.title()}' provider is not supported."
+            raise UnsupportedThirdPartyAuthProviderError(
+                f"'{provider_name}' provider is not supported."
             )
 
         return third_party_auth_service(
@@ -76,6 +81,7 @@ class ThirdPartyAuthServiceFactory:
         )
 
     async def create_provider_state(self, state: str) -> None:
+        await StateValidatorBase(self._oidc_repo)(state)
         await self._oidc_repo.create_state(state)
 
 

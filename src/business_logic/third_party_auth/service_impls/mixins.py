@@ -6,6 +6,10 @@ from src.business_logic.third_party_auth.dto import (
 from src.business_logic.third_party_auth.interfaces import (
     ThirdPartyAuthMixinProtocol,
 )
+from src.business_logic.third_party_auth.errors import (
+    ThirdPartyAuthProviderInvalidRequestDataError,
+)
+from src.business_logic.third_party_auth.constants import StateData
 
 
 class ThirdPartyAuthMixin:
@@ -42,6 +46,10 @@ class ThirdPartyAuthMixin:
             params=params,
             headers={"Accept": "application/json"},
         )
+        error_response = json.loads(response.content).get("error")
+        if error_response:
+            raise ThirdPartyAuthProviderInvalidRequestDataError(error_response)
+
         return json.loads(response.content)["access_token"]
 
     async def _get_username(
@@ -93,16 +101,16 @@ class ThirdPartyAuthMixin:
             provider_name=provider_name,
         )
         await self._create_user_if_not_exists(username, provider_name)
-        client_id = request_data.state.split("!_!")[1]
-        auth_code_lifetime = (
-            await self._client_repo.get_auth_code_lifetime_by_client(client_id)
-        )
+        client_id = request_data.state.split("!_!")[StateData.CLIENT_ID.value]
+        # auth_code_lifetime = (
+        #     await self._client_repo.get_auth_code_lifetime_by_client(client_id)
+        # )
         await self._persistent_grant_repo.create(
             client_id=client_id,
             grant_data=self._secret_code,
             user_id=await self._user_repo.get_user_id_by_username(username),
             grant_type="authorization_code",
-            expiration_time=auth_code_lifetime + int(time.time()),
+            # expiration_time=auth_code_lifetime + int(time.time()),
         )
 
     async def _update_redirect_url(

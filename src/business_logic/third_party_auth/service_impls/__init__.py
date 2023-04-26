@@ -3,6 +3,7 @@ from .gitlab import GitlabAuthService
 from .google import GoogleAuthService
 from .linkedin import LinkedinAuthService
 from .microsoft import MicrosoftAuthService
+from .mixins import ThirdPartyAuthMixin
 
 __all__ = [
     "GithubAuthService",
@@ -10,4 +11,5 @@ __all__ = [
     "GoogleAuthService",
     "LinkedinAuthService",
     "MicrosoftAuthService",
+    "ThirdPartyAuthMixin",
 ]

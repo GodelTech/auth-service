@@ -3,9 +3,14 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING
 
-from src.business_logic.third_party_auth.mixins import ThirdPartyAuthMixin
+from business_logic.third_party_auth.service_impls.mixins import (
+    ThirdPartyAuthMixin,
+)
 
-from ..constants import AuthProviderName
+from src.business_logic.third_party_auth.constants import (
+    AuthProviderName,
+    StateData,
+)
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -49,7 +54,5 @@ class GitlabAuthService(ThirdPartyAuthMixin):
             username_type="nickname",
             provider_name=AuthProviderName.GITLAB.value,
         )
-        redirect_url = (
-            f"{request_data.state.split('!_!')[-1]}?code={self._secret_code}"
-        )
+        redirect_url = f"{request_data.state.split('!_!')[StateData.REDIRECT_URL.value]}?code={self._secret_code}"
         return await self._update_redirect_url(request_data, redirect_url)

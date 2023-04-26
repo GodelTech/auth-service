@@ -4,9 +4,17 @@ import json
 import secrets
 from typing import TYPE_CHECKING
 
-from src.business_logic.third_party_auth.mixins import ThirdPartyAuthMixin
+from business_logic.third_party_auth.service_impls.mixins import (
+    ThirdPartyAuthMixin,
+)
+from src.business_logic.third_party_auth.errors import (
+    ThirdPartyAuthProviderInvalidRequestDataError,
+)
 
-from ..constants import AuthProviderName
+from src.business_logic.third_party_auth.constants import (
+    AuthProviderName,
+    StateData,
+)
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -54,6 +62,10 @@ class MicrosoftAuthService(ThirdPartyAuthMixin):
             data=params,
             headers={"Accept": "application/json"},
         )
+        error_response = json.loads(response.content).get("error")
+        if error_response:
+            raise ThirdPartyAuthProviderInvalidRequestDataError(error_response)
+
         return json.loads(response.content)["access_token"]
 
     async def get_redirect_url(
@@ -65,7 +77,5 @@ class MicrosoftAuthService(ThirdPartyAuthMixin):
             username_type="email",
             provider_name=AuthProviderName.MICROSOFT.value,
         )
-        redirect_url = (
-            f"{request_data.state.split('!_!')[-1]}?code={self._secret_code}"
-        )
+        redirect_url = f"{request_data.state.split('!_!')[StateData.REDIRECT_URL.value]}?code={self._secret_code}"
         return await self._update_redirect_url(request_data, redirect_url)

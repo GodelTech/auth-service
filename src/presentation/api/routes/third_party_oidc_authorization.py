@@ -13,10 +13,7 @@ from src.business_logic.third_party_auth.dto import (
     StateRequestModel,
     ThirdPartyAccessTokenRequestModel,
 )
-from src.data_access.postgresql.errors import (
-    ThirdPartyStateDuplicationError,
-    WrongDataError,
-)
+from src.data_access.postgresql.errors import WrongDataError
 from src.di.providers import (
     provide_third_party_auth_service_factory_stub,
     provide_third_party_facebook_service_stub,
@@ -40,25 +37,11 @@ async def get_github_authorize(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        auth_service: ThirdPartyAuthServiceProtocol = (
-            auth_service_factory.get_service_impl("github")
-        )
-        result = await auth_service.get_redirect_url(request_body)
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    auth_service: ThirdPartyAuthServiceProtocol = (
+        auth_service_factory.get_service_impl("github")
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
 @auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND)
@@ -68,25 +51,11 @@ async def get_linkedin_authorize(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        auth_service: ThirdPartyAuthServiceProtocol = (
-            auth_service_factory.get_service_impl("linkedin")
-        )
-        result = await auth_service.get_redirect_url(request_body)
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    auth_service: ThirdPartyAuthServiceProtocol = (
+        auth_service_factory.get_service_impl("linkedin")
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
 @auth_oidc_router.get(
@@ -99,25 +68,11 @@ async def get_google_authorize(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        auth_service: ThirdPartyAuthServiceProtocol = (
-            auth_service_factory.get_service_impl("google")
-        )
-        result = await auth_service.get_redirect_url(request_body)
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    auth_service: ThirdPartyAuthServiceProtocol = (
+        auth_service_factory.get_service_impl("google")
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
 @auth_oidc_router.get(
@@ -130,25 +85,11 @@ async def get_gitlab_authorize(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        auth_service: ThirdPartyAuthServiceProtocol = (
-            auth_service_factory.get_service_impl("gitlab")
-        )
-        result = await auth_service.get_redirect_url(request_body)
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    auth_service: ThirdPartyAuthServiceProtocol = (
+        auth_service_factory.get_service_impl("gitlab")
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
 @auth_oidc_router.get(
@@ -161,25 +102,11 @@ async def get_microsoft_authorize(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        auth_service: ThirdPartyAuthServiceProtocol = (
-            auth_service_factory.get_service_impl("microsoft")
-        )
-        result = await auth_service.get_redirect_url(request_body)
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    auth_service: ThirdPartyAuthServiceProtocol = (
+        auth_service_factory.get_service_impl("microsoft")
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
 @auth_oidc_router.post(
@@ -192,19 +119,11 @@ async def post_create_state(
         provide_third_party_auth_service_factory_stub
     ),
 ) -> JSONResponse:
-    try:
-        await auth_service_factory.create_provider_state(request_body.state)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"message": "State created successfully"},
-        )
-
-    except ThirdPartyStateDuplicationError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "Third Party State already exists"},
-        )
+    await auth_service_factory.create_provider_state(request_body.state)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "State created successfully"},
+    )
 
 
 @auth_oidc_router.get(

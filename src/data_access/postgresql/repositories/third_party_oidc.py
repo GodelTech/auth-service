@@ -80,10 +80,6 @@ class ThirdPartyOIDCRepository(BaseRepository):
                     )
                 )
                 await session.commit()
-            else:  # TODO ?
-                raise ThirdPartyStateDuplicationError(
-                    "State you are trying to delete for does not exist"
-                )
 
     async def delete_state(self, state: str) -> None:
         session_factory = sessionmaker(
@@ -98,10 +94,6 @@ class ThirdPartyOIDCRepository(BaseRepository):
                     )
                 )
                 await session.commit()
-            else:
-                raise ThirdPartyStateNotFoundError(
-                    "State you are trying to delete for does not exist"
-                )
 
     async def validate_state(self, state: str) -> bool:
         session_factory = sessionmaker(
