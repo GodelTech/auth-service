@@ -15,7 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 import pytest
 import asyncio
 from src.main import get_application
-from src.business_logic.services.authorization import AuthorizationService
+from src.business_logic.services.authorization.authorization_service import (
+    AuthorizationService,
+)
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services import DeviceService, WellKnownServices
@@ -234,13 +236,15 @@ async def wlk_services(engine) -> WellKnownServices:
     )
     return wlk_services
 
+
 from src.business_logic.services.admin_auth import AdminAuthService
+
 
 @pytest_asyncio.fixture
 async def admin_auth_service(engine) -> AdminAuthService:
     admin_auth_service = AdminAuthService(
         user_repo=UserRepository(engine),
         password_service=PasswordHash(),
-        jwt_service=JWTService()
+        jwt_service=JWTService(),
     )
     return admin_auth_service
