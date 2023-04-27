@@ -1,9 +1,11 @@
+from typing import Optional, Type, no_type_check
+
 from sqladmin import ModelView
 from sqladmin.forms import get_model_form
-from typing import Type, no_type_check
-from src.data_access.postgresql.tables.client import *
-from typing import Optional
 from wtforms import Form
+
+from src.data_access.postgresql.tables.client import *
+
 
 class ClientAdminController(ModelView, model=Client):
     icon = "fa-solid fa-mobile-screen-button"
@@ -37,7 +39,8 @@ class ClientAdminController(ModelView, model=Client):
         Client.require_pkce,
         Client.sliding_refresh_token_lifetime,
         Client.update_access_token_claims_on_refresh,
-        Client.authorisation_code_lifetime,
+        Client.authorization_code_lifetime,
+        Client.device_code_lifetime,
         Client.logout_uri,
         Client.always_include_user_claims_id_token,
         Client.redirect_uris,
@@ -56,7 +59,7 @@ class ClientAdminController(ModelView, model=Client):
         if self.form is not None:
             return self.form
 
-        exclude:list[Optional[str]] = []
+        exclude: list[Optional[str]] = []
 
         if task is None:
             exclude = None

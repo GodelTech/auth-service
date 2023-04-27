@@ -1,7 +1,6 @@
 from sqlalchemy import exists, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
@@ -200,6 +199,69 @@ class ClientRepository(BaseRepository):
                 result.append(uri[0].type + ":" + uri[0].value)
 
             return result
+
+    async def list_all_redirect_uris_by_client(
+        self, client_id: str
+    ) -> list[str]:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.scalars(
+                select(ClientRedirectUri.redirect_uri)
+                .join(Client, ClientRedirectUri.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return result.all()
+
+    async def list_all_scopes_by_client(self, client_id: str) -> str:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            scopes = await session.scalars(
+                select(ClientScope.scope)
+                .join(Client, ClientScope.client_id == Client.id)
+                .where(Client.client_id == client_id)
+            )
+            return scopes.all()
+
+    async def exists(self, client_id: str) -> bool:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client)
+                .where(Client.client_id == client_id)
+                .exists()
+                .select()
+            )
+            return result.scalar()
+
+    async def get_auth_code_lifetime_by_client(self, client_id: str) -> int:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client.authorization_code_lifetime).where(
+                    Client.client_id == client_id
+                )
+            )
+            return result.scalar()
+
+    async def get_device_code_lifetime_by_client(self, client_id: str) -> int:
+        session_factory = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+        async with session_factory() as session:
+            result = await session.execute(
+                select(Client.device_code_lifetime).where(
+                    Client.client_id == client_id
+                )
+            )
+            return result.scalar()
 
     def __repr__(self) -> str:
         return "Client Repository"

@@ -132,7 +132,7 @@ def provide_token_service(
         user_repo=user_repo,
         device_repo=device_repo,
         jwt_service=jwt_service,
-        blacklisted_repo=blacklisted_repo
+        blacklisted_repo=blacklisted_repo,
     )
 
 
@@ -175,8 +175,10 @@ def provide_admin_role_service(
         role_repo=role_repo,
     )
 
+
 def provide_wellknown_service_stub() -> None:
     ...
+
 
 def provide_wellknown_service(
     wlk_repo: WellKnownRepository,

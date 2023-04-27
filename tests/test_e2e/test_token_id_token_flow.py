@@ -28,7 +28,7 @@ class TestAuthorizationTokenFlow:
         params = {
             "client_id": "spider_man",
             "response_type": "token",
-            "scope": scope,
+            "scope": "openid profile",
             "redirect_uri": "https://www.google.com/",
         }
         response = await client.request("GET", "/authorize/", params=params)
@@ -39,7 +39,7 @@ class TestAuthorizationTokenFlow:
             "POST",
             "/authorize/",
             data=params
-            | {"username": "TestClient", "password": "test_password"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": content_type},
         )
         data = response.headers["location"].split("?")[1]
@@ -91,7 +91,7 @@ class TestAuthorizationTokenFlow:
         params = {
             "client_id": "spider_man",
             "response_type": "id_token token",
-            "scope": scope,
+            "scope": "openid profile",
             "redirect_uri": "https://www.google.com/",
         }
         response = await client.request("GET", "/authorize/", params=params)

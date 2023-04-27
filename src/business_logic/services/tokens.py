@@ -37,15 +37,15 @@ from jwt.exceptions import ExpiredSignatureError
 
 
 def get_base_payload(
-    client_id: str, 
-    expiration_time: int, 
-    scope = None, 
-    claims = None,
-    aud: Optional[list[str]] = None, 
-    **kwargs: Any, 
+    client_id: str,
+    expiration_time: int,
+    scope=None,
+    claims=None,
+    aud: Optional[list[str]] = None,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     if kwargs.get("user_id") and kwargs["user_id"] != "":
-        kwargs ["sub"] = kwargs.get("user_id")
+        kwargs["sub"] = kwargs.get("user_id")
 
     if kwargs.get("user_id"):
         kwargs.pop("user_id")
@@ -61,7 +61,7 @@ def get_base_payload(
     if scope:
         base_payload = base_payload | scope
     if aud:
-        base_payload['aud'] = aud
+        base_payload["aud"] = aud
     return base_payload
 
 
@@ -110,15 +110,24 @@ class TokenService:
         self.blacklisted_repo = blacklisted_repo
 
     async def get_tokens(self) -> dict[str, Any]:
-        if self.request_model is None and self.request_model.grant_type is None:
+        if (
+            self.request_model is None
+            and self.request_model.grant_type is None
+        ):
             pass
         elif self.request_model.grant_type == "authorization_code":
-            if self.request_model.redirect_uri is not None and self.request_model.code is not None:
+            if (
+                self.request_model.redirect_uri is not None
+                and self.request_model.code is not None
+            ):
                 service = CodeMaker(token_service=self)
                 return await service.create()
-                
-        elif self.request_model.grant_type == "password": 
-            if self.request_model.username is not None and self.request_model.password is not None:
+
+        elif self.request_model.grant_type == "password":
+            if (
+                self.request_model.username is not None
+                and self.request_model.password is not None
+            ):
                 return None
 
         elif self.request_model.grant_type == "refresh_token":
@@ -126,7 +135,10 @@ class TokenService:
                 service = RefreshMaker(token_service=self)
                 return await service.create()
 
-        elif self.request_model.grant_type== "urn:ietf:params:oauth:grant-type:device_code":
+        elif (
+            self.request_model.grant_type
+            == "urn:ietf:params:oauth:grant-type:device_code"
+        ):
             if self.request_model.device_code is not None:
                 service = DeviceCodeMaker(token_service=self)
                 return await service.create()
@@ -154,8 +166,7 @@ class TokenService:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
             decoded_token = await self.jwt_service.decode_token(
-                self.request_body.token,
-                audience="revoke"
+                self.request_body.token, audience="revoke"
             )
             await self.blacklisted_repo.create(
                 token=self.request_body.token, expiration=decoded_token["exp"]
@@ -247,7 +258,7 @@ class BaseMaker:
             scope=scopes,
             jwt_service=self.jwt_service,
             expiration_time=self.expiration_time * 6,
-            aud=["introspection", "revocation", 'userinfo'] 
+            aud=["introspection", "revocation", "userinfo"],
         )
         # ID TOKEN
         new_id_token = None
@@ -319,7 +330,7 @@ class CodeMaker(BaseMaker):
             "token_type": "Bearer",
         }
 
-    async def _validate_client_redirect_uri(  # TODO create mixin
+    async def _validate_client_redirect_uri(
         self, client_id: str, redirect_uri: str
     ) -> bool:
         """
@@ -367,22 +378,20 @@ class DeviceCodeMaker(BaseMaker):
         ):
             raise GrantNotFoundError
         if await self.device_repo.validate_device_code(
+            device_code=self.request_model.device_code
+        ):
+            # add check for expire time
+            now = datetime.datetime.utcnow()
+            check_time = datetime.datetime.timestamp(now)
+            expire_in = await self.device_repo.get_expiration_time(
                 device_code=self.request_model.device_code
-            ):
-                # add check for expire time
-                now = datetime.datetime.utcnow()
-                check_time = datetime.datetime.timestamp(now)
-                expire_in = await self.device_repo.get_expiration_time(
+            )
+            if check_time > expire_in:
+                await self.device_repo.delete_by_device_code(
                     device_code=self.request_model.device_code
                 )
-                if check_time > expire_in:
-                    await self.device_repo.delete_by_device_code(
-                        device_code=self.request_model.device_code
-                    )
-                    raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError(
-                    "Device registration in progress"
-                )
+                raise DeviceCodeExpirationTimeError("Device code expired")
+            raise DeviceRegistrationError("Device registration in progress")
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(
@@ -472,7 +481,7 @@ class ClientCredentialsMaker(BaseMaker):
                 # # ACR value is a set of arbitrary values that the client and idp agreed upon to communicate the level of authentication that happened. This is to give the client a level of confidence on the qualify of the authentication that took place.
                 # "jti" : str(uuid.uuid4()),
                 # # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.7
-                'aud': audience,
+                "aud": audience,
                 ## https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3
                 "azp": client_from_db.client_id,
                 "client_id": client_from_db.client_id,
