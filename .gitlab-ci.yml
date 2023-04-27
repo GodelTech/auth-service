@@ -78,7 +78,7 @@ deploy-to-dev:
   tags:
     - identity
   only:
-    - development
+    - main
 
 
 
