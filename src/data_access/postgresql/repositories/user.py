@@ -178,11 +178,10 @@ class UserRepository(BaseRepository):
         self, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:
     
-        if group_id is None and role_id is None:
-            query = await self.session.execute(select(User))
-            query = query.all()
-            return [user[0] for user in query]
-        elif group_id is None and role_id is not None:
+        #if group_id is None and role_id is None:
+        query = await self.session.execute(select(User))
+        return [user[0] for user in query]
+        if group_id is None and role_id is not None:
             iterator = await self.session.execute(
                 select(User)
                 .join(Role, User.roles)

@@ -11,7 +11,7 @@ from src.data_access.postgresql.repositories.roles import RoleRepository
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 from src.data_access.postgresql.tables import Group, Role, User
 from src.data_access.postgresql.errors.user import DuplicationError
-
+from sqlalchemy import exists, insert, join, select, text, update
 
 class AdminTokenService():
     def __init__(
@@ -86,8 +86,10 @@ class AdminUserService():
     def __init__(
             self,
             user_repo: UserRepository,
+            client_repo:ClientRepository,
         ) -> None:
-        self.user_repo= user_repo
+        self.user_repo=user_repo
+        self.client_repo=client_repo
 
     async def add_user_roles(self, user_id:int ,role_ids: str) -> None:
         role_ids_int = [int(number) for number in role_ids.split(",")]
@@ -133,9 +135,13 @@ class AdminUserService():
         await self.user_repo.delete(user_id=user_id)
 
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
-        users:list[User] = await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+        a=1
+        # await self.user_repo.session.begin()
+        users = await self.user_repo.session.execute(select(User))
+        # users:list[User] = await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
         await self.user_repo.close()
-        return [{"id":user.id,"username":user.username, 'email':user.email} for user in users]
+        return{'smth':"smth"}
+        # return [{"id":user.id,"username":user.username, 'email':user.email} for user in users]
     
         
     async def registration(self, kwargs:dict)->None:

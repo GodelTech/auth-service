@@ -76,7 +76,9 @@ async def get_all_users(
     user_class: AdminUserService = Depends(Provide[Container.admin_user_service]),
 ) -> dict[str, Any]:
 
-    user_class = await user_class.provider()
+    user_class = user_class.provider()
+    user_class = await user_class.admin_user_service_provider().provides()
+
     return {
         "all_users": await user_class.get_all_users(
             group_id=request_model.group_id, role_id=request_model.role_id
