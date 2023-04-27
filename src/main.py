@@ -407,6 +407,8 @@ Instrumentator().instrument(app).expose(app)
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
+    redis = aioredis.from_url(
+        REDIS_URL, encoding="utf8", decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
