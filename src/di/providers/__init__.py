@@ -1,4 +1,4 @@
-from .config import provide_config
+# from .config import provide_config
 from .db import provide_db
 from .repositories import (
     provide_wellknown_repo,

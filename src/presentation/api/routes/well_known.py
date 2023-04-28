@@ -14,7 +14,8 @@ from fastapi_cache.decorator import cache
 
 from src.business_logic.cache.key_builders import builder_with_parametr
 from src.business_logic.services.well_known import WellKnownServices
-from src.config.settings.cache_time import CacheTimeSettings
+# from src.config.settings.cache_time import CacheTimeSettings
+from src.dyna_config import CACHE_TIME_WELL_KNOWN_OPENID_CONFIG
 from src.presentation.api.models.well_known import (
     ResponseJWKS,
     ResponseOpenIdConfiguration,
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 @well_known_router.get("/openid-configuration", response_model=ResponseOpenIdConfiguration)
-@cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
+@cache(expire=CACHE_TIME_WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
     request: Request,
     well_known_info_class: WellKnownServices = Depends(
