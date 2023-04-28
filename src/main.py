@@ -225,7 +225,8 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_admin_group_service = (
         lambda: prov.provide_admin_group_service(
-            group_repo=prov.provide_group_repo(),
+            # group_repo=prov.provide_group_repo(),
+            session=prov.provide_async_session(db_engine)
         )
     )
 

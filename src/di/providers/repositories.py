@@ -84,5 +84,5 @@ def provide_blacklisted_repo_stub(engine: AsyncEngine) -> None:
 def provide_blacklisted_repo(engine: AsyncEngine) -> BlacklistedTokenRepository:
     return BlacklistedTokenRepository(engine)
 
-def provide_async_session(engine: AsyncEngine):
+def provide_async_session(engine: AsyncEngine) -> AsyncSession:
     return sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)()
