@@ -82,5 +82,5 @@ class RoleRepository(BaseRepository):
         quiery = quiery.all()
         return [role[0] for role in quiery]
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self, session: AsyncSession) -> str:  # pragma: no cover
         return "Role repository"

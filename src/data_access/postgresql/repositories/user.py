@@ -87,7 +87,7 @@ class UserRepository(BaseRepository):
         else:
             raise ValueError
 
-    async def get_user_by_id(self, user_id: int) -> User:
+    async def get_user_by_id(self, user_id: int, session: AsyncSession) -> User:
         try:
             user = await self.session.execute(
                 select(User)
@@ -124,8 +124,8 @@ class UserRepository(BaseRepository):
 
         return user[0].password_hash.value, user[0].id
 
-    async def get_claims(self, id: int) -> Dict[str, Any]:
-        claims_of_user = await self.request_DB_for_claims(id)
+    async def get_claims(self, id: int, session: AsyncSession) -> Dict[str, Any]:
+        claims_of_user = await self.request_DB_for_claims(id, session)
         result = {}
 
         for claim in claims_of_user:
@@ -158,7 +158,7 @@ class UserRepository(BaseRepository):
             result = result[0].username
             return result
 
-    async def get_user_by_username(self, username: str) -> User:
+    async def get_user_by_username(self, username: str, session: AsyncSession) -> User:
         try:
             user = await self.session.execute(
                 select(User)
@@ -184,6 +184,7 @@ class UserRepository(BaseRepository):
     async def update(
         self,
         user_id: int,
+        session: AsyncSession,
         id: Union[None, str] = None,
         username: Union[None, str] = None,
         security_stamp: Union[None, str] = None,
@@ -226,6 +227,7 @@ class UserRepository(BaseRepository):
 
     async def create(
         self,
+        session: AsyncSession,
         id: Union[None, int] = None,
         username: Union[None, str] = None,
         identity_provider_id: Union[None, int] = None,
@@ -355,7 +357,7 @@ class UserRepository(BaseRepository):
             raise ValueError
 
     async def change_password(
-        self, user_id: int, password: Optional[str] = None
+        self, session: AsyncSession, user_id: int, password: Optional[str] = None
     ) -> None:
         user = await self.get_user_by_id(user_id=user_id)
         if user:
