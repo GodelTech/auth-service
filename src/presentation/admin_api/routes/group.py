@@ -59,7 +59,7 @@ async def get_group(
 @admin_group_router.get(
     "", response_model=dict, tags=["Administration Group"], description="Get All Groups"
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def get_all_groups(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -72,7 +72,7 @@ async def get_all_groups(
 @admin_group_router.get(
     "/{group_id}/subgroups", response_model=dict, tags=["Administration Group"], description="Get Subgroups of the Group"
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def get_subgroups(
     request: Request,
     group_id:int,
@@ -106,7 +106,7 @@ async def create_group(
     tags=["Administration Group"],
     description="Update the Group"
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def update_group(
     request: Request,
     group_id:int,

@@ -157,10 +157,10 @@ def provide_admin_group_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_group_service(
-    group_repo: GroupRepository,
+    session: AsyncSession,
 ) -> AdminGroupService:
     return AdminGroupService(
-        group_repo=group_repo,
+        session=session,
     )
 
 

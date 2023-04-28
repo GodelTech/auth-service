@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables import Group, Role, User
+from src.business_logic.services.base import session_manager
 
 class AdminService():
     def __init__(
@@ -58,56 +59,64 @@ class AdminRoleService():
     async def delete_role(self, role_id:int) -> None:
         await self.role_repo.delete(role_id=role_id)
 
-def session_manager(func):
-    async def inner(self, *args, **kwargs):
-        try:
-            assert isinstance(self.session, AsyncSession) 
-            result = await func(self, *args, **kwargs)
-        except:
-            await self.session.rollback()
-            raise
-        else:
-            await self.session.commit()
-        finally:
-            await self.session.close()
-        return result
-    
-    return inner
+# def session_manager(func):
+#     async def inner(self, *args, **kwargs):
+#         try:
+#             assert isinstance(self.session, AsyncSession)
+#             result = await func(self, *args, **kwargs)
+#         except:
+#             await self.session.rollback()
+#             raise
+#         else:
+#             await self.session.commit()
+#         finally:
+#             await self.session.close()
+#         return result
+#
+#     return inner
 
 
 class AdminGroupService():
     def __init__(
             self,
-            group_repo: GroupRepository
+            session: AsyncSession,
+            group_repo: GroupRepository = GroupRepository(),
         ) -> None:
+        self.session = session
         self.group_repo= group_repo
-    
-    
+
+    @session_manager
     async def get_all_groups(self) -> list[Role]:
-        return await self.group_repo.get_all_groups()
-        
+        return await self.group_repo.get_all_groups(session=self.session)
+
+    @session_manager
     async def get_groups(self, group_ids:list[int]) -> list[Group]:
         result = []
         for group_id in group_ids:
-            result.append(await self.group_repo.get_by_id(group_id=group_id))
+            result.append(await self.group_repo.get_by_id(session=self.session, group_id=group_id))
         return result
 
+    @session_manager
     async def get_subgroups(self, group_id:int) -> dict[str, Any]:
-        group = await self.group_repo.get_by_id(group_id=group_id)
-        result = await self.group_repo.get_all_subgroups(main_group=group)
+        group = await self.group_repo.get_by_id(session=self.session, group_id=group_id)
+        result = await self.group_repo.get_all_subgroups(session=self.session, main_group=group)
         return result
-    
+
+    @session_manager
     async def update_group(self, group_id: int, **kwargs:Any) -> None:
-        await self.group_repo.update(group_id=group_id, **kwargs)
+        await self.group_repo.update(session=self.session, group_id=group_id, **kwargs)
 
+    @session_manager
     async def get_group(self, group_id:int) -> Group:
-        return await self.group_repo.get_by_id(group_id=group_id)
-        
-    async def create_group(self, **kwargs: Any) -> None:
-        await self.group_repo.create(**kwargs)
+        return await self.group_repo.get_by_id(session=self.session, group_id=group_id)
 
+    @session_manager
+    async def create_group(self, **kwargs: Any) -> None:
+        await self.group_repo.create(session=self.session, **kwargs)
+
+    @session_manager
     async def delete_group(self, group_id: int) -> None:
-        await self.group_repo.delete(group_id=group_id)
+        await self.group_repo.delete(session=self.session, group_id=group_id)
 
 
 # class BaseService():
