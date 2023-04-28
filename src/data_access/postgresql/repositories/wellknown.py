@@ -18,7 +18,7 @@ from src.data_access.postgresql.tables import (
 from ..tables import UserClaimType, PersistentGrantType
 
 
-class WellKnownRepository(BaseRepository):
+class WellKnownRepository():
     async def get_user_claim_types(self) -> list[Optional[str]]:
         result = await self.session.execute(
             select(UserClaimType.type_of_claim)

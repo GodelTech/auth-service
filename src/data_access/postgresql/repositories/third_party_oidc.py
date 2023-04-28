@@ -16,7 +16,7 @@ from src.data_access.postgresql.tables.identity_resource import (
 )
 
 
-class ThirdPartyOIDCRepository(BaseRepository):
+class ThirdPartyOIDCRepository():
     async def get_row_providers_data(
         self,
     ) -> List[Tuple[str, str, str, str, str, str]]:
