@@ -75,24 +75,19 @@ class UserRepository():
         #     raise ValueError
 
     async def exists(self, user_id: int, session: AsyncSession) -> bool:
-        
-        
-
             result = await session.execute(
                 select(exists().where(User.id == user_id))
             )
             result = result.first()
             return result[0]
 
-    async def delete(self, user_id: int, session: AsyncSession) -> None:
-        
-        
-            if await self.exists(user_id=user_id):
-                user_to_delete = await self.get_user_by_id(user_id=user_id)
-                await session.delete(user_to_delete)
-                await session.commit()
-            else:
-                raise ValueError
+    async def delete(self, user_id: int, session: AsyncSession) -> None:       
+        if await self.exists(user_id=user_id):
+            user_to_delete = await self.get_user_by_id(user_id=user_id)
+            await session.delete(user_to_delete)
+            await session.commit()
+        else:
+            raise ValueError
 
     async def get_user_by_id(self, user_id: int, session: AsyncSession) -> User:
         try:
@@ -117,21 +112,19 @@ class UserRepository():
             raise ValueError
 
     async def get_hash_password(self, user_name: str, session: AsyncSession) -> Tuple[str, int]:
-        
-        
-            user = await session.execute(
-                select(User)
-                .join(UserPassword, User.password_hash_id == UserPassword.id)
-                .where(User.username == user_name)
+        user = await session.execute(
+            select(User)
+            .join(UserPassword, User.password_hash_id == UserPassword.id)
+            .where(User.username == user_name)
+        )
+        user = user.first()
+
+        if user is None:
+            raise UserNotFoundError(
+                "User you are looking for does not exist"
             )
-            user = user.first()
 
-            if user is None:
-                raise UserNotFoundError(
-                    "User you are looking for does not exist"
-                )
-
-            return user[0].password_hash.value, user[0].id
+        return user[0].password_hash.value, user[0].id
 
     async def get_claims(self, id: int, session: AsyncSession) -> Dict[str, Any]:
         claims_of_user = await self.request_DB_for_claims(id, session)
@@ -230,7 +223,6 @@ class UserRepository():
                     update(User).values(**kwargs).where(User.id == user_id)
                 )
                 await session.execute(updates)
-                await session.commit()
             else:
                 raise ValueError
         except:
@@ -294,7 +286,6 @@ class UserRepository():
                         user_id=user_id, group_id=group_id
                     )
                 )
-                await session.commit()
             elif not flag_two or not flag_one:
                 raise ValueError
         except ValueError:
@@ -314,43 +305,36 @@ class UserRepository():
         except:
             raise DuplicationError
 
-    async def remove_user_groups(self, user_id: int, group_ids: str) -> None:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
+    async def remove_user_groups(self, user_id: int, group_ids: str, session: AsyncSession) -> None:
         # prepare a list of ids for the IN statement
         group_ids_list = list(map(int, group_ids.split(",")))
 
         try:
-            async with session_factory() as session:
-                query = (
-                    delete(users_groups)
-                    .where(users_groups.c.user_id == user_id)
-                    .where(users_groups.c.group_id.in_(group_ids_list))
-                )
+            query = (
+                delete(users_groups)
+                .where(users_groups.c.user_id == user_id)
+                .where(users_groups.c.group_id.in_(group_ids_list))
+            )
 
-                await session.execute(query)
-                await session.commit()
+            await session.execute(query)
+            await session.commit()
         except:
             raise ValueError
 
-    async def remove_user_roles(self, user_id: int, role_ids: str) -> None:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
+    async def remove_user_roles(self, user_id: int, role_ids: str, session: AsyncSession) -> None:
+
         # prepare a list of ids for the IN statement
         role_ids_list = list(map(int, role_ids.split(",")))
 
         try:
-            async with session_factory() as session:
-                query = (
-                    delete(users_roles)
-                    .where(users_roles.c.user_id == user_id)
-                    .where(users_roles.c.role_id.in_(role_ids_list))
-                )
+            query = (
+                delete(users_roles)
+                .where(users_roles.c.user_id == user_id)
+                .where(users_roles.c.role_id.in_(role_ids_list))
+            )
 
-                await session.execute(query)
-                await session.commit()
+            await session.execute(query)
+            await session.commit()
         except:
             raise ValueError
 
@@ -436,11 +420,7 @@ class UserRepository():
         result = result.first()
         return result[0]
 
-    async def get_hashed_password_by_username(self, username: str) -> str:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as session:
+    async def get_hashed_password_by_username(self, username: str, session: AsyncSession) -> str:
             result = await session.execute(
                 select(UserPassword.value)
                 .join(User, User.password_hash_id == UserPassword.id)
@@ -448,15 +428,11 @@ class UserRepository():
             )
             return result.scalar()
 
-    async def exists_user(self, username: str) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
+    async def exists_user(self, username: str, session: AsyncSession) -> bool:
+        result = await session.execute(
+            select(User).where(User.username == username).exists().select()
         )
-        async with session_factory() as session:
-            result = await session.execute(
-                select(User).where(User.username == username).exists().select()
-            )
-            return result.scalar()
+        return result.scalar()
 
     async def get_user_id_by_username(self, username: str) -> int:
         session_factory = sessionmaker(
