@@ -17,7 +17,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     return result
 
 
-class GroupRepository(BaseRepository):
+class GroupRepository():
     async def create(
         self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:

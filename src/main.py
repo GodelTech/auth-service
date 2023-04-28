@@ -172,11 +172,6 @@ def setup_di(app: FastAPI) -> None:
             user_repo=prov.provide_user_repo(),
             client_repo=prov.provide_client_repo(),
             persistent_grant_repo=prov.provide_persistent_grant_repo(),
-            user_repo=prov.provide_user_repo(db_engine),
-            client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
         )
     )
     app.dependency_overrides[

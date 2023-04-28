@@ -11,7 +11,7 @@ from src.data_access.postgresql.tables import BlacklistedToken
 logger = logging.getLogger(__name__)
 
 
-class BlacklistedTokenRepository(BaseRepository):
+class BlacklistedTokenRepository():
     async def create(
         self,
         token: str,

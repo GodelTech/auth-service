@@ -11,7 +11,7 @@ from src.data_access.postgresql.tables.device import Device
 from .client import Client
 
 
-class DeviceRepository(BaseRepository):
+class DeviceRepository():
     async def create(
         self,
         client_id: str,

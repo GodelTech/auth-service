@@ -60,7 +60,6 @@ class AdminRoleService():
 
 def session_manager(func):
     async def inner(self, *args, **kwargs):
-        
         try:
             assert isinstance(self.session, AsyncSession) 
             result = await func(self, *args, **kwargs)

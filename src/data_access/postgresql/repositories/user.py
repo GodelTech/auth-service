@@ -43,7 +43,6 @@ class UserRepository():
     async def get_all_users(
         self, session: AsyncSession, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:
-        
         # try:
             if group_id is None and role_id is None:
                 query = await session.execute(select(User))
