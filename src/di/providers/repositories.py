@@ -12,6 +12,8 @@ from src.data_access.postgresql.repositories import (
     BlacklistedTokenRepository
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 
 def provide_wellknown_repo_stub() -> None:  # pragma: no cover
@@ -45,8 +47,8 @@ def provide_user_repo_stub() -> None:  # pragma: no cover
     ...
 
 
-def provide_user_repo(engine: AsyncEngine) -> UserRepository:
-    return UserRepository(engine)
+def provide_user_repo() -> UserRepository:
+    return UserRepository()
 
 
 def provide_persistent_grant_repo_stub() -> None:  # pragma: no cover
@@ -63,8 +65,8 @@ def provide_group_repo(engine: AsyncEngine) -> GroupRepository:
     return GroupRepository(engine)
 
 
-def provide_role_repo(engine: AsyncEngine) -> RoleRepository:
-    return RoleRepository(engine)
+def provide_role_repo() -> RoleRepository:
+    return RoleRepository()
 
 
 def provide_device_repo_stub() -> None:  # pragma: no cover
@@ -81,3 +83,6 @@ def provide_blacklisted_repo_stub(engine: AsyncEngine) -> None:
 
 def provide_blacklisted_repo(engine: AsyncEngine) -> BlacklistedTokenRepository:
     return BlacklistedTokenRepository(engine)
+
+def provide_async_session(engine: AsyncEngine):
+    return sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)()

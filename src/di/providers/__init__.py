@@ -16,7 +16,8 @@ from .repositories import (
     provide_user_repo,
     provide_user_repo_stub,
     provide_blacklisted_repo,
-    provide_blacklisted_repo_stub
+    provide_blacklisted_repo_stub,
+    provide_async_session,
 )
 from .services import (
     provide_wellknown_service,

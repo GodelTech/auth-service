@@ -37,6 +37,7 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     BlacklistedTokenRepository,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def provide_auth_service_stub() -> None:  # pragma: no cover
@@ -141,9 +142,13 @@ def provide_admin_user_service_stub() -> None:  # pragma: no cover
 
 def provide_admin_user_service(
     user_repo: UserRepository,
+    role_repo: RoleRepository,
+    session:AsyncSession
 ) -> AdminUserService:
     return AdminUserService(
         user_repo=user_repo,
+        role_repo=role_repo,
+        session=session
     )
 
 
