@@ -143,6 +143,15 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.ApiScopeClaimTypeAdminController)
     admin.add_base_view(ui.SeparationLine)
 
+    db = prov.provide_db_only(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    )
+    session = prov.ProviderSession(db.session_factory)
+
+    app.dependency_overrides[
+        prov.provide_async_session_stub
+    ] = session
+
     nodepends_provide_auth_service = lambda: prov.provide_auth_service(
         client_repo=prov.provide_client_repo(),
         user_repo=prov.provide_user_repo(),
@@ -215,7 +224,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_admin_user_service(
             user_repo=prov.provide_user_repo(),
             role_repo=prov.provide_role_repo(),
-            session=prov.provide_async_session(db_engine)
+            session=session()
         )
     )
 
@@ -225,8 +234,9 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_admin_group_service = (
         lambda: prov.provide_admin_group_service(
-            # group_repo=prov.provide_group_repo(),
-            session=prov.provide_async_session(db_engine)
+            group_repo=prov.provide_group_repo(session()),
+            # session=prov.provide_async_session(db_engine),
+            session= session()
         )
     )
 

@@ -3,9 +3,13 @@ from functools import wraps
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from typing import Callable, Any
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.data_access.postgresql.repositories import GroupRepository
 from src.business_logic.services.admin_api import AdminGroupService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_group_service_stub
+from src.di.providers import provide_async_session_stub, provide_async_session
 from src.presentation.admin_api.models.group import *
 
 logger = logging.getLogger(__name__)
@@ -44,9 +48,13 @@ async def get_group(
     group_id:int,
     access_token: str = Header(description="Access token"),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> dict[str, Any]:
 
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
 
     result = await group_class.get_group(group_id=group_id)
     return {
@@ -64,8 +72,13 @@ async def get_all_groups(
     request: Request,
     access_token: str = Header(description="Access token"),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
+    # group_class = group_class
     return {"all_groups": await group_class.get_all_groups()}
 
 
@@ -78,8 +91,13 @@ async def get_subgroups(
     group_id:int,
     access_token: str = Header(description="Access token"),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
+    # group_class = group_class
     result = await group_class.get_subgroups(group_id=group_id)
     return result
 
@@ -87,14 +105,19 @@ async def get_subgroups(
 @admin_group_router.post(
     "", status_code=status.HTTP_200_OK, tags=["Administration Group"], description="Create a New Group"
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def create_group(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestNewGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
+    # group_class = group_class
     await group_class.create_group(
         name=request_model.name, parent_group=request_model.parent_group
     )
@@ -113,8 +136,13 @@ async def update_group(
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateGroupModel = Depends(),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
+    # group_class = group_class
     await group_class.update_group(
         group_id=group_id,
         name=request_model.name,
@@ -134,6 +162,11 @@ async def delete_group(
     group_id:int,
     access_token: str = Header(description="Access token"),
     group_class: AdminGroupService = Depends(provide_admin_group_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    group_class = group_class
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
+    # group_class = group_class
     await group_class.delete_group(group_id=group_id)

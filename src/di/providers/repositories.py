@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncEngine
+from typing import Generator
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -61,8 +62,8 @@ def provide_persistent_grant_repo(
     return PersistentGrantRepository(engine)
 
 
-def provide_group_repo(engine: AsyncEngine) -> GroupRepository:
-    return GroupRepository(engine)
+def provide_group_repo(session: AsyncSession) -> GroupRepository:
+    return GroupRepository(session)
 
 
 def provide_role_repo() -> RoleRepository:
@@ -86,3 +87,15 @@ def provide_blacklisted_repo(engine: AsyncEngine) -> BlacklistedTokenRepository:
 
 def provide_async_session(engine: AsyncEngine) -> AsyncSession:
     return sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)()
+
+
+def provide_async_session_stub() -> None:
+    ...
+
+class ProviderSession:
+    def __init__(self, session_factory: sessionmaker) -> None:
+        self._session_factory = session_factory
+
+    async def __call__(self) -> Generator[AsyncSession, None, None]:
+        async with self._session_factory() as session:
+            yield session

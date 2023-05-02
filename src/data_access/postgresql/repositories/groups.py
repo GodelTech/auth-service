@@ -17,40 +17,43 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     return result
 
 
-class GroupRepository():
+class GroupRepository:
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
     async def create(
-        self, session: AsyncSession, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
+        self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:
         try:
             kwargs = params_to_dict(
                 name=name, parent_group=parent_group, id=id
             )
-            await session.execute(insert(Group).values(**kwargs))
-                # await session.commit()
+            await self.session.execute(insert(Group).values(**kwargs))
         except Exception as e:
             raise DuplicationError(e)
 
-    async def delete(self, session: AsyncSession, group_id: Optional[int] = None) -> None:
+    async def delete(self, group_id: Optional[int] = None) -> None:
 
         if group_id is None:
-            await session.execute(text("DELETE FROM groups"))
-        elif await self.exists(session=session, group_id=group_id):
-            client_to_delete = await self.get_by_id(session=session, group_id=group_id)
-            await session.delete(client_to_delete)
+            await self.session.execute(text("DELETE FROM groups"))
+        elif await self.exists(group_id=group_id):
+            client_to_delete = await self.get_by_id(group_id=group_id)
+            await self.session.delete(client_to_delete)
         else:
             raise ValueError
 
-    async def exists(self, group_id: int, session: AsyncSession,) -> bool:
+    async def exists(self, group_id: int) -> bool:
 
-        result = await session.execute(
+        result = await self.session.execute(
             select(exists().where(Group.id == group_id))
         )
         result = result.first()
         return result[0]
 
-    async def get_by_id(self, group_id: int, session: AsyncSession,) -> Group:
+    async def get_by_id(self, group_id: int) -> Group:
         try:
-            result = await session.execute(
+            result = await self.session.execute(
                 select(Group).where(
                     Group.id == group_id,
                 )
@@ -59,9 +62,9 @@ class GroupRepository():
         except Exception as e:
             raise e
 
-    async def get_group_by_name(self, name: str, session: AsyncSession,) -> Group:
+    async def get_group_by_name(self, name: str) -> Group:
         try:
-            group = await session.execute(
+            group = await self.session.execute(
                 select(Group).where(Group.name == name)
             )
             group = group.first()
@@ -70,24 +73,24 @@ class GroupRepository():
         except:
             raise ValueError
 
-    async def get_all_groups(self, session: AsyncSession,) -> list[Group]:
-        groups = await session.execute(select(Group))
+    async def get_all_groups(self) -> list[Group]:
+        groups = await self.session.execute(select(Group))
         result = [group[0] for group in groups]
 
         return result
 
     async def update(
-        self, session: AsyncSession, group_id: int, name: Optional[str] = None, parent_group: Optional[int] = None
+        self, group_id: int, name: Optional[str] = None, parent_group: Optional[int] = None
     ) -> None:
         try:
             kwargs = params_to_dict(name=name, parent_group=parent_group)
-            if await self.exists(session=session, group_id=group_id):
+            if await self.exists(group_id=group_id):
                 updates = (
                     update(Group)
                     .values(**kwargs)
                     .where(Group.id == group_id)
                 )
-                await session.execute(updates)
+                await self.session.execute(updates)
             else:
                 raise ValueError
 
@@ -96,8 +99,8 @@ class GroupRepository():
         except Exception as e:
             raise DuplicationError(e)
 
-    async def get_all_subgroups(self, main_group: Group, session: AsyncSession) -> dict[str, Any]:
-        all_groups = await self.get_all_groups(session=session)
+    async def get_all_subgroups(self, main_group: Group) -> dict[str, Any]:
+        all_groups = await self.get_all_groups()
 
         result = {
             f"subgroups_of_{main_group.name}_id_{main_group.id}": self.recursion(
