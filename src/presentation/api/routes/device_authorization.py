@@ -115,6 +115,7 @@ async def delete_device(
 ) -> Union[str, JSONResponse]:
     try:
         auth_service.request_model = request_model
+        user_code = request_model.scope.split('=')[1]
         return await auth_service.clean_device_data(user_code)
 
     except UserCodeNotFoundError as exception:
