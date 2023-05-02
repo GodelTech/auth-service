@@ -17,7 +17,11 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     return result
 
 
-class GroupRepository():
+class GroupRepository:
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
     async def create(
         self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:

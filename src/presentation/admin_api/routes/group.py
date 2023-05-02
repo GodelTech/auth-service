@@ -9,6 +9,7 @@ from src.data_access.postgresql.repositories import GroupRepository
 from src.business_logic.services.admin_api import AdminGroupService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_group_service_stub
+from src.di.providers import provide_async_session_stub, provide_async_session
 from src.presentation.admin_api.models.group import *
 
 logger = logging.getLogger(__name__)
@@ -100,7 +101,7 @@ async def get_subgroups(
 @admin_group_router.post(
     "", status_code=status.HTTP_200_OK, tags=["Administration Group"], description="Create a New Group"
 )
-@exceptions_wrapper
+# @exceptions_wrapper
 async def create_group(
     request: Request,
     access_token: str = Header(description="Access token"),
