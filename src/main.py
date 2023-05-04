@@ -93,7 +93,7 @@ def setup_di(app: FastAPI) -> None:
     admin = ui.CustomAdmin(
         app,
         db_engine,
-        templates_dir="templates_admin_ui",
+        templates_dir="src/presentation/admin_ui/controllers/templates",
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
             auth_service=prov.provide_admin_auth_service(
@@ -103,6 +103,12 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
+    admin.app.mount(
+        "/statics",
+        StaticFiles(directory="src/presentation/admin_ui/controllers/statics"),
+        name="statics",
+    )
+
     # Identity Resourses
     admin.add_view(ui.IdentityProviderAdminController)
     admin.add_view(ui.IdentityProviderMappedAdminController)
@@ -401,8 +407,6 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(
-        REDIS_URL, encoding="utf8", decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
