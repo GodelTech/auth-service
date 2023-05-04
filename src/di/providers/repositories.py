@@ -63,11 +63,11 @@ def provide_persistent_grant_repo(
 
 
 def provide_group_repo(session: AsyncSession) -> GroupRepository:
-    return GroupRepository(session)
+    return GroupRepository(session=session)
 
 
-def provide_role_repo() -> RoleRepository:
-    return RoleRepository()
+def provide_role_repo(session: AsyncSession) -> RoleRepository:
+    return RoleRepository(session=session)
 
 
 def provide_device_repo_stub() -> None:  # pragma: no cover

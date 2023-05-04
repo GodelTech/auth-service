@@ -171,9 +171,11 @@ def provide_admin_role_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_role_service(
+    session: AsyncSession,
     role_repo: RoleRepository,
 ) -> AdminRoleService:
     return AdminRoleService(
+        session=session,
         role_repo=role_repo,
     )
 

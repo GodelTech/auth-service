@@ -13,7 +13,7 @@ def provide_db(database_url: str, max_connection_count: int) -> AsyncEngine:
     ).engine
 
 
-def provide_db_only(database_url: str, max_connection_count: int) -> AsyncEngine:
+def provide_db_only(database_url: str, max_connection_count: int) -> Database:
     return Database(
         database_url=database_url, max_connection_count=max_connection_count
     )

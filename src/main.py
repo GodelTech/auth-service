@@ -246,7 +246,8 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_admin_role_service = (
         lambda: prov.provide_admin_role_service(
-            role_repo=prov.provide_role_repo(),
+            role_repo=prov.provide_role_repo(session()),
+            session=session()
         )
     )
     app.dependency_overrides[

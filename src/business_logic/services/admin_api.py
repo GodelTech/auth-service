@@ -36,8 +36,10 @@ class AdminTokenService():
 class AdminRoleService():
     def __init__(
             self,
+            session: AsyncSession,
             role_repo: RoleRepository
         ) -> None:
+        self.session = session
         self.role_repo= role_repo
         
     async def get_role(self, role_id:int) -> Role:
@@ -52,12 +54,15 @@ class AdminRoleService():
 
     async def create_role(self, **kwargs:Any) -> None:
         await self.role_repo.create(**kwargs)
+        # await self.session.commit()
 
     async def update_role(self, role_id:int, **kwargs:Any) -> None:
         await self.role_repo.update(role_id=role_id, **kwargs)
+        # await self.session.commit()
 
     async def delete_role(self, role_id:int) -> None:
         await self.role_repo.delete(role_id=role_id)
+        # await self.session.commit()
 
 
 class AdminGroupService():
