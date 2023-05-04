@@ -80,7 +80,7 @@ def setup_di(app: FastAPI) -> None:
     admin = ui.CustomAdmin(
         app,
         db_engine,
-        templates_dir="templates_admin_ui",
+        templates_dir="src/presentation/admin_ui/controllers/templates",
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
             auth_service=prov.provide_admin_auth_service(
@@ -90,6 +90,12 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
+    admin.app.mount(
+        "/statics",
+        StaticFiles(directory="src/presentation/admin_ui/controllers/statics"),
+        name="statics",
+    )
+
     # Identity Resourses
     admin.add_view(ui.IdentityProviderAdminController)
     admin.add_view(ui.IdentityProviderMappedAdminController)
@@ -158,9 +164,7 @@ def setup_di(app: FastAPI) -> None:
     nodepends_provide_endsession_servise = (
         lambda: prov.provide_endsession_service(
             client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             jwt_service=prov.provide_jwt_service(),
         )
     )
@@ -173,9 +177,7 @@ def setup_di(app: FastAPI) -> None:
             jwt=prov.provide_jwt_service(),
             user_repo=prov.provide_user_repo(db_engine),
             client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
         )
     )
     app.dependency_overrides[
@@ -256,9 +258,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_auth_third_party_oidc_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -271,9 +271,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_auth_third_party_linkedin_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -286,9 +284,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_third_party_google_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -302,9 +298,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_third_party_facebook_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -318,9 +312,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_third_party_gitlab_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -341,9 +333,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_third_party_microsoft_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -357,9 +347,7 @@ def setup_di(app: FastAPI) -> None:
         lambda: prov.provide_third_party_microsoft_service(
             client_repo=prov.provide_client_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
             http_client=AsyncClient(),
         )
@@ -372,9 +360,7 @@ def setup_di(app: FastAPI) -> None:
     nodepends_provide_auth_service_factory = (
         lambda: prov.provide_auth_service_factory(
             client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
             user_repo=prov.provide_user_repo(db_engine),
             device_repo=prov.provide_device_repo(db_engine),
             jwt_service=prov.provide_jwt_service(),
@@ -398,8 +384,6 @@ LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(
-        REDIS_URL, encoding="utf8", decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
