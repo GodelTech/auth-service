@@ -56,9 +56,6 @@ from .users import (
     PasswordAdminController,
 )
 from typing import no_type_check
-from fastapi.staticfiles import StaticFiles
-from starlette.routing import Mount, Route
-
 
 Base = declarative_base()
 
@@ -74,11 +71,6 @@ class SeparationLine(BaseView):
 
 
 class CustomAdmin(Admin):
-    # statics = StaticFiles(directory="src/presentation/admin_ui/controllers/statics")
-    # statics = StaticFiles(packages=["sqladmin"])
-    #
-    # routes = [Mount("/statics", app=statics, name="statics")]
-
     @no_type_check
     async def create(self, request: Request) -> _TemplateResponse:
         # Create model endpoint.
