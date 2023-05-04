@@ -56,11 +56,13 @@ from .users import (
     PasswordAdminController,
 )
 from typing import no_type_check
+
 Base = declarative_base()
 
 
 class SeparationLine(BaseView):
     name = " "
+
     # icon = "fa-solid fa-chart-line"
     @no_type_check
     @expose("/", methods=["GET"])
@@ -96,7 +98,6 @@ class CustomAdmin(Admin):
                 "model_view": model_view,
                 "form": form,
             }
-            
 
             if request.method == "GET":
                 return self.templates.TemplateResponse(
@@ -118,11 +119,9 @@ class CustomAdmin(Admin):
                             dict_form_data[key] = True
                     obj = await model_view.insert_model(dict_form_data)
 
-                elif identity == 'user-password':
+                elif identity == "user-password":
                     dict_form_data = dict(form_data)
-                    dict_form_data[
-                        "value"
-                    ] = PasswordHash.hash_password(
+                    dict_form_data["value"] = PasswordHash.hash_password(
                         dict_form_data["value"]
                     )
 
