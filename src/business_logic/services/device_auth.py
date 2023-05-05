@@ -4,6 +4,7 @@ import secrets
 import time
 from string import ascii_uppercase
 from typing import Any, Optional, Union
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -24,12 +25,15 @@ class DeviceService:
         self,
         client_repo: ClientRepository,
         device_repo: DeviceRepository,
+        session: AsyncSession
+
     ) -> None:
         self._request_model: Union[
             DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel, None
         ] = None
         self.client_repo = client_repo
         self.device_repo = device_repo
+        self.session = session
 
     async def get_response(self) -> Optional[dict[str, Any]]:
         if type(self.request_model) == DeviceRequestModel:
@@ -65,6 +69,11 @@ class DeviceService:
         return None
 
     async def get_redirect_uri(self) -> str:
+        print()
+        print(f"################ service --- async def get_redirect_uri #####################")
+        print(f"################{self.session}#####################")
+        print()
+        print()
         if not isinstance(self.request_model, DeviceUserCodeModel):
             raise ValueError
 
@@ -73,6 +82,16 @@ class DeviceService:
         device = await self.device_repo.get_device_by_user_code(
             user_code=self.request_model.user_code
         )
+        print()
+        print(f"################ service --- async def get_redirect_uri #####################")
+        print(
+            uri_start + f"client_id={device.client.client_id}"
+            f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
+            f"&redirect_uri={redirect_uri}"
+        )
+        print(f"self.request_model.user_code: {self.request_model.user_code}")
+        print()
+        print()
         return (
             uri_start + f"client_id={device.client.client_id}"
             f"&response_type=urn:ietf:params:oauth:grant-type:device_code"

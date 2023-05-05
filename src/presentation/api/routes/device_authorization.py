@@ -5,13 +5,15 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.data_access.postgresql.repositories import ClientRepository, DeviceRepository
 from src.business_logic.services import DeviceService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
 )
-from src.di.providers import provide_device_service_stub
+from src.di.providers import provide_device_service_stub, provide_async_session_stub
 from src.dyna_config import BASE_URL_HOST
 from src.presentation.api.models import (
     DeviceCancelModel,
@@ -32,7 +34,13 @@ device_auth_router = APIRouter(prefix="/device", tags=["Device"])
 async def post_device_authorize(
     request_model: DeviceRequestModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> JSONResponse:
+    auth_service = DeviceService(
+        client_repo=ClientRepository(session=session),
+        device_repo=DeviceRepository(session=session),
+        session=session
+    )
     try:
         auth_service.request_model = request_model
         response_data = await auth_service.get_response()
@@ -68,8 +76,19 @@ async def get_device_user_code(
 async def post_device_user_code(
     request_model: DeviceUserCodeModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
+    print()
+    print(f"################START### /auth --- async def post_device_user_code #####################")
+    print(f"################{session}#####################")
+    print()
+    print()
     try:
+        auth_service = DeviceService(
+            client_repo=ClientRepository(session=session),
+            device_repo=DeviceRepository(session=session),
+            session=session
+        )
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.get_redirect_uri()
 
@@ -84,6 +103,11 @@ async def post_device_user_code(
             domain=BASE_URL_HOST,
             httponly=True,
         )  # TODO add secure=True when we'll have https
+        print()
+        print(f"################END### /auth --- async def post_device_user_code #####################")
+        print(f"################{session}#####################")
+        print()
+        print()
         return response
 
     except UserCodeNotFoundError as exception:
@@ -112,7 +136,13 @@ async def delete_device(
     request_model: DeviceCancelModel = Depends(),
     auth_service: DeviceService = Depends(provide_device_service_stub),
     user_code: Optional[str] = Cookie(None),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[str, JSONResponse]:
+    auth_service = DeviceService(
+        client_repo=ClientRepository(session=session),
+        device_repo=DeviceRepository(session=session),
+        session=session
+    )
     try:
         auth_service.request_model = request_model
         return await auth_service.clean_device_data(user_code)

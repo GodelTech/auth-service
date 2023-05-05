@@ -211,8 +211,9 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_login_form_service = (
         lambda: prov.provide_login_form_service(
-            client_repo=prov.provide_client_repo(),
-            oidc_repo=prov.provide_third_party_oidc_repo(),
+            client_repo=prov.provide_client_repo(session()),
+            oidc_repo=prov.provide_third_party_oidc_repo(session()),
+            session=session
         )
     )
 
@@ -255,8 +256,9 @@ def setup_di(app: FastAPI) -> None:
     ] = nodepends_provide_admin_role_service
 
     nodepends_provide_device_service = lambda: prov.provide_device_service(
-        client_repo=prov.provide_client_repo(),
-        device_repo=prov.provide_device_repo(),
+        client_repo=prov.provide_client_repo(session=session()),
+        device_repo=prov.provide_device_repo(session=session()),
+        session=session()
     )
     app.dependency_overrides[
         prov.provide_device_service_stub

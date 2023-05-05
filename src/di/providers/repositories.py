@@ -31,17 +31,17 @@ def provide_third_party_oidc_repo_stub() -> None:  # pragma: no cover
 
 
 def provide_third_party_oidc_repo(
-    engine: AsyncEngine,
+    session:AsyncSession,
 ) -> ThirdPartyOIDCRepository:
-    return ThirdPartyOIDCRepository(engine)
+    return ThirdPartyOIDCRepository(session)
 
 
 def provide_client_repo_stub() -> None:  # pragma: no cover
     ...
 
 
-def provide_client_repo(engine: AsyncEngine) -> ClientRepository:
-    return ClientRepository(engine)
+def provide_client_repo(session: AsyncSession) -> ClientRepository:
+    return ClientRepository(session)
 
 
 def provide_user_repo_stub() -> None:  # pragma: no cover
@@ -74,8 +74,8 @@ def provide_device_repo_stub() -> None:  # pragma: no cover
     ...
 
 
-def provide_device_repo(engine: AsyncEngine) -> DeviceRepository:
-    return DeviceRepository(engine)
+def provide_device_repo(session: AsyncSession) -> DeviceRepository:
+    return DeviceRepository(session)
 
 
 def provide_blacklisted_repo_stub(engine: AsyncEngine) -> None:

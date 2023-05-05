@@ -219,6 +219,7 @@ def provide_login_form_service_stub() -> None:  # pragma: no cover
 def provide_login_form_service(
     client_repo: ClientRepository,
     oidc_repo: ThirdPartyOIDCRepository,
+    session: AsyncSession
 ) -> LoginFormService:
     return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo)
 
@@ -246,8 +247,9 @@ def provide_device_service_stub() -> None:  # pragma: no cover
 def provide_device_service(
     client_repo: ClientRepository,
     device_repo: DeviceRepository,
+    session: AsyncSession
 ) -> DeviceService:
-    return DeviceService(client_repo=client_repo, device_repo=device_repo)
+    return DeviceService(session=session, client_repo=client_repo, device_repo=device_repo)
 
 
 def provide_auth_third_party_oidc_service_stub() -> None:  # pragma: no cover
