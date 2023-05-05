@@ -82,6 +82,11 @@ async def post_device_user_code(
     request:Request,
     request_model: DeviceUserCodeModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
+    print()
+    print(f"################START### /auth --- async def post_device_user_code #####################")
+    print(f"################{session}#####################")
+    print()
+    print()
     try:
         session = request.state.session
         auth_service = DeviceService(
@@ -103,6 +108,11 @@ async def post_device_user_code(
             domain=BASE_URL_HOST,
             httponly=True,
         )  # TODO add secure=True when we'll have https
+        print()
+        print(f"################END### /auth --- async def post_device_user_code #####################")
+        print(f"################{session}#####################")
+        print()
+        print()
         return response
 
     except UserCodeNotFoundError as exception:

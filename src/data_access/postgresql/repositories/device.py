@@ -12,6 +12,10 @@ from .client import Client
 
 
 class DeviceRepository():
+
+    def __init__(self, session):
+        self.session = session
+
     async def create(
         self,
         client_id: str,
