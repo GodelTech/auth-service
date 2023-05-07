@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
@@ -17,7 +18,12 @@ from src.presentation.api.middleware import (
 
 from src.presentation.api import router
 from src.di import Container
-from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
+from src.dyna_config import (
+    DB_MAX_CONNECTION_COUNT,
+    DB_URL,
+    REDIS_URL,
+    IS_DEVELOPMENT,
+)
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
 
@@ -46,6 +52,10 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # HTTPSRedirectMiddleware Enforces that all incoming requests must either be https or wss
+    if IS_DEVELOPMENT:
+        application.add_middleware(HTTPSRedirectMiddleware)
 
     setup_di(application)
     container = Container()
