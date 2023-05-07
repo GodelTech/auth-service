@@ -8,7 +8,6 @@ from fastapi.staticfiles import StaticFiles
 from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
@@ -52,10 +51,6 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    # HTTPSRedirectMiddleware Enforces that all incoming requests must either be https or wss
-    if IS_DEVELOPMENT:
-        application.add_middleware(HTTPSRedirectMiddleware)
 
     setup_di(application)
     container = Container()
