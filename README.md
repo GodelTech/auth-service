@@ -1,5 +1,5 @@
-**development**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/development/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
-**development**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/development/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/development)
+**main**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/main/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
+**main**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/main/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 
 # Project installation
 
