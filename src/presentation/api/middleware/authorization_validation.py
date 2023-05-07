@@ -82,6 +82,6 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         else:
             logger.info("No Authorization")
             response = await call_next(request)
-            if IS_DEVELOPMENT:
-                return RedirectResponse(request.url.replace(scheme="https"))
+            # if IS_DEVELOPMENT:
+            #     return RedirectResponse(request.url.replace(scheme="https"))
             return response
