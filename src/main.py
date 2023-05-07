@@ -9,6 +9,7 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 
 from src.presentation.api.middleware import (
@@ -74,6 +75,8 @@ def setup_di(app: FastAPI) -> None:
     db_engine = prov.provide_db(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
+    if IS_DEVELOPMENT:
+        app.add_middleware(HTTPSRedirectMiddleware)
 
     db = prov.provide_db_only(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
