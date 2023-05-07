@@ -8,6 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
@@ -403,9 +405,8 @@ def setup_di(app: FastAPI) -> None:
 
 app = get_application()
 
-
-# TODO: Move this code to setup_di() function.
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
+# expose the default Python metrics to the /metrics endpoint
+Instrumentator().instrument(app).expose(app)
 
 
 # Redis activation
