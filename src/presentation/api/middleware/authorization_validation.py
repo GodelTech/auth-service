@@ -83,5 +83,6 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                     )
         else:
             logger.info("No Authorization")
+            print(request.url.path, " ", request["scheme"])
             response = await call_next(request)
             return response
