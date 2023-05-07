@@ -11,8 +11,6 @@ from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from starlette.responses import RedirectResponse
 
-from src.dyna_config import IS_DEVELOPMENT
-
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +80,4 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         else:
             logger.info("No Authorization")
             response = await call_next(request)
-            # if IS_DEVELOPMENT:
-            #     return RedirectResponse(request.url.replace(scheme="https"))
             return response
