@@ -31,12 +31,6 @@ function formRequestModel() {
     return model;
 }
 
-function updateScope() {
-    let user_name = username.value;
-    let user_password = password.value;
-    return '&username=' + user_name + '&password=' + user_password;
-}
-
 function formBody() {
     let bodyData = new URLSearchParams();
     let details = formRequestModel();

@@ -8,6 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
@@ -24,7 +26,11 @@ from src.presentation.api.exception_handlers import (
     http400_third_party_auth_invalid_request_data_handler,
 )
 from src.di import Container
-from src.dyna_config import DB_MAX_CONNECTION_COUNT, DB_URL, REDIS_URL
+from src.dyna_config import (
+    DB_MAX_CONNECTION_COUNT,
+    DB_URL,
+    REDIS_URL,
+)
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
 from src.business_logic.common.errors import InvalidClientIdError
@@ -100,7 +106,7 @@ def setup_di(app: FastAPI) -> None:
     admin = ui.CustomAdmin(
         app,
         db_engine,
-        templates_dir="templates_admin_ui",
+        templates_dir="src/presentation/admin_ui/controllers/templates",
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
             auth_service=prov.provide_admin_auth_service(
@@ -110,6 +116,7 @@ def setup_di(app: FastAPI) -> None:
             ),
         ),
     )
+
     # Identity Resourses
     admin.add_view(ui.IdentityProviderAdminController)
     admin.add_view(ui.IdentityProviderMappedAdminController)
@@ -389,21 +396,22 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_third_party_microsoft_service_stub
     ] = nodepends_provide_third_party_microsoft_service
 
-    nodepends_provide_third_party_auth_service_factory = (
-        lambda: prov.provide_third_party_auth_service_factory(
+    nodepends_provide_auth_service_factory = (
+        lambda: prov.provide_auth_service_factory(
             client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
             persistent_grant_repo=prov.provide_persistent_grant_repo(
                 db_engine
             ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            async_http_client=AsyncClient(),
+            user_repo=prov.provide_user_repo(db_engine),
+            device_repo=prov.provide_device_repo(db_engine),
+            jwt_service=prov.provide_jwt_service(),
+            password_service=prov.provide_password_service(),
         )
     )
 
     app.dependency_overrides[
-        prov.provide_third_party_auth_service_factory_stub
-    ] = nodepends_provide_third_party_auth_service_factory
+        prov.provide_auth_service_factory_stub
+    ] = nodepends_provide_auth_service_factory
 
 
 def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
@@ -434,9 +442,8 @@ def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
 
 app = get_application()
 
-
-# TODO: Move this code to setup_di() function.
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"  # move to .env file
+# expose the default Python metrics to the /metrics endpoint
+Instrumentator().instrument(app).expose(app)
 
 
 # Redis activation

@@ -11,6 +11,7 @@ from .device import (
     DeviceCodeExpirationTimeError,
     DeviceCodeNotFoundError,
     DeviceRegistrationError,
+    UserCodeExpirationTimeError,
     UserCodeNotFoundError,
 )
 from .grant import (

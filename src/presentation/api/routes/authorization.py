@@ -1,24 +1,36 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Optional, Union
-from starlette.templating import _TemplateResponse
-from fastapi import APIRouter, Depends, Request, status
+from typing import TYPE_CHECKING, Any, Optional, Union
+
+from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from starlette.templating import _TemplateResponse
 
-from src.business_logic.services import AuthorizationService, LoginFormService
+from src.business_logic.authorization import AuthServiceFactory
+from src.business_logic.authorization.dto import AuthRequestModel
+from src.business_logic.services import LoginFormService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientRedirectUriError,
+    ClientScopesError,
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
 )
 from src.di.providers import (
-    provide_auth_service_stub,
+    provide_auth_service_factory_stub,
     provide_login_form_service_stub,
 )
 from src.dyna_config import DOMAIN_NAME
-from src.presentation.api.models import DataRequestModel, RequestModel
+from src.presentation.api.models import RequestModel
+
+if TYPE_CHECKING:
+    from src.business_logic.authorization import AuthServiceProtocol
+
+AuthorizePostEndpointResponse = Union[RedirectResponse, JSONResponse]
+AuthorizeGetEndpointResponse = Union[JSONResponse, _TemplateResponse]
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +48,11 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-) -> Union[JSONResponse, _TemplateResponse]:
+) -> AuthorizeGetEndpointResponse:
     try:
-        auth_class = auth_class
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
-        external_logins: Optional[Dict[str, Dict[str, Any]]] = {}
+        external_logins: Optional[dict[str, dict[str, Any]]] = {}
         if request_model.response_type == "code":
             external_logins = await auth_class.form_providers_data_for_auth()
 
@@ -56,8 +67,7 @@ async def get_authorize(
                 },
                 status_code=200,
             )
-        else:
-            raise ValueError
+        raise ValueError
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -81,22 +91,20 @@ async def get_authorize(
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
-    request_body: DataRequestModel = Depends(),
-    auth_class: AuthorizationService = Depends(provide_auth_service_stub),
-) -> Union[RedirectResponse, JSONResponse]:
+    request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
+    auth_service_factory: AuthServiceFactory = Depends(
+        provide_auth_service_factory_stub
+    ),
+    user_code: Optional[str] = Cookie(None),
+) -> AuthorizePostEndpointResponse:
     try:
-        auth_class = auth_class
-        auth_class.request_model = request_body
-        firmed_redirect_uri = await auth_class.get_redirect_url()
-
-        if not firmed_redirect_uri:
-            raise UserNotFoundError
-
-        response = RedirectResponse(
-            firmed_redirect_uri, status_code=status.HTTP_302_FOUND
+        setattr(request_body, "user_code", user_code)
+        auth_service: AuthServiceProtocol = (
+            auth_service_factory.get_service_impl(request_body.response_type)
         )
+        result = await auth_service.get_redirect_url(request_body)
+        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
-        return response
     except ClientNotFoundError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -121,14 +129,9 @@ async def post_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Redirect Uri not found"},
         )
-    except KeyError as exception:
-        message = (
-            f"KeyError: key {exception} does not exist is not in the scope"
-        )
-        logger.exception(message)
+    except ClientScopesError as e:
+        logger.exception(e)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "message": "The scope is missing a password, or a username"
-            },
+            content={"message": "Invalid scope"},
         )

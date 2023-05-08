@@ -62,3 +62,7 @@ from .services import (
     provide_userinfo_service,
     provide_userinfo_service_stub,
 )
+from .services_factory import (
+    provide_auth_service_factory,
+    provide_auth_service_factory_stub,
+)
