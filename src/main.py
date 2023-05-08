@@ -23,7 +23,6 @@ from src.dyna_config import (
     DB_MAX_CONNECTION_COUNT,
     DB_URL,
     REDIS_URL,
-    IS_DEVELOPMENT,
 )
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
@@ -109,11 +108,6 @@ def setup_di(app: FastAPI) -> None:
                 jwt_service=prov.provide_jwt_service(),
             ),
         ),
-    )
-    admin.app.mount(
-        "/statics",
-        StaticFiles(directory="src/presentation/admin_ui/controllers/statics"),
-        name="statics",
     )
 
     # Identity Resourses
