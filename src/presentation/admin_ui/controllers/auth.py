@@ -5,6 +5,7 @@ from starlette.requests import Request
 
 from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services import AdminAuthService
+from src.dyna_config import IS_DEVELOPMENT
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,6 @@ class AdminAuthController(AuthenticationBackend):
         super().__init__(secret_key=secret_key)
 
     async def login(self, request: Request) -> bool:
-
         data_from_form = await request.form()
         try:
             token = await self.auth_service.authorize(
@@ -24,6 +24,8 @@ class AdminAuthController(AuthenticationBackend):
                     password=data_from_form.get("password"),
                 )
             )
+            if IS_DEVELOPMENT:
+                request.scope["scheme"] = "https"
             request.session.update({"Token": token})
             return True
         # TODO: Add different error types support!
