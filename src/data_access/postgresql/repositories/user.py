@@ -130,7 +130,7 @@ class UserRepository():
         return user[0].password_hash.value, user[0].id
 
     async def get_claims(self, id: int) -> Dict[str, Any]:
-        claims_of_user = await self.request_DB_for_claims(id, self.session)
+        claims_of_user = await self.request_DB_for_claims(id)
         result = {}
 
         for claim in claims_of_user:

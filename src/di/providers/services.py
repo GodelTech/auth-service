@@ -115,6 +115,7 @@ def provide_token_service_stub() -> None:  # pragma: no cover
 
 
 def provide_token_service(
+    session: AsyncSession,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
     user_repo: UserRepository,
@@ -123,6 +124,7 @@ def provide_token_service(
     blacklisted_repo: BlacklistedTokenRepository,
 ) -> TokenService:
     return TokenService(
+        session=session,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,

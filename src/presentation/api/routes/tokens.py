@@ -3,8 +3,16 @@ from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services import TokenService
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    PersistentGrantRepository,
+    UserRepository,
+    DeviceRepository,
+    BlacklistedTokenRepository
+)
+from src.business_logic.services import TokenService, JWTService
 from src.data_access.postgresql.errors import (
     ClientBaseException,
     ClientGrantsError,
@@ -19,7 +27,7 @@ from src.data_access.postgresql.errors import (
     GrantNotFoundError,
     GrantTypeNotSupported,
 )
-from src.di.providers import provide_token_service_stub
+from src.di.providers import provide_token_service_stub, provide_async_session_stub
 from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
@@ -44,9 +52,19 @@ async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        token_class = token_class
+        token_class = TokenService(
+            session=session,
+            client_repo=ClientRepository(session=session),
+            persistent_grant_repo=PersistentGrantRepository(session=session),
+            user_repo=UserRepository(session=session),
+            device_repo=DeviceRepository(session=session),
+            jwt_service=JWTService(),
+            blacklisted_repo=BlacklistedTokenRepository(session=session)
+        )
+        # token_class = token_class
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
