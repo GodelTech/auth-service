@@ -7,7 +7,16 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.business_logic.services import PasswordHash, JWTService
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    ThirdPartyOIDCRepository,
+    UserRepository,
+    PersistentGrantRepository,
+    DeviceRepository
+)
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
 from src.business_logic.services import LoginFormService
@@ -22,6 +31,7 @@ from src.data_access.postgresql.errors import (
 from src.di.providers import (
     provide_auth_service_factory_stub,
     provide_login_form_service_stub,
+    provide_async_session_stub,
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
@@ -48,7 +58,13 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizeGetEndpointResponse:
+    auth_class = LoginFormService(
+        client_repo=ClientRepository(session=session),
+        oidc_repo=ThirdPartyOIDCRepository(session=session),
+        session=session
+    )
     try:
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
@@ -96,8 +112,18 @@ async def post_authorize(
         provide_auth_service_factory_stub
     ),
     user_code: Optional[str] = Cookie(None),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizePostEndpointResponse:
     try:
+        auth_service_factory = AuthServiceFactory(
+            session=session,
+            client_repo=ClientRepository(session=session),
+            user_repo=UserRepository(session=session),
+            persistent_grant_repo=PersistentGrantRepository(session=session),
+            device_repo=DeviceRepository(session=session),
+            password_service=PasswordHash(),
+            jwt_service=JWTService()
+        )
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)

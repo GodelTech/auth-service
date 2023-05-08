@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, Dict
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.authorization.constants import ResponseType
 from src.data_access.postgresql.errors import WrongResponseTypeError
@@ -33,6 +34,7 @@ class AuthServiceFactory:
 
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
@@ -40,6 +42,7 @@ class AuthServiceFactory:
         password_service: PasswordHash,
         jwt_service: JWTService,
     ) -> None:
+        self.session = session
         self._client_repo = client_repo
         self._user_repo = user_repo
         self._persistent_grant_repo = persistent_grant_repo

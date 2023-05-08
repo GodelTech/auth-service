@@ -2,6 +2,9 @@ import logging
 import secrets
 from typing import Any, Dict, Optional
 
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -15,10 +18,12 @@ logger = logging.getLogger(__name__)
 class LoginFormService:
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         oidc_repo: ThirdPartyOIDCRepository,
     ) -> None:
         self._request_model: Optional[RequestModel] = None
+        self.session = session
         self.client_repo = client_repo
         self.oidc_repo = oidc_repo
 

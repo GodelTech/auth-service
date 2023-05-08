@@ -30,10 +30,8 @@ def provide_third_party_oidc_repo_stub() -> None:  # pragma: no cover
     ...
 
 
-def provide_third_party_oidc_repo(
-    session:AsyncSession,
-) -> ThirdPartyOIDCRepository:
-    return ThirdPartyOIDCRepository(session)
+def provide_third_party_oidc_repo(session: AsyncSession) -> ThirdPartyOIDCRepository:
+    return ThirdPartyOIDCRepository(session=session)
 
 
 def provide_client_repo_stub() -> None:  # pragma: no cover
@@ -41,15 +39,15 @@ def provide_client_repo_stub() -> None:  # pragma: no cover
 
 
 def provide_client_repo(session: AsyncSession) -> ClientRepository:
-    return ClientRepository(session)
+    return ClientRepository(session=session)
 
 
 def provide_user_repo_stub() -> None:  # pragma: no cover
     ...
 
 
-def provide_user_repo() -> UserRepository:
-    return UserRepository()
+def provide_user_repo(session: AsyncSession) -> UserRepository:
+    return UserRepository(session=session)
 
 
 def provide_persistent_grant_repo_stub() -> None:  # pragma: no cover
@@ -57,9 +55,9 @@ def provide_persistent_grant_repo_stub() -> None:  # pragma: no cover
 
 
 def provide_persistent_grant_repo(
-    engine: AsyncEngine,
+    session: AsyncSession,
 ) -> PersistentGrantRepository:
-    return PersistentGrantRepository(engine)
+    return PersistentGrantRepository(session=session)
 
 
 def provide_group_repo(session: AsyncSession) -> GroupRepository:
@@ -82,8 +80,8 @@ def provide_blacklisted_repo_stub(engine: AsyncEngine) -> None:
     ...
 
 
-def provide_blacklisted_repo(engine: AsyncEngine) -> BlacklistedTokenRepository:
-    return BlacklistedTokenRepository(engine)
+def provide_blacklisted_repo(session: AsyncSession) -> BlacklistedTokenRepository:
+    return BlacklistedTokenRepository(session=session)
 
 def provide_async_session(engine: AsyncEngine) -> AsyncSession:
     return sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)()

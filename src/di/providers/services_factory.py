@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.authorization import AuthServiceFactory
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -13,6 +14,7 @@ def provide_auth_service_factory_stub() -> None:
 
 
 def provide_auth_service_factory(
+    session: AsyncSession,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
     user_repo: UserRepository,
@@ -21,6 +23,7 @@ def provide_auth_service_factory(
     password_service: PasswordHash,
 ) -> AuthServiceFactory:
     return AuthServiceFactory(
+        session=session,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,

@@ -67,6 +67,15 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
+    db = prov.provide_db_only(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    )
+    session = prov.ProviderSession(db.session_factory)
+
+    app.dependency_overrides[
+        prov.provide_async_session_stub
+    ] = session
+
     # app.add_middleware(
     #     middleware_class=AuthorizationMiddleware,
     #     blacklisted_repo=prov.provide_blacklisted_repo(),
@@ -84,7 +93,7 @@ def setup_di(app: FastAPI) -> None:
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
             auth_service=prov.provide_admin_auth_service(
-                user_repo=prov.provide_user_repo(),
+                user_repo=prov.provide_user_repo(session=session),
                 password_service=prov.provide_password_service(),
                 jwt_service=prov.provide_jwt_service(),
             ),
@@ -143,20 +152,12 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.ApiScopeClaimTypeAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    db = prov.provide_db_only(
-        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
-    )
-    session = prov.ProviderSession(db.session_factory)
-
-    app.dependency_overrides[
-        prov.provide_async_session_stub
-    ] = session
-
     nodepends_provide_auth_service = lambda: prov.provide_auth_service(
-        client_repo=prov.provide_client_repo(),
-        user_repo=prov.provide_user_repo(),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(),
-        device_repo=prov.provide_device_repo(),
+        session=session,
+        client_repo=prov.provide_client_repo(session=session),
+        user_repo=prov.provide_user_repo(session=session),
+        persistent_grant_repo=prov.provide_persistent_grant_repo(session=session),
+        device_repo=prov.provide_device_repo(session=session),
         password_service=prov.provide_password_service(),
         jwt_service=prov.provide_jwt_service(),
     )
@@ -188,12 +189,13 @@ def setup_di(app: FastAPI) -> None:
     ] = nodepends_provide_introspection_service
 
     nodepends_provide_token_service = lambda: prov.provide_token_service(
+        session=session(),
         jwt_service=prov.provide_jwt_service(),
-        user_repo=prov.provide_user_repo(),
-        client_repo=prov.provide_client_repo(),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(),
-        device_repo=prov.provide_device_repo(),
-        blacklisted_repo=prov.provide_blacklisted_repo(),
+        user_repo=prov.provide_user_repo(session=session()),
+        client_repo=prov.provide_client_repo(session=session()),
+        persistent_grant_repo=prov.provide_persistent_grant_repo(session=session()),
+        device_repo=prov.provide_device_repo(session=session()),
+        blacklisted_repo=prov.provide_blacklisted_repo(session=session()),
     )
     app.dependency_overrides[
         prov.provide_token_service_stub
@@ -211,9 +213,9 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_login_form_service = (
         lambda: prov.provide_login_form_service(
-            client_repo=prov.provide_client_repo(session()),
-            oidc_repo=prov.provide_third_party_oidc_repo(session()),
-            session=session
+            client_repo=prov.provide_client_repo(session=session()),
+            oidc_repo=prov.provide_third_party_oidc_repo(session=session()),
+            session=session()
         )
     )
 
@@ -369,12 +371,11 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_auth_service_factory = (
         lambda: prov.provide_auth_service_factory(
-            client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            user_repo=prov.provide_user_repo(db_engine),
-            device_repo=prov.provide_device_repo(db_engine),
+            session=session(),
+            client_repo=prov.provide_client_repo(session=session()),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(session=session()),
+            user_repo=prov.provide_user_repo(session=session()),
+            device_repo=prov.provide_device_repo(session=session()),
             jwt_service=prov.provide_jwt_service(),
             password_service=prov.provide_password_service(),
         )

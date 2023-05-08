@@ -7,10 +7,6 @@ from src.business_logic.services import (
     AdminUserService,
     AuthorizationService,
     AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
-    ThirdPartyFacebookService,
-    ThirdPartyLinkedinService,
-    ThirdPartyGitLabService,
     ThirdPartyMicrosoftService,
     DeviceService,
     EndSessionService,
@@ -221,7 +217,7 @@ def provide_login_form_service(
     oidc_repo: ThirdPartyOIDCRepository,
     session: AsyncSession
 ) -> LoginFormService:
-    return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo)
+    return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo, session=session)
 
 
 def provide_admin_auth_service_stub() -> None:  # pragma: no cover
