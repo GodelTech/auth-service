@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class PersistentGrantRepository():
+
+    def __init__(self, session):
+        self.session = session
+
     async def create(
         self,
         client_id: str,
