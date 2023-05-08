@@ -57,10 +57,6 @@ from .users import (
     PasswordAdminController,
 )
 
-from starlette.templating import Jinja2Templates
-from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
-import jinja2
-
 from typing import no_type_check
 
 Base = declarative_base()
@@ -76,37 +72,7 @@ class SeparationLine(BaseView):
         return None
 
 
-if hasattr(jinja2, "pass_context"):
-    pass_context = jinja2.pass_context
-else:
-    pass_context = jinja2.contextfunction
-
-
-@no_type_check
-@pass_context
-def https_url_for(context: dict, name: str, **path_params) -> str:
-    request = context["request"]
-    http_url = request.url_for(name, **path_params)
-    return http_url.replace("http", "https", 1)
-
-
 class CustomAdmin(Admin):
-    def init_templating_engine(self) -> Jinja2Templates:
-        templates = Jinja2Templates("templates")
-        loaders = [
-            FileSystemLoader(self.templates_dir),
-            PackageLoader("sqladmin", "templates"),
-        ]
-
-        templates.env.loader = ChoiceLoader(loaders)
-        templates.env.globals["min"] = min
-        templates.env.globals["zip"] = zip
-        templates.env.globals["admin"] = self
-        templates.env.globals["is_list"] = lambda x: isinstance(x, list)
-        if IS_DEVELOPMENT:
-            templates.env.globals["url_for"] = https_url_for
-        return templates
-
     @no_type_check
     async def create(self, request: Request) -> _TemplateResponse:
         # Create model endpoint.
