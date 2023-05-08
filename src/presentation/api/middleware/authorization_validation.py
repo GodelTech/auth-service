@@ -5,11 +5,11 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from jwt.exceptions import PyJWTError
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import RedirectResponse
 from typing import Any, Callable
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
-from starlette.responses import RedirectResponse
+
+from src.dyna_config import IS_DEVELOPMENT
 
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                     )
         else:
             logger.info("No Authorization")
-            print(request.url.path, " ", request["scheme"])
+            if IS_DEVELOPMENT:
+                request.scope["scheme"] = "https"
             response = await call_next(request)
             return response
