@@ -79,11 +79,7 @@ async def get_tokens(
         ValueError,
     ) as e:
         logger.exception(e)
-        response_class = exception_response_mapper.get(type(e))
-        if response_class:
-            return response_class()
-        else:
-            raise e
+        raise e
 
     except Exception as e:
         logger.exception(e)

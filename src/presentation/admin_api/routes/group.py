@@ -101,7 +101,7 @@ async def get_subgroups(
 @admin_group_router.post(
     "", status_code=status.HTTP_200_OK, tags=["Administration Group"], description="Create a New Group"
 )
-# @exceptions_wrapper
+@exceptions_wrapper
 async def create_group(
     request: Request,
     access_token: str = Header(description="Access token"),

@@ -69,8 +69,7 @@ class AdminGroupService():
     def __init__(
             self,
             session: AsyncSession,
-            group_repo: GroupRepository,
-            group_repo: GroupRepository,
+            group_repo: GroupRepository
         ) -> None:
         self.session = session
         self.group_repo= group_repo
@@ -80,40 +79,29 @@ class AdminGroupService():
     async def get_all_groups(self) -> list[Role]:
         return await self.group_repo.get_all_groups()
 
-        return await self.group_repo.get_all_groups()
-
 
     async def get_groups(self, group_ids:list[int]) -> list[Group]:
         result = []
         for group_id in group_ids:
-            result.append(await self.group_repo.get_by_id(group_id=group_id))
             result.append(await self.group_repo.get_by_id(group_id=group_id))
         return result
 
     async def get_subgroups(self, group_id:int) -> dict[str, Any]:
         group = await self.group_repo.get_by_id(group_id=group_id)
         result = await self.group_repo.get_all_subgroups(main_group=group)
-        group = await self.group_repo.get_by_id(group_id=group_id)
-        result = await self.group_repo.get_all_subgroups(main_group=group)
         return result
 
     async def update_group(self, group_id: int, **kwargs:Any) -> None:
         await self.group_repo.update(group_id=group_id, **kwargs)
-        await self.group_repo.update(group_id=group_id, **kwargs)
-        # await self.session.commit()
 
     async def get_group(self, group_id:int) -> Group:
-        return await self.group_repo.get_by_id(group_id=group_id)
         return await self.group_repo.get_by_id(group_id=group_id)
 
     async def create_group(self, **kwargs: Any) -> None:
         await self.group_repo.create(**kwargs)
-        await self.group_repo.create(**kwargs)
-        await self.session.commit()
 
     async def delete_group(self, group_id: int) -> None:
         await self.group_repo.delete(group_id=group_id)
-        # await self.session.commit()
 
 
 class AdminUserService():
@@ -128,8 +116,6 @@ class AdminUserService():
         self.role_repo=role_repo
         self.session = session
 
-    
-    @session_manager
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
         from time import time
 

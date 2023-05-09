@@ -101,11 +101,6 @@ class ClientRepository(BaseRepository):
     async def validate_client_redirect_uri(
         self, client_id: str, redirect_uri: str
     ) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         client_id_int = (
             await self.get_client_by_client_id(client_id=client_id)
         ).id
