@@ -6,7 +6,7 @@ authors = ["None"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.87.0"
+fastapi = "0.95.1"
 uvicorn = "^0.20.0"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
 asyncpg = "^0.27.0"
@@ -42,6 +42,7 @@ types-redis = "^4.5.1"
 types-mock = "^5.0.0"
 fastapi-utils = "^0.2.1"
 prometheus-fastapi-instrumentator = "^6.0.0"
+starlette = "0.26.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
