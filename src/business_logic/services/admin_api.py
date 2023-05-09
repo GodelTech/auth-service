@@ -54,15 +54,12 @@ class AdminRoleService():
 
     async def create_role(self, **kwargs:Any) -> None:
         await self.role_repo.create(**kwargs)
-        # await self.session.commit()
 
     async def update_role(self, role_id:int, **kwargs:Any) -> None:
         await self.role_repo.update(role_id=role_id, **kwargs)
-        # await self.session.commit()
 
     async def delete_role(self, role_id:int) -> None:
         await self.role_repo.delete(role_id=role_id)
-        # await self.session.commit()
 
 
 class AdminGroupService():
@@ -92,18 +89,15 @@ class AdminGroupService():
 
     async def update_group(self, group_id: int, **kwargs:Any) -> None:
         await self.group_repo.update(group_id=group_id, **kwargs)
-        # await self.session.commit()
 
     async def get_group(self, group_id:int) -> Group:
         return await self.group_repo.get_by_id(group_id=group_id)
 
     async def create_group(self, **kwargs: Any) -> None:
         await self.group_repo.create(**kwargs)
-        await self.session.commit()
 
     async def delete_group(self, group_id: int) -> None:
         await self.group_repo.delete(group_id=group_id)
-        # await self.session.commit()
 
 
 class AdminUserService():

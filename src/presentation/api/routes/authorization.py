@@ -129,6 +129,7 @@ async def post_authorize(
             auth_service_factory.get_service_impl(request_body.response_type)
         )
         result = await auth_service.get_redirect_url(request_body)
+        await session.commit()
         return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
     except ClientNotFoundError as exception:

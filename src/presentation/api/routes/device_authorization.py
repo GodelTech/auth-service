@@ -44,17 +44,23 @@ async def post_device_authorize(
     try:
         auth_service.request_model = request_model
         response_data = await auth_service.get_response()
+        await session.commit()
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=response_data,
         )
-
     except ClientNotFoundError as exception:
         logger.exception(exception)
+        await session.rollback()
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Client not found"},
         )
+    except:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
 
 
 @device_auth_router.get(
@@ -78,11 +84,6 @@ async def post_device_user_code(
     auth_service: DeviceService = Depends(provide_device_service_stub),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
-    print()
-    print(f"################START### /auth --- async def post_device_user_code #####################")
-    print(f"################{session}#####################")
-    print()
-    print()
     try:
         auth_service = DeviceService(
             client_repo=ClientRepository(session=session),
@@ -103,11 +104,6 @@ async def post_device_user_code(
             domain=BASE_URL_HOST,
             httponly=True,
         )  # TODO add secure=True when we'll have https
-        print()
-        print(f"################END### /auth --- async def post_device_user_code #####################")
-        print(f"################{session}#####################")
-        print()
-        print()
         return response
 
     except UserCodeNotFoundError as exception:
@@ -116,6 +112,7 @@ async def post_device_user_code(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Wrong user code"},
         )
+
 
 
 @device_auth_router.get(
@@ -145,20 +142,28 @@ async def delete_device(
     )
     try:
         auth_service.request_model = request_model
-        return await auth_service.clean_device_data(user_code)
-
+        result = await auth_service.clean_device_data(user_code)
+        await session.commit()
+        return result
     except UserCodeNotFoundError as exception:
         logger.exception(exception)
+        await session.rollback()
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Wrong user code"},
         )
     except ClientNotFoundError as exception:
         logger.exception(exception)
+        await session.rollback()
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Client not found"},
         )
+    except:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
 
 
 @device_auth_router.get(

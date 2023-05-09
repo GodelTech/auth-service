@@ -24,12 +24,6 @@ class ClientRepository():
         self.session = session
 
     async def get_client_by_client_id(self, client_id: str) -> Client:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
-
         client = await self.session.execute(
             select(Client).where(Client.client_id == client_id)
         )
@@ -42,16 +36,6 @@ class ClientRepository():
         return client[0]
 
     async def validate_client_by_client_id(self, client_id: str) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
-        print()
-        print(f"################ REPO_CLIENT --- async def validate_client_by_client_id #####################")
-        print(f"################{self.session}#####################")
-        print()
-        print()
         result = await self.session.execute(
             select(
                 exists().where(
@@ -67,12 +51,6 @@ class ClientRepository():
         return result[0]
 
     async def validate_client_by_int_id(self, client_id: int) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
-
         result = await self.session.execute(
             select(
                 exists().where(
@@ -88,11 +66,6 @@ class ClientRepository():
         return result[0]
 
     async def get_client_secrete_by_client_id(self, client_id: str) -> str:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         secrete = await self.session.execute(
             select(ClientSecret)
             .join(Client, ClientSecret.client_id == Client.id)
@@ -109,12 +82,6 @@ class ClientRepository():
     async def validate_post_logout_redirect_uri(
         self, client_id: str, logout_redirect_uri: str
     ) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
-
         logout_redirect_uri_obj = await self.session.execute(
             select(ClientPostLogoutRedirectUri)
             .join(
@@ -137,11 +104,6 @@ class ClientRepository():
     async def validate_client_redirect_uri(
         self, client_id: str, redirect_uri: str
     ) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         client_id_int = (
             await self.get_client_by_client_id(client_id=client_id)
         ).id
@@ -161,22 +123,12 @@ class ClientRepository():
             return True
 
     async def get_client_scopes(self, client_id: int) -> str:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         scopes = await self.session.execute(
             select(ClientScope).where(ClientScope.client_id == client_id)
         )
         return scopes.first()[-1].scope
 
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         uris = await self.session.execute(
             select(ClientRedirectUri)
             .join(Client, ClientSecret.client_id == Client.id)
@@ -190,11 +142,6 @@ class ClientRepository():
         return result
 
     async def get_client_claims(self, client_id: int) -> list[str]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         uris = await self.session.execute(
             select(ClientClaim).where(ClientClaim.client_id == client_id)
         )
@@ -208,10 +155,6 @@ class ClientRepository():
     async def list_all_redirect_uris_by_client(
         self, client_id: str
     ) -> list[str]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
         result = await self.session.scalars(
             select(ClientRedirectUri.redirect_uri)
             .join(Client, ClientRedirectUri.client_id == Client.id)
@@ -220,10 +163,6 @@ class ClientRepository():
         return result.all()
 
     async def list_all_scopes_by_client(self, client_id: str) -> str:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
         scopes = await self.session.scalars(
             select(ClientScope.scope)
             .join(Client, ClientScope.client_id == Client.id)
@@ -232,10 +171,6 @@ class ClientRepository():
         return scopes.all()
 
     async def exists(self, client_id: str) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
         result = await self.session.execute(
             select(Client)
             .where(Client.client_id == client_id)
@@ -245,10 +180,6 @@ class ClientRepository():
         return result.scalar()
 
     async def get_auth_code_lifetime_by_client(self, client_id: str) -> int:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
         result = await self.session.execute(
             select(Client.authorization_code_lifetime).where(
                 Client.client_id == client_id
@@ -257,10 +188,6 @@ class ClientRepository():
         return result.scalar()
 
     async def get_device_code_lifetime_by_client(self, client_id: str) -> int:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
         result = await self.session.execute(
             select(Client.device_code_lifetime).where(
                 Client.client_id == client_id

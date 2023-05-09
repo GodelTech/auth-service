@@ -74,11 +74,6 @@ class GroupRepository:
             raise ValueError
 
     async def get_all_groups(self) -> list[Group]:
-        print()
-        print()
-        print(f"################{self.session}#####################")
-        print()
-        print()
         groups = await self.session.execute(select(Group))
         result = [group[0] for group in groups]
 

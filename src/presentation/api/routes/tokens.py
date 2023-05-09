@@ -64,25 +64,29 @@ async def get_tokens(
             jwt_service=JWTService(),
             blacklisted_repo=BlacklistedTokenRepository(session=session)
         )
-        # token_class = token_class
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
+        await session.commit()
         return JSONResponse(content=result, headers=headers)
 
-    except (
-        DeviceBaseException,
-        ClientBaseException,
-        GrantBaseException,
-        ValueError,
-    ) as e:
+    # except (
+    #     DeviceBaseException,
+    #     ClientBaseException,
+    #     GrantBaseException,
+    #     ValueError,
+    # ) as e:
+    #     logger.exception(e)
+    #     response_class = exception_response_mapper.get(type(e))
+    #     if response_class:
+    #         return response_class()
+    #     else:
+    #         raise e
+
+    except Exception as e:
         logger.exception(e)
-        response_class = exception_response_mapper.get(type(e))
-        if response_class:
-            return response_class()
-        else:
-            raise e
+        raise e
 
 
 exception_response_mapper = {

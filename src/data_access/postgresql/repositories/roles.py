@@ -32,7 +32,6 @@ class RoleRepository():
         if await self.exists(role_id=role_id):
             role_to_delete = await self.get_role_by_id(role_id=role_id)
             await self.session.delete(role_to_delete)
-            # await self.session.commit()
         else:
             raise ValueError
 
@@ -67,7 +66,6 @@ class RoleRepository():
                     .where(Role.id == role_id)
                 )
                 await self.session.execute(updates)
-                # await self.session.commit()
             else:
                 raise ValueError
         except ValueError:

@@ -88,7 +88,6 @@ class UserRepository():
         if await self.exists(user_id=user_id):
             user_to_delete = await self.get_user_by_id(user_id=user_id)
             await self.session.delete(user_to_delete)
-            await self.session.commit()
         else:
             raise ValueError
 
@@ -302,7 +301,6 @@ class UserRepository():
                     user_id=user_id, role_id=role_id
                 )
             )
-            await self.session.commit()
         except:
             raise DuplicationError
 
@@ -318,7 +316,6 @@ class UserRepository():
             )
 
             await self.session.execute(query)
-            await self.session.commit()
         except:
             raise ValueError
 
@@ -335,7 +332,6 @@ class UserRepository():
             )
 
             await self.session.execute(query)
-            await self.session.commit()
         except:
             raise ValueError
 
@@ -384,7 +380,6 @@ class UserRepository():
                         )
                     ).first()
                     await self.session.delete(password_to_delete)
-                await self.session.commit()
             else:
                 if user.password_hash_id:
                     updates = (
@@ -393,7 +388,6 @@ class UserRepository():
                         .where(UserPassword.id == user.password_hash_id)
                     )
                     await self.session.execute(updates)
-                    await self.session.commit()
                 else:
                     await self.session.execute(
                         insert(UserPassword).values(value=password)
@@ -410,7 +404,6 @@ class UserRepository():
                         .where(User.id == user_id)
                     )
                     await self.session.execute(updates)
-                    await self.session.commit()
         else:
             raise ValueError
 

@@ -69,11 +69,6 @@ class DeviceService:
         return None
 
     async def get_redirect_uri(self) -> str:
-        print()
-        print(f"################ service --- async def get_redirect_uri #####################")
-        print(f"################{self.session}#####################")
-        print()
-        print()
         if not isinstance(self.request_model, DeviceUserCodeModel):
             raise ValueError
 
@@ -82,16 +77,6 @@ class DeviceService:
         device = await self.device_repo.get_device_by_user_code(
             user_code=self.request_model.user_code
         )
-        print()
-        print(f"################ service --- async def get_redirect_uri #####################")
-        print(
-            uri_start + f"client_id={device.client.client_id}"
-            f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
-            f"&redirect_uri={redirect_uri}"
-        )
-        print(f"self.request_model.user_code: {self.request_model.user_code}")
-        print()
-        print()
         return (
             uri_start + f"client_id={device.client.client_id}"
             f"&response_type=urn:ietf:params:oauth:grant-type:device_code"
