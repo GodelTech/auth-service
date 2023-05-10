@@ -43,6 +43,7 @@ auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
     "/",
     status_code=status.HTTP_200_OK,
     response_class=HTMLResponse,
+    response_model=None
 )
 async def get_authorize(
     request: Request,
@@ -89,7 +90,7 @@ async def get_authorize(
         )
 
 
-@auth_router.post("/", status_code=status.HTTP_302_FOUND)
+@auth_router.post("/", status_code=status.HTTP_302_FOUND, response_model=None)
 async def post_authorize(
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     auth_service_factory: AuthServiceFactory = Depends(
