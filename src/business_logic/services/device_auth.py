@@ -26,14 +26,12 @@ class DeviceService:
         session: AsyncSession,
         client_repo: ClientRepository,
         device_repo: DeviceRepository,
-        session: AsyncSession
-
     ) -> None:
         self._request_model: Union[
             DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel, None
         ] = None
-        self.client_repo = client_repo
-        self.device_repo = device_repo
+        self.client_repo = client_repo(session)
+        self.device_repo = device_repo(session)
         self.session = session
 
     async def get_response(self) -> Optional[dict[str, Any]]:

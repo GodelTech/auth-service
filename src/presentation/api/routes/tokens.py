@@ -40,7 +40,7 @@ from src.presentation.api.routes.utils import (
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
 )
-from src.presentation.api.session.manager import session_manager
+
 logger = logging.getLogger(__name__)
 
 
