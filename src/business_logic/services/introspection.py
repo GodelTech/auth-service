@@ -16,23 +16,25 @@ from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class IntrospectionServies:
     def __init__(
         self,
-        jwt: JWTService,
-        user_repo: UserRepository,
-        client_repo: ClientRepository,
-        persistent_grant_repo: PersistentGrantRepository,
+        session:AsyncSession,
+        jwt = JWTService,
+        user_repo = UserRepository,
+        client_repo = ClientRepository,
+        persistent_grant_repo = PersistentGrantRepository,
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
         self.authorization: Optional[str] = None
         self.request_body: Optional[BodyRequestIntrospectionModel] = None
-        self.user_repo = user_repo
-        self.client_repo = client_repo
-        self.persistent_grant_repo = persistent_grant_repo
+        self.user_repo = user_repo(session)
+        self.client_repo = client_repo(session)
+        self.persistent_grant_repo = persistent_grant_repo(session)
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:

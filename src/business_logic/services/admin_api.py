@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables import Group, Role, User
-from src.business_logic.services.base import session_manager
+
 
 class AdminService():
     def __init__(
@@ -37,10 +37,10 @@ class AdminRoleService():
     def __init__(
             self,
             session: AsyncSession,
-            role_repo: RoleRepository
+            role_repo = RoleRepository
         ) -> None:
         self.session = session
-        self.role_repo= role_repo
+        self.role_repo= role_repo(self)
         
     async def get_role(self, role_id:int) -> Role:
         return await self.role_repo.get_role_by_id(role_id=role_id)
@@ -104,23 +104,15 @@ class AdminUserService():
     
     def __init__(
             self,
-            user_repo: UserRepository,
-            role_repo: RoleRepository,
-            session: AsyncSession
+            session: AsyncSession,
+            user_repo = UserRepository,
+            role_repo = RoleRepository,
         ) -> None:
-        self.user_repo=user_repo
-        self.role_repo=role_repo
+        self.user_repo=user_repo(session)
+        self.role_repo=role_repo(session)
         self.session = session
-
-    
-    @session_manager
+            
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
-        from time import time
-
-        await self.user_repo.create(username=str(time()), email=str(time()), session=self.session)
-        await self.role_repo.create(name=str(time()), session=self.session)
-        if 2/2 == 1:
-            raise BaseException
         users=await self.user_repo.get_all_users(group_id= group_id, role_id = role_id, session=self.session)
         return users
     

@@ -20,11 +20,7 @@ from sqlalchemy.engine.result import ChunkedIteratorResult
 logger = logging.getLogger(__name__)
 
 
-class PersistentGrantRepository():
-
-    def __init__(self, session):
-        self.session = session
-
+class PersistentGrantRepository(BaseRepository):
     async def create(
         self,
         client_id: str,
@@ -34,9 +30,7 @@ class PersistentGrantRepository():
         expiration_time: int = 600,
     ) -> None:
         grant_type_id = await self.get_type_id(grant_type)
-        client_id_int = await self.get_client_id_int(
-            client_id=client_id, session=self.session
-        )
+        client_id_int = await self.get_client_id_int(client_id=client_id)
         unique_key = str(uuid.uuid4())
         persistent_grant = {
             "key": unique_key,
@@ -105,9 +99,7 @@ class PersistentGrantRepository():
         await self.check_grant_by_client_and_user_ids(
             client_id=client_id, user_id=user_id
         )
-        client_id_int = await self.get_client_id_int(
-            client_id=client_id, session=self.session
-        )
+        client_id_int = await self.get_client_id_int(client_id=client_id)
         await self.session.execute(
             delete(PersistentGrant).where(
                 PersistentGrant.client_id == client_id_int,
@@ -119,9 +111,7 @@ class PersistentGrantRepository():
     async def check_grant_by_client_and_user_ids(
         self, client_id: str, user_id: int
     ) -> bool:
-        client_id_int = await self.get_client_id_int(
-            client_id=client_id, session=self.session
-        )
+        client_id_int = await self.get_client_id_int(client_id=client_id)
         grant = await self.session.execute(
             select(
                 exists().where(
@@ -165,9 +155,9 @@ class PersistentGrantRepository():
             return client_id_str[0]
 
     async def get_client_id_int(
-        self, client_id: str, session: AsyncSession
+        self, client_id: str,
     ) -> int:
-        client_id_int = await session.execute(
+        client_id_int = await self.session.execute(
             select(Client.id).where(
                 Client.client_id == client_id,
             )

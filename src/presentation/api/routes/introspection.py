@@ -25,12 +25,10 @@ async def post_introspection(
         default=None, description="Authorization"
     ),  # crutch for swagger
     request_body: BodyRequestIntrospectionModel = Depends(),
-    introspection_class: IntrospectionServies = Depends(
-        provide_introspection_service_stub
-    ),
 ) -> dict[str, Any]:
     try:
-        introspection_class = introspection_class
+        session = request.state.session
+        introspection_class = IntrospectionServies(session)
         introspection_class.request = request
 
         token = request.headers.get("authorization") or auth_swagger

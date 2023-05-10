@@ -15,16 +15,18 @@ from src.data_access.postgresql.repositories.user import UserRepository
 class UserInfoServices:
     def __init__(
         self,
-        jwt: JWTService,
-        user_repo: UserRepository,
-        client_repo: ClientRepository,
-        persistent_grant_repo: PersistentGrantRepository,
+        session,
+        jwt = JWTService,
+        user_repo = UserRepository,
+        client_repo = ClientRepository,
+        persistent_grant_repo = PersistentGrantRepository,
+
     ) -> None:
-        self.jwt = jwt
+        self.jwt = jwt()
         self.authorization: Optional[str] = None
-        self.user_repo = user_repo
-        self.client_repo = client_repo
-        self.persistent_grant_repo = persistent_grant_repo
+        self.user_repo = user_repo(session)
+        self.client_repo = client_repo(session)
+        self.persistent_grant_repo = persistent_grant_repo(session)
 
     async def get_user_info(
         self,

@@ -17,16 +17,17 @@ revoke_router = APIRouter(prefix="/revoke", tags=["Revoke"])
     "/",
     status_code=200,
 )
+
 async def post_revoke_token(
     request: Request,
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
     request_body: BodyRequestRevokeModel = Depends(),
-    token_class: TokenService = Depends(provide_token_service_stub),
 ) -> None:
     try:
-        token_class = token_class
+        session = request.state.session
+        token_class = TokenService(session)
         token_class.request = request
         token_class.request_body = request_body
         token = request.headers.get("authorization") or auth_swagger

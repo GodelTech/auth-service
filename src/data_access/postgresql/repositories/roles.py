@@ -17,10 +17,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     return result
 
 
-class RoleRepository():
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
+class RoleRepository(BaseRepository):
     async def exists(self, role_id: int) -> bool:
         result = await self.session.execute(
             select(exists().where(Role.id == role_id))

@@ -13,6 +13,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import DataRequestModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -20,20 +21,22 @@ logger = logging.getLogger(__name__)
 class AuthorizationService:
     def __init__(
         self,
-        client_repo: ClientRepository,
-        user_repo: UserRepository,
-        persistent_grant_repo: PersistentGrantRepository,
-        device_repo: DeviceRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+        session:AsyncSession,
+        client_repo = ClientRepository,
+        user_repo = UserRepository,
+        persistent_grant_repo = PersistentGrantRepository,
+        device_repo = DeviceRepository,
+        password_service = PasswordHash,
+        jwt_service = JWTService,
     ) -> None:
         self._request_model: Optional[DataRequestModel] = None
-        self.client_repo = client_repo
-        self.user_repo = user_repo
-        self.persistent_grant_repo = persistent_grant_repo
-        self.device_repo = device_repo
-        self.password_service = password_service
-        self.jwt_service = jwt_service
+        self.client_repo = client_repo(session)
+        self.user_repo = user_repo(session)
+        self.persistent_grant_repo = persistent_grant_repo(session)
+        self.device_repo = device_repo(session)
+        self.password_service = password_service()
+        self.jwt_service = jwt_service()
+        self.session = session
 
     @property
     def request_model(self) -> Optional[DataRequestModel]:

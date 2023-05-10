@@ -12,14 +12,16 @@ from typing import Union, Optional, Any
 class EndSessionService:
     def __init__(
         self,
-        client_repo: ClientRepository,
-        persistent_grant_repo: PersistentGrantRepository,
-        jwt_service: JWTService,
+        session,
+        jwt_service = JWTService,
+        client_repo = ClientRepository,
+        persistent_grant_repo = PersistentGrantRepository,
     ) -> None:
-        self.client_repo = client_repo
-        self.persistent_grant_repo = persistent_grant_repo
-        self.jwt_service = jwt_service
+        self.client_repo = client_repo(session)
+        self.persistent_grant_repo = persistent_grant_repo(session)
+        self.jwt_service = jwt_service()
         self._request_model: Optional[RequestEndSessionModel] = None
+        self.session = session
 
     async def end_session(self) -> Optional[str]:
         if self.request_model is not None:

@@ -39,11 +39,7 @@ def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     return result
 
 
-class UserRepository():
-
-    def __init__(self, session):
-        self.session = session
-
+class UserRepository(BaseRepository):
     async def get_all_users(
         self, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:

@@ -11,10 +11,7 @@ from src.data_access.postgresql.tables import BlacklistedToken
 logger = logging.getLogger(__name__)
 
 
-class BlacklistedTokenRepository():
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
+class BlacklistedTokenRepository(BaseRepository):
 
     async def create(
         self,
@@ -22,39 +19,26 @@ class BlacklistedTokenRepository():
         expiration: int,
     ) -> None:
         
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            
         blacklisted_token = {
             "token": token,
             "expiration": expiration
         }
             
-        await session.execute(
+        await self.session.execute(
                 insert(BlacklistedToken).values(**blacklisted_token)
             )
-        await session.commit()
+        await self.session.commit()
         
     async def exists(
         self,
         token: str, 
-    ) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-    
-        async with session_factory() as sess:
-            session = sess
-            
-            result = await session.execute(
-                select(BlacklistedToken)
-                        .where(
-                        BlacklistedToken.token == token,
-                    )
+    ) -> bool:    
+        result = await self.session.execute(
+            select(BlacklistedToken)
+                    .where(
+                    BlacklistedToken.token == token,
                 )
+            )
 
-            result = result.first()
-            return bool(result)
+        result = result.first()
+        return bool(result)

@@ -12,6 +12,7 @@ from starlette.middleware.cors import CORSMiddleware
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
     AccessTokenMiddleware,
+    SessionManager
 )
 
 from src.presentation.api import router
@@ -70,12 +71,15 @@ def setup_di(app: FastAPI) -> None:
     db = prov.provide_db_only(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-    session = prov.ProviderSession(db.session_factory)
+    session = prov.ProviderSession(db.session_factory).get_session
 
     app.dependency_overrides[
         prov.provide_async_session_stub
     ] = session
 
+    app.add_middleware(
+        middleware_class=SessionManager, session = session
+    )
     # app.add_middleware(
     #     middleware_class=AuthorizationMiddleware,
     #     blacklisted_repo=prov.provide_blacklisted_repo(),

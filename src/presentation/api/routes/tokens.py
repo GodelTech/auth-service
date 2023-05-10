@@ -48,22 +48,16 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
 @token_router.post("/", response_model=ResponseTokenModel)
+
 async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        token_class = TokenService(
-            session=session,
-            client_repo=ClientRepository(session=session),
-            persistent_grant_repo=PersistentGrantRepository(session=session),
-            user_repo=UserRepository(session=session),
-            device_repo=DeviceRepository(session=session),
-            jwt_service=JWTService(),
-            blacklisted_repo=BlacklistedTokenRepository(session=session)
-        )
+        session = request.state.session
+        token_class = TokenService(session)
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
@@ -71,18 +65,18 @@ async def get_tokens(
         await session.commit()
         return JSONResponse(content=result, headers=headers)
 
-    # except (
-    #     DeviceBaseException,
-    #     ClientBaseException,
-    #     GrantBaseException,
-    #     ValueError,
-    # ) as e:
-    #     logger.exception(e)
-    #     response_class = exception_response_mapper.get(type(e))
-    #     if response_class:
-    #         return response_class()
-    #     else:
-    #         raise e
+    except (
+        DeviceBaseException,
+        ClientBaseException,
+        GrantBaseException,
+        ValueError,
+    ) as e:
+        logger.exception(e)
+        response_class = exception_response_mapper.get(type(e))
+        if response_class:
+            return response_class()
+        else:
+            raise e
 
     except Exception as e:
         logger.exception(e)

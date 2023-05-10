@@ -19,13 +19,13 @@ class LoginFormService:
     def __init__(
         self,
         session: AsyncSession,
-        client_repo: ClientRepository,
-        oidc_repo: ThirdPartyOIDCRepository,
+        client_repo = ClientRepository,
+        oidc_repo = ThirdPartyOIDCRepository,
     ) -> None:
         self._request_model: Optional[RequestModel] = None
         self.session = session
-        self.client_repo = client_repo
-        self.oidc_repo = oidc_repo
+        self.client_repo = client_repo(session)
+        self.oidc_repo = oidc_repo(session)
 
     async def get_html_form(self) -> Optional[bool]:
         if self.request_model is not None:
