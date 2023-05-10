@@ -28,11 +28,6 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
     WrongResponseTypeError,
 )
-from src.di.providers import (
-    provide_auth_service_factory_stub,
-    provide_login_form_service_stub,
-    provide_async_session_stub,
-)
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
 # from src.presentation.api.session.closer import with_session
@@ -57,7 +52,6 @@ auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
-    auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ) -> AuthorizeGetEndpointResponse:
     session = request.state.session
     auth_class = LoginFormService(
@@ -110,9 +104,6 @@ async def get_authorize(
 async def post_authorize(
     request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
-    auth_service_factory: AuthServiceFactory = Depends(
-        provide_auth_service_factory_stub
-    ),
     user_code: Optional[str] = Cookie(None),
 ) -> AuthorizePostEndpointResponse:
     try:

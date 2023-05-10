@@ -28,7 +28,7 @@ from src.presentation.api.models import (
     ThirdPartyOIDCRequestModel,
     ThirdPartyMicrosoftRequestModel,
 )
-from src.presentation.api.session.manager import session_manager
+
 logger = logging.getLogger(__name__)
 
 auth_oidc_router = APIRouter(
@@ -44,10 +44,11 @@ auth_oidc_router = APIRouter(
 )
 
 async def get_github_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = AuthThirdPartyOIDCService(session)
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_github_redirect_uri(
@@ -77,10 +78,11 @@ async def get_github_authorize(
 @auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND)
 
 async def get_linkedin_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyLinkedinRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = ThirdPartyLinkedinService(session)
         auth_class.request_model = request_model
         linkedin_redirect_uri = await auth_class.get_redirect_uri(
@@ -113,10 +115,11 @@ async def get_linkedin_authorize(
 )
 
 async def get_facebook_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyFacebookRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = ThirdPartyFacebookService(session)
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_facebook_redirect_uri(
@@ -149,10 +152,11 @@ async def get_facebook_authorize(
 )
 
 async def get_google_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyGoogleRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = ThirdPartyGoogleService(session)
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_google_redirect_uri(
@@ -185,10 +189,11 @@ async def get_google_authorize(
 )
 
 async def get_gitlab_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = ThirdPartyGitLabService(session)
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_redirect_uri(
@@ -221,10 +226,11 @@ async def get_gitlab_authorize(
 )
 
 async def get_microsoft_authorize(
-    session,
+    request:Request,
     request_model: ThirdPartyMicrosoftRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_class = ThirdPartyMicrosoftService(session)
         auth_class.request_model = request_model
         redirect_uri = await auth_class.get_redirect_uri(
@@ -257,10 +263,11 @@ async def get_microsoft_authorize(
 )
 
 async def post_create_state(
-    session,
+    request:Request,
     state_request_model: StateRequestModel = Depends(),
 ) -> Union[None, JSONResponse, int]:
     try:
+        session = request.state.session
         auth_class = AuthThirdPartyOIDCService(session)
         auth_class.state_request_model = state_request_model
         await auth_class.create_provider_state()

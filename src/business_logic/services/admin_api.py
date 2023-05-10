@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables import Group, Role, User
-from src.business_logic.services.base import session_manager
+
 
 class AdminService():
     def __init__(

@@ -11,7 +11,7 @@ from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.di.providers import provide_async_session_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-from src.presentation.api.session.manager import session_manager
+
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +114,6 @@ async def get_default_token(
     scope: str = "profile",
 ) -> str:
     try:
-        
         jwt = JWTService()
         payload: dict[str, Any] = {"sub": "1", "scope": scope}
         if with_iss_me:

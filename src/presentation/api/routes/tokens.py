@@ -40,7 +40,7 @@ from src.presentation.api.routes.utils import (
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
 )
-from src.presentation.api.session.manager import session_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -56,15 +56,8 @@ async def get_tokens(
     
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        token_class = TokenService(
-            session=session,
-            client_repo=ClientRepository(session=session),
-            persistent_grant_repo=PersistentGrantRepository(session=session),
-            user_repo=UserRepository(session=session),
-            device_repo=DeviceRepository(session=session),
-            jwt_service=JWTService(),
-            blacklisted_repo=BlacklistedTokenRepository(session=session)
-        )
+        session = request.state.session
+        token_class = TokenService(session)
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
@@ -72,18 +65,18 @@ async def get_tokens(
         await session.commit()
         return JSONResponse(content=result, headers=headers)
 
-    # except (
-    #     DeviceBaseException,
-    #     ClientBaseException,
-    #     GrantBaseException,
-    #     ValueError,
-    # ) as e:
-    #     logger.exception(e)
-    #     response_class = exception_response_mapper.get(type(e))
-    #     if response_class:
-    #         return response_class()
-    #     else:
-    #         raise e
+    except (
+        DeviceBaseException,
+        ClientBaseException,
+        GrantBaseException,
+        ValueError,
+    ) as e:
+        logger.exception(e)
+        response_class = exception_response_mapper.get(type(e))
+        if response_class:
+            return response_class()
+        else:
+            raise e
 
     except Exception as e:
         logger.exception(e)

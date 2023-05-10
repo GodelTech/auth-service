@@ -10,7 +10,7 @@ from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
     ResponceIntrospectionModel,
 )
-from src.presentation.api.session.manager import session_manager
+
 logger = logging.getLogger(__name__)
 
 introspection_router = APIRouter(
@@ -27,6 +27,7 @@ async def post_introspection(
     request_body: BodyRequestIntrospectionModel = Depends(),
 ) -> dict[str, Any]:
     try:
+        session = request.state.session
         introspection_class = IntrospectionServies(session)
         introspection_class.request = request
 

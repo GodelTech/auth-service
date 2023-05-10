@@ -19,7 +19,6 @@ from src.presentation.api.models import (
     DeviceRequestModel,
     DeviceUserCodeModel,
 )
-from src.presentation.api.session.manager import session_manager
 
 
 logger = logging.getLogger("is_app")
@@ -137,11 +136,7 @@ async def delete_device(
     user_code: Optional[str] = Cookie(None),  
 ) -> Union[str, JSONResponse]:
     session = request.state.session
-    auth_service = DeviceService(
-        client_repo=ClientRepository(session=session),
-        device_repo=DeviceRepository(session=session),
-        session=session
-    )
+    auth_service = DeviceService(session)
     try:
         auth_service.request_model = request_model
         result = await auth_service.clean_device_data(user_code)
