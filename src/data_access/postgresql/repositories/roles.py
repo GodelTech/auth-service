@@ -74,8 +74,11 @@ class RoleRepository():
             raise DuplicationError
 
     async def create(self, name: str, id: Optional[int] = None) -> None:
-        kwargs = params_to_dict(name=name, id=id)
-        await self.session.execute(insert(Role).values(**kwargs))
+        try:
+            kwargs = params_to_dict(name=name, id=id)
+            await self.session.execute(insert(Role).values(**kwargs))
+        except:
+            raise DuplicationError
 
     async def get_all_roles(self) -> list[Role]:
         quiery = await self.session.execute(select(Role))
