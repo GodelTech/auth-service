@@ -27,6 +27,8 @@ from src.presentation.api.models import (
     ThirdPartyGoogleRequestModel,
 )
 
+
+############################### ! OLD TESTS  #####################################################
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
 
 

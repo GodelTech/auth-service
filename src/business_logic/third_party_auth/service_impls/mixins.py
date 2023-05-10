@@ -102,15 +102,15 @@ class ThirdPartyAuthMixin:
         )
         await self._create_user_if_not_exists(username, provider_name)
         client_id = request_data.state.split("!_!")[StateData.CLIENT_ID.value]
-        # auth_code_lifetime = (
-        #     await self._client_repo.get_auth_code_lifetime_by_client(client_id)
-        # )
+        auth_code_lifetime = (
+            await self._client_repo.get_auth_code_lifetime_by_client(client_id)
+        )
         await self._persistent_grant_repo.create(
             client_id=client_id,
             grant_data=self._secret_code,
             user_id=await self._user_repo.get_user_id_by_username(username),
             grant_type="authorization_code",
-            # expiration_time=auth_code_lifetime + int(time.time()),
+            expiration_time=auth_code_lifetime + int(time.time()),
         )
 
     async def _update_redirect_url(
