@@ -9,7 +9,6 @@ from src.data_access.postgresql.repositories import GroupRepository
 from src.business_logic.services.admin_api import AdminGroupService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.di.providers.services import provide_admin_group_service_stub
-from src.di.providers import provide_async_session_stub, provide_async_session
 from src.presentation.admin_api.models.group import *
 
 logger = logging.getLogger(__name__)

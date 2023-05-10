@@ -19,6 +19,8 @@ from src.presentation.api.models import (
     DeviceRequestModel,
     DeviceUserCodeModel,
 )
+from src.presentation.api.session.manager import session_manager
+
 
 
 logger = logging.getLogger("is_app")

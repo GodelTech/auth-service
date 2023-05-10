@@ -106,7 +106,6 @@ async def post_authorize(
     request:Request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     user_code: Optional[str] = Cookie(None),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizePostEndpointResponse:
     try:
         session = request.state.session
