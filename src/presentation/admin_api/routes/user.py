@@ -43,10 +43,11 @@ async def get_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
+    
 ) -> dict[str, Any]:
 
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     result = await user_class.get_user(user_id=user_id)
     return {
@@ -70,10 +71,10 @@ async def get_all_users(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestAllUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
+    
 ) -> dict[str, Any]:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
     return {
         "all_users": await user_class.get_all_users(
             group_id=request_model.group_id, role_id=request_model.role_id
@@ -90,9 +91,9 @@ async def update_user(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
     data_to_change = {}
     for param in (
         "username",
@@ -119,11 +120,9 @@ async def delete_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
-    request_model: RequestUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
     await user_class.delete_user(user_id=user_id)
 
 
@@ -135,10 +134,9 @@ async def create_user(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_body: RequestCreateUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
     data = request_body.dictionary()
     data["access_failed_count"] = 0
 
@@ -154,10 +152,9 @@ async def add_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_body: RequestGroupsUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     await user_class.add_user_groups(
         user_id=user_id, group_ids=request_body.group_ids
@@ -173,10 +170,9 @@ async def add_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
     await user_class.add_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
     )
@@ -192,10 +188,9 @@ async def get_user_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 )  -> dict[str, Any]:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     return {
         "groups": await user_class.get_user_groups(
@@ -213,9 +208,10 @@ async def get_user_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
+    
 ) -> dict[str, Any]:
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     return {
         "roles": await user_class.get_user_roles(user_id=user_id)
@@ -231,9 +227,9 @@ async def delete_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     await user_class.remove_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
@@ -249,10 +245,9 @@ async def delete_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestGroupsUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     await user_class.remove_user_groups(
         user_id=user_id, group_ids=request_model.group_ids
@@ -268,10 +263,9 @@ async def change_user_password(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestPasswordUserModel = Depends(),
-    user_class: AdminUserService = Depends(provide_admin_user_service_stub),
 ) -> None:
-
-    user_class = user_class
+    session = request.state.session
+    user_class = AdminUserService(session)
 
     await user_class.change_password(
         user_id=user_id, new_password=request_model.new_password

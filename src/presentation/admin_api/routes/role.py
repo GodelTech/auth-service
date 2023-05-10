@@ -47,21 +47,13 @@ async def get_role(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    try:
+        session = request.state.session
         role_class = AdminRoleService(
             session=session,
-            role_repo=RoleRepository(session=session)
         )
         result = await role_class.get_role(role_id=role_id)
         return {"role": result}
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
 
 
 @admin_role_router.get(
@@ -71,20 +63,12 @@ async def get_role(
 async def get_all_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 )-> dict[str, Any]:
-    try:
-        role_class = AdminRoleService(
-            session=session,
-            role_repo=RoleRepository(session=session)
-        )
-        return {"all_roles": await role_class.get_all_roles()}
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    session = request.state.session
+    role_class = AdminRoleService(
+        session=session,
+    )
+    return {"all_roles": await role_class.get_all_roles()}
 
 
 @admin_role_router.post(
@@ -95,21 +79,12 @@ async def create_role(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestNewRoleModel = Depends(),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    try:
-        role_class = AdminRoleService(
-            session=session,
-            role_repo=RoleRepository(session=session)
-        )
-        await role_class.create_role(name=request_model.name)
-        await session.commit()
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    session = request.state.session
+    role_class = AdminRoleService(
+        session=session,
+    )
+    await role_class.create_role(name=request_model.name)
 
 
 @admin_role_router.put(
@@ -121,24 +96,14 @@ async def update_role(
     role_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateRoleModel = Depends(),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    try:
+        session = request.state.session
         role_class = AdminRoleService(
             session=session,
-            role_repo=RoleRepository(session=session)
         )
         await role_class.update_role(
             role_id=role_id, name=request_model.name
         )
-        await session.commit()
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
-
 
 @admin_role_router.delete(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
@@ -148,18 +113,10 @@ async def delete_group(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    try:
-        role_class = AdminRoleService(
-            session=session,
-            role_repo=RoleRepository(session=session)
-        )
-        await role_class.delete_role(role_id=role_id)
-        await session.commit()
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    session = request.state.session
+    role_class = AdminRoleService(
+        session=session,
+        role_repo=RoleRepository(session=session)
+    )
+    await role_class.delete_role(role_id=role_id)

@@ -74,7 +74,7 @@ async def get_all_groups(
         session=session,
         group_repo=GroupRepository(session=session)
     )
-    # group_class = group_class
+    
     return {"all_groups": await group_class.get_all_groups()}
 
 
@@ -92,7 +92,7 @@ async def get_subgroups(
         session=session,
         group_repo=GroupRepository(session=session)
     )
-    # group_class = group_class
+    
     result = await group_class.get_subgroups(group_id=group_id)
     return result
 
@@ -111,7 +111,7 @@ async def create_group(
         session=session,
         group_repo=GroupRepository(session=session)
     )
-    # group_class = group_class
+    
     await group_class.create_group(
         name=request_model.name, parent_group=request_model.parent_group
     )
@@ -135,7 +135,7 @@ async def update_group(
         session=session,
         group_repo=GroupRepository(session=session)
     )
-    # group_class = group_class
+    
     await group_class.update_group(
         group_id=group_id,
         name=request_model.name,
@@ -156,9 +156,5 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
 ) -> None:
     session = request.state.session
-    group_class = AdminGroupService(
-        session=session,
-        group_repo=GroupRepository(session=session)
-    )
-    # group_class = group_class
+    group_class = AdminGroupService(session=session)
     await group_class.delete_group(group_id=group_id)
