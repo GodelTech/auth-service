@@ -13,13 +13,14 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
 )
-from src.di.providers import provide_device_service_stub, provide_async_session_stub
 from src.dyna_config import BASE_URL_HOST
 from src.presentation.api.models import (
     DeviceCancelModel,
     DeviceRequestModel,
     DeviceUserCodeModel,
 )
+from src.presentation.api.session.manager import session_manager
+
 
 logger = logging.getLogger("is_app")
 
@@ -31,11 +32,12 @@ device_auth_router = APIRouter(prefix="/device", tags=["Device"])
 @device_auth_router.post(
     "/", status_code=status.HTTP_200_OK, response_class=JSONResponse
 )
+
 async def post_device_authorize(
+    request:Request,
     request_model: DeviceRequestModel = Depends(),
-    auth_service: DeviceService = Depends(provide_device_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> JSONResponse:
+    session = request.state.session
     auth_service = DeviceService(
         client_repo=ClientRepository(session=session),
         device_repo=DeviceRepository(session=session),
@@ -80,11 +82,11 @@ async def get_device_user_code(
     "/auth", status_code=status.HTTP_302_FOUND, response_class=RedirectResponse
 )
 async def post_device_user_code(
+    request:Request,
     request_model: DeviceUserCodeModel = Depends(),
-    auth_service: DeviceService = Depends(provide_device_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
+        session = request.state.session
         auth_service = DeviceService(
             client_repo=ClientRepository(session=session),
             device_repo=DeviceRepository(session=session),
@@ -130,11 +132,11 @@ async def get_device_login_confirm(
 
 @device_auth_router.delete("/auth/cancel", status_code=status.HTTP_200_OK)
 async def delete_device(
+    request:Request,
     request_model: DeviceCancelModel = Depends(),
-    auth_service: DeviceService = Depends(provide_device_service_stub),
-    user_code: Optional[str] = Cookie(None),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    user_code: Optional[str] = Cookie(None),  
 ) -> Union[str, JSONResponse]:
+    session = request.state.session
     auth_service = DeviceService(
         client_repo=ClientRepository(session=session),
         device_repo=DeviceRepository(session=session),

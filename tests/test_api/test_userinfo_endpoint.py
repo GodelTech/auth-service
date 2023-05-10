@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy import delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-
+from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services import UserInfoServices
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
@@ -34,9 +34,10 @@ ANSWER_USER_INFO = {
 class TestUserInfoEndpoint:
     @pytest.mark.asyncio
     async def test_successful_userinfo_get_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, client: AsyncClient
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        jwt = JWTService()
+        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }

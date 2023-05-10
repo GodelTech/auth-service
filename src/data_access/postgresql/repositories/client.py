@@ -18,10 +18,7 @@ from src.data_access.postgresql.tables.client import (
 )
 
 
-class ClientRepository():
-
-    def __init__(self, session):
-        self.session = session
+class ClientRepository(BaseRepository):
 
     async def get_client_by_client_id(self, client_id: str) -> Client:
         client = await self.session.execute(

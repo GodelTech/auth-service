@@ -35,7 +35,7 @@ from src.di.providers import (
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
-
+# from src.presentation.api.session.closer import with_session
 if TYPE_CHECKING:
     from src.business_logic.authorization import AuthServiceProtocol
 
@@ -58,8 +58,8 @@ async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
     auth_class: LoginFormService = Depends(provide_login_form_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizeGetEndpointResponse:
+    session = request.state.session
     auth_class = LoginFormService(
         client_repo=ClientRepository(session=session),
         oidc_repo=ThirdPartyOIDCRepository(session=session),
@@ -83,8 +83,9 @@ async def get_authorize(
                 },
                 status_code=200,
             )
-        raise ValueError
-
+        else:
+            raise ValueError
+        
     except ClientNotFoundError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -107,14 +108,15 @@ async def get_authorize(
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
+    request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     auth_service_factory: AuthServiceFactory = Depends(
         provide_auth_service_factory_stub
     ),
     user_code: Optional[str] = Cookie(None),
-    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizePostEndpointResponse:
     try:
+        session = request.state.session
         auth_service_factory = AuthServiceFactory(
             session=session,
             client_repo=ClientRepository(session=session),

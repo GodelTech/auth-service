@@ -94,6 +94,6 @@ class ProviderSession:
     def __init__(self, session_factory: sessionmaker) -> None:
         self._session_factory = session_factory
 
-    async def __call__(self) -> Generator[AsyncSession, None, None]:
+    async def get_session(self) -> Generator[AsyncSession, None, None]:
         async with self._session_factory() as session:
             yield session

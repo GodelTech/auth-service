@@ -24,11 +24,6 @@ class ThirdPartyOIDCRepository():
     async def get_row_providers_data(
         self,
     ) -> List[Tuple[str, str, str, str, str, str]]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         providers = await self.session.execute(
             select(
                 IdentityProvider.name,
@@ -49,11 +44,6 @@ class ThirdPartyOIDCRepository():
     async def get_row_provider_credentials_by_name(
         self, name: str
     ) -> Optional[Tuple[str, str, str]]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         provider_data = await self.session.execute(
             select(
                 IdentityProviderMapped.provider_client_id,
@@ -72,11 +62,6 @@ class ThirdPartyOIDCRepository():
             return None
 
     async def create_state(self, state: str) -> None:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         if not await self.validate_state(state=state):
             await self.session.execute(
                 insert(IdentityProviderState).values(
@@ -90,11 +75,6 @@ class ThirdPartyOIDCRepository():
             )
 
     async def delete_state(self, state: str) -> None:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         if await self.validate_state(state=state):
             await self.session.execute(
                 delete(IdentityProviderState).where(
@@ -108,11 +88,6 @@ class ThirdPartyOIDCRepository():
             )
 
     async def validate_state(self, state: str) -> bool:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         state_checked = await self.session.execute(
             select(
                 exists().where(

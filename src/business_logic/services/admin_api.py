@@ -113,7 +113,7 @@ class AdminUserService():
         self.session = session
 
     
-    @session_manager
+    
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
         from time import time
 

@@ -40,7 +40,7 @@ from src.presentation.api.routes.utils import (
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
 )
-
+from src.presentation.api.session.manager import session_manager
 logger = logging.getLogger(__name__)
 
 
@@ -48,11 +48,12 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
 @token_router.post("/", response_model=ResponseTokenModel)
+
 async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
     token_class: TokenService = Depends(provide_token_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
         token_class = TokenService(
