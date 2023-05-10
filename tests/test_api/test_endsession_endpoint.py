@@ -28,20 +28,23 @@ class TestEndSessionEndpoint:
         self,
         engine: AsyncEngine,
         client: AsyncClient,
-        end_session_service: EndSessionService,
         end_session_request_model: RequestEndSessionModel,
+        end_session_service = EndSessionService,
     ) -> None:
-        service = end_session_service
-        service.request_model = end_session_request_model
-        secret = await service.client_repo.get_client_secrete_by_client_id(
-            client_id=TOKEN_HINT_DATA["client_id"]
-        )
-        token = await service.jwt_service.encode_jwt(secret=secret, payload={})
+        
         session_factory = sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
         )
         async with session_factory() as sess:
             session = sess
+
+            service = end_session_service(session)
+            service.request_model = end_session_request_model
+
+            secret = await service.client_repo.get_client_secrete_by_client_id(
+                client_id=TOKEN_HINT_DATA["client_id"]
+            )
+            token = await service.jwt_service.encode_jwt(secret=secret, payload={})
             await session.execute(
                 insert(PersistentGrant).values(
                     key="test_key",

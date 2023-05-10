@@ -38,8 +38,6 @@ async def post_device_authorize(
 ) -> JSONResponse:
     session = request.state.session
     auth_service = DeviceService(
-        client_repo=ClientRepository(session=session),
-        device_repo=DeviceRepository(session=session),
         session=session
     )
     try:
@@ -87,8 +85,6 @@ async def post_device_user_code(
     try:
         session = request.state.session
         auth_service = DeviceService(
-            client_repo=ClientRepository(session=session),
-            device_repo=DeviceRepository(session=session),
             session=session
         )
         auth_service.request_model = request_model

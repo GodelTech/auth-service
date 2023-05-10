@@ -55,8 +55,6 @@ async def get_authorize(
 ) -> AuthorizeGetEndpointResponse:
     session = request.state.session
     auth_class = LoginFormService(
-        client_repo=ClientRepository(session=session),
-        oidc_repo=ThirdPartyOIDCRepository(session=session),
         session=session
     )
     try:
@@ -102,21 +100,13 @@ async def get_authorize(
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND)
 async def post_authorize(
-    request,
+    request:Request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     user_code: Optional[str] = Cookie(None),
 ) -> AuthorizePostEndpointResponse:
     try:
         session = request.state.session
-        auth_service_factory = AuthServiceFactory(
-            session=session,
-            client_repo=ClientRepository(session=session),
-            user_repo=UserRepository(session=session),
-            persistent_grant_repo=PersistentGrantRepository(session=session),
-            device_repo=DeviceRepository(session=session),
-            password_service=PasswordHash(),
-            jwt_service=JWTService()
-        )
+        auth_service_factory = AuthServiceFactory(session=session)
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)
