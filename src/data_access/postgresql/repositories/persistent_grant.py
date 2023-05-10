@@ -20,11 +20,7 @@ from sqlalchemy.engine.result import ChunkedIteratorResult
 logger = logging.getLogger(__name__)
 
 
-class PersistentGrantRepository():
-
-    def __init__(self, session):
-        self.session = session
-
+class PersistentGrantRepository(BaseRepository):
     async def create(
         self,
         client_id: str,
