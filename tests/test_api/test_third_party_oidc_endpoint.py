@@ -121,6 +121,24 @@ class TestGithubAuthEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"error": "unsupported_auth_provider"}
 
+    async def test_unsuccessful_github_get_request_without_state_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_github_get_request_without_code_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
 
 @pytest.mark.asyncio
 class TestLinkedinAuthEndpoint:
@@ -171,6 +189,24 @@ class TestLinkedinAuthEndpoint:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_linkedin_get_request_without_state_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_linkedin_get_request_without_code_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.asyncio
@@ -223,6 +259,24 @@ class TestGoogleAuthEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"error": "unsupported_auth_provider"}
 
+    async def test_unsuccessful_google_get_request_without_state_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_google_get_request_without_code_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
 
 @pytest.mark.asyncio
 class TestGitlabAuthEndpoint:
@@ -274,6 +328,24 @@ class TestGitlabAuthEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"error": "unsupported_auth_provider"}
 
+    async def test_unsuccessful_gitlab_get_request_without_state_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_gitlab_get_request_without_code_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
 
 @pytest.mark.asyncio
 class TestMicrosoftAuthEndpoint:
@@ -324,3 +396,21 @@ class TestMicrosoftAuthEndpoint:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_microsoft_get_request_without_state_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_microsoft_get_request_without_code_parameter(
+        self, mocked_get_service_impl
+    ):
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
