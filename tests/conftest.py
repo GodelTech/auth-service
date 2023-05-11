@@ -72,7 +72,7 @@ async def engine() -> AsyncEngine:
         yield engine
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def connection(engine: AsyncEngine) -> AsyncSession:
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False

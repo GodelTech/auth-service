@@ -56,7 +56,7 @@ class GroupRepository(BaseRepository):
             )
             return result.first()[0]
         except Exception as e:
-            raise e
+            raise ValueError(e)
 
     async def get_group_by_name(self, name: str) -> Group:
         try:
