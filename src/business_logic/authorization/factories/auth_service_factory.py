@@ -15,14 +15,14 @@ from .factory_methods import (
     _create_token_auth_service,
 )
 
-if TYPE_CHECKING:
-    from src.business_logic.services import JWTService, PasswordHash
-    from src.data_access.postgresql.repositories import (
-        ClientRepository,
-        DeviceRepository,
-        PersistentGrantRepository,
-        UserRepository,
-    )
+
+from src.business_logic.services import JWTService, PasswordHash
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    DeviceRepository,
+    PersistentGrantRepository,
+    UserRepository,
+)
 
 
 FactoryMethod = Callable[..., AuthServiceProtocol]
