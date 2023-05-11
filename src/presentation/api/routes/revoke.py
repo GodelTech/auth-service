@@ -7,7 +7,7 @@ from src.business_logic.services import JWTService, TokenService
 from src.data_access.postgresql.errors import GrantNotFoundError
 from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
-
+from src.data_access.postgresql.repositories import PersistentGrantRepository, ClientRepository, UserRepository,DeviceRepository, BlacklistedTokenRepository
 logger = logging.getLogger(__name__)
 
 revoke_router = APIRouter(prefix="/revoke", tags=["Revoke"])
@@ -27,7 +27,14 @@ async def post_revoke_token(
 ) -> None:
     try:
         session = request.state.session
-        token_class = TokenService(session)
+        token_class = TokenService(
+            session = session,
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            user_repo=UserRepository(session),
+            device_repo=DeviceRepository(session),
+            blacklisted_repo=BlacklistedTokenRepository(session)
+            )
         token_class.request = request
         token_class.request_body = request_body
         token = request.headers.get("authorization") or auth_swagger

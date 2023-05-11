@@ -51,6 +51,7 @@ async def get_role(
         session = request.state.session
         role_class = AdminRoleService(
             session=session,
+            role_repo=RoleRepository(session)
         )
         result = await role_class.get_role(role_id=role_id)
         return {"role": result}
@@ -66,8 +67,9 @@ async def get_all_roles(
 )-> dict[str, Any]:
     session = request.state.session
     role_class = AdminRoleService(
-        session=session,
-    )
+            session=session,
+            role_repo=RoleRepository(session)
+        )
     return {"all_roles": await role_class.get_all_roles()}
 
 
@@ -82,8 +84,9 @@ async def create_role(
 ) -> None:
     session = request.state.session
     role_class = AdminRoleService(
-        session=session,
-    )
+            session=session,
+            role_repo=RoleRepository(session)
+        )
     await role_class.create_role(name=request_model.name)
 
 
@@ -100,6 +103,7 @@ async def update_role(
         session = request.state.session
         role_class = AdminRoleService(
             session=session,
+            role_repo=RoleRepository(session)
         )
         await role_class.update_role(
             role_id=role_id, name=request_model.name

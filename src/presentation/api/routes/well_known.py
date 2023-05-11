@@ -19,7 +19,7 @@ from src.presentation.api.models.well_known import (
     ResponseJWKS,
     ResponseOpenIdConfiguration,
 )
-
+from src.data_access.postgresql.repositories import WellKnownRepository
 
 well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 
@@ -49,7 +49,10 @@ async def get_jwks(
     try:
         logger.debug("JWKS")
         session = request.state.session
-        well_known_info_class = WellKnownServices(session)
+        well_known_info_class = WellKnownServices(
+            session = session, 
+            wlk_repo=WellKnownRepository(session)
+        )
         well_known_info_class.request = request
         return {
             "keys": [

@@ -156,5 +156,8 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
 ) -> None:
     session = request.state.session
-    group_class = AdminGroupService(session=session)
+    group_class = AdminGroupService(
+        session=session,
+        group_repo=GroupRepository(session=session)
+    )
     await group_class.delete_group(group_id=group_id)

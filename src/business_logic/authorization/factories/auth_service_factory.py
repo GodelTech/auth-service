@@ -39,8 +39,8 @@ class AuthServiceFactory:
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+        password_service = PasswordHash(),
+        jwt_service = JWTService(),
     ) -> None:
         self.session = session
         self._client_repo = client_repo

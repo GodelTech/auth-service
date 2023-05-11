@@ -17,10 +17,10 @@ class WellKnownServices:
     def __init__(
             self,
             session:AsyncSession, 
-            wlk_repo =  WellKnownRepository
+            wlk_repo: WellKnownRepository
         ) -> None:
         self.request: Union[Request, Any] = None
-        self.wlk_repo = wlk_repo(session)
+        self.wlk_repo = wlk_repo
         self.session = session
 
     def get_list_of_types(

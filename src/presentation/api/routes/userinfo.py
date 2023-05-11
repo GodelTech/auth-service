@@ -11,7 +11,7 @@ from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.di.providers import provide_async_session_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-
+from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,12 @@ async def get_userinfo(
     ),  # crutch for swagger
 ) -> dict[str, Any]:
         session = request.state.session 
-        userinfo_class = UserInfoServices(session)
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.debug("Collecting Claims from DataBase.")
@@ -54,7 +59,12 @@ async def post_userinfo(
 ) -> dict[str, Any]:
     try:
         session = request.state.session
-        userinfo_class = UserInfoServices(session)
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
@@ -87,7 +97,12 @@ async def get_userinfo_jwt(
 ) -> str:
     try:
         session = request.state.session
-        userinfo_class = UserInfoServices(session)
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")

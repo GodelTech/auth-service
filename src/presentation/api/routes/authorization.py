@@ -55,7 +55,9 @@ async def get_authorize(
 ) -> AuthorizeGetEndpointResponse:
     session = request.state.session
     auth_class = LoginFormService(
-        session=session
+        session=session,
+        client_repo=ClientRepository(session),
+        oidc_repo=ThirdPartyOIDCRepository(session)
     )
     try:
         auth_class.request_model = request_model
@@ -106,7 +108,13 @@ async def post_authorize(
 ) -> AuthorizePostEndpointResponse:
     try:
         session = request.state.session
-        auth_service_factory = AuthServiceFactory(session=session)
+        auth_service_factory = AuthServiceFactory(
+            session=session,
+            client_repo=ClientRepository(session),
+            user_repo=UserRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            device_repo=DeviceRepository(session)
+            )
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)

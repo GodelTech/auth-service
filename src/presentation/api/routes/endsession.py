@@ -14,7 +14,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
 )
 from src.di.providers import provide_endsession_service_stub
 from src.presentation.api.models.endsession import RequestEndSessionModel
-
+from src.data_access.postgresql.repositories import ClientRepository, PersistentGrantRepository
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,11 @@ async def end_session(
 ) -> Union[int, RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
-        service_class = EndSessionService(session)
+        service_class = EndSessionService(
+            session, 
+            client_repo=ClientRepository(session), 
+            persistent_grant_repo=PersistentGrantRepository(session)
+        )
         service_class.request_model = request_model
         logout_redirect_uri = await service_class.end_session()
         if logout_redirect_uri is None:

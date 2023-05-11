@@ -37,10 +37,10 @@ class AdminRoleService():
     def __init__(
             self,
             session: AsyncSession,
-            role_repo = RoleRepository
+            role_repo: RoleRepository
         ) -> None:
         self.session = session
-        self.role_repo= role_repo(self)
+        self.role_repo= role_repo
         
     async def get_role(self, role_id:int) -> Role:
         return await self.role_repo.get_role_by_id(role_id=role_id)
@@ -105,11 +105,9 @@ class AdminUserService():
     def __init__(
             self,
             session: AsyncSession,
-            user_repo = UserRepository,
-            role_repo = RoleRepository,
+            user_repo: UserRepository,
         ) -> None:
-        self.user_repo=user_repo(session)
-        self.role_repo=role_repo(session)
+        self.user_repo=user_repo
         self.session = session
             
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:

@@ -57,7 +57,14 @@ async def get_tokens(
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
         session = request.state.session
-        token_class = TokenService(session)
+        token_class = TokenService(
+            session = session,
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            user_repo=UserRepository(session),
+            device_repo=DeviceRepository(session),
+            blacklisted_repo=BlacklistedTokenRepository(session)
+            )
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()

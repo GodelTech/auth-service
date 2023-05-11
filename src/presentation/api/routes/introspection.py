@@ -10,7 +10,7 @@ from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
     ResponceIntrospectionModel,
 )
-
+from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 logger = logging.getLogger(__name__)
 
 introspection_router = APIRouter(
@@ -28,7 +28,11 @@ async def post_introspection(
 ) -> dict[str, Any]:
     try:
         session = request.state.session
-        introspection_class = IntrospectionServies(session)
+        introspection_class = IntrospectionServies(
+            session=session,
+            user_repo=UserRepository(session),
+            persistent_grant_repo= PersistentGrantRepository(session)
+            )
         introspection_class.request = request
 
         token = request.headers.get("authorization") or auth_swagger

@@ -38,7 +38,9 @@ async def post_device_authorize(
 ) -> JSONResponse:
     session = request.state.session
     auth_service = DeviceService(
-        session=session
+        session=session,
+        client_repo=ClientRepository(session),
+        device_repo=DeviceRepository(session)
     )
     try:
         auth_service.request_model = request_model
@@ -85,7 +87,9 @@ async def post_device_user_code(
     try:
         session = request.state.session
         auth_service = DeviceService(
-            session=session
+            session=session,
+            client_repo=ClientRepository(session),
+            device_repo=DeviceRepository(session)
         )
         auth_service.request_model = request_model
         firmed_redirect_uri = await auth_service.get_redirect_uri()
@@ -132,7 +136,11 @@ async def delete_device(
     user_code: Optional[str] = Cookie(None),  
 ) -> Union[str, JSONResponse]:
     session = request.state.session
-    auth_service = DeviceService(session)
+    auth_service = DeviceService(
+        session=session,
+        client_repo=ClientRepository(session),
+        device_repo=DeviceRepository(session)
+    )
     try:
         auth_service.request_model = request_model
         result = await auth_service.clean_device_data(user_code)
