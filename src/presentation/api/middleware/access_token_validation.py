@@ -15,22 +15,23 @@ logger = logging.getLogger(__name__)
 class AccessTokenMiddleware(BaseHTTPMiddleware):
     def __init__(self, 
                  app: Any, 
-                 blacklisted_repo: BlacklistedTokenRepository,
+                 #blacklisted_repo: BlacklistedTokenRepository,
                  jwt_service: JWTService = JWTService(), 
                  ):
         self.app = app
         self.jwt_service = jwt_service
-        self.blacklisted_repo = blacklisted_repo
+        #self.blacklisted_repo = blacklisted_repo
 
     async def dispatch_func(self, request: Any, call_next:Callable[..., Any]) -> Any:
 
         if "/administration/" in request.url.path:
             token = request.headers.get("access-token")
-
+            session = request.state.session
+            blacklisted_repo = BlacklistedTokenRepository(session)
             try:
                 if token is None:
                     raise ValueError
-                if await self.blacklisted_repo.exists(
+                if await blacklisted_repo.exists(
                         token=token,
                     ):
                     return JSONResponse(
