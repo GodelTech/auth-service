@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 endsession_router = APIRouter(prefix="/endsession", tags=["End Session"])
 
 
-@endsession_router.get("/", status_code=status.HTTP_204_NO_CONTENT)
+@endsession_router.get("/", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 async def end_session(
     request_model: RequestEndSessionModel = Depends(),
     service_class: EndSessionService = Depends(
         provide_endsession_service_stub
-    ),
+    )
 ) -> Union[int, RedirectResponse, JSONResponse]:
     try:
         service_class = service_class
