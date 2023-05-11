@@ -50,65 +50,30 @@ class DataBasePopulation:
 
     @classmethod
     def clean_data_from_database(cls) -> None:
-        sess.session.execute(
-            text("TRUNCATE TABLE user_passwords RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE user_claim_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE api_claim_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE api_scope_claim_types RESTART IDENTITY CASCADE"
+        tables_to_clean = {
+            "user_passwords",
+            "user_claim_types",
+            "api_claim_types",
+            "api_scope_claim_types",
+            "api_secrets_types",
+            "persistent_grant_types",
+            "persistent_grants",
+            "client_secrets",
+            "user_claims",
+            "users",
+            "clients",
+            "roles",
+            "access_token_types",
+            "protocol_types",
+            "refresh_token_expiration_types",
+            "refresh_token_usage_types",
+            "identity_providers",
+        }
+
+        for table_name in tables_to_clean:
+            sess.session.execute(
+                text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE")
             )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE api_secrets_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE persistent_grant_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE client_secrets RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE user_claims RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE protocol_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE refresh_token_expiration_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE refresh_token_usage_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE identity_providers RESTART IDENTITY CASCADE")
-        )
 
         sess.session.commit()
         sess.session.close()
