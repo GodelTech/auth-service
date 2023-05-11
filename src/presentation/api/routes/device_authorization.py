@@ -73,7 +73,10 @@ async def get_device_user_code(
 
 
 @device_auth_router.post(
-    "/auth", status_code=status.HTTP_302_FOUND, response_class=RedirectResponse
+    "/auth", 
+    status_code=status.HTTP_302_FOUND,
+    response_class=RedirectResponse,
+    response_model=None
 )
 async def post_device_user_code(
     request:Request,
@@ -124,7 +127,7 @@ async def get_device_login_confirm(
     )
 
 
-@device_auth_router.delete("/auth/cancel", status_code=status.HTTP_200_OK)
+@device_auth_router.delete("/auth/cancel", status_code=status.HTTP_200_OK, response_model=None)
 async def delete_device(
     request:Request,
     request_model: DeviceCancelModel = Depends(),

@@ -43,6 +43,7 @@ auth_oidc_router = APIRouter(
 @auth_oidc_router.get(
     "/github",
     status_code=status.HTTP_302_FOUND,
+    response_model=None
 )
 
 async def get_github_authorize(
@@ -83,8 +84,7 @@ async def get_github_authorize(
         )
 
 
-@auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND)
-
+@auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND, response_model=None)
 async def get_linkedin_authorize(
     request:Request,
     request_model: ThirdPartyLinkedinRequestModel = Depends(),
@@ -126,6 +126,7 @@ async def get_linkedin_authorize(
 @auth_oidc_router.get(
     "/facebook",
     status_code=status.HTTP_302_FOUND,
+    response_model=None
 )
 
 async def get_facebook_authorize(
@@ -169,6 +170,7 @@ async def get_facebook_authorize(
 @auth_oidc_router.get(
     "/google",
     status_code=status.HTTP_302_FOUND,
+    response_model=None
 )
 
 async def get_google_authorize(
@@ -212,6 +214,7 @@ async def get_google_authorize(
 @auth_oidc_router.get(
     "/gitlab",
     status_code=status.HTTP_302_FOUND,
+    response_model=None
 )
 
 async def get_gitlab_authorize(
@@ -255,6 +258,7 @@ async def get_gitlab_authorize(
 @auth_oidc_router.get(
     "/microsoft",
     status_code=status.HTTP_302_FOUND,
+    response_model=None
 )
 
 async def get_microsoft_authorize(
@@ -298,6 +302,7 @@ async def get_microsoft_authorize(
 @auth_oidc_router.post(
     "/state",
     status_code=status.HTTP_200_OK,
+    response_model=None
 )
 
 async def post_create_state(
