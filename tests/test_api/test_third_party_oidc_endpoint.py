@@ -1,19 +1,16 @@
-from typing import Any
-from src.main import app
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import httpx
 import pytest
 from fastapi import status
-import httpx
 
-
-from src.business_logic.third_party_auth import (
-    ThirdPartyAuthServiceProtocol,
-)
+from src.business_logic.third_party_auth import ThirdPartyAuthServiceProtocol
 from src.business_logic.third_party_auth.errors import (
     ThirdPartyAuthInvalidStateError,
-    UnsupportedThirdPartyAuthProviderError,
     ThirdPartyAuthProviderInvalidRequestDataError,
+    UnsupportedThirdPartyAuthProviderError,
 )
+from src.main import app
 
 client = httpx.AsyncClient(app=app, base_url="http://testserver")
 
