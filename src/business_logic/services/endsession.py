@@ -17,8 +17,8 @@ class EndSessionService:
         persistent_grant_repo: PersistentGrantRepository,
         jwt_service = JWTService()
     ) -> None:
-        self.client_repo = client_repo(session)
-        self.persistent_grant_repo = persistent_grant_repo(session)
+        self.client_repo = client_repo
+        self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service()
         self._request_model: Optional[RequestEndSessionModel] = None
         self.session = session

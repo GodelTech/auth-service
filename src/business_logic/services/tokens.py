@@ -104,12 +104,12 @@ class TokenService:
         self.request_model: Optional[BodyRequestTokenModel] = None
         self.request_body: Optional[BodyRequestRevokeModel] = None
         self.authorization: Optional[str] = None
-        self.client_repo = client_repo(session)
-        self.persistent_grant_repo = persistent_grant_repo(session)
-        self.user_repo = user_repo(session)
-        self.device_repo = device_repo(session)
-        self.jwt_service = jwt_service()
-        self.blacklisted_repo = blacklisted_repo(session)
+        self.client_repo = client_repo
+        self.persistent_grant_repo = persistent_grant_repo
+        self.user_repo = user_repo
+        self.device_repo = device_repo
+        self.jwt_service = jwt_service
+        self.blacklisted_repo = blacklisted_repo
 
     async def get_tokens(self) -> dict[str, Any]:
         if (

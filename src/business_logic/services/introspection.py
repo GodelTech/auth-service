@@ -32,9 +32,9 @@ class IntrospectionServies:
         self.request: Optional[Request] = None
         self.authorization: Optional[str] = None
         self.request_body: Optional[BodyRequestIntrospectionModel] = None
-        self.user_repo = user_repo(session)
-        self.client_repo = client_repo(session)
-        self.persistent_grant_repo = persistent_grant_repo(session)
+        self.user_repo = user_repo
+        self.client_repo = client_repo
+        self.persistent_grant_repo = persistent_grant_repo
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:

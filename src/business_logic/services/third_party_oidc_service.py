@@ -31,11 +31,11 @@ class AuthThirdPartyOIDCService:
     ) -> None:
         self._request_model: Optional[ThirdPartyOIDCRequestModel] = None
         self._state_request_model: Optional[StateRequestModel] = None
-        self.client_repo = client_repo(session)
-        self.user_repo = user_repo(session)
-        self.persistent_grant_repo = persistent_grant_repo(session)
-        self.oidc_repo = oidc_repo(session)
-        self.http_client = http_client()
+        self.client_repo = client_repo
+        self.user_repo = user_repo
+        self.persistent_grant_repo = persistent_grant_repo
+        self.oidc_repo = oidc_repo
+        self.http_client = http_client
 
     async def get_github_redirect_uri(
         self, provider_name: str

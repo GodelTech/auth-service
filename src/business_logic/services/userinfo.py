@@ -23,9 +23,9 @@ class UserInfoServices:
     ) -> None:
         self.jwt = jwt()
         self.authorization: Optional[str] = None
-        self.user_repo = user_repo(session)
-        self.client_repo = client_repo(session)
-        self.persistent_grant_repo = persistent_grant_repo(session)
+        self.user_repo = user_repo
+        self.client_repo = client_repo
+        self.persistent_grant_repo = persistent_grant_repo
 
     async def get_user_info(
         self,
