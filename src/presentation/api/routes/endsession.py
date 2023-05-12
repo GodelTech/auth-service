@@ -26,6 +26,9 @@ endsession_router = APIRouter(prefix="/endsession", tags=["End Session"])
 async def end_session(
     request:Request,
     request_model: RequestEndSessionModel = Depends(),
+    service_class: EndSessionService = Depends(
+        provide_endsession_service_stub
+    )
 ) -> Union[int, RedirectResponse, JSONResponse]:
     try:
         session = request.state.session

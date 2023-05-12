@@ -30,7 +30,6 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         #self.blacklisted_repo = blacklisted_repo
 
     async def dispatch_func(self, request, call_next:Callable[..., Any]) -> Any:
-
         for request_with_auth in REQUESTS_WITH_AUTH:
             if (
                 request_with_auth["path"] == request.url.path
@@ -46,6 +45,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         content="Incorrect Authorization Token",
                     )
+
                 session = request.state.session
                 blacklisted_repo = BlacklistedTokenRepository(session)
                 if await blacklisted_repo.exists(

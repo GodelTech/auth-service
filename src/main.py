@@ -190,6 +190,7 @@ def setup_di(app: FastAPI) -> None:
             user_repo=prov.provide_user_repo(),
             client_repo=prov.provide_client_repo(),
             persistent_grant_repo=prov.provide_persistent_grant_repo(),
+
         )
     )
     app.dependency_overrides[
@@ -379,11 +380,10 @@ def setup_di(app: FastAPI) -> None:
 
     nodepends_provide_auth_service_factory = (
         lambda: prov.provide_auth_service_factory(
-            session=session(),
-            client_repo=prov.provide_client_repo(session=session()),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(session=session()),
-            user_repo=prov.provide_user_repo(session=session()),
-            device_repo=prov.provide_device_repo(session=session()),
+            client_repo=prov.provide_client_repo(db_engine),
+            persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
+            user_repo=prov.provide_user_repo(db_engine),
+            device_repo=prov.provide_device_repo(db_engine),
             jwt_service=prov.provide_jwt_service(),
             password_service=prov.provide_password_service(),
         )
@@ -404,8 +404,6 @@ Instrumentator().instrument(app).expose(app)
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(
-        REDIS_URL, encoding="utf8", decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")
