@@ -104,12 +104,13 @@ def event_loop(request: Request) -> Any:
 
 
 @pytest_asyncio.fixture
-async def authorization_service(engine: AsyncEngine) -> AuthorizationService:
+async def authorization_service(connection: AsyncSession) -> AuthorizationService:
     auth_service = AuthorizationService(
-        client_repo=ClientRepository(engine),
-        user_repo=UserRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        device_repo=DeviceRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        user_repo=UserRepository(session=connection),
+        persistent_grant_repo=PersistentGrantRepository(session=connection),
+        device_repo=DeviceRepository(session=connection),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
     )
@@ -117,64 +118,70 @@ async def authorization_service(engine: AsyncEngine) -> AuthorizationService:
 
 
 @pytest_asyncio.fixture
-async def end_session_service(engine: AsyncEngine) -> EndSessionService:
+async def end_session_service(connection: AsyncSession) -> EndSessionService:
     end_sess_service = EndSessionService(
-        client_repo=ClientRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        persistent_grant_repo=PersistentGrantRepository(session=connection),
         jwt_service=JWTService(),
     )
     return end_sess_service
 
 
 @pytest_asyncio.fixture
-async def introspection_service(engine: AsyncEngine) -> IntrospectionServies:
+async def introspection_service(connection: AsyncSession) -> IntrospectionServies:
     intro_service = IntrospectionServies(
-        client_repo=ClientRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        user_repo=UserRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        persistent_grant_repo=PersistentGrantRepository(session=connection),
+        user_repo=UserRepository(session=connection),
         jwt=JWTService(),
     )
     return intro_service
 
 
 @pytest_asyncio.fixture
-async def user_info_service(engine: AsyncEngine) -> UserInfoServices:
+async def user_info_service(connection: AsyncSession) -> UserInfoServices:
     user_info = UserInfoServices(
+        session=connection,
         jwt=JWTService(),
-        client_repo=ClientRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        user_repo=UserRepository(engine),
+        client_repo=ClientRepository(session=connection),
+        persistent_grant_repo=PersistentGrantRepository(session=connection),
+        user_repo=UserRepository(session=connection),
     )
     return user_info
 
 
 @pytest_asyncio.fixture
-async def token_service(engine: AsyncEngine) -> TokenService:
+async def token_service(connection: AsyncSession) -> TokenService:
     tk_service = TokenService(
-        client_repo=ClientRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        user_repo=UserRepository(engine),
-        device_repo=DeviceRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        persistent_grant_repo=PersistentGrantRepository(session=connection),
+        user_repo=UserRepository(session=connection),
+        device_repo=DeviceRepository(session=connection),
         jwt_service=JWTService(),
-        blacklisted_repo=BlacklistedTokenRepository(engine),
+        blacklisted_repo=BlacklistedTokenRepository(session=connection),
     )
     return tk_service
 
 
 @pytest_asyncio.fixture
-async def login_form_service(engine: AsyncEngine) -> LoginFormService:
+async def login_form_service(connection: AsyncSession) -> LoginFormService:
     login_service = LoginFormService(
-        client_repo=ClientRepository(engine),
-        oidc_repo=ThirdPartyOIDCRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        oidc_repo=ThirdPartyOIDCRepository(session=connection),
     )
     return login_service
 
 
 @pytest_asyncio.fixture
-async def device_service(engine: AsyncEngine) -> DeviceService:
+async def device_service(connection: AsyncSession) -> DeviceService:
     dev_service = DeviceService(
-        client_repo=ClientRepository(engine),
-        device_repo=DeviceRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(session=connection),
+        device_repo=DeviceRepository(session=connection),
     )
     return dev_service
 
@@ -230,9 +237,10 @@ async def microsoft_third_party_service(engine) -> ThirdPartyMicrosoftService:
 
 
 @pytest_asyncio.fixture
-async def wlk_services(engine) -> WellKnownServices:
+async def wlk_services(connection: AsyncSession) -> WellKnownServices:
     wlk_services = WellKnownServices(
-        wlk_repo=WellKnownRepository(engine),
+        session=connection,
+        wlk_repo=WellKnownRepository(session=connection),
     )
     return wlk_services
 
@@ -241,9 +249,10 @@ from src.business_logic.services.admin_auth import AdminAuthService
 
 
 @pytest_asyncio.fixture
-async def admin_auth_service(engine) -> AdminAuthService:
+async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
     admin_auth_service = AdminAuthService(
-        user_repo=UserRepository(engine),
+        session=connection,
+        user_repo=UserRepository(session=connection),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
     )
