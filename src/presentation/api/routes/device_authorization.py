@@ -57,11 +57,6 @@ async def post_device_authorize(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Client not found"},
         )
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
 
 
 @device_auth_router.get(
@@ -160,11 +155,6 @@ async def delete_device(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "Client not found"},
         )
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
 
 
 @device_auth_router.get(
