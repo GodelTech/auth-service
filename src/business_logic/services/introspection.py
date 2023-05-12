@@ -55,6 +55,8 @@ class IntrospectionServies:
                 "access-token",
                 "access_token",
                 "access",
+                "authorization_code",
+                "authorization-code"
             ):
                 response["active"] = True
 

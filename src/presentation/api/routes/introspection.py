@@ -31,7 +31,8 @@ async def post_introspection(
         introspection_class = IntrospectionServies(
             session=session,
             user_repo=UserRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session)
+            persistent_grant_repo=PersistentGrantRepository(session),
+            client_repo=ClientRepository(session)
             )
         introspection_class.request = request
 
