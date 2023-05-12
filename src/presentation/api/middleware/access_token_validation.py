@@ -30,31 +30,22 @@ class AccessTokenMiddleware(BaseHTTPMiddleware):
             blacklisted_repo = BlacklistedTokenRepository(session)
             try:
                 if token is None:
-                    raise ValueError
-                if await blacklisted_repo.exists(
-                        token=token,
-                    ):
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        content="Token revoked"
-                    )
+                    raise BaseException
+                if await blacklisted_repo.exists(token=token):
+                    raise BaseException
                 if not await self.jwt_service.verify_token(token, aud='admin'):
-                    logger.exception("403 Incorrect Access Token")
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        content="Incorrect Access Token",
-                    )
-                    
-                else:
-                    logger.info("Access Token Auth Passed")
-                    response = await call_next(request)
-                    return response
+                    raise BaseException                
             except:
                 logger.exception("403 Incorrect Access Token")
                 return JSONResponse(
                     status_code=status.HTTP_403_FORBIDDEN,
                     content="Incorrect Access Token",
                 )
+            else:
+                logger.info("Access Token Auth Passed")
+                response = await call_next(request)
+                return response
+            
         else:
             response = await call_next(request)
             return response

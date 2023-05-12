@@ -111,30 +111,30 @@ class AdminUserService():
         self.session = session
             
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
-        users=await self.user_repo.get_all_users(group_id= group_id, role_id = role_id, session=self.session)
+        users=await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
         return users
     
     async def add_user_roles(self, user_id:int ,role_ids: str) -> None:
         role_ids_int = [int(number) for number in role_ids.split(",")]
         for role_id in role_ids_int:
-            await self.user_repo.add_role(user_id=user_id, role_id=role_id, session=self.session)
+            await self.user_repo.add_role(user_id=user_id, role_id=role_id)
 
     async def remove_user_roles(self, user_id:int ,role_ids: str) -> None:
-        await self.user_repo.remove_user_roles(user_id=user_id, role_ids=role_ids, session=self.session)
+        await self.user_repo.remove_user_roles(user_id=user_id, role_ids=role_ids)
 
     async def get_user_roles(self, user_id:int) -> list[Role]:
-        return await self.user_repo.get_roles(user_id=user_id, session=self.session)
+        return await self.user_repo.get_roles(user_id=user_id)
     
     async def add_user_groups(self, user_id:int, group_ids:str) -> None:
         group_ids_int = [int(number) for number in group_ids.split(",")]
         for group_id in group_ids_int: 
-            await self.user_repo.add_group(user_id = user_id, group_id=group_id, session=self.session)
+            await self.user_repo.add_group(user_id = user_id, group_id=group_id)
 
     async def get_user_groups(self, user_id:int) -> list[Group]:
-        return await self.user_repo.get_groups(user_id=user_id, session=self.session)
+        return await self.user_repo.get_groups(user_id=user_id)
 
     async def remove_user_groups(self, user_id:int, group_ids:str) -> None:
-        await self.user_repo.remove_user_groups(user_id=user_id, group_ids=group_ids, session=self.session)
+        await self.user_repo.remove_user_groups(user_id=user_id, group_ids=group_ids)
 
     async def create_user(self, kwargs:Any) -> None:
         kwargs = kwargs | {
@@ -142,19 +142,19 @@ class AdminUserService():
             "phone_number_confirmed": False,
             "access_failed_count":0,
             }
-        await self.user_repo.create(session=self.session, **kwargs)
+        await self.user_repo.create(**kwargs)
         
     async def change_password(self, user_id:int, new_password:str) -> None:
         new_password = PasswordHash.hash_password(password=new_password)
-        await self.user_repo.change_password(user_id=user_id, password = new_password, session=self.session)
+        await self.user_repo.change_password(user_id=user_id, password = new_password)
     
 
     async def get_user(self, user_id:int) -> User:
-        return await self.user_repo.get_user_by_id(user_id=user_id, session=self.session)
+        return await self.user_repo.get_user_by_id(user_id=user_id)
 
     async def update_user(self, user_id:int, kwargs: Any) -> None:
-        await self.user_repo.update(user_id=user_id, session=self.session, **kwargs)
+        await self.user_repo.update(user_id=user_id, **kwargs)
         
     async def delete_user(self, user_id:int) -> None:
-        await self.user_repo.delete(user_id=user_id, session=self.session)
+        await self.user_repo.delete(user_id=user_id)
 
