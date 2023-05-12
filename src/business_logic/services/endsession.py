@@ -19,7 +19,7 @@ class EndSessionService:
     ) -> None:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
-        self.jwt_service = jwt_service()
+        self.jwt_service = jwt_service
         self._request_model: Optional[RequestEndSessionModel] = None
         self.session = session
 

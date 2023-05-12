@@ -26,26 +26,26 @@ from tests.test_unit.fixtures import (
 class TestEndSessionEndpoint:
     async def test_successful_authorize_request(
         self,
-        engine: AsyncEngine,
+        connection: AsyncSession,
         client: AsyncClient,
         end_session_request_model: RequestEndSessionModel,
-        end_session_service = EndSessionService,
+        end_session_service: EndSessionService,
     ) -> None:
         
-        session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
+        # session_factory = sessionmaker(
+        #     engine, expire_on_commit=False, class_=AsyncSession
+        # )
+        # async with session_factory() as sess:
+        #     session = sess
 
-            service = end_session_service(session)
+            service = end_session_service
             service.request_model = end_session_request_model
 
             secret = await service.client_repo.get_client_secrete_by_client_id(
                 client_id=TOKEN_HINT_DATA["client_id"]
             )
             token = await service.jwt_service.encode_jwt(secret=secret, payload={})
-            await session.execute(
+            await connection.execute(
                 insert(PersistentGrant).values(
                     key="test_key",
                     client_id=3,
@@ -55,7 +55,7 @@ class TestEndSessionEndpoint:
                     expiration=False,
                 )
             )
-            await session.commit()
+            await connection.flush()
             hint = TokenHint()
             token_hint = await hint.get_token_hint()
             params = {
@@ -68,10 +68,10 @@ class TestEndSessionEndpoint:
             )
             assert response.status_code == status.HTTP_302_FOUND
 
-            await session.execute(
-                delete(PersistentGrant).where(PersistentGrant.client_id == 3)
-            )
-            await session.commit()
+            # await connectin.execute(
+            #     delete(PersistentGrant).where(PersistentGrant.client_id == 3)
+            # )
+            # await connectin.commit()
 
     async def test_successful_authorize_request_without_uri(
         self,
