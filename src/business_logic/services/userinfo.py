@@ -21,7 +21,7 @@ class UserInfoServices:
         persistent_grant_repo: PersistentGrantRepository,
         jwt:JWTService = JWTService(),
     ) -> None:
-        self.jwt = jwt()
+        self.jwt = jwt
         self.authorization: Optional[str] = None
         self.user_repo = user_repo
         self.client_repo = client_repo
