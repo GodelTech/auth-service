@@ -34,7 +34,10 @@ async def get_openid_configuration(
     try:
         session = request.state.session
         logger.debug("Collecting Data for OpenID Configuration.")
-        well_known_info_class = WellKnownServices(session)
+        well_known_info_class = WellKnownServices(
+            session = session,
+            wlk_repo=WellKnownRepository(session)
+        )
         well_known_info_class.request = request
         result = await well_known_info_class.get_openid_configuration()
         return {k: v for k, v in result.items() if v is not None}
