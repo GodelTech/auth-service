@@ -85,12 +85,9 @@ def setup_di(app: FastAPI) -> None:
 
     app.add_middleware(
         middleware_class=AccessTokenMiddleware,
- #       blacklisted_repo=prov.provide_blacklisted_repo(),
     )
-
     app.add_middleware(
         middleware_class=AuthorizationMiddleware,
-#        blacklisted_repo=prov.provide_blacklisted_repo(),
     )
     app.add_middleware(
         middleware_class=SessionManager, session = session
