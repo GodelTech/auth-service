@@ -59,15 +59,15 @@ class GroupRepository(BaseRepository):
             raise ValueError(e)
 
     async def get_group_by_name(self, name: str) -> Group:
-        try:
+        # try:
             group = await self.session.execute(
                 select(Group).where(Group.name == name)
             )
             group = group.first()
 
             return group[0]
-        except:
-            raise ValueError
+        # except:
+        #     raise ValueError
 
     async def get_all_groups(self) -> list[Group]:
         groups = await self.session.execute(select(Group))
