@@ -30,6 +30,7 @@ async def get_userinfo(
         default=None, description="Authorization"
     ),  # crutch for swagger
 ) -> dict[str, Any]:
+    try:
         session = request.state.session 
         userinfo_class = UserInfoServices(
             session=session,
@@ -43,6 +44,18 @@ async def get_userinfo(
         result = await userinfo_class.get_user_info()
         result = {k: v for k, v in result.items() if v is not None}
         return result
+
+    except ClaimsNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission for this claims",
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
+        )
+
 
 
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
