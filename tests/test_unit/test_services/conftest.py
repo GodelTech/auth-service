@@ -50,6 +50,8 @@ def device_repository_mock():
 def third_party_oidc_repository_mock():
     third_party_oidc_repo = AsyncMock()
     third_party_oidc_repo.create_state.return_value = None
+    third_party_oidc_repo.is_state.return_value = False
+    third_party_oidc_repo.delete_state.return_value = None
     yield third_party_oidc_repo
     del third_party_oidc_repo
 

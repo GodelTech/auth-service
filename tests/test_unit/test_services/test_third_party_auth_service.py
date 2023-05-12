@@ -10,7 +10,9 @@ from src.business_logic.services import (
     AuthThirdPartyOIDCService,
     ThirdPartyGoogleService,
 )
+from src.business_logic.third_party_auth.constants import StateData
 from src.business_logic.third_party_auth.errors import (
+    ThirdPartyAuthInvalidStateError,
     UnsupportedThirdPartyAuthProviderError,
 )
 from src.business_logic.third_party_auth.factory import (
@@ -20,7 +22,10 @@ from src.business_logic.third_party_auth.interfaces import (
     ThirdPartyAuthServiceProtocol,
 )
 from src.business_logic.third_party_auth.service_impls import GithubAuthService
-from src.business_logic.third_party_auth.validators import StateValidatorBase
+from src.business_logic.third_party_auth.validators import (
+    StateValidator,
+    StateValidatorBase,
+)
 from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.tables import IdentityProviderMapped
@@ -37,6 +42,26 @@ from tests.test_unit.fixtures import (
     third_party_google_request_model,
     third_party_oidc_request_model,
 )
+
+
+@pytest.fixture
+def state_validator_base_with_mocked_dependencies(
+    third_party_oidc_repository_mock,
+):
+    state_validator = StateValidatorBase(
+        third_party_oidc_repo=third_party_oidc_repository_mock
+    )
+    yield state_validator
+    del state_validator
+
+
+@pytest.fixture
+def state_validator_with_mocked_dependencies(third_party_oidc_repository_mock):
+    state_validator = StateValidator(
+        third_party_oidc_repo=third_party_oidc_repository_mock
+    )
+    yield state_validator
+    del state_validator
 
 
 @pytest.fixture
@@ -95,6 +120,60 @@ class TestThirdPartyAuthServiceFactory:
         mocked_state_validator.assert_called_once_with(self.factory._oidc_repo)
         state_validator_instance.assert_called_once_with("state")
         self.factory._oidc_repo.create_state.assert_called_once_with("state")
+
+
+@pytest.mark.asyncio
+class TestStateValidatorBase:
+    @pytest.fixture(autouse=True)
+    def setup(self, state_validator_base_with_mocked_dependencies):
+        self.state_validator = state_validator_base_with_mocked_dependencies
+
+    async def test_state_validator_base(self):
+        state = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        await self.state_validator(state)
+
+    async def test_state_validator_base_with_truthy_is_state(self):
+        state = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        self.state_validator._third_party_oidc_repo.is_state.return_value = (
+            True
+        )
+        with pytest.raises(
+            ThirdPartyAuthInvalidStateError, match="State already exists."
+        ):
+            await self.state_validator(state)
+
+    async def test_state_validator_base_with_invalid_state(self):
+        self.state_validator._third_party_oidc_repo.is_state.return_value = (
+            True
+        )
+        with pytest.raises(
+            ThirdPartyAuthInvalidStateError, match="State already exists."
+        ):
+            await self.state_validator(state="invalid")
+
+
+@pytest.mark.asyncio
+class TestStateValidator:
+    @pytest.fixture(autouse=True)
+    def setup(self, state_validator_with_mocked_dependencies):
+        self.state_validator = state_validator_with_mocked_dependencies
+
+    async def test_state_validator(self):
+        state = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        self.state_validator._third_party_oidc_repo.is_state.return_value = (
+            True
+        )
+        await self.state_validator(state)
+        self.state_validator._third_party_oidc_repo.delete_state.assert_called_once_with(
+            state
+        )
+
+    async def test_state_validator_with_falsy_is_state(self):
+        state = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        with pytest.raises(
+            ThirdPartyAuthInvalidStateError, match="State does not exist."
+        ):
+            await self.state_validator(state)
 
 
 ############################### ! OLD TESTS  #####################################################
