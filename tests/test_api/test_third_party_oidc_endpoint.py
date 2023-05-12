@@ -1,5 +1,5 @@
 from typing import Generator
-from unittest.mock import MagicMock, _Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from fastapi import status
@@ -13,7 +13,7 @@ from src.business_logic.third_party_auth.errors import (
 )
 
 GetServiceImpl = Generator[MagicMock, None, None]
-GetServiceImplWithSideEffect = Generator[_Mock, None, None]
+GetServiceImplWithSideEffect = Generator[Mock, None, None]
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ class TestCreateState:
         "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.create_provider_state"
     )
     async def test_successful_create_state_request(
-        self, mocked_data: _Mock, client: AsyncClient
+        self, mocked_data: Mock, client: AsyncClient
     ) -> None:
         mocked_data.return_value = "test"
         response = await client.post(
@@ -61,7 +61,7 @@ class TestCreateState:
         "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.create_provider_state"
     )
     async def test_unsuccessful_create_state_request(
-        self, mocked_data: _Mock, client: AsyncClient
+        self, mocked_data: Mock, client: AsyncClient
     ) -> None:
         mocked_data.side_effect = ThirdPartyAuthInvalidStateError
         response = await client.post(
@@ -76,7 +76,7 @@ class TestCreateState:
 @pytest.mark.asyncio
 class TestGithubAuthEndpoint:
     async def test_successful_github_get_request(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/github",
@@ -86,7 +86,7 @@ class TestGithubAuthEndpoint:
         assert response.headers["location"] == "http://www.test.com/"
 
     async def test_unsuccessful_github_get_request_invalid_state(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthInvalidStateError
@@ -99,7 +99,7 @@ class TestGithubAuthEndpoint:
         assert response.json() == {"error": "invalid_state"}
 
     async def test_unsuccessful_github_get_request_invalid_request_data(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthProviderInvalidRequestDataError(
@@ -115,7 +115,7 @@ class TestGithubAuthEndpoint:
 
     async def test_unsuccessful_github_get_request_unsupported_provider(
         self,
-        mocked_get_service_impl_with_side_effect: _Mock,
+        mocked_get_service_impl_with_side_effect: Mock,
         client: AsyncClient,
     ) -> None:
         response = await client.get(
@@ -126,7 +126,7 @@ class TestGithubAuthEndpoint:
         assert response.json() == {"error": "unsupported_auth_provider"}
 
     async def test_unsuccessful_github_get_request_without_state_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/github",
@@ -135,7 +135,7 @@ class TestGithubAuthEndpoint:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_github_get_request_without_code_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/github",
@@ -147,7 +147,7 @@ class TestGithubAuthEndpoint:
 @pytest.mark.asyncio
 class TestLinkedinAuthEndpoint:
     async def test_successful_linkedin_get_request(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/linkedin",
@@ -157,7 +157,7 @@ class TestLinkedinAuthEndpoint:
         assert response.headers["location"] == "http://www.test.com/"
 
     async def test_unsuccessful_linkedin_get_request_invalid_state(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthInvalidStateError
@@ -170,7 +170,7 @@ class TestLinkedinAuthEndpoint:
         assert response.json() == {"error": "invalid_state"}
 
     async def test_unsuccessful_linkedin_get_request_invalid_request_data(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthProviderInvalidRequestDataError(
@@ -186,7 +186,7 @@ class TestLinkedinAuthEndpoint:
 
     async def test_unsuccessful_linkedin_get_request_unsupported_provider(
         self,
-        mocked_get_service_impl_with_side_effect: _Mock,
+        mocked_get_service_impl_with_side_effect: Mock,
         client: AsyncClient,
     ) -> None:
         response = await client.get(
@@ -197,7 +197,7 @@ class TestLinkedinAuthEndpoint:
         assert response.json() == {"error": "unsupported_auth_provider"}
 
     async def test_unsuccessful_linkedin_get_request_without_state_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/linkedin",
@@ -206,7 +206,7 @@ class TestLinkedinAuthEndpoint:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_linkedin_get_request_without_code_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/linkedin",
@@ -218,7 +218,7 @@ class TestLinkedinAuthEndpoint:
 @pytest.mark.asyncio
 class TestGoogleAuthEndpoint:
     async def test_successful_google_get_request(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/google",
@@ -228,7 +228,7 @@ class TestGoogleAuthEndpoint:
         assert response.headers["location"] == "http://www.test.com/"
 
     async def test_unsuccessful_google_get_request_invalid_state(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthInvalidStateError
@@ -241,7 +241,7 @@ class TestGoogleAuthEndpoint:
         assert response.json() == {"error": "invalid_state"}
 
     async def test_unsuccessful_google_get_request_invalid_request_data(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthProviderInvalidRequestDataError(
@@ -257,7 +257,7 @@ class TestGoogleAuthEndpoint:
 
     async def test_unsuccessful_google_get_request_unsupported_provider(
         self,
-        mocked_get_service_impl_with_side_effect: _Mock,
+        mocked_get_service_impl_with_side_effect: Mock,
         client: AsyncClient,
     ) -> None:
         response = await client.get(
@@ -268,7 +268,7 @@ class TestGoogleAuthEndpoint:
         assert response.json() == {"error": "unsupported_auth_provider"}
 
     async def test_unsuccessful_google_get_request_without_state_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/google",
@@ -277,7 +277,7 @@ class TestGoogleAuthEndpoint:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_google_get_request_without_code_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/google",
@@ -289,7 +289,7 @@ class TestGoogleAuthEndpoint:
 @pytest.mark.asyncio
 class TestGitlabAuthEndpoint:
     async def test_successful_gitlab_get_request(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/gitlab",
@@ -299,7 +299,7 @@ class TestGitlabAuthEndpoint:
         assert response.headers["location"] == "http://www.test.com/"
 
     async def test_unsuccessful_gitlab_get_request_invalid_state(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthInvalidStateError
@@ -312,7 +312,7 @@ class TestGitlabAuthEndpoint:
         assert response.json() == {"error": "invalid_state"}
 
     async def test_unsuccessful_gitlab_get_request_invalid_request_data(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthProviderInvalidRequestDataError(
@@ -328,7 +328,7 @@ class TestGitlabAuthEndpoint:
 
     async def test_unsuccessful_gitlab_get_request_unsupported_provider(
         self,
-        mocked_get_service_impl_with_side_effect: _Mock,
+        mocked_get_service_impl_with_side_effect: Mock,
         client: AsyncClient,
     ) -> None:
         response = await client.get(
@@ -339,7 +339,7 @@ class TestGitlabAuthEndpoint:
         assert response.json() == {"error": "unsupported_auth_provider"}
 
     async def test_unsuccessful_gitlab_get_request_without_state_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/gitlab",
@@ -348,7 +348,7 @@ class TestGitlabAuthEndpoint:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_gitlab_get_request_without_code_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/gitlab",
@@ -360,7 +360,7 @@ class TestGitlabAuthEndpoint:
 @pytest.mark.asyncio
 class TestMicrosoftAuthEndpoint:
     async def test_successful_microsoft_get_request(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/microsoft",
@@ -370,7 +370,7 @@ class TestMicrosoftAuthEndpoint:
         assert response.headers["location"] == "http://www.test.com/"
 
     async def test_unsuccessful_microsoft_get_request_invalid_state(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthInvalidStateError
@@ -383,7 +383,7 @@ class TestMicrosoftAuthEndpoint:
         assert response.json() == {"error": "invalid_state"}
 
     async def test_unsuccessful_microsoft_get_request_invalid_request_data(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         mocked_get_service_impl.get_redirect_url.side_effect = (
             ThirdPartyAuthProviderInvalidRequestDataError(
@@ -399,7 +399,7 @@ class TestMicrosoftAuthEndpoint:
 
     async def test_unsuccessful_microsoft_get_request_unsupported_provider(
         self,
-        mocked_get_service_impl_with_side_effect: _Mock,
+        mocked_get_service_impl_with_side_effect: Mock,
         client: AsyncClient,
     ) -> None:
         response = await client.get(
@@ -410,7 +410,7 @@ class TestMicrosoftAuthEndpoint:
         assert response.json() == {"error": "unsupported_auth_provider"}
 
     async def test_unsuccessful_microsoft_get_request_without_state_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/microsoft",
@@ -419,7 +419,7 @@ class TestMicrosoftAuthEndpoint:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_microsoft_get_request_without_code_parameter(
-        self, mocked_get_service_impl: _Mock, client: AsyncClient
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
         response = await client.get(
             "/authorize/oidc/microsoft",
