@@ -1,6 +1,7 @@
+from unittest.mock import AsyncMock, MagicMock, Mock
+
 import pytest
 import pytest_asyncio
-from unittest.mock import MagicMock, AsyncMock, Mock
 
 
 @pytest_asyncio.fixture
@@ -43,6 +44,14 @@ def device_repository_mock():
     device_repo.get_device_by_user_code.return_value = mock_device
     yield device_repo
     del device_repo
+
+
+@pytest_asyncio.fixture
+def third_party_oidc_repository_mock():
+    third_party_oidc_repo = AsyncMock()
+    third_party_oidc_repo.create_state.return_value = None
+    yield third_party_oidc_repo
+    del third_party_oidc_repo
 
 
 @pytest.fixture
