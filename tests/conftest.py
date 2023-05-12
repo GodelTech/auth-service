@@ -187,50 +187,52 @@ async def device_service(connection: AsyncSession) -> DeviceService:
 
 
 @pytest_asyncio.fixture
-async def auth_third_party_service(
-    engine: AsyncEngine,
-) -> AuthThirdPartyOIDCService:
+async def auth_third_party_service(connection: AsyncSession) -> AuthThirdPartyOIDCService:
     third_party_service = AuthThirdPartyOIDCService(
-        client_repo=ClientRepository(engine),
-        user_repo=UserRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        oidc_repo=ThirdPartyOIDCRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(connection),
+        user_repo=UserRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        oidc_repo=ThirdPartyOIDCRepository(connection),
         http_client=AsyncClient(),
     )
     return third_party_service
 
 
 @pytest_asyncio.fixture
-async def google_third_party_service(engine) -> ThirdPartyGoogleService:
+async def google_third_party_service(connection) -> ThirdPartyGoogleService:
     google_service = ThirdPartyGoogleService(
-        client_repo=ClientRepository(engine),
-        user_repo=UserRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        oidc_repo=ThirdPartyOIDCRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(connection),
+        user_repo=UserRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        oidc_repo=ThirdPartyOIDCRepository(connection),
         http_client=AsyncClient(),
     )
     return google_service
 
 
 @pytest_asyncio.fixture
-async def gitlab_third_party_service(engine) -> ThirdPartyGitLabService:
+async def gitlab_third_party_service(connection) -> ThirdPartyGitLabService:
     gitlab_service = ThirdPartyGitLabService(
-        client_repo=ClientRepository(engine),
-        user_repo=UserRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        oidc_repo=ThirdPartyOIDCRepository(engine),
+        session=connection,
+        client_repo=ClientRepository(connection),
+        user_repo=UserRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        oidc_repo=ThirdPartyOIDCRepository(connection),
         http_client=AsyncClient(),
     )
     return gitlab_service
 
 
 @pytest_asyncio.fixture
-async def microsoft_third_party_service(engine) -> ThirdPartyMicrosoftService:
+async def microsoft_third_party_service(connection) -> ThirdPartyMicrosoftService:
     microsoft_service = ThirdPartyMicrosoftService(
-        client_repo=ClientRepository(engine),
-        user_repo=UserRepository(engine),
-        persistent_grant_repo=PersistentGrantRepository(engine),
-        oidc_repo=ThirdPartyOIDCRepository(engine),
+        client_repo=ClientRepository(connection),
+        session=connection,
+        user_repo=UserRepository(connection),
+        persistent_grant_repo=PersistentGrantRepository(connection),
+        oidc_repo=ThirdPartyOIDCRepository(connection),
         http_client=AsyncClient(),
     )
     return microsoft_service
@@ -251,7 +253,6 @@ from src.business_logic.services.admin_auth import AdminAuthService
 @pytest_asyncio.fixture
 async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
     admin_auth_service = AdminAuthService(
-        session=connection,
         user_repo=UserRepository(session=connection),
         password_service=PasswordHash(),
         jwt_service=JWTService(),

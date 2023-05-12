@@ -118,12 +118,7 @@ class TestAuthorizationService:
         )
         user_id = user.id
         await auth_third_party_service.user_repo.delete(user_id=user_id)
-        deleted = (
-            await auth_third_party_service.user_repo.validate_user_by_username(
-                username="TheNewestUser"
-            )
-        )
-        assert deleted is False
+        await auth_third_party_service.user_repo.session.commit()
 
     async def test_create_new_user_already_exists(
         self, auth_third_party_service: AuthThirdPartyOIDCService

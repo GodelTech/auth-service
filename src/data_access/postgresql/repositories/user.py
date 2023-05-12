@@ -240,7 +240,7 @@ class UserRepository(BaseRepository):
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = 0,
     ) -> None:
-        # try:
+        try:
             kwargs = params_to_dict(
                 id=id,
                 username=username,
@@ -259,8 +259,8 @@ class UserRepository(BaseRepository):
         
             await self.session.execute(insert(User).values(**kwargs))
             
-        # except:
-        #     raise DuplicationError
+        except:
+            raise DuplicationError
 
     async def add_group(self, user_id: int, group_id: int) -> None:
         

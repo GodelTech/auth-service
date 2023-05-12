@@ -9,14 +9,11 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-
-
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
     AccessTokenMiddleware,
     SessionManager
 )
-
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -26,11 +23,10 @@ from src.dyna_config import (
 )
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-
 import logging
 from src.log import LOGGING_CONFIG
-
-
+from src.data_access.postgresql.repositories import UserRepository
+from src.business_logic.services.admin_auth import AdminAuthService
 logger = logging.getLogger(__name__)
 
 
@@ -83,12 +79,12 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_async_session_stub
     ] = session
 
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-    )
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-    )
+    # app.add_middleware(
+    #     middleware_class=AccessTokenMiddleware,
+    # )
+    # app.add_middleware(
+    #     middleware_class=AuthorizationMiddleware,
+    # )
     app.add_middleware(
         middleware_class=SessionManager, session = session
     )
@@ -99,12 +95,12 @@ def setup_di(app: FastAPI) -> None:
         templates_dir="src/presentation/admin_ui/controllers/templates",
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
-            auth_service=prov.provide_admin_auth_service(
-                user_repo=prov.provide_user_repo(session=session),
-                password_service=prov.provide_password_service(),
-                jwt_service=prov.provide_jwt_service(),
-            ),
-        ),
+            auth_service=AdminAuthService(
+                user_repo=UserRepository(
+                    session=prov.provide_async_session(db_engine)
+                ),
+            )
+        )
     )
 
     # Identity Resourses
