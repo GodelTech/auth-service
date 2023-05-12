@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     )
 
 
+@runtime_checkable
 class ThirdPartyAuthServiceProtocol(Protocol):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         ...
