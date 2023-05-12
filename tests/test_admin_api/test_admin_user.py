@@ -2,7 +2,7 @@ import json
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert, delete
+from sqlalchemy import insert, delete, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -33,24 +33,22 @@ class TestAdminUserEndpoint:
         self.role_repo = RoleRepository(connection)
 
         self.user_repo = UserRepository(connection)
+        
+        if await self.user_repo.exists(user_id=user_id):
+            await self.user_repo.delete(user_id=user_id)
+
         try:
-            if await self.user_repo.exists(user_id=user_id):
-                await self.user_repo.delete(user_id=user_id)
-            if await self.user_repo.get_user_by_username(username="DioBrando"):
-                await self.user_repo.delete(
-                    user_id=(
-                        await self.user_repo.get_user_by_username(
-                            username="DioBrando"
-                        )
-                    ).id
-                )
-        except:
+            user = await self.user_repo.get_user_by_username(username="DioBrando")
+            await self.user_repo.delete(user_id=user.id)
+        except ValueError:
             pass
+        await self.user_repo.session.commit()
+
 
         await self.user_repo.create( 
             id=user_id,
             username="DioBrando",
-            email = "theworld@timestop.com",
+            email = "TheWorld@timestop.com",
             email_confirmed = True,
             phone_number ="+20-123-123-123",
             phone_number_confirmed = False,
@@ -63,6 +61,8 @@ class TestAdminUserEndpoint:
    
     async def setup_groups_roles(self, connection:AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+       # await connection.execute(text("TRUNCATE TABLE roles"))
+       # await connection.execute(text("TRUNCATE TABLE groups"))
         groups:list[dict[str, Any]] = [
             {"name": "Polnareff", "parent_group": None},
             {"name": "Giorno", "parent_group": None},
@@ -76,11 +76,12 @@ class TestAdminUserEndpoint:
                             name=name,
                             parent_group=parent_group,
                         )
+                    await connection.commit()
             except DuplicationError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
                 await connection.rollback()
-        await connection.commit()
+        
         groups = [
             {
                 "name": "Gold",
@@ -107,6 +108,7 @@ class TestAdminUserEndpoint:
                 ).id,
             },
         ]
+        
         for group in groups:
             try:
                 await group_repo.create(**group)
@@ -133,14 +135,15 @@ class TestAdminUserEndpoint:
                     await connection.rollback()
 
         role_repo = RoleRepository(connection)
-        role_repo.delete
         for role in ("Standuser", "French", "Italian", "Vampire"):
             try:
                 await role_repo.create(name=role)
-            except DuplicationError:
+                await connection.commit()
+            except:
                 logger.info(role + " role already exists")
+                await connection.rollback()
 
-        await connection.commit()
+        
 
     async def test_successful_get_all_users(self, connection:AsyncSession, client: AsyncClient) -> None:
         await self.setup_base(connection)
