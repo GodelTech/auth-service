@@ -52,6 +52,11 @@ def third_party_oidc_repository_mock():
     third_party_oidc_repo.create_state.return_value = None
     third_party_oidc_repo.is_state.return_value = False
     third_party_oidc_repo.delete_state.return_value = None
+    third_party_oidc_repo.get_credentials_by_provider_name.return_value = (
+        "test_client",
+        "test_secret",
+        "test_redirect_uri",
+    )
     yield third_party_oidc_repo
     del third_party_oidc_repo
 

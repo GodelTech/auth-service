@@ -1,15 +1,9 @@
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
-from sqlalchemy import delete, insert
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services import (
-    AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
-)
 from src.business_logic.third_party_auth.constants import StateData
 from src.business_logic.third_party_auth.errors import (
     ThirdPartyAuthInvalidStateError,
@@ -21,26 +15,20 @@ from src.business_logic.third_party_auth.factory import (
 from src.business_logic.third_party_auth.interfaces import (
     ThirdPartyAuthServiceProtocol,
 )
-from src.business_logic.third_party_auth.service_impls import GithubAuthService
+from src.business_logic.third_party_auth.service_impls import (
+    GithubAuthService,
+    GitlabAuthService,
+    GoogleAuthService,
+    LinkedinAuthService,
+    MicrosoftAuthService,
+)
 from src.business_logic.third_party_auth.validators import (
     StateValidator,
     StateValidatorBase,
 )
-from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
-from src.data_access.postgresql.errors.user import DuplicationError
-from src.data_access.postgresql.tables import IdentityProviderMapped
-from src.data_access.postgresql.tables.identity_resource import (
-    IdentityProviderState,
-)
-from src.presentation.api.models import (
-    StateRequestModel,
-    ThirdPartyGoogleRequestModel,
-    ThirdPartyOIDCRequestModel,
-)
 from tests.test_unit.fixtures import (
     state_request_model,
-    third_party_google_request_model,
-    third_party_oidc_request_model,
+    third_party_access_token_request_model,
 )
 
 
@@ -80,6 +68,106 @@ def third_party_auth_service_factory_with_mocked_dependencies(
     )
     yield factory
     del factory
+
+
+@pytest_asyncio.fixture
+def github_auth_service_with_mocked_dependencies(
+    state_validator_with_mocked_dependencies,
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    third_party_oidc_repository_mock,
+):
+    github_auth_service = GithubAuthService(
+        state_validator=state_validator_with_mocked_dependencies,
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        oidc_repo=third_party_oidc_repository_mock,
+        async_http_client=AsyncClient(),
+    )
+    yield github_auth_service
+    del github_auth_service
+
+
+@pytest_asyncio.fixture
+def gitlab_auth_service_with_mocked_dependencies(
+    state_validator_with_mocked_dependencies,
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    third_party_oidc_repository_mock,
+):
+    gitlab_auth_service = GitlabAuthService(
+        state_validator=state_validator_with_mocked_dependencies,
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        oidc_repo=third_party_oidc_repository_mock,
+        async_http_client=AsyncClient(),
+    )
+    yield gitlab_auth_service
+    del gitlab_auth_service
+
+
+@pytest_asyncio.fixture
+def google_auth_service_with_mocked_dependencies(
+    state_validator_with_mocked_dependencies,
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    third_party_oidc_repository_mock,
+):
+    google_auth_service = GoogleAuthService(
+        state_validator=state_validator_with_mocked_dependencies,
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        oidc_repo=third_party_oidc_repository_mock,
+        async_http_client=AsyncClient(),
+    )
+    yield google_auth_service
+    del google_auth_service
+
+
+@pytest_asyncio.fixture
+def microsoft_auth_service_with_mocked_dependencies(
+    state_validator_with_mocked_dependencies,
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    third_party_oidc_repository_mock,
+):
+    microsoft_auth_service = MicrosoftAuthService(
+        state_validator=state_validator_with_mocked_dependencies,
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        oidc_repo=third_party_oidc_repository_mock,
+        async_http_client=AsyncClient(),
+    )
+    yield microsoft_auth_service
+    del microsoft_auth_service
+
+
+@pytest_asyncio.fixture
+def linkedin_auth_service_with_mocked_dependencies(
+    state_validator_with_mocked_dependencies,
+    client_repository_mock,
+    user_repository_mock,
+    persistent_grant_repository_mock,
+    third_party_oidc_repository_mock,
+):
+    linkedin_auth_service = LinkedinAuthService(
+        state_validator=state_validator_with_mocked_dependencies,
+        client_repo=client_repository_mock,
+        user_repo=user_repository_mock,
+        persistent_grant_repo=persistent_grant_repository_mock,
+        oidc_repo=third_party_oidc_repository_mock,
+        async_http_client=AsyncClient(),
+    )
+    yield linkedin_auth_service
+    del linkedin_auth_service
 
 
 class TestThirdPartyAuthServiceFactory:
@@ -174,6 +262,27 @@ class TestStateValidator:
             ThirdPartyAuthInvalidStateError, match="State does not exist."
         ):
             await self.state_validator(state)
+
+
+@pytest.mark.asyncio
+class TestGithubAuthService:
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, github_auth_service_with_mocked_dependencies):
+        self.auth_service = github_auth_service_with_mocked_dependencies
+
+    async def test_form_parameters_data(
+        self, third_party_access_token_request_model
+    ):
+        result = await self.auth_service._form_parameters_data(
+            third_party_access_token_request_model, "github"
+        )
+        assert result == {
+            "client_id": "test_client",
+            "client_secret": "test_secret",
+            "redirect_uri": "test_redirect_uri",
+            "code": "test_code",
+            "grant_type": "authorization_code",
+        }
 
 
 ############################### ! OLD TESTS  #####################################################
