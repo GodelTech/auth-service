@@ -160,24 +160,23 @@ class UserRepository(BaseRepository):
 
     async def get_user_by_username(self, username: str) -> User:
         try:
-            
-                user = await self.session.execute(
-                    select(User)
-                    .join(
-                        UserPassword,
-                        User.password_hash_id == UserPassword.id,
-                        isouter=True,
-                    )
-                    .join(
-                        IdentityProvider,
-                        User.identity_provider_id == IdentityProvider.id,
-                        isouter=True,
-                    )
-                    .where(User.username == username)
+            user = await self.session.execute(
+                select(User)
+                .join(
+                    UserPassword,
+                    User.password_hash_id == UserPassword.id,
+                    isouter=True,
                 )
-                user = user.first()
+                .join(
+                    IdentityProvider,
+                    User.identity_provider_id == IdentityProvider.id,
+                    isouter=True,
+                )
+                .where(User.username == username)
+            )
+            user = user.first()
 
-                return user[0]
+            return user[0]
         except:
             raise ValueError
 

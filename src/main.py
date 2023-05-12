@@ -79,14 +79,15 @@ def setup_di(app: FastAPI) -> None:
 
     app.add_middleware(
         middleware_class=AccessTokenMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(session=session),
+ #       blacklisted_repo=prov.provide_blacklisted_repo(),
     )
+
     app.add_middleware(
         middleware_class=AuthorizationMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(session=session),
+#        blacklisted_repo=prov.provide_blacklisted_repo(),
     )
     app.add_middleware(
-        middleware_class=SessionManager, session=session
+        middleware_class=SessionManager, session = session
     )
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
