@@ -22,13 +22,19 @@ class NewUrl():
     def __init__(self) -> None:
         self.path = "/administration/" 
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 class NewRequest():    
-    def __init__(self) -> None:
+    def __init__(self, session, with_state = True) -> None:
         self.url = NewUrl()
         self.method = ""
         self.headers: dict[str, Any] = {
             "access-token" : None, 
         }
+        if with_state:
+            self.state = NewRequest(session, with_state=False)
+        self.session = session
+
 class NewJWTService(JWTService):
     async def verify_token(self, *args: Any, **kwargs: Any) -> bool:
         if "Bearer AccessToken" in kwargs.values() or "Bearer AccessToken" in args:
@@ -38,29 +44,28 @@ class NewJWTService(JWTService):
 
 @pytest.mark.asyncio
 class TestAccessTokenMiddleware:
-    async def test_successful_auth(self, engine: AsyncEngine) -> None:
-
+    async def test_successful_auth(self, connection: AsyncSession) -> None:
         test_token = "Bearer AccessToken"
-        request = NewRequest()
+        request = NewRequest(connection)
 
         request.headers["access-token"] = test_token
 
-        middleware = AccessTokenMiddleware(app = ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine), jwt_service=NewJWTService())
+        middleware = AccessTokenMiddleware(app = ASGIApp, jwt_service=NewJWTService())
         assert await middleware.dispatch_func(request=request, call_next=new_call_next) == 'Successful'
     
-    async def test_without_token(self, engine: AsyncEngine) -> None:
-        request = NewRequest()
-        middleware = AccessTokenMiddleware(app = ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine), jwt_service=NewJWTService())
+    async def test_without_token(self, connection: AsyncSession) -> None:
+        request = NewRequest(connection)
+        middleware = AccessTokenMiddleware(app = ASGIApp, jwt_service=NewJWTService())
         response = await middleware.dispatch_func(request=request, call_next=new_call_next) 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    async def test_incorrect_token(self,  engine: AsyncEngine) -> None:
+    async def test_incorrect_token(self,  connection: AsyncSession) -> None:
         with mock.patch.object(
             JWTService, "verify_token", new= new_decode_token
         ):
-            request = NewRequest()
+            request = NewRequest(connection)
             request.headers["authorization"] = "Bearer FALSE_accessToken"
-            middleware = AccessTokenMiddleware(app = ASGIApp, blacklisted_repo=BlacklistedTokenRepository(engine), jwt_service=NewJWTService())
+            middleware = AccessTokenMiddleware(app = ASGIApp, jwt_service=NewJWTService())
             response = await middleware.dispatch_func(request=request, call_next=new_call_next) 
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
