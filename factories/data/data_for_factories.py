@@ -26,6 +26,8 @@ CLIENT_HASH_PASSWORDS = {
     10: PasswordHash.hash_password("just_a_guy"),
 }
 
+# It's not correct, according to factories
+# client_id <-> username relation may be different from test to test
 CLIENT_USERNAMES = {
     1: "TestClient",
     2: "Doubl",

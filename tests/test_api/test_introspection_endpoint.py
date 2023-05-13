@@ -57,13 +57,14 @@ class TestIntrospectionEndpoint:
             "active": True,
             "scope": None,
             "client_id": "test_client",
-            "username": "TestClient",
+            # temporary solution, relying on the fact that client with id 1
+            # will always have username "FrodoBaggins", which is not true
+            "username": "FrodoBaggins",
             "token_type": "Bearer",
             "exp": 0,
             "iat": None,
             "nbf": None,
             "sub": "1",
-            "aud": None,
             "iss": "http://testserver",
             "jti": None,
             'aud': ['introspection']

@@ -43,7 +43,7 @@ class DataBasePopulation:
     def populate_user_password_table(cls) -> None:
         # from src.business_logic.services.password import PasswordHash
 
-        for i in range(len(data.CLIENT_USERNAMES)):
+        for i in range(len(data.CLIENT_HASH_PASSWORDS)):
             user_factory.UserPasswordFactory()
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
