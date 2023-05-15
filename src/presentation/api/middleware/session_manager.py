@@ -39,7 +39,6 @@ class SessionManager(BaseHTTPMiddleware):
                     return response
                 finally:
                     await session.close()
-                    # break
 
         else:
             response = await call_next(request)

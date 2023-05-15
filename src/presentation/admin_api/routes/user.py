@@ -42,7 +42,6 @@ async def get_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
-    
 ) -> dict[str, Any]:
 
     session = request.state.session

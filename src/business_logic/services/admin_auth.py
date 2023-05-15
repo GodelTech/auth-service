@@ -47,3 +47,4 @@ class AdminAuthService:
             return None
         else:
             return RedirectResponse(f"/admin/login")
+        

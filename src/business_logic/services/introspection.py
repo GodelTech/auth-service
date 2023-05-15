@@ -26,7 +26,7 @@ class IntrospectionServies:
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt = JWTService(),
+        jwt:JWTService = JWTService(),
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
@@ -35,6 +35,7 @@ class IntrospectionServies:
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.session = session
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:

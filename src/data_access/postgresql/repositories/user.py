@@ -43,35 +43,32 @@ class UserRepository(BaseRepository):
     async def get_all_users(
         self, group_id: Optional[int] = None, role_id: Optional[int] = None
     ) -> list[User]:
-        # try:
-            if group_id is None and role_id is None:
-                query = await self.session.execute(select(User))
-                query = query.all()
-                return [user[0] for user in query]
-            elif group_id is None and role_id is not None:
-                iterator = await self.session.execute(
-                    select(User)
-                    .join(Role, User.roles)
-                    .where(Role.id == role_id)
-                )
-                return [user[0] for user in iterator.all()]
-            elif group_id is not None and role_id is None:
-                iterator = await self.session.execute(
-                    select(User)
-                    .join(Group, User.groups)
-                    .where(Group.id == group_id)
-                )
-                return [user[0] for user in iterator.all()]
-            else:
-                iterator = await self.session.execute(
-                    select(User)
-                    .join(Group, User.groups)
-                    .join(Role, User.roles)
-                    .where(Group.id == group_id, Role.id == role_id)
-                )
-                return [user[0] for user in iterator.all()]
-        # except:
-        #     raise ValueError
+        if group_id is None and role_id is None:
+            query = await self.session.execute(select(User))
+            query = query.all()
+            return [user[0] for user in query]
+        elif group_id is None and role_id is not None:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Role, User.roles)
+                .where(Role.id == role_id)
+            )
+            return [user[0] for user in iterator.all()]
+        elif group_id is not None and role_id is None:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Group, User.groups)
+                .where(Group.id == group_id)
+            )
+            return [user[0] for user in iterator.all()]
+        else:
+            iterator = await self.session.execute(
+                select(User)
+                .join(Group, User.groups)
+                .join(Role, User.roles)
+                .where(Group.id == group_id, Role.id == role_id)
+            )
+            return [user[0] for user in iterator.all()]
 
     async def exists(self, user_id: int) -> bool:
             result = await self.session.execute(
@@ -424,10 +421,6 @@ class UserRepository(BaseRepository):
         return result.scalar()
 
     async def get_user_id_by_username(self, username: str) -> int:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as session:
             result = await self.session.execute(
                 select(User.id).where(User.username == username)
             )

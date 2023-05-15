@@ -97,7 +97,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         blacklisted_repo: BlacklistedTokenRepository,
-        jwt_service = JWTService(),
+        jwt_service: JWTService = JWTService(),
     ) -> None:
         self.session = session
         self.request: Optional[Request] = None

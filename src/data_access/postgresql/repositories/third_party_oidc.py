@@ -97,11 +97,6 @@ class ThirdPartyOIDCRepository(BaseRepository):
     async def get_provider_external_links(
         self, name: str
     ) -> Optional[Tuple[str, str]]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         provider_external_links = await self.session.execute(
             select(
                 IdentityProvider.token_endpoint_link,
@@ -117,11 +112,6 @@ class ThirdPartyOIDCRepository(BaseRepository):
             return None
 
     async def get_provider_id_by_name(self, name: str) -> Optional[int]:
-        # session_factory = sessionmaker(
-        #     self.engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
         provider_id = await self.session.execute(
             select(
                 IdentityProvider.id,

@@ -30,7 +30,6 @@ from src.data_access.postgresql.errors import (
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
-# from src.presentation.api.session.closer import with_session
 if TYPE_CHECKING:
     from src.business_logic.authorization import AuthServiceProtocol
 
