@@ -1,22 +1,10 @@
 # https://docs.google.com/spreadsheets/d/1zJAcCxaGz2CV9zKlqeBhRE8xfiqyJMy5-XPRH1I8HPg/edit#gid=0
-from typing import Union, Optional, Any
-from src.data_access.postgresql.repositories import RoleRepository, UserRepository, ClientRepository
+from typing import Optional, Any
+from src.data_access.postgresql.repositories import RoleRepository, UserRepository, PersistentGrantRepository, GroupRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
-from src.data_access.postgresql.repositories import RoleRepository, UserRepository, ClientRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
-from src.business_logic.services.well_known import WellKnownServices
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
-from src.data_access.postgresql.repositories.base import BaseRepository
-from src.data_access.postgresql.repositories.user import UserRepository
-from src.data_access.postgresql.repositories.groups import GroupRepository
-from src.data_access.postgresql.repositories.roles import RoleRepository
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
 from src.data_access.postgresql.tables import Group, Role, User
 
 

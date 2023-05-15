@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from src.data_access.postgresql.repositories import UserRepository
 from src.business_logic.services.admin_api import AdminUserService
 from src.data_access.postgresql.errors.user import DuplicationError
-from src.di.providers.services import provide_admin_user_service_stub
 from src.presentation.admin_api.models.user import *
 from typing import Callable
 logger = logging.getLogger(__name__)

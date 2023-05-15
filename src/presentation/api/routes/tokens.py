@@ -27,7 +27,6 @@ from src.data_access.postgresql.errors import (
     GrantNotFoundError,
     GrantTypeNotSupported,
 )
-from src.di.providers import provide_token_service_stub, provide_async_session_stub
 from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
@@ -51,9 +50,7 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 
 async def get_tokens(
     request: Request,
-    request_body: BodyRequestTokenModel = Depends(),
-    token_class: TokenService = Depends(provide_token_service_stub),
-    
+    request_body: BodyRequestTokenModel = Depends(),    
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
         session = request.state.session

@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from jwt.exceptions import ExpiredSignatureError
 
 from src.business_logic.services.introspection import IntrospectionServies
-from src.di.providers import provide_introspection_service_stub
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
     ResponceIntrospectionModel,

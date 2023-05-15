@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
 from src.business_logic.services import JWTService, TokenService
 from src.data_access.postgresql.errors import GrantNotFoundError
-from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.data_access.postgresql.repositories import PersistentGrantRepository, ClientRepository, UserRepository,DeviceRepository, BlacklistedTokenRepository
 logger = logging.getLogger(__name__)

@@ -8,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories import RoleRepository
 from src.business_logic.services.admin_api import AdminRoleService
 from src.data_access.postgresql.errors.user import DuplicationError
-from src.di.providers import provide_admin_role_service_stub
-from src.di.providers import provide_async_session_stub
 from src.presentation.admin_api.models.role import *
 
 logger = logging.getLogger(__name__)

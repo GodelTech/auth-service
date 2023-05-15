@@ -9,7 +9,6 @@ from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
-from src.di.providers import provide_async_session_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
 from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 
