@@ -42,7 +42,7 @@ class AdminAuthService:
         )
     
 
-    async def authenticate(self, token: str, request) -> bool:
+    async def authenticate(self, token: str) -> Union[None, RedirectResponse]:
         if await self.jwt_service.verify_token(token=token, aud="admin"):
             return None
         else:
