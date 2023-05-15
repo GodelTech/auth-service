@@ -1,12 +1,12 @@
+import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
 
-from src.business_logic.third_party_auth.constants import StateData
 from src.business_logic.third_party_auth.errors import (
     ThirdPartyAuthInvalidStateError,
+    ThirdPartyAuthProviderInvalidRequestDataError,
     UnsupportedThirdPartyAuthProviderError,
 )
 from src.business_logic.third_party_auth.factory import (
@@ -58,13 +58,14 @@ def third_party_auth_service_factory_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     factory = ThirdPartyAuthServiceFactory(
         client_repo=client_repository_mock,
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield factory
     del factory
@@ -77,6 +78,7 @@ def github_auth_service_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     github_auth_service = GithubAuthService(
         state_validator=state_validator_with_mocked_dependencies,
@@ -84,7 +86,7 @@ def github_auth_service_with_mocked_dependencies(
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield github_auth_service
     del github_auth_service
@@ -97,6 +99,7 @@ def gitlab_auth_service_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     gitlab_auth_service = GitlabAuthService(
         state_validator=state_validator_with_mocked_dependencies,
@@ -104,7 +107,7 @@ def gitlab_auth_service_with_mocked_dependencies(
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield gitlab_auth_service
     del gitlab_auth_service
@@ -117,6 +120,7 @@ def google_auth_service_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     google_auth_service = GoogleAuthService(
         state_validator=state_validator_with_mocked_dependencies,
@@ -124,7 +128,7 @@ def google_auth_service_with_mocked_dependencies(
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield google_auth_service
     del google_auth_service
@@ -137,6 +141,7 @@ def microsoft_auth_service_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     microsoft_auth_service = MicrosoftAuthService(
         state_validator=state_validator_with_mocked_dependencies,
@@ -144,7 +149,7 @@ def microsoft_auth_service_with_mocked_dependencies(
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield microsoft_auth_service
     del microsoft_auth_service
@@ -157,6 +162,7 @@ def linkedin_auth_service_with_mocked_dependencies(
     user_repository_mock,
     persistent_grant_repository_mock,
     third_party_oidc_repository_mock,
+    async_http_client_mock,
 ):
     linkedin_auth_service = LinkedinAuthService(
         state_validator=state_validator_with_mocked_dependencies,
@@ -164,7 +170,7 @@ def linkedin_auth_service_with_mocked_dependencies(
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
         oidc_repo=third_party_oidc_repository_mock,
-        async_http_client=AsyncClient(),
+        async_http_client=async_http_client_mock,
     )
     yield linkedin_auth_service
     del linkedin_auth_service
@@ -284,474 +290,293 @@ class TestGithubAuthService:
             "grant_type": "authorization_code",
         }
 
+    async def test_update_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        result = await self.auth_service._update_redirect_url(
+            third_party_access_token_request_model,
+            redirect_url="http://www.test.com/test",
+        )
+        assert result == "http://www.test.com/test&state=test_state"
 
-############################### ! OLD TESTS  #####################################################
-# STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+    async def test_update_redirect_url_without_state(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = None
+        result = await self.auth_service._update_redirect_url(
+            third_party_access_token_request_model,
+            redirect_url="http://www.test.com/test",
+        )
+        assert result == "http://www.test.com/test"
 
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.github.GithubAuthService._form_parameters_data",
+        return_value={"param1": "test"},
+    )
+    async def test_get_access_token(
+        self,
+        mocked_form_parameters_data,
+        third_party_access_token_request_model,
+    ):
+        access_token = "test_token"
+        self.auth_service._async_http_client.request.return_value.content = (
+            json.dumps({"access_token": access_token})
+        )
+        result = await self.auth_service._get_access_token(
+            third_party_access_token_request_model,
+            token_url="https://www.test.com/token/",
+            provider_name="test_provider",
+        )
+        assert result == access_token
 
-# @pytest.mark.asyncio
-# class TestAuthorizationService:
-#     async def test_get_provider_auth_request_data(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         connection: AsyncSession,
-#         third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         service.request_model = third_party_oidc_request_model
-#         await connection.execute(
-#             insert(IdentityProviderMapped).values(
-#                 identity_provider_id=1,
-#                 provider_client_id="test_client",
-#                 provider_client_secret="secret",
-#                 enabled=True,
-#             )
-#         )
-#         await connection.commit()
-#         expected_data = {
-#             "client_id": "test_client",
-#             "client_secret": "secret",
-#             "redirect_uri": "http://127.0.0.1:8000/authorize/oidc/github",
-#             "code": "test_code",
-#         }
-#         result_data = await service.get_provider_auth_request_data(
-#             name="github"
-#         )
-#         assert expected_data == result_data
-#         await connection.execute(
-#             delete(IdentityProviderMapped).where(
-#                 IdentityProviderMapped.provider_client_id == "test_client"
-#             )
-#         )
-#         await connection.commit()
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.github.GithubAuthService._form_parameters_data",
+        return_value={"param1": "test"},
+    )
+    async def test_get_access_token_with_error_response(
+        self,
+        mocked_form_parameters_data,
+        third_party_access_token_request_model,
+    ):
+        self.auth_service._async_http_client.request.return_value.content = (
+            json.dumps({"error": "test_error"})
+        )
+        with pytest.raises(ThirdPartyAuthProviderInvalidRequestDataError):
+            await self.auth_service._get_access_token(
+                third_party_access_token_request_model,
+                token_url="https://www.test.com/token/",
+                provider_name="test_provider",
+            )
 
-#     async def test_get_provider_auth_request_data_no_request_model(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         service = auth_third_party_service
-#         result_url = await service.get_provider_auth_request_data(
-#             name="No_such_a_provider"
-#         )
-#         assert result_url is None
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.github.GithubAuthService._get_access_token",
+        return_value="access_token",
+    )
+    async def test_get_username(
+        self, mocked_access_token, third_party_access_token_request_model
+    ):
+        username = "test_login"
+        self.auth_service._async_http_client.request.return_value.content = (
+            json.dumps({"login": username})
+        )
+        result = await self.auth_service._get_username(
+            third_party_access_token_request_model,
+            username_type="login",
+            provider_name="test_provider",
+        )
+        assert result == username
 
-#     async def test_get_provider_external_links(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         expected_links = {
-#             "token_endpoint_link": "https://github.com/login/oauth/access_token",
-#             "userinfo_link": "https://api.github.com/user",
-#         }
+    async def test_create_user_if_not_exists(self):
+        username, provider_name = "test_username", "test_provider"
+        await self.auth_service._create_user_if_not_exists(
+            username, provider_name
+        )
+        self.auth_service._user_repo.exists_user.assert_called_once_with(
+            username
+        )
+        self.auth_service._oidc_repo.get_id_by_provider_name.assert_called_once_with(
+            provider_name
+        )
+        self.auth_service._user_repo.create.assert_called_once_with(
+            username=username, identity_provider_id="test_id"
+        )
 
-#         result_links = (
-#             await auth_third_party_service.get_provider_external_links(
-#                 name="github"
-#             )
-#         )
-#         assert result_links == expected_links
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.mixins.time.time",
+        return_value=123,
+    )
+    async def test_create_grant(self, third_party_access_token_request_model):
+        username_type, provider_name = ("login", "test_provider")
+        username = ("test_user",)
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._get_username = AsyncMock(return_value=username)
+        self.auth_service._create_user_if_not_exists = AsyncMock(
+            return_value=None
+        )
+        self.auth_service._secret_code = "test_secret"
+        await self.auth_service._create_grant(
+            request_data=third_party_access_token_request_model,
+            username_type=username_type,
+            provider_name=provider_name,
+        )
+        self.auth_service._get_username.assert_called_once_with(
+            request_data=third_party_access_token_request_model,
+            username_type=username_type,
+            provider_name=provider_name,
+        )
+        self.auth_service._create_user_if_not_exists.assert_called_once_with(
+            username, provider_name
+        )
+        self.auth_service._client_repo.get_auth_code_lifetime_by_client.assert_called_once_with(
+            "test_client"
+        )
+        self.auth_service._user_repo.get_user_id_by_username.assert_called_once_with(
+            username
+        )
+        self.auth_service._persistent_grant_repo.create.assert_called_once_with(
+            client_id="test_client",
+            grant_data="test_secret",
+            user_id="test_user",
+            grant_type="authorization_code",
+            expiration_time=183,  # sum of auth_code_lifetime mocked as 60 and time.time mocked as 123
+        )
 
-#     async def test_get_provider_external_links_not_registered_provider(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         result_links = (
-#             await auth_third_party_service.get_provider_external_links(
-#                 name="Not_registered_provider"
-#             )
-#         )
-#         assert result_links is None
-
-#     async def test_create_new_user(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         await auth_third_party_service.create_new_user(
-#             username="TheNewestUser", provider=1
-#         )
-#         created = (
-#             await auth_third_party_service.user_repo.validate_user_by_username(
-#                 username="TheNewestUser"
-#             )
-#         )
-#         assert created is True
-
-#         user = await auth_third_party_service.user_repo.get_user_by_username(
-#             username="TheNewestUser"
-#         )
-#         user_id = user.id
-#         await auth_third_party_service.user_repo.delete(user_id=user_id)
-#         deleted = (
-#             await auth_third_party_service.user_repo.validate_user_by_username(
-#                 username="TheNewestUser"
-#             )
-#         )
-#         assert deleted is False
-
-#     async def test_create_new_user_already_exists(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         with pytest.raises(DuplicationError):
-#             await auth_third_party_service.create_new_user(
-#                 username="TestClient", provider=1
-#             )
-
-#     async def test_create_new_persistent_grant(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         third_party_oidc_request_model.state = STUB_STATE
-#         service.request_model = third_party_oidc_request_model
-#         await service.create_new_persistent_grant(
-#             username="TestClient", secret_code="TestClientSecretCode"
-#         )
-#         created = await service.persistent_grant_repo.exists(
-#             grant_data="TestClientSecretCode", grant_type="authorization_code"
-#         )
-#         assert created is True
-
-#         await service.persistent_grant_repo.delete(
-#             grant_data="TestClientSecretCode", grant_type="code"
-#         )
-#         deleted = await service.persistent_grant_repo.exists(
-#             grant_data="TestClientSecretCode", grant_type="code"
-#         )
-#         assert deleted is False
-
-#     async def test_create_provider_state(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         state_request_model: StateRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         service.state_request_model = state_request_model
-#         await service.create_provider_state()
-#         created = await service.oidc_repo.validate_state(
-#             state=state_request_model.state
-#         )
-#         assert created is True
-
-#     async def test_create_provider_state_exists(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         state_request_model: StateRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         service.state_request_model = state_request_model
-#         with pytest.raises(ThirdPartyStateDuplicationError):
-#             await service.create_provider_state()
-#         await service.oidc_repo.delete_state(state=state_request_model.state)
-#         deleted = await service.oidc_repo.validate_state(
-#             state=state_request_model.state
-#         )
-#         assert deleted is False
-
-#     async def test_update_redirect_url_with_params(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         service.request_model = third_party_oidc_request_model
-#         expected_uri = (
-#             "https://www.google.com/?code=Secrete_code&state=test_state"
-#         )
-#         result_uri = await service._update_redirect_url_with_params(
-#             redirect_uri="https://www.google.com/", secret_code="Secrete_code"
-#         )
-
-#         assert result_uri == expected_uri
-
-#     async def test_update_redirect_url_without_request_model(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         service = auth_third_party_service
-#         result_uri = await service._update_redirect_url_with_params(
-#             redirect_uri="https://www.google.com/", secret_code="Secrete_code"
-#         )
-
-#         assert result_uri is None
-
-#     async def test_update_redirect_url_no_state(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
-#     ) -> None:
-#         service = auth_third_party_service
-#         third_party_oidc_request_model.state = None
-#         service.request_model = third_party_oidc_request_model
-#         expected_uri = "https://www.google.com/?code=Secrete_code"
-#         result_uri = await service._update_redirect_url_with_params(
-#             redirect_uri="https://www.google.com/", secret_code="Secrete_code"
-#         )
-
-#         assert result_uri == expected_uri
-
-#     async def test_parse_response_content_data(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         expected_password = "BestOfTheBest"
-#         expected_client_id = "tony_stark"
-#         expected_username = "IronMan"
-
-#         to_parse = "gcp-api%20IdentityServerApi&client_id=tony_stark&password=BestOfTheBest&username=IronMan"
-#         result = auth_third_party_service._parse_response_content(to_parse)
-#         assert result["client_id"] == expected_client_id
-#         assert result["password"] == expected_password
-#         assert result["username"] == expected_username
-
-#     async def test_parse_response_content_data_len_two(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         expected_password = "BestOfTheBest"
-#         expected_username = "IronMan"
-
-#         to_parse = "password=BestOfTheBest&username=IronMan"
-#         result = auth_third_party_service._parse_response_content(to_parse)
-#         assert result["password"] == expected_password
-#         assert result["username"] == expected_username
-
-#     async def test_parse_empty_response_content(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         expected: dict[str, Any] = {}
-#         to_parse = ""
-#         result = auth_third_party_service._parse_response_content(to_parse)
-#         assert result == expected
-
-#     async def test_parse_response_content_without_separator(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         expected = {"some_key": "key"}
-#         to_parse = "some_key=key"
-#         result = auth_third_party_service._parse_response_content(to_parse)
-#         assert result == expected
-
-#     async def test_parse_response_content_uri(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         to_parse = f"https://www.google.com/?code=blfpo4Bk3xXME5-lyYnyVNiy9wA5RmXPREhT2NERKG8&state={STUB_STATE}"
-#         result = auth_third_party_service._parse_response_content(to_parse)
-#         assert result["state"] == STUB_STATE
-
-#     async def test_get_github_redirect_uri_empty_request_model(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService
-#     ) -> None:
-#         result_uri = await auth_third_party_service.get_github_redirect_uri(
-#             provider_name="github"
-#         )
-#         assert result_uri is None
-
-#     async def test_get_github_redirect_uri(
-#         self,
-#         auth_third_party_service: AuthThirdPartyOIDCService,
-#         third_party_oidc_request_model: ThirdPartyOIDCRequestModel,
-#         connection: AsyncSession,
-#         mocker: Any,
-#     ) -> None:
-#         async def replace_post(*args: Any, **kwargs: Any) -> str:
-#             return "access_token"
-
-#         async def replace_get(*args: Any, **kwargs: Any) -> str:
-#             return "NewUserNew"
-
-#         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
-#         if not auth_third_party_service:
-#             raise AssertionError
-#         service = auth_third_party_service
-#         service.request_model = third_party_oidc_request_model
-#         service.request_model.state = STUB_STATE
-#         mocker.patch(
-#             f"{patch_start}.make_request_for_access_token", replace_post
-#         )
-#         mocker.patch(
-#             f"{patch_start}.make_get_request_for_user_data", replace_get
-#         )
-
-#         await connection.execute(
-#             insert(IdentityProviderMapped).values(
-#                 identity_provider_id=1,
-#                 provider_client_id="e6a4c6014f35f4acf016",
-#                 provider_client_secret="***REMOVED***",
-#                 enabled=True,
-#             )
-#         )
-#         await connection.commit()
-#         await connection.execute(
-#             insert(IdentityProviderState).values(state=STUB_STATE)
-#         )
-#         await connection.commit()
-#         expected_uri_start = "https://www.google.com/?code"
-#         expected_uri_end = STUB_STATE
-
-#         result_uri = await service.get_github_redirect_uri(
-#             provider_name="github"
-#         )
-#         assert result_uri
-#         assert result_uri.startswith(expected_uri_start)
-#         assert result_uri.endswith(expected_uri_end)
-#         await connection.execute(
-#             delete(IdentityProviderMapped).where(
-#                 IdentityProviderMapped.identity_provider_id == 1,
-#                 IdentityProviderMapped.provider_client_id
-#                 == "e6a4c6014f35f4acf016",
-#                 IdentityProviderMapped.provider_client_secret
-#                 == "***REMOVED***",
-#             )
-#         )
-#         await connection.commit()
-
-#     async def test_make_post_request_for_access_token(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService, mocker: Any
-#     ) -> None:
-#         service = auth_third_party_service
-#         request_params = {
-#             "client_id": "TestClient",
-#             "client_secret": "client_secret",
-#             "code": "code",
-#         }
-#         mocker.patch(
-#             "src.business_logic.services.third_party_oidc_service.AsyncClient.request",
-#             return_value=httpx.Response(
-#                 200,
-#                 content=b"access_token=***REMOVED***&scope=&token_type=bearer",
-#             ),
-#         )
-#         expected_token = "***REMOVED***"
-#         access_token = await service.make_request_for_access_token(
-#             method="POST",
-#             access_url="https://www.google.com/",
-#             params=request_params,
-#         )
-#         assert access_token == expected_token
-
-#     async def test_make_get_request_for_user_data(
-#         self, auth_third_party_service: AuthThirdPartyOIDCService, mocker: Any
-#     ) -> None:
-#         service = auth_third_party_service
-#         headers = {
-#             "Authorization": "Bearer " + "access_token",
-#             "Content-Type": "application/x-www-form-urlencoded",
-#         }
-#         mocker.patch(
-#             "src.business_logic.services.third_party_oidc_service.AsyncClient.request",
-#             return_value=httpx.Response(200, json={"login": "NewUser"}),
-#         )
-#         expected_user_name = "NewUser"
-#         user_name = await service.make_get_request_for_user_data(
-#             access_url="https://www.google.com/", headers=headers
-#         )
-#         assert user_name == expected_user_name
+    async def test_get_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._secret_code = "secret_code"
+        self.auth_service._state_validator = AsyncMock(return_value=None)
+        self.auth_service._create_grant = AsyncMock(return_value=None)
+        result = await self.auth_service.get_redirect_url(
+            third_party_access_token_request_model
+        )
+        assert (
+            result == "https://www.google.com/?code=secret_code"
+            "&state=2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        )
 
 
-# @pytest.mark.asyncio
-# class TestThirdPartyGoogleService:
-#     async def test_get_google_access_token(
-#         self, google_third_party_service: ThirdPartyGoogleService, mocker: Any
-#     ) -> None:
-#         service = google_third_party_service
-#         request_params = {
-#             "client_id": "TestClient",
-#             "client_secret": "client_secret",
-#             "code": "code",
-#             "grant_type": "authorization_code",
-#         }
-#         mocker.patch(
-#             "src.business_logic.services.third_party_oidc_service.AsyncClient.request",
-#             return_value=httpx.Response(
-#                 200,
-#                 json={
-#                     "access_token": "***REMOVED***",
-#                     "token_type": "Bearer",
-#                 },
-#             ),
-#         )
-#         expected_token = "***REMOVED***"
-#         access_token = await service.get_google_access_token(
-#             method="POST",
-#             access_url="https://www.google.com/",
-#             params=request_params,
-#         )
-#         assert access_token == expected_token
+@pytest.mark.asyncio
+class TestGitlabAuthService:
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, gitlab_auth_service_with_mocked_dependencies):
+        self.auth_service = gitlab_auth_service_with_mocked_dependencies
 
-#     async def test_make_get_request_for_user_email(
-#         self, google_third_party_service: ThirdPartyGoogleService, mocker: Any
-#     ) -> None:
-#         service = google_third_party_service
-#         headers = {
-#             "Authorization": "Bearer " + "access_token",
-#             "Content-Type": "application/x-www-form-urlencoded",
-#         }
-#         mocker.patch(
-#             "src.business_logic.services.third_party_oidc_service.AsyncClient.request",
-#             return_value=httpx.Response(
-#                 200, json={"name": "NewUser", "email": "example@boo.com"}
-#             ),
-#         )
-#         expected_user_email = "example@boo.com"
-#         user_name = await service.make_get_request_for_user_email(
-#             access_url="https://www.google.com/", headers=headers
-#         )
-#         assert user_name == expected_user_email
+    async def test_get_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._secret_code = "secret_code"
+        self.auth_service._state_validator = AsyncMock(return_value=None)
+        self.auth_service._create_grant = AsyncMock(return_value=None)
+        result = await self.auth_service.get_redirect_url(
+            third_party_access_token_request_model
+        )
+        assert (
+            result == "https://www.google.com/?code=secret_code"
+            "&state=2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        )
 
-#     async def test_get_google_redirect_uri_empty_request_model(
-#         self, google_third_party_service: ThirdPartyGoogleService
-#     ) -> None:
-#         result_uri = await google_third_party_service.get_google_redirect_uri(
-#             provider_name="google"
-#         )
-#         assert result_uri is None
 
-#     async def test_get_google_redirect_uri(
-#         self,
-#         google_third_party_service: ThirdPartyGoogleService,
-#         third_party_google_request_model: ThirdPartyGoogleRequestModel,
-#         connection: AsyncSession,
-#         mocker: Any,
-#     ):
-#         async def replace_post(*args, **kwargs):
-#             return "access_token"
+@pytest.mark.asyncio
+class TestGoogleAuthService:
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, google_auth_service_with_mocked_dependencies):
+        self.auth_service = google_auth_service_with_mocked_dependencies
 
-#         async def replace_get(*args, **kwargs):
-#             return "UserNewEmail"
+    async def test_get_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._secret_code = "secret_code"
+        self.auth_service._state_validator = AsyncMock(return_value=None)
+        self.auth_service._create_grant = AsyncMock(return_value=None)
+        result = await self.auth_service.get_redirect_url(
+            third_party_access_token_request_model
+        )
+        assert (
+            result == "https://www.google.com/?code=secret_code"
+            "&state=2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        )
 
-#         patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGoogleService"
 
-#         service = google_third_party_service
-#         service.request_model = third_party_google_request_model
-#         service.request_model.state = STUB_STATE
-#         mocker.patch(f"{patch_start}.get_google_access_token", replace_post)
-#         mocker.patch(
-#             f"{patch_start}.make_get_request_for_user_email", replace_get
-#         )
+@pytest.mark.asyncio
+class TestLinkedinAuthService:
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, linkedin_auth_service_with_mocked_dependencies):
+        self.auth_service = linkedin_auth_service_with_mocked_dependencies
 
-#         await connection.execute(
-#             insert(IdentityProviderMapped).values(
-#                 identity_provider_id=3,
-#                 provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-#                 provider_client_secret="***REMOVED***",
-#                 enabled=True,
-#             )
-#         )
-#         await connection.commit()
-#         await connection.execute(
-#             insert(IdentityProviderState).values(state=STUB_STATE)
-#         )
-#         await connection.commit()
-#         expected_uri_start = "https://www.google.com/?code"
-#         expected_uri_end = STUB_STATE
+    async def test_get_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._secret_code = "secret_code"
+        self.auth_service._state_validator = AsyncMock(return_value=None)
+        self.auth_service._create_grant = AsyncMock(return_value=None)
+        result = await self.auth_service.get_redirect_url(
+            third_party_access_token_request_model
+        )
+        assert (
+            result == "https://www.google.com/?code=secret_code"
+            "&state=2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        )
 
-#         result_uri = await service.get_google_redirect_uri(
-#             provider_name="google"
-#         )
 
-#         assert result_uri.startswith(expected_uri_start)
-#         assert result_uri.endswith(expected_uri_end)
-#         await connection.execute(
-#             delete(IdentityProviderMapped).where(
-#                 IdentityProviderMapped.identity_provider_id == 3,
-#                 IdentityProviderMapped.provider_client_id
-#                 == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-#                 IdentityProviderMapped.provider_client_secret
-#                 == "***REMOVED***",
-#             )
-#         )
-#         await connection.commit()
+@pytest.mark.asyncio
+class TestMicrosoftAuthService:
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, microsoft_auth_service_with_mocked_dependencies):
+        self.auth_service = microsoft_auth_service_with_mocked_dependencies
+
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.microsoft.MicrosoftAuthService._form_parameters_data",
+        return_value={"param1": "test"},
+    )
+    async def test_get_access_token(
+        self,
+        mocked_form_parameters_data,
+        third_party_access_token_request_model,
+    ):
+        access_token = "test_token"
+        self.auth_service._async_http_client.request.return_value.content = (
+            json.dumps({"access_token": access_token})
+        )
+        result = await self.auth_service._get_access_token(
+            third_party_access_token_request_model,
+            token_url="https://www.test.com/token/",
+            provider_name="test_provider",
+        )
+        assert result == access_token
+
+    @patch(
+        "src.business_logic.third_party_auth.service_impls.microsoft.MicrosoftAuthService._form_parameters_data",
+        return_value={"param1": "test"},
+    )
+    async def test_get_access_token_with_error_response(
+        self,
+        mocked_form_parameters_data,
+        third_party_access_token_request_model,
+    ):
+        self.auth_service._async_http_client.request.return_value.content = (
+            json.dumps({"error": "test_error"})
+        )
+        with pytest.raises(ThirdPartyAuthProviderInvalidRequestDataError):
+            await self.auth_service._get_access_token(
+                third_party_access_token_request_model,
+                token_url="https://www.test.com/token/",
+                provider_name="test_provider",
+            )
+
+    async def test_get_redirect_url(
+        self, third_party_access_token_request_model
+    ):
+        third_party_access_token_request_model.state = (
+            "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+            "!_!test_client!_!https://www.google.com/"
+        )
+        self.auth_service._secret_code = "secret_code"
+        self.auth_service._state_validator = AsyncMock(return_value=None)
+        self.auth_service._create_grant = AsyncMock(return_value=None)
+        result = await self.auth_service.get_redirect_url(
+            third_party_access_token_request_model
+        )
+        assert (
+            result == "https://www.google.com/?code=secret_code"
+            "&state=2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
+        )

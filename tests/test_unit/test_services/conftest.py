@@ -12,6 +12,7 @@ def client_repository_mock():
     mock_client = MagicMock(id=1)
     client_repo.get_client_by_client_id.return_value = mock_client
     client_repo.get_client_scopes_by_client_id.return_value = "openid"
+    client_repo.get_auth_code_lifetime_by_client.return_value = 60
     yield client_repo
     del client_repo
 
@@ -23,6 +24,9 @@ def user_repository_mock():
         "hashed_password",
         1,
     )
+    user_repo.exists_user.return_value = False
+    user_repo.create.return_value = None
+    user_repo.get_user_id_by_username.return_value = "test_user"
     yield user_repo
     del user_repo
 
@@ -57,8 +61,20 @@ def third_party_oidc_repository_mock():
         "test_secret",
         "test_redirect_uri",
     )
+    third_party_oidc_repo.get_external_links_by_provider_name.return_value = (
+        "token_url",
+        "user_info_url",
+    )
+    third_party_oidc_repo.get_id_by_provider_name.return_value = "test_id"
     yield third_party_oidc_repo
     del third_party_oidc_repo
+
+
+@pytest_asyncio.fixture
+def async_http_client_mock():
+    client = AsyncMock()
+    yield client
+    del client
 
 
 @pytest.fixture
