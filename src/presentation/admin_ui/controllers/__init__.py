@@ -10,6 +10,7 @@ from starlette.responses import RedirectResponse
 from starlette.templating import _TemplateResponse
 
 from src.business_logic.services.password import PasswordHash
+from src.dyna_config import IS_DEVELOPMENT
 
 from .auth import AdminAuthController
 from .clients import (
@@ -56,12 +57,15 @@ from .users import (
     UserClaimAdminController,
     PasswordAdminController,
 )
+
 from typing import no_type_check
+
 Base = declarative_base()
 
 
 class SeparationLine(BaseView):
     name = " "
+
     # icon = "fa-solid fa-chart-line"
     @no_type_check
     @expose("/", methods=["GET"])
@@ -97,7 +101,6 @@ class CustomAdmin(Admin):
                 "model_view": model_view,
                 "form": form,
             }
-            
 
             if request.method == "GET":
                 return self.templates.TemplateResponse(
@@ -119,11 +122,9 @@ class CustomAdmin(Admin):
                             dict_form_data[key] = True
                     obj = await model_view.insert_model(dict_form_data)
 
-                elif identity == 'user-password':
+                elif identity == "user-password":
                     dict_form_data = dict(form_data)
-                    dict_form_data[
-                        "value"
-                    ] = PasswordHash.hash_password(
+                    dict_form_data["value"] = PasswordHash.hash_password(
                         dict_form_data["value"]
                     )
 

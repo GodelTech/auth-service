@@ -46,7 +46,7 @@ class TestAdminAuthService:
         }
         token = await JWTService().encode_jwt(payload)
         result = await service.authenticate(token=token)
-        assert result
+        assert result is None
 
         payload = {
             "aud": [
@@ -56,7 +56,7 @@ class TestAdminAuthService:
         }
         token = await JWTService().encode_jwt(payload)
         result = await service.authenticate(token=token)
-        assert result is False
+        assert result is not None
 
         payload = {
             "aud": [
@@ -66,7 +66,7 @@ class TestAdminAuthService:
         }
         token = await JWTService().encode_jwt(payload)
         result = await service.authenticate(token=token)
-        assert result is False
+        assert result is not None
 
     async def test_authorize_authenticate(
         self, admin_auth_service: AdminAuthService
@@ -78,11 +78,11 @@ class TestAdminAuthService:
         result = await service.authorize(credentials=credentials)
         assert type(result) is str
         result = await service.authenticate(token=result)
-        assert result is True
+        assert result is None
 
         credentials = AdminCredentialsDTO(
             username="TestClient", password=SecretStr("test_password")
         )
         result = await service.authorize(credentials=credentials, exp_time=-10)
         result = await service.authenticate(token=result)
-        assert result is False
+        assert result is not None

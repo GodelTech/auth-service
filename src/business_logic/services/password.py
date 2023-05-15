@@ -30,3 +30,11 @@ class PasswordHash:
                 "You are trying to pass the wrong password to the scope"
             )
         return is_valid
+
+    @classmethod
+    def is_password_valid(
+        cls, str_password: SecretStr, hash_password: str
+    ) -> bool:
+        str_password_bytes = str_password.get_secret_value().encode("utf-8")
+        hash_password_bytes = bytes(hash_password.encode())
+        return bcrypt.checkpw(str_password_bytes, hash_password_bytes)

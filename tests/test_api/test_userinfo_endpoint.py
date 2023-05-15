@@ -4,9 +4,9 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import delete, insert
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
-
+from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services import UserInfoServices
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
@@ -34,9 +34,10 @@ ANSWER_USER_INFO = {
 class TestUserInfoEndpoint:
     @pytest.mark.asyncio
     async def test_successful_userinfo_get_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        jwt = JWTService()
+        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -48,7 +49,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_jwt_get_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {"authorization": token, "accept": "application/json"}
@@ -66,7 +67,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_incorrect_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
@@ -83,7 +84,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
         for url in ("/userinfo/", "/userinfo/jwt"):
@@ -100,7 +101,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_post_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
         headers = {
@@ -117,7 +118,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_incorrect_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
@@ -131,7 +132,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_user_without_claims(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
         headers = {
@@ -147,7 +148,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_default_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         response = await client.request("GET", "/userinfo/get_default_token")
         response_content = json.loads(response.content.decode("utf-8"))
@@ -159,7 +160,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_iss_me(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         response = await client.request(
             "GET", "/userinfo/get_default_token?with_iss_me=true"
@@ -173,7 +174,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_aud(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         response = await client.request(
             "GET", "/userinfo/get_default_token?with_aud=true"
@@ -188,7 +189,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_default_token_with_iss_and_aud(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         response = await client.request(
             "GET",
@@ -204,7 +205,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_decode_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         payload = {"sub": 1}
         token = await user_info_service.jwt.encode_jwt(payload=payload)
@@ -218,7 +219,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_decode_token_with_issuer(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         iss = "http://www.example.com"
         payload = {"sub": 1, "iss": iss}
@@ -233,7 +234,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_decode_token_with_audience(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         aud = ["facebook"]
         payload = {"sub": 1, "aud": aud}
@@ -248,7 +249,7 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_get_decode_token_with_issuer_and_audience(
-        self, user_info_service: UserInfoServices, client: AsyncClient
+        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         iss = "http://www.example.com"
         aud = ["facebook"]

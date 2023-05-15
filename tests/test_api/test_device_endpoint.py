@@ -109,7 +109,7 @@ class TestDeviceEndpoint:
             "scope": f"user_code={user_code}",
         }
         response = await client.request(
-            "DELETE", "/device/auth/cancel", data=param_next, headers={'Content-Type': self.content_type}
+            "DELETE", "/device/auth/cancel", data=param_next, headers={'Content-Type': self.content_type, "Cookie":param_next["scope"]}
         )
 
         assert response.status_code == status.HTTP_200_OK

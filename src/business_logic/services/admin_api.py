@@ -1,18 +1,12 @@
 # https://docs.google.com/spreadsheets/d/1zJAcCxaGz2CV9zKlqeBhRE8xfiqyJMy5-XPRH1I8HPg/edit#gid=0
-from typing import Union, Optional, Any
-from src.data_access.postgresql.repositories.roles import RoleRepository
-from src.data_access.postgresql.repositories.user import UserRepository
-
-from src.business_logic.services.well_known import WellKnownServices
+from typing import Optional, Any
+from src.data_access.postgresql.repositories import RoleRepository, UserRepository, PersistentGrantRepository, GroupRepository
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.password import PasswordHash
-
-from src.data_access.postgresql.repositories.user import UserRepository
-from src.data_access.postgresql.repositories.groups import GroupRepository
-from src.data_access.postgresql.repositories.roles import RoleRepository
-from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
-
 from src.data_access.postgresql.tables import Group, Role, User
+
 
 class AdminService():
     def __init__(
@@ -33,8 +27,10 @@ class AdminTokenService():
 class AdminRoleService():
     def __init__(
             self,
+            session: AsyncSession,
             role_repo: RoleRepository
         ) -> None:
+        self.session = session
         self.role_repo= role_repo
         
     async def get_role(self, role_id:int) -> Role:
@@ -60,13 +56,18 @@ class AdminRoleService():
 class AdminGroupService():
     def __init__(
             self,
+            session: AsyncSession,
             group_repo: GroupRepository
         ) -> None:
+        self.session = session
         self.group_repo= group_repo
-        
+
+
+
     async def get_all_groups(self) -> list[Role]:
         return await self.group_repo.get_all_groups()
-        
+
+
     async def get_groups(self, group_ids:list[int]) -> list[Group]:
         result = []
         for group_id in group_ids:
@@ -77,13 +78,13 @@ class AdminGroupService():
         group = await self.group_repo.get_by_id(group_id=group_id)
         result = await self.group_repo.get_all_subgroups(main_group=group)
         return result
-    
+
     async def update_group(self, group_id: int, **kwargs:Any) -> None:
         await self.group_repo.update(group_id=group_id, **kwargs)
 
     async def get_group(self, group_id:int) -> Group:
         return await self.group_repo.get_by_id(group_id=group_id)
-        
+
     async def create_group(self, **kwargs: Any) -> None:
         await self.group_repo.create(**kwargs)
 
@@ -92,12 +93,19 @@ class AdminGroupService():
 
 
 class AdminUserService():
+    
     def __init__(
             self,
-            user_repo: UserRepository
+            user_repo: UserRepository,
+            session: AsyncSession
         ) -> None:
-        self.user_repo= user_repo
+        self.user_repo=user_repo
+        self.session = session
 
+    async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
+        users=await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+        return users
+    
     async def add_user_roles(self, user_id:int ,role_ids: str) -> None:
         role_ids_int = [int(number) for number in role_ids.split(",")]
         for role_id in role_ids_int:
@@ -141,7 +149,7 @@ class AdminUserService():
         
     async def delete_user(self, user_id:int) -> None:
         await self.user_repo.delete(user_id=user_id)
-
+        
     async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
         return await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
     

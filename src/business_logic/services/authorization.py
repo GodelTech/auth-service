@@ -14,18 +14,21 @@ from src.data_access.postgresql.repositories import (
 )
 from src.presentation.api.models import DataRequestModel
 from src.data_access.postgresql.errors import NotCompleteScopeError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 logger = logging.getLogger(__name__)
 
 
 class AuthorizationService:
     def __init__(
         self,
+        session:AsyncSession,
         client_repo: ClientRepository,
-        user_repo: UserRepository,
+        user_repo:UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+        password_service: PasswordHash = PasswordHash(),
+        jwt_service: JWTService = JWTService(),
     ) -> None:
         self._request_model: Optional[DataRequestModel] = None
         self.client_repo = client_repo
@@ -34,6 +37,7 @@ class AuthorizationService:
         self.device_repo = device_repo
         self.password_service = password_service
         self.jwt_service = jwt_service
+        self.session = session
 
     @property
     def request_model(self) -> Optional[DataRequestModel]:

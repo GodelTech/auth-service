@@ -6,7 +6,7 @@ import pytest
 from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 from sqlalchemy.ext.asyncio import AsyncEngine
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.services import TokenService
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import (
@@ -128,11 +128,11 @@ class TestTokenServices:
     async def base_test_token_service(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection:AsyncSession,
         grant_type: str,
     ) -> None:
         await self.setup_test()
-        token_repo = PersistentGrantRepository(engine)
+        token_repo = PersistentGrantRepository(connection)
         if grant_type != "client_credentials":
             await token_repo.create(
                 grant_data=self.encodedattr,
@@ -157,12 +157,12 @@ class TestTokenServices:
     async def test_type_code(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_token_service(
             grant_type="authorization_code",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
         )
         for param in (
             "access_token",
@@ -175,12 +175,12 @@ class TestTokenServices:
     async def test_type_refresh_token(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_token_service(
             grant_type="refresh_token",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
         )
         for param in (
             "access_token",
@@ -194,12 +194,12 @@ class TestTokenServices:
     async def test_type_device_code(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_token_service(
             grant_type="urn:ietf:params:oauth:grant-type:device_code",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
         )
         for param in (
             "access_token",
@@ -212,12 +212,12 @@ class TestTokenServices:
     async def test_token_service_client_credentials(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_token_service(
             grant_type="client_credentials",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
         )
         for param in ("access_token", "expires_in", "token_type"):
             assert result[param] is not None
@@ -225,13 +225,13 @@ class TestTokenServices:
     async def base_test_maker(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
         grant_type: str,
         maker: BaseMaker,
         broken: bool = False,
     ) -> None:
         await self.setup_test()
-        token_repo = PersistentGrantRepository(engine)
+        token_repo = PersistentGrantRepository(connection)
         if grant_type != "client_credentials":
             await token_repo.create(
                 grant_data=self.encodedattr,
@@ -259,12 +259,12 @@ class TestTokenServices:
     async def test_maker_code(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_maker(
             grant_type="authorization_code",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
             maker=CodeMaker,
         )
         for param in (
@@ -278,12 +278,12 @@ class TestTokenServices:
     async def test_maker_refresh_token(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_maker(
             grant_type="refresh_token",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
             maker=RefreshMaker,
         )
         for param in (
@@ -298,12 +298,12 @@ class TestTokenServices:
     async def test_maker_device_code(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_maker(
             grant_type="urn:ietf:params:oauth:grant-type:device_code",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
             maker=DeviceCodeMaker,
         )
         for param in (
@@ -317,12 +317,12 @@ class TestTokenServices:
     async def test_maker_client_credentials(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         result = await self.base_test_maker(
             grant_type="client_credentials",
             token_service=token_service,
-            engine=engine,
+            connection=connection,
             maker=ClientCredentialsMaker,
         )
         for param in ("access_token", "expires_in", "token_type"):
@@ -331,13 +331,13 @@ class TestTokenServices:
     async def test_maker_device_code_broken(
         self,
         token_service: TokenService,
-        engine: AsyncEngine,
+        connection: AsyncSession,
     ):
         with pytest.raises(GrantNotFoundError):
             result = await self.base_test_maker(
                 grant_type="urn:ietf:params:oauth:grant-type:device_code",
                 token_service=token_service,
-                engine=engine,
+                connection=connection,
                 maker=DeviceCodeMaker,
                 broken=True,
             )

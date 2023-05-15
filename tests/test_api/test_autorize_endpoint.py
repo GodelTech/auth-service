@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 @pytest.mark.asyncio
 class TestAuthorizeEndpointGET:
     async def test_successful_authorize_request(
-        self, client: AsyncClient,
-        engine: AsyncEngine
+      self, 
+      client: AsyncClient, 
+      engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",
@@ -20,7 +21,7 @@ class TestAuthorizeEndpointGET:
         assert response.status_code == status.HTTP_200_OK
 
     async def test_unsuccessful_authorize_request_not_full_data(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "response_type": "code",
@@ -31,7 +32,7 @@ class TestAuthorizeEndpointGET:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_authorize_request_wrong_client(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "wrong_test_client",
@@ -46,7 +47,7 @@ class TestAuthorizeEndpointGET:
         assert response.content.decode("UTF-8") == expected_content
 
     async def test_unsuccessful_authorize_request_bad_uri(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",
@@ -61,7 +62,7 @@ class TestAuthorizeEndpointGET:
         assert response.content.decode("UTF-8") == expected_content
 
     async def test_unsuccessful_authorize_request_bad_response_type(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",
@@ -81,7 +82,7 @@ class TestAuthorizeEndpointPOST:
     content_type = "application/x-www-form-urlencoded"
 
     async def test_successful_authorize_request(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",
@@ -100,7 +101,7 @@ class TestAuthorizeEndpointPOST:
         assert response.status_code == status.HTTP_302_FOUND
 
     async def test_unsuccessful_authorize_request_not_full_data(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "response_type": "code",
@@ -116,7 +117,7 @@ class TestAuthorizeEndpointPOST:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_unsuccessful_authorize_request_wrong_client(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "wrong_test_client",
@@ -138,7 +139,7 @@ class TestAuthorizeEndpointPOST:
         assert response.content.decode("UTF-8") == expected_content
 
     async def test_unsuccessful_authorize_request_badpassword(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ):
         params = {
             "client_id": "test_client",
@@ -160,7 +161,7 @@ class TestAuthorizeEndpointPOST:
         assert response.content.decode("UTF-8") == expected_content
 
     async def test_unsuccessful_authorize_request_bad_username(
-        self, client: AsyncClient
+        self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",

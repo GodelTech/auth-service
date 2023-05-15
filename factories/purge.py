@@ -43,6 +43,7 @@ class DataBasePurge:
         sess.session.execute(text("DROP TABLE api_secrets CASCADE"))
         sess.session.execute(text("DROP TABLE client_claims CASCADE"))
         sess.session.execute(text("DROP TABLE client_cors_origins CASCADE"))
+        sess.session.execute(text("DROP TABLE client_grant_types CASCADE"))
         sess.session.execute(text("DROP TABLE client_id_restrictions CASCADE"))
         sess.session.execute(text("DROP TABLE client_post_logout_redirect_uris CASCADE"))
         sess.session.execute(text("DROP TABLE client_redirect_uris CASCADE"))

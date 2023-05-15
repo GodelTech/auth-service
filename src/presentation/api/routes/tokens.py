@@ -3,8 +3,16 @@ from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services import TokenService
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    PersistentGrantRepository,
+    UserRepository,
+    DeviceRepository,
+    BlacklistedTokenRepository
+)
+from src.business_logic.services import TokenService, JWTService
 from src.data_access.postgresql.errors import (
     ClientBaseException,
     ClientGrantsError,
@@ -19,7 +27,6 @@ from src.data_access.postgresql.errors import (
     GrantNotFoundError,
     GrantTypeNotSupported,
 )
-from src.di.providers import provide_token_service_stub
 from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
     ResponseTokenModel,
@@ -40,13 +47,21 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
 @token_router.post("/", response_model=ResponseTokenModel)
+
 async def get_tokens(
     request: Request,
-    request_body: BodyRequestTokenModel = Depends(),
-    token_class: TokenService = Depends(provide_token_service_stub),
+    request_body: BodyRequestTokenModel = Depends(),    
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        token_class = token_class
+        session = request.state.session
+        token_class = TokenService(
+            session = session,
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            user_repo=UserRepository(session),
+            device_repo=DeviceRepository(session),
+            blacklisted_repo=BlacklistedTokenRepository(session)
+            )
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()
@@ -63,8 +78,11 @@ async def get_tokens(
         response_class = exception_response_mapper.get(type(e))
         if response_class:
             return response_class()
-        else:
-            raise e
+        raise e
+
+    except Exception as e:
+        logger.exception(e)
+        raise e
 
 
 exception_response_mapper = {
