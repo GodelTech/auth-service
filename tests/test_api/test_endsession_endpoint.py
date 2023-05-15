@@ -31,47 +31,35 @@ class TestEndSessionEndpoint:
         end_session_request_model: RequestEndSessionModel,
         end_session_service: EndSessionService,
     ) -> None:
-        
-        # session_factory = sessionmaker(
-        #     engine, expire_on_commit=False, class_=AsyncSession
-        # )
-        # async with session_factory() as sess:
-        #     session = sess
+        service = end_session_service
+        service.request_model = end_session_request_model
 
-            service = end_session_service
-            service.request_model = end_session_request_model
-
-            secret = await service.client_repo.get_client_secrete_by_client_id(
-                client_id=TOKEN_HINT_DATA["client_id"]
+        secret = await service.client_repo.get_client_secrete_by_client_id(
+            client_id=TOKEN_HINT_DATA["client_id"]
+        )
+        token = await service.jwt_service.encode_jwt(secret=secret, payload={})
+        await connection.execute(
+            insert(PersistentGrant).values(
+                key="test_key",
+                client_id=3,
+                user_id=3,
+                grant_data="test_successful_authorize_request",
+                persistent_grant_type_id=1,
+                expiration=False,
             )
-            token = await service.jwt_service.encode_jwt(secret=secret, payload={})
-            await connection.execute(
-                insert(PersistentGrant).values(
-                    key="test_key",
-                    client_id=3,
-                    user_id=3,
-                    grant_data="test_successful_authorize_request",
-                    persistent_grant_type_id=1,
-                    expiration=False,
-                )
-            )
-            await connection.flush()
-            hint = TokenHint()
-            token_hint = await hint.get_token_hint()
-            params = {
-                "id_token_hint": token_hint,
-                "post_logout_redirect_uri": "https://www.cole.com/",
-                "state": "test_state",
-            }
-            response = await client.request(
-                "GET", "/endsession/", params=params
-            )
-            assert response.status_code == status.HTTP_302_FOUND
-
-            # await connectin.execute(
-            #     delete(PersistentGrant).where(PersistentGrant.client_id == 3)
-            # )
-            # await connectin.commit()
+        )
+        await connection.flush()
+        hint = TokenHint()
+        token_hint = await hint.get_token_hint()
+        params = {
+            "id_token_hint": token_hint,
+            "post_logout_redirect_uri": "https://www.cole.com/",
+            "state": "test_state",
+        }
+        response = await client.request(
+            "GET", "/endsession/", params=params
+        )
+        assert response.status_code == status.HTTP_302_FOUND
 
     async def test_successful_authorize_request_without_uri(
         self,

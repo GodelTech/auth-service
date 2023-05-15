@@ -25,7 +25,7 @@ class NewUrl():
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class NewRequest():    
-    def __init__(self, session, with_state = True) -> None:
+    def __init__(self, session: AsyncSession, with_state:bool = True) -> None:
         self.url = NewUrl()
         self.method = ""
         self.headers: dict[str, Any] = {

@@ -96,14 +96,12 @@ def provide_introspection_service_stub() -> None:  # pragma: no cover
 
 def provide_introspection_service(
     jwt: JWTService,
-    # token_service: TokenService,
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
 ) -> IntrospectionServies:
     return IntrospectionServies(
         jwt=jwt,
-        # token_service=token_service,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
@@ -196,14 +194,12 @@ def provide_userinfo_service_stub() -> None:  # pragma: no cover
 
 def provide_userinfo_service(
     jwt: JWTService,
-    # token_service: TokenService,
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
 ) -> UserInfoServices:
     return UserInfoServices(
         jwt=jwt,
-        # token_service=token_service,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,

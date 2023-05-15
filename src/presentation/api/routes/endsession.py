@@ -29,7 +29,7 @@ async def end_session(
     try:
         session = request.state.session
         service_class = EndSessionService(
-            session, 
+            session=session, 
             client_repo=ClientRepository(session), 
             persistent_grant_repo=PersistentGrantRepository(session)
         )

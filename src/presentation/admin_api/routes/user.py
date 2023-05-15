@@ -42,7 +42,6 @@ async def get_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
-    
 ) -> dict[str, Any]:
 
     session = request.state.session
@@ -68,7 +67,7 @@ async def get_user(
 @admin_user_router.get(
     "", status_code=status.HTTP_200_OK, tags=["Administration User"]
 )
-#@exceptions_wrapper
+@exceptions_wrapper
 async def get_all_users(
     request: Request,
     access_token: str = Header(description="Access token"),
