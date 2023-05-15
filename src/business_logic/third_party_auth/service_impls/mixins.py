@@ -1,15 +1,16 @@
 import json
 import time
+
+from src.business_logic.third_party_auth.constants import StateData
 from src.business_logic.third_party_auth.dto import (
     ThirdPartyAccessTokenRequestModel,
-)
-from src.business_logic.third_party_auth.interfaces import (
-    ThirdPartyAuthMixinProtocol,
 )
 from src.business_logic.third_party_auth.errors import (
     ThirdPartyAuthProviderInvalidRequestDataError,
 )
-from src.business_logic.third_party_auth.constants import StateData
+from src.business_logic.third_party_auth.interfaces import (
+    ThirdPartyAuthMixinProtocol,
+)
 
 
 class ThirdPartyAuthMixin:
@@ -89,7 +90,7 @@ class ThirdPartyAuthMixin:
                 username=username, identity_provider_id=provider_id
             )
 
-    async def _create__grant(
+    async def _create_grant(
         self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         username_type: str,

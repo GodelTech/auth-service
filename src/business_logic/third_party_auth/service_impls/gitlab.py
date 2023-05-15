@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from business_logic.third_party_auth.service_impls.mixins import (
     ThirdPartyAuthMixin,
 )
-
 from src.business_logic.third_party_auth.constants import (
     AuthProviderName,
     StateData,
@@ -49,7 +48,7 @@ class GitlabAuthService(ThirdPartyAuthMixin):
         self, request_data: ThirdPartyAccessTokenRequestModel
     ) -> str:
         await self._state_validator(request_data.state)
-        await self._create__grant(
+        await self._create_grant(
             request_data,
             username_type="nickname",
             provider_name=AuthProviderName.GITLAB.value,

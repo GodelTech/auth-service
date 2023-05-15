@@ -3,12 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Type
 
 from src.business_logic.third_party_auth.constants import AuthProviderName
+from src.business_logic.third_party_auth.errors import (
+    UnsupportedThirdPartyAuthProviderError,
+)
 from src.business_logic.third_party_auth.validators import (
     StateValidator,
     StateValidatorBase,
-)
-from src.business_logic.third_party_auth.errors import (
-    UnsupportedThirdPartyAuthProviderError,
 )
 
 from .interfaces import ThirdPartyAuthServiceProtocol
