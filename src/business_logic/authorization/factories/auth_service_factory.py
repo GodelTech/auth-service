@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, Dict
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.authorization.constants import ResponseType
 from src.data_access.postgresql.errors import WrongResponseTypeError
@@ -14,14 +15,14 @@ from .factory_methods import (
     _create_token_auth_service,
 )
 
-if TYPE_CHECKING:
-    from src.business_logic.services import JWTService, PasswordHash
-    from src.data_access.postgresql.repositories import (
-        ClientRepository,
-        DeviceRepository,
-        PersistentGrantRepository,
-        UserRepository,
-    )
+
+from src.business_logic.services import JWTService, PasswordHash
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    DeviceRepository,
+    PersistentGrantRepository,
+    UserRepository,
+)
 
 
 FactoryMethod = Callable[..., AuthServiceProtocol]
@@ -33,13 +34,15 @@ class AuthServiceFactory:
 
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
-        password_service: PasswordHash,
-        jwt_service: JWTService,
+        password_service = PasswordHash(),
+        jwt_service: JWTService = JWTService(),
     ) -> None:
+        self.session = session
         self._client_repo = client_repo
         self._user_repo = user_repo
         self._persistent_grant_repo = persistent_grant_repo

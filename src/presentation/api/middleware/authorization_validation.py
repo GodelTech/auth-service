@@ -24,19 +24,12 @@ REQUESTS_WITH_AUTH = [
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
-    def __init__(
-        self,
-        app: Any,
-        blacklisted_repo: BlacklistedTokenRepository,
-        jwt_service: JWTService = JWTService(),
-    ) -> None:
+    def __init__(self, app: Any, jwt_service: JWTService = JWTService()) -> None:
         self.app = app
         self.jwt_service = jwt_service
-        self.blacklisted_repo = blacklisted_repo
+        #self.blacklisted_repo = blacklisted_repo
 
-    async def dispatch_func(
-        self, request: Any, call_next: Callable[..., Any]
-    ) -> Any:
+    async def dispatch_func(self, request, call_next:Callable[..., Any]) -> Any:
         for request_with_auth in REQUESTS_WITH_AUTH:
             if (
                 request_with_auth["path"] == request.url.path
@@ -52,9 +45,12 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         content="Incorrect Authorization Token",
                     )
-                if await self.blacklisted_repo.exists(
-                    token=token,
-                ):
+
+                session = request.state.session
+                blacklisted_repo = BlacklistedTokenRepository(session)
+                if await blacklisted_repo.exists(
+                        token=token,
+                    ):
                     return JSONResponse(
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         content="Token blacklisted",

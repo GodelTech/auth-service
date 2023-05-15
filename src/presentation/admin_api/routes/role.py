@@ -3,9 +3,11 @@ from functools import wraps
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from typing import Callable, Any
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.data_access.postgresql.repositories import RoleRepository
 from src.business_logic.services.admin_api import AdminRoleService
 from src.data_access.postgresql.errors.user import DuplicationError
-from src.di.providers.services import provide_admin_role_service_stub
 from src.presentation.admin_api.models.role import *
 
 logger = logging.getLogger(__name__)
@@ -43,13 +45,14 @@ async def get_role(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ) -> dict[str, Any]:
-
-    role_class = role_class
-
-    result = await role_class.get_role(role_id=role_id)
-    return {"role": result}
+        session = request.state.session
+        role_class = AdminRoleService(
+            session=session,
+            role_repo=RoleRepository(session)
+        )
+        result = await role_class.get_role(role_id=role_id)
+        return {"role": result}
 
 
 @admin_role_router.get(
@@ -59,9 +62,12 @@ async def get_role(
 async def get_all_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 )-> dict[str, Any]:
-    role_class = role_class
+    session = request.state.session
+    role_class = AdminRoleService(
+            session=session,
+            role_repo=RoleRepository(session)
+        )
     return {"all_roles": await role_class.get_all_roles()}
 
 
@@ -73,9 +79,12 @@ async def create_role(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestNewRoleModel = Depends(),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ) -> None:
-    role_class = role_class
+    session = request.state.session
+    role_class = AdminRoleService(
+            session=session,
+            role_repo=RoleRepository(session)
+        )
     await role_class.create_role(name=request_model.name)
 
 
@@ -88,13 +97,15 @@ async def update_role(
     role_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateRoleModel = Depends(),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ) -> None:
-    role_class = role_class
-    await role_class.update_role(
-        role_id=role_id, name=request_model.name
-    )
-
+        session = request.state.session
+        role_class = AdminRoleService(
+            session=session,
+            role_repo=RoleRepository(session)
+        )
+        await role_class.update_role(
+            role_id=role_id, name=request_model.name
+        )
 
 @admin_role_router.delete(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
@@ -104,7 +115,10 @@ async def delete_group(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
-    role_class: AdminRoleService = Depends(provide_admin_role_service_stub),
 ) -> None:
-    role_class = role_class
+    session = request.state.session
+    role_class = AdminRoleService(
+        session=session,
+        role_repo=RoleRepository(session=session)
+    )
     await role_class.delete_role(role_id=role_id)

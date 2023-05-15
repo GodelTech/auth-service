@@ -72,7 +72,6 @@ class ClientAdminController(ModelView, model=Client):
             model=self.model,
             engine=self.engine,
             exclude=exclude,
-            only=[i[1].key or i[1].name for i in self._form_attrs],
             column_labels={k.key: v for k, v in self._column_labels.items()},
             form_args=self.form_args,
             form_widget_args=self.form_widget_args,

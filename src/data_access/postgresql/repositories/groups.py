@@ -25,114 +25,75 @@ class GroupRepository(BaseRepository):
             kwargs = params_to_dict(
                 name=name, parent_group=parent_group, id=id
             )
-            session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession
-            )
-            async with session_factory() as sess:
-                session = sess
-
-                await session.execute(insert(Group).values(**kwargs))
-                await session.commit()
-        except:
-            raise DuplicationError
+            await self.session.execute(insert(Group).values(**kwargs))
+        except Exception as e:
+            raise DuplicationError(e)
 
     async def delete(self, group_id: Optional[int] = None) -> None:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            if group_id is None:
-                await session.execute(text("DELETE FROM groups"))
-                await session.commit()
-            elif await self.exists(group_id=group_id):
-                client_to_delete = await self.get_by_id(group_id=group_id)
-                await session.delete(client_to_delete)
-                await session.commit()
-            else:
-                raise ValueError
+
+        if group_id is None:
+            await self.session.execute(text("DELETE FROM groups"))
+        elif await self.exists(group_id=group_id):
+            client_to_delete = await self.get_by_id(group_id=group_id)
+            await self.session.delete(client_to_delete)
+        else:
+            raise ValueError
 
     async def exists(self, group_id: int) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
 
-            result = await session.execute(
-                select(exists().where(Group.id == group_id))
-            )
-            result = result.first()
-            return result[0]
+        result = await self.session.execute(
+            select(exists().where(Group.id == group_id))
+        )
+        result = result.first()
+        return result[0]
 
     async def get_by_id(self, group_id: int) -> Group:
         try:
-            session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession
-            )
-            async with session_factory() as sess:
-                session = sess
-
-                result = await session.execute(
-                    select(Group).where(
-                        Group.id == group_id,
-                    )
+            result = await self.session.execute(
+                select(Group).where(
+                    Group.id == group_id,
                 )
-                return result.first()[0]
-        except:
-            raise ValueError
+            )
+            return result.first()[0]
+        except Exception as e:
+            raise ValueError(e)
 
     async def get_group_by_name(self, name: str) -> Group:
         try:
-            session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession
+            group = await self.session.execute(
+                select(Group).where(Group.name == name)
             )
-            async with session_factory() as sess:
-                session = sess
-                group = await session.execute(
-                    select(Group).where(Group.name == name)
-                )
-                group = group.first()
-
-                return group[0]
+            group = group.first()
+            
+            return group[0]
         except:
             raise ValueError
 
     async def get_all_groups(self) -> list[Group]:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            groups = await session.execute(select(Group))
-            result = [group[0] for group in groups]
+        groups = await self.session.execute(select(Group))
+        result = [group[0] for group in groups]
 
-            return result
+        return result
 
     async def update(
         self, group_id: int, name: Optional[str] = None, parent_group: Optional[int] = None
     ) -> None:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
         try:
             kwargs = params_to_dict(name=name, parent_group=parent_group)
-            async with session_factory() as sess:
-                session = sess
-                if await self.exists(group_id=group_id):
-                    updates = (
-                        update(Group)
-                        .values(**kwargs)
-                        .where(Group.id == group_id)
-                    )
-                    await session.execute(updates)
-                    await session.commit()
-                else:
-                    raise ValueError
+            if await self.exists(group_id=group_id):
+                updates = (
+                    update(Group)
+                    .values(**kwargs)
+                    .where(Group.id == group_id)
+                )
+                await self.session.execute(updates)
+            else:
+                raise ValueError
+
         except ValueError:
             raise ValueError
-        except:
-            raise DuplicationError
+        except Exception as e:
+            raise DuplicationError(e)
 
     async def get_all_subgroups(self, main_group: Group) -> dict[str, Any]:
         all_groups = await self.get_all_groups()
@@ -144,6 +105,7 @@ class GroupRepository(BaseRepository):
         }
         return result
 
+    # TODO move to services
     def recursion(
         self, main_group: dict[str, Any], all_groups: list[Any]
     ) -> Union[list[dict[str, Any]], None]:
