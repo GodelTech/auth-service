@@ -36,4 +36,4 @@ class AdminAuthController(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool:
         token = request.session.get("Token")
-        return await self.auth_service.authenticate(token)
+        return await self.auth_service.authenticate(token, request)
