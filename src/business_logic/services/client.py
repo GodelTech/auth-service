@@ -11,6 +11,8 @@ from src.data_access.postgresql.repositories import ClientRepository
 import secrets
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from typing import Union
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 DEFAULT_REFRESH_TOKEN_LIFETIME = 10*60
 DEFAULT_ABSOLUTE_REFRESH_TOKEN_LIFETIME = 3*60*60
@@ -24,9 +26,11 @@ class ClientService:
     def __init__(
         self,
         client_repo: ClientRepository,
+        session:AsyncSession
     ) -> None:
         self.client_repo = client_repo
         self.request_model:Union[ClientRequestModel, ClientUpdateRequestModel, None]
+        self.session = session
 
     async def generate_credentials(self):
         while True:
@@ -93,7 +97,7 @@ class ClientService:
             "allow_remember_consent" : getattr(self.request_model, "allow_remember_consent", False),
             "always_include_user_claims_id_token": getattr(self.request_model, "", False), 	
             "always_send_client_claims": getattr(self.request_model, "always_send_client_claims", False),
-            "authorisation_code_lifetime": getattr(self.request_model, "authorisation_code_lifetime", DEFAULT_AUTHORIZATION_CODE_LIFETIME),
+            "authorization_code_lifetime": getattr(self.request_model, "authorisation_code_lifetime", DEFAULT_AUTHORIZATION_CODE_LIFETIME),
             "client_name": self.request_model.client_name,
             "client_uri": self.request_model.client_uri,
             "enable_local_login": getattr(self.request_model, "enable_local_login", True),

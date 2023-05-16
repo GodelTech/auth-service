@@ -136,16 +136,12 @@ class UserRepository(BaseRepository):
         return result
 
     async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
+        
             
-            await session.execute(
+            await self.session.execute(
                 insert(UserClaim).values(claims)
             )
-            await session.commit()
+            await self.session.commit()
 
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
         
@@ -168,13 +164,8 @@ class UserRepository(BaseRepository):
             return result
 
     async def get_user_by_username(self, username: str) -> User:
-        #try:
-            session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession
-            )
-            async with session_factory() as sess:
-                session = sess
-                user = await session.execute(
+        try:
+                user = await self.session.execute(
                     select(User)
                     .join(
                         UserPassword,
@@ -191,17 +182,12 @@ class UserRepository(BaseRepository):
                 user = user.first()
 
                 return user[0]
-        # except:
-        #     raise ValueError
+        except:
+            raise ValueError
         
     async def get_user_by_email(self, email:str,) -> User:
         try:
-            session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession
-            )
-            async with session_factory() as sess:
-                session = sess
-                user = await session.execute(
+                user = await self.session.execute(
                     select(User)
                     .join(
                         UserPassword,
@@ -220,6 +206,13 @@ class UserRepository(BaseRepository):
                 return user[0]
         except:
             raise ValueError
+    
+    async def exists_user(self, username: str) -> bool:
+        result = await self.session.execute(
+            select(User).where(User.username == username).exists().select()
+        )
+        return result.scalar()
+    
 # =======
 #         try:
 #             user = await self.session.execute(
@@ -482,36 +475,24 @@ class UserRepository(BaseRepository):
             return result[0]
     
     async def validate_user_by_email(self, email: str) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            result = await session.execute(
+        
+            result = await self.session.execute(
                 select(exists().where(User.email == email))
             )
             result = result.first()
             return result[0]
     
     async def validate_user_by_phone_number(self, phone_number: str) -> bool:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            result = await session.execute(
+        
+            result = await self.session.execute(
                 select(exists().where(User.phone_number == phone_number))
             )
             result = result.first()
             return result[0]
 
     async def get_all_claim_types(self) -> dict[str, int]:
-        session_factory = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as sess:
-            session = sess
-            result = await session.execute(
+        
+            result = await self.session.execute(
                 select(UserClaimType.id, UserClaimType.type_of_claim)
             )
             return {value[1]:int(value[0]) for value in result.all()}

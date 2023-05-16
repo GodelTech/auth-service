@@ -7,6 +7,8 @@ from src.di.providers.services import provide_admin_user_service_stub
 from src.dyna_config import DOMAIN_NAME
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
+from src.data_access.postgresql.repositories import UserRepository
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,12 @@ async def add_info(
     username:str,
     scope:str, 
     request: Request, 
-    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     ) -> _TemplateResponse:
+    session = request.state.session
+    user_service = AdminUserService(
+        session=session, 
+        user_repo=UserRepository(session)
+    )
     user_id = (await user_service.user_repo.get_user_by_username(username)).id
     claim_types = (await user_service.user_repo.get_claims(id=user_id)).keys()
     all_fields =[]
@@ -58,24 +64,33 @@ async def add_info(
     action_url = f'/user/add_info/{username}?scope={scope}'
     return templates.TemplateResponse("user_registration.html", {'request': request, 'fields':fields, 'action_url':action_url})
 
+
 @user_router.post("/add_info/{username}", status_code=200)
 async def add_info(
     username:str,
     request:Request,
     request_body:RequestAddInfoUserModel = Depends(),
-    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     ) -> None:
+    session = request.state.session
+    user_service = AdminUserService(
+        session=session, 
+        user_repo=UserRepository(session)
+    )
     new_claims = request_body.__dict__
     await user_service.add_user_info(data=new_claims, username=username)
     return templates.TemplateResponse("user_registration_success.html", {'request': request})
+
 
 @user_router.post("/register", response_class=HTMLResponse)
 async def register_user(
     request: Request,
     request_body: RequestUserModel = Depends(),
-    user_service: AdminUserService = Depends(provide_admin_user_service_stub)
     ) -> _TemplateResponse:
-
+    session = request.state.session
+    user_service = AdminUserService(
+        session=session, 
+        user_repo=UserRepository(session)
+    )
     kwargs = request_body.__dict__
     if await user_service.user_repo.validate_user_by_email(email=kwargs['email']):
         return JSONResponse(status_code=400, content='email_duplication')
@@ -86,6 +101,7 @@ async def register_user(
             return JSONResponse(status_code=400, content='phone_number_duplication')
     await user_service.registration(kwargs)
     return templates.TemplateResponse("user_registration_success.html", {'request': request})
+
 
 @user_router.get("/register/{scope}", response_class=HTMLResponse)
 def register(scope:str, request: Request, ) -> _TemplateResponse:

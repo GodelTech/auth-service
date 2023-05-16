@@ -258,8 +258,9 @@ async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
     return admin_auth_service
 
 @pytest_asyncio.fixture
-async def client_service(engine) -> ClientService:
+async def client_service(connection:AsyncSession) -> ClientService:
     client_service = ClientService(
-        client_repo=ClientRepository(engine),
+        client_repo=ClientRepository(connection),
+        session=connection
     )
     return client_service

@@ -162,9 +162,7 @@ class TestAdminGroupEndpoint:
         assert response_content["name"] == "Polnareff"
 
     async def test_get_all_group(self, connection: AsyncSession, client: AsyncClient) -> None:
-        await self.setup_base(
-            connection,
-        )
+        await self.setup_base(connection)
         await self.setup_groups_roles(connection)
 
         headers = {

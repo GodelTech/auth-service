@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import exists, select, insert, update, delete, text
 
-from data_access.postgresql.errors import ClientNotFoundError
+from src.data_access.postgresql.errors import ClientNotFoundError
 from src.business_logic.services import ClientService
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
@@ -25,7 +25,7 @@ from src.data_access.postgresql.tables.client import (
     clients_response_types,
     clients_grant_types,
 )
-from data_access.postgresql.tables.persistent_grant import PersistentGrantType
+from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
 
 # class ClientRequestModel(BaseModel):
 #     client_name: str
@@ -354,6 +354,7 @@ class TestClientService:
         )
 
         await client_service.update(client_id=unique_client_id)
+        await client_service.session.commit()
 
         async with session_factory() as session:
             uris_object = await session.scalars(
@@ -393,9 +394,9 @@ class TestClientService:
 
         expected_dictionary = {
             'client_id': 'double_test',
-            'client_name': 'kaisernancy',
-            'client_uri': 'https://www.arnold-mann.net/',
-            'logo_uri': 'https://carlson.com/',
+            'client_name': 'jasmine85',
+            'client_uri': 'http://davis-yates.com/',
+            'logo_uri': 'http://www.zavala.com/',
             'redirect_uris': ['https://www.google.com/'],
             'grant_types': [],
             'response_types': [],

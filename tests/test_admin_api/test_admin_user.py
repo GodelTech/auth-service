@@ -31,7 +31,6 @@ class TestAdminUserEndpoint:
         )
         self.group_repo = GroupRepository(connection)
         self.role_repo = RoleRepository(connection)
-
         self.user_repo = UserRepository(connection)
         
         if await self.user_repo.exists(user_id=user_id):

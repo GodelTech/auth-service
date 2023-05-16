@@ -3,7 +3,7 @@ from fastapi import status
 from httpx import AsyncClient
 from src.data_access.postgresql.repositories.user import UserRepository
 import logging
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 class TestUserEndpoint:
    
-    async def test_successful_get_HTML_register_add_info(self, engine: AsyncEngine, client: AsyncClient) -> None:
+    async def test_successful_get_HTML_register_add_info(self, client: AsyncClient) -> None:
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -33,7 +33,7 @@ class TestUserEndpoint:
         assert "<h1>Registration Form</h1>" in response_content
         assert '<input type="text" id="name" name="name" required>' not in response_content
 
-    async def test_successful_post_register_post_get_add_info(self, engine: AsyncEngine, client: AsyncClient) -> None:
+    async def test_successful_post_register_post_get_add_info(self, connection: AsyncSession, client: AsyncClient) -> None:
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -50,7 +50,7 @@ class TestUserEndpoint:
         )
         assert response.status_code == status.HTTP_200_OK
         response_content = response.content.decode("utf-8")
-        user_repo = UserRepository(engine)
+        user_repo = UserRepository(connection)
         user = await user_repo.get_user_by_username("polnareff")
         assert '<h1>Success</h1>' in response_content
 
@@ -74,7 +74,7 @@ class TestUserEndpoint:
         claims = await user_repo.get_claims(user.id)
         assert "family_name" in claims.keys()
 
-    async def test_unsuccessful_post_register(self, client: AsyncClient, engine: AsyncEngine) -> None:
+    async def test_unsuccessful_post_register(self, client: AsyncClient) -> None:
                 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
