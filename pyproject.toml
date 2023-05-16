@@ -7,8 +7,6 @@ authors = ["None"]
 [tool.poetry.dependencies]
 python = "^3.9"
 fastapi = "0.95.1"
-starlette = "0.26.1"
-WTForms = "3.0.1"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
 alembic = "^1.8.1"
 httpx = "^0.23.1"
@@ -24,6 +22,10 @@ pyjwkest = "^1.4.2"
 dynaconf = "^3.1.11"
 sqladmin = "^0.10.0"
 prometheus-fastapi-instrumentator = "^6.0.0"
+celery = "^5.2.7"
+starlette = "0.26.1"
+WTForms = "3.0.1"
+requests = "2.30.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -43,7 +45,6 @@ pytest-postgresql = "^4.1.1"
 psycopg = "^3.1.8"
 testcontainers = "^3.7.1"
 fontawesomefree = "^6.3.0"
-celery = "^5.2.7"
 pytest-mock = "^3.10.0"
 types-redis = "^4.5.1"
 types-mock = "^5.0.0"
@@ -77,7 +78,7 @@ no_incremental = true
 
 
 [tool.deptry]
-exclude = ["client_example", "tests"]
+exclude = ["tests"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
