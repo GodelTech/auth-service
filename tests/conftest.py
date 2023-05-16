@@ -1,5 +1,6 @@
 import mock
 import os
+import time
 
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
@@ -259,17 +260,48 @@ async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
     )
     return admin_auth_service
 
+
 @pytest_asyncio.fixture
-def admin_credentials():
+async def token():
+    jwt_service = JWTService()
+    token = await jwt_service.encode_jwt(
+            payload={
+                "sub": 1,
+                "exp": time.time() + 3600,
+                "aud": ["admin", "introspection", "revoke"]
+            }
+        )
+    return token
+
+@pytest_asyncio.fixture
+async def admin_credentials():
     return {
         'username': 'TestClient',
         'password': 'test_password'
     }
 
 @pytest_asyncio.fixture
-def device_data():
+async def client_create_data():
     return {
-        'client': 'client_example',
-        'device_code': 'device_code_example',
-        'user_code': 'user_code_example'
+        "access_token_type": "1",
+        "protocol_type": "1",
+        "refresh_token_expiration_type": "1",
+        "refresh_token_usage_type": "1",
+        "response_types": "1",
+        "client_id": "cli_id",
+        "client_name": "cli_name",
+        "token_endpoint_auth_method": "client_secret_post",
+        "save": "Save"
     }
+
+@pytest_asyncio.fixture
+async def device_create_data():
+    return {
+        'client': 1,
+        'device_code': 'device_code_example',
+        'user_code': 'user_code_example',
+        'verification_uri': 'https://www.device.com',
+        'verification_uri_complete': 'https://www.device_verif.com'
+    }
+
+
