@@ -2,8 +2,9 @@ from __future__ import annotations
 import time
 import uuid
 from src.business_logic.get_tokens.dto import RequestTokenModel, ResponseTokenModel
-from src.business_logic.jwt_manager.dto import AccessTokenPayload, RefreshTokenPayload, IdTokenPayload
+from src.business_logic.jwt_manager.dto import AccessTokenPayload, IdTokenPayload
 from src.dyna_config import DOMAIN_NAME
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.business_logic.common.interfaces import ValidatorProtocol
