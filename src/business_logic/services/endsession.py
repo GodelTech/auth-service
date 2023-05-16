@@ -5,21 +5,23 @@ from src.data_access.postgresql.repositories.persistent_grant import (
 )
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
-
 from typing import Union, Optional, Any
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EndSessionService:
     def __init__(
         self,
+        session:AsyncSession,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt_service: JWTService,
+        jwt_service = JWTService()
     ) -> None:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
         self.jwt_service = jwt_service
         self._request_model: Optional[RequestEndSessionModel] = None
+        self.session = session
 
     async def end_session(self) -> Optional[str]:
         if self.request_model is not None:

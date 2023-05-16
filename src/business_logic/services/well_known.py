@@ -8,14 +8,20 @@ from fastapi import Request
 from src.business_logic.services.jwt_token import JWTService
 from typing import Any, Union
 from src.data_access.postgresql.repositories import WellKnownRepository
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 logger = logging.getLogger(__name__)
 
-
 class WellKnownServices:
-    def __init__(self, wlk_repo: WellKnownRepository) -> None:
+    def __init__(
+            self,
+            session:AsyncSession, 
+            wlk_repo: WellKnownRepository
+        ) -> None:
         self.request: Union[Request, Any] = None
         self.wlk_repo = wlk_repo
+        self.session = session
 
     def get_list_of_types(
         self, list_of_types: list[Any] = [("Not ready yet", "")]
@@ -110,7 +116,7 @@ class WellKnownServices:
             "n": long_to_base64(await jwt_service.get_module()),
             "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
         }
-        logger.info(
+        logger.debug(
             f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"
         )
         return result

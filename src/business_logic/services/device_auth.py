@@ -4,6 +4,7 @@ import secrets
 import time
 from string import ascii_uppercase
 from typing import Any, Optional, Union
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -22,6 +23,7 @@ logger = logging.getLogger("is_app")
 class DeviceService:
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         device_repo: DeviceRepository,
     ) -> None:
@@ -30,6 +32,7 @@ class DeviceService:
         ] = None
         self.client_repo = client_repo
         self.device_repo = device_repo
+        self.session = session
 
     async def get_response(self) -> Optional[dict[str, Any]]:
         if type(self.request_model) == DeviceRequestModel:

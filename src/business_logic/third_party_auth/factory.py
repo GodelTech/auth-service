@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         ThirdPartyOIDCRepository,
         UserRepository,
     )
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 ProviderNameToService = dict[str, Type[ThirdPartyAuthServiceProtocol]]
@@ -39,12 +40,14 @@ class ThirdPartyAuthServiceFactory:
 
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         oidc_repo: ThirdPartyOIDCRepository,
         async_http_client: AsyncClient,
     ) -> None:
+        self.session = session
         self._client_repo = client_repo
         self._user_repo = user_repo
         self._persistent_grant_repo = persistent_grant_repo

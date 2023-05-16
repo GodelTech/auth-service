@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 import pytest
 
 from src.data_access.postgresql.errors import (
@@ -22,8 +22,8 @@ TEST_DEVICE_DATA = {
 
 @pytest.mark.asyncio
 class TestClientRepository:
-    async def test_create_delete_by_device_code(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_create_delete_by_device_code(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         await device_repo.create(
             client_id="test_client", 
             device_code="device_code",
@@ -41,8 +41,8 @@ class TestClientRepository:
         assert not await device_repo.validate_device_code(device_code="device_code")
     
     @no_type_check
-    async def test_create_not_full_data(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_create_not_full_data(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         with pytest.raises(TypeError):
             await device_repo.create(
                 device_code="device_code",
@@ -50,8 +50,8 @@ class TestClientRepository:
                 verification_uri="verification_uri",
             )
 
-    async def test_delete_by_user_code(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_delete_by_user_code(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         await device_repo.create(
             client_id="test_client",
             device_code="device_code",
@@ -66,17 +66,17 @@ class TestClientRepository:
         with pytest.raises(UserCodeNotFoundError):
             await device_repo.validate_user_code(user_code="user_code")
 
-    async def test_delete_by_user_code_not_exist(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_delete_by_user_code_not_exist(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         with pytest.raises(UserCodeNotFoundError):
             await device_repo.delete_by_user_code(user_code="fhjhYTU3")
 
-    async def test_delete_by_device_code_not_exist(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_delete_by_device_code_not_exist(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         assert not await device_repo.delete_by_device_code(device_code="fhjhYTU3")
 
-    async def test_validate_user_code(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_validate_user_code(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         await device_repo.create(
             client_id="test_client", 
             device_code="device_code",
@@ -95,8 +95,8 @@ class TestClientRepository:
         with pytest.raises(UserCodeNotFoundError):
             await device_repo.validate_user_code(user_code="user_code")
 
-    async def test_validate_device_code(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_validate_device_code(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         await device_repo.create(
             client_id="test_client", 
             device_code="device_code",
@@ -115,8 +115,8 @@ class TestClientRepository:
         
         assert not await device_repo.validate_device_code(device_code="device_code")
 
-    async def test_get_device_by_user_code(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_get_device_by_user_code(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
         await device_repo.create(
             client_id="test_client", 
             device_code="device_code",
@@ -136,8 +136,8 @@ class TestClientRepository:
         with pytest.raises(UserCodeNotFoundError):
             await device_repo.get_device_by_user_code(user_code="user_code")
 
-    async def test_get_expiration_time(self, engine: AsyncEngine) -> None:
-        device_repo = DeviceRepository(engine=engine)
+    async def test_get_expiration_time(self, connection: AsyncSession) -> None:
+        device_repo = DeviceRepository(session=connection)
 
         await device_repo.create(
             client_id="test_client", 

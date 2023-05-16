@@ -9,22 +9,31 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-
-
+from src.business_logic.common.errors import InvalidClientIdError
+from src.business_logic.get_tokens.errors import (
+    InvalidGrantError,
+    InvalidRedirectUriError,
+    UnsupportedGrantTypeError,
+)
+from src.business_logic.third_party_auth.errors import (
+    ThirdPartyAuthInvalidStateError,
+    ThirdPartyAuthProviderInvalidRequestDataError,
+    UnsupportedThirdPartyAuthProviderError,
+)
+from src.presentation.api.exception_handlers import (
+    http400_invalid_client_handler,
+    http400_invalid_grant_handler,
+    http400_third_party_auth_invalid_request_data_handler,
+    http400_third_party_auth_invalid_state_handler,
+    http400_unsupported_grant_type_handler,
+    http400_unsupported_third_party_auth_provider_handler,
+)
 from src.presentation.api.middleware import (
     AuthorizationMiddleware,
     AccessTokenMiddleware,
+    SessionManager,
 )
-
 from src.presentation.api import router
-from src.presentation.api.exception_handlers import (
-    http400_invalid_grant_handler,
-    http400_unsupported_grant_type_handler,
-    http400_invalid_client_handler,
-    http400_unsupported_third_party_auth_provider_handler,
-    http400_third_party_auth_invalid_state_handler,
-    http400_third_party_auth_invalid_request_data_handler,
-)
 from src.di import Container
 from src.dyna_config import (
     DB_MAX_CONNECTION_COUNT,
@@ -33,21 +42,10 @@ from src.dyna_config import (
 )
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-from src.business_logic.common.errors import InvalidClientIdError
-from src.business_logic.get_tokens.errors import (
-    InvalidGrantError,
-    InvalidRedirectUriError,
-    UnsupportedGrantTypeError,
-)
-from src.business_logic.third_party_auth.errors import (
-    UnsupportedThirdPartyAuthProviderError,
-    ThirdPartyAuthInvalidStateError,
-    ThirdPartyAuthProviderInvalidRequestDataError,
-)
-
 import logging
 from src.log import LOGGING_CONFIG
-
+from src.data_access.postgresql.repositories import UserRepository
+from src.business_logic.services.admin_auth import AdminAuthService
 
 logger = logging.getLogger(__name__)
 
@@ -93,15 +91,20 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
+    db = prov.provide_db_only(
+        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
+    session = prov.ProviderSession(db.session_factory).get_session
+
+    app.dependency_overrides[prov.provide_async_session_stub] = session
+
     app.add_middleware(
         middleware_class=AccessTokenMiddleware,
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
     )
-
+    app.add_middleware(
+        middleware_class=AuthorizationMiddleware,
+    )
+    app.add_middleware(middleware_class=SessionManager, session=session)
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
@@ -109,10 +112,10 @@ def setup_di(app: FastAPI) -> None:
         templates_dir="src/presentation/admin_ui/controllers/templates",
         authentication_backend=ui.AdminAuthController(
             secret_key="1234",
-            auth_service=prov.provide_admin_auth_service(
-                user_repo=prov.provide_user_repo(db_engine),
-                password_service=prov.provide_password_service(),
-                jwt_service=prov.provide_jwt_service(),
+            auth_service=AdminAuthService(
+                user_repo=UserRepository(
+                    session=prov.provide_async_session(db_engine)
+                ),
             ),
         ),
     )
@@ -169,265 +172,6 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.ApiScopeClaimAdminController)
     admin.add_view(ui.ApiScopeClaimTypeAdminController)
     admin.add_base_view(ui.SeparationLine)
-
-    nodepends_provide_auth_service = lambda: prov.provide_auth_service(
-        client_repo=prov.provide_client_repo(db_engine),
-        user_repo=prov.provide_user_repo(db_engine),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
-        device_repo=prov.provide_device_repo(db_engine),
-        password_service=prov.provide_password_service(),
-        jwt_service=prov.provide_jwt_service(),
-    )
-    app.dependency_overrides[
-        prov.provide_auth_service_stub
-    ] = nodepends_provide_auth_service
-
-    nodepends_provide_endsession_servise = (
-        lambda: prov.provide_endsession_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            jwt_service=prov.provide_jwt_service(),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_endsession_service_stub
-    ] = nodepends_provide_endsession_servise
-
-    nodepends_provide_introspection_service = (
-        lambda: prov.provide_introspection_service(
-            jwt=prov.provide_jwt_service(),
-            user_repo=prov.provide_user_repo(db_engine),
-            client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_introspection_service_stub
-    ] = nodepends_provide_introspection_service
-
-    nodepends_provide_token_service = lambda: prov.provide_token_service(
-        jwt_service=prov.provide_jwt_service(),
-        user_repo=prov.provide_user_repo(db_engine),
-        client_repo=prov.provide_client_repo(db_engine),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
-        device_repo=prov.provide_device_repo(db_engine),
-        blacklisted_repo=prov.provide_blacklisted_repo(db_engine),
-    )
-    app.dependency_overrides[
-        prov.provide_token_service_stub
-    ] = nodepends_provide_token_service
-
-    nodepends_provide_userinfo_service = lambda: prov.provide_userinfo_service(
-        jwt=prov.provide_jwt_service(),
-        user_repo=prov.provide_user_repo(db_engine),
-        client_repo=prov.provide_client_repo(db_engine),
-        persistent_grant_repo=prov.provide_persistent_grant_repo(db_engine),
-    )
-    app.dependency_overrides[
-        prov.provide_userinfo_service_stub
-    ] = nodepends_provide_userinfo_service
-
-    nodepends_provide_login_form_service = (
-        lambda: prov.provide_login_form_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_login_form_service_stub
-    ] = nodepends_provide_login_form_service
-
-    nodepends_provide_admin_user_service = (
-        lambda: prov.provide_admin_user_service(
-            user_repo=prov.provide_user_repo(db_engine),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_admin_user_service_stub
-    ] = nodepends_provide_admin_user_service
-
-    nodepends_provide_admin_group_service = (
-        lambda: prov.provide_admin_group_service(
-            group_repo=prov.provide_group_repo(db_engine),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_admin_group_service_stub
-    ] = nodepends_provide_admin_group_service
-
-    nodepends_provide_admin_role_service = (
-        lambda: prov.provide_admin_role_service(
-            role_repo=prov.provide_role_repo(db_engine),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_admin_role_service_stub
-    ] = nodepends_provide_admin_role_service
-
-    nodepends_provide_device_service = lambda: prov.provide_device_service(
-        client_repo=prov.provide_client_repo(db_engine),
-        device_repo=prov.provide_device_repo(db_engine),
-    )
-    app.dependency_overrides[
-        prov.provide_device_service_stub
-    ] = nodepends_provide_device_service
-
-    nodepends_provide_auth_third_party_oidc_service = (
-        lambda: prov.provide_auth_third_party_oidc_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_auth_third_party_oidc_service_stub
-    ] = nodepends_provide_auth_third_party_oidc_service
-
-    nodepends_provide_auth_linkedin_third_party_service = (
-        lambda: prov.provide_auth_third_party_linkedin_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-    app.dependency_overrides[
-        prov.provide_auth_third_party_linkedin_service_stub
-    ] = nodepends_provide_auth_linkedin_third_party_service
-
-    nodepends_provide_third_party_google_service = (
-        lambda: prov.provide_third_party_google_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_google_service_stub
-    ] = nodepends_provide_third_party_google_service
-
-    nodepends_provide_third_party_facebook_service = (
-        lambda: prov.provide_third_party_facebook_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_facebook_service_stub
-    ] = nodepends_provide_third_party_facebook_service
-
-    nodepends_provide_third_party_gitlab_service = (
-        lambda: prov.provide_third_party_gitlab_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_gitlab_service_stub
-    ] = nodepends_provide_third_party_gitlab_service
-
-    nodepends_wellknown_service = lambda: prov.provide_wellknown_service(
-        wlk_repo=prov.provide_wellknown_repo(db_engine),
-    )
-    app.dependency_overrides[
-        prov.provide_wellknown_service_stub
-    ] = nodepends_wellknown_service
-
-    nodepends_provide_third_party_microsoft_service = (
-        lambda: prov.provide_third_party_microsoft_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_microsoft_service_stub
-    ] = nodepends_provide_third_party_microsoft_service
-
-    nodepends_provide_third_party_microsoft_service = (
-        lambda: prov.provide_third_party_microsoft_service(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_microsoft_service_stub
-    ] = nodepends_provide_third_party_microsoft_service
-
-    nodepends_provide_third_party_auth_service_factory = (
-        lambda: prov.provide_third_party_auth_service_factory(
-            client_repo=prov.provide_client_repo(db_engine),
-            user_repo=prov.provide_user_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            oidc_repo=prov.provide_third_party_oidc_repo(db_engine),
-            async_http_client=AsyncClient(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_third_party_auth_service_factory_stub
-    ] = nodepends_provide_third_party_auth_service_factory
-
-    nodepends_provide_auth_service_factory = (
-        lambda: prov.provide_auth_service_factory(
-            client_repo=prov.provide_client_repo(db_engine),
-            persistent_grant_repo=prov.provide_persistent_grant_repo(
-                db_engine
-            ),
-            user_repo=prov.provide_user_repo(db_engine),
-            device_repo=prov.provide_device_repo(db_engine),
-            jwt_service=prov.provide_jwt_service(),
-            password_service=prov.provide_password_service(),
-        )
-    )
-
-    app.dependency_overrides[
-        prov.provide_auth_service_factory_stub
-    ] = nodepends_provide_auth_service_factory
 
 
 def setup_exception_handlers(app: NewFastApi) -> NewFastApi:

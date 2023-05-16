@@ -8,6 +8,13 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
 
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    ThirdPartyOIDCRepository,
+    UserRepository,
+    PersistentGrantRepository,
+    DeviceRepository,
+)
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
 from src.business_logic.services import LoginFormService
@@ -18,10 +25,6 @@ from src.data_access.postgresql.errors import (
     UserNotFoundError,
     WrongPasswordError,
     WrongResponseTypeError,
-)
-from src.di.providers import (
-    provide_auth_service_factory_stub,
-    provide_login_form_service_stub,
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
@@ -43,12 +46,18 @@ auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
     "/",
     status_code=status.HTTP_200_OK,
     response_class=HTMLResponse,
+    response_model=None,
 )
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
-    auth_class: LoginFormService = Depends(provide_login_form_service_stub),
 ) -> AuthorizeGetEndpointResponse:
+    session = request.state.session
+    auth_class = LoginFormService(
+        session=session,
+        client_repo=ClientRepository(session),
+        oidc_repo=ThirdPartyOIDCRepository(session),
+    )
     try:
         auth_class.request_model = request_model
         return_form = await auth_class.get_html_form()
@@ -67,7 +76,8 @@ async def get_authorize(
                 },
                 status_code=200,
             )
-        raise ValueError
+        else:
+            raise ValueError
 
     except ClientNotFoundError as exception:
         logger.exception(exception)
@@ -89,20 +99,27 @@ async def get_authorize(
         )
 
 
-@auth_router.post("/", status_code=status.HTTP_302_FOUND)
+@auth_router.post("/", status_code=status.HTTP_302_FOUND, response_model=None)
 async def post_authorize(
+    request: Request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
-    auth_service_factory: AuthServiceFactory = Depends(
-        provide_auth_service_factory_stub
-    ),
     user_code: Optional[str] = Cookie(None),
 ) -> AuthorizePostEndpointResponse:
     try:
+        session = request.state.session
+        auth_service_factory = AuthServiceFactory(
+            session=session,
+            client_repo=ClientRepository(session),
+            user_repo=UserRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            device_repo=DeviceRepository(session),
+        )
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (
             auth_service_factory.get_service_impl(request_body.response_type)
         )
         result = await auth_service.get_redirect_url(request_body)
+        await session.commit()
         return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
     except ClientNotFoundError as exception:
