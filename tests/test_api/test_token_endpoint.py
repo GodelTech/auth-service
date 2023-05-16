@@ -188,6 +188,8 @@ class TestTokenEndpoint:
             expiration_time=3600,
         )
 
+        await connection.commit()
+
         wrong_params = {
             "client_id": "test_client",
             "grant_type": "authorization_code",
