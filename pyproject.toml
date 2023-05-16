@@ -77,8 +77,8 @@ warn_unused_configs = true
 no_incremental = true
 
 
-[tool.deptry]
-exclude = ["tests"]
+#[tool.deptry]
+#exclude = ["tests"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
