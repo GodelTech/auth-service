@@ -76,10 +76,6 @@ warn_unused_ignores = true
 warn_unused_configs = true
 no_incremental = true
 
-
-#[tool.deptry]
-#exclude = ["tests"]
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
