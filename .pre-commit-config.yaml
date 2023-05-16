@@ -41,4 +41,3 @@ repos:
     rev: 0.11.0
     hooks:
       - id: deptry
-        args: [ "--skip-missing" ]
