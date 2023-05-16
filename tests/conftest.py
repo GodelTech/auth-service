@@ -258,3 +258,18 @@ async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
         jwt_service=JWTService(),
     )
     return admin_auth_service
+
+@pytest_asyncio.fixture
+def admin_credentials():
+    return {
+        'username': 'TestClient',
+        'password': 'test_password'
+    }
+
+@pytest_asyncio.fixture
+def device_data():
+    return {
+        'client': 'client_example',
+        'device_code': 'device_code_example',
+        'user_code': 'user_code_example'
+    }
