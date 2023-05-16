@@ -1,17 +1,16 @@
 import logging
 from typing import Any, Optional, Union
-
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.cache.key_builders import builder_with_parametr
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
-from src.di.providers import provide_userinfo_service_stub
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
+from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +28,21 @@ async def get_userinfo(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
-    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> dict[str, Any]:
     try:
-        userinfo_class = userinfo_class
+        session = request.state.session 
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.debug("Collecting Claims from DataBase.")
         result = await userinfo_class.get_user_info()
-
-        return {k: v for k, v in result.items() if v is not None}
+        result = {k: v for k, v in result.items() if v is not None}
+        return result
 
     except ClaimsNotFoundError:
         raise HTTPException(
@@ -52,6 +56,7 @@ async def get_userinfo(
         )
 
 
+
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
 @cache(
     expire=CacheTimeSettings.USERINFO,
@@ -63,10 +68,15 @@ async def post_userinfo(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
-    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> dict[str, Any]:
     try:
-        userinfo_class = userinfo_class
+        session = request.state.session
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
@@ -96,11 +106,15 @@ async def get_userinfo_jwt(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),
-    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
     try:
-        userinfo_class = userinfo_class
-        jwt_service = JWTService()
+        session = request.state.session
+        userinfo_class = UserInfoServices(
+            session=session,
+            user_repo=UserRepository(session),
+            client_repo=ClientRepository(session),
+            persistent_grant_repo=PersistentGrantRepository(session),
+            )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
@@ -125,16 +139,15 @@ async def get_default_token(
     with_iss_me: Optional[bool] = None,
     with_aud: Optional[bool] = None,
     scope: str = "profile",
-    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> str:
     try:
-        uis = userinfo_class
+        jwt = JWTService()
         payload: dict[str, Any] = {"sub": "1", "scope": scope}
         if with_iss_me:
             payload["iss"] = "me"
         if with_aud:
             payload["aud"] = ["admin", "userinfo", "introspection", "revoke"]
-        return await uis.jwt.encode_jwt(payload)
+        return await jwt.encode_jwt(payload)
     except:
         raise HTTPException(status_code=500)
 
@@ -144,13 +157,12 @@ async def get_decode_token(
     token: str,
     issuer: Optional[str] = None,
     audience: Optional[str] = None,
-    userinfo_class: UserInfoServices = Depends(provide_userinfo_service_stub),
 ) -> dict[str, Any]:
-    uis = userinfo_class
+    jwt = JWTService()
     kwargs = {}
     if issuer is not None:
         kwargs["issuer"] = issuer
     if audience is not None:
         kwargs["audience"] = audience
 
-    return await uis.jwt.decode_token(token, **kwargs)
+    return await jwt.decode_token(token, **kwargs)

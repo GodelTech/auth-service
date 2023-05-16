@@ -7,10 +7,6 @@ from src.business_logic.services import (
     AdminUserService,
     AuthorizationService,
     AuthThirdPartyOIDCService,
-    ThirdPartyGoogleService,
-    ThirdPartyFacebookService,
-    ThirdPartyLinkedinService,
-    ThirdPartyGitLabService,
     ThirdPartyMicrosoftService,
     DeviceService,
     EndSessionService,
@@ -37,6 +33,7 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     BlacklistedTokenRepository,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def provide_auth_service_stub() -> None:  # pragma: no cover
@@ -99,14 +96,12 @@ def provide_introspection_service_stub() -> None:  # pragma: no cover
 
 def provide_introspection_service(
     jwt: JWTService,
-    # token_service: TokenService,
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
 ) -> IntrospectionServies:
     return IntrospectionServies(
         jwt=jwt,
-        # token_service=token_service,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
@@ -118,6 +113,7 @@ def provide_token_service_stub() -> None:  # pragma: no cover
 
 
 def provide_token_service(
+    session: AsyncSession,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
     user_repo: UserRepository,
@@ -126,12 +122,13 @@ def provide_token_service(
     blacklisted_repo: BlacklistedTokenRepository,
 ) -> TokenService:
     return TokenService(
+        session=session,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,
         device_repo=device_repo,
         jwt_service=jwt_service,
-        blacklisted_repo=blacklisted_repo
+        blacklisted_repo=blacklisted_repo,
     )
 
 
@@ -141,9 +138,13 @@ def provide_admin_user_service_stub() -> None:  # pragma: no cover
 
 def provide_admin_user_service(
     user_repo: UserRepository,
+    role_repo: RoleRepository,
+    session:AsyncSession
 ) -> AdminUserService:
     return AdminUserService(
         user_repo=user_repo,
+        role_repo=role_repo,
+        session=session
     )
 
 
@@ -152,10 +153,12 @@ def provide_admin_group_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_group_service(
-    group_repo: GroupRepository,
+    session: AsyncSession,
+    group_repo: GroupRepository
 ) -> AdminGroupService:
     return AdminGroupService(
-        group_repo=group_repo,
+        session=session,
+        group_repo=group_repo
     )
 
 
@@ -164,14 +167,18 @@ def provide_admin_role_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_role_service(
+    session: AsyncSession,
     role_repo: RoleRepository,
 ) -> AdminRoleService:
     return AdminRoleService(
+        session=session,
         role_repo=role_repo,
     )
 
+
 def provide_wellknown_service_stub() -> None:
     ...
+
 
 def provide_wellknown_service(
     wlk_repo: WellKnownRepository,
@@ -187,14 +194,12 @@ def provide_userinfo_service_stub() -> None:  # pragma: no cover
 
 def provide_userinfo_service(
     jwt: JWTService,
-    # token_service: TokenService,
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
 ) -> UserInfoServices:
     return UserInfoServices(
         jwt=jwt,
-        # token_service=token_service,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
@@ -208,8 +213,9 @@ def provide_login_form_service_stub() -> None:  # pragma: no cover
 def provide_login_form_service(
     client_repo: ClientRepository,
     oidc_repo: ThirdPartyOIDCRepository,
+    session: AsyncSession
 ) -> LoginFormService:
-    return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo)
+    return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo, session=session)
 
 
 def provide_admin_auth_service_stub() -> None:  # pragma: no cover
@@ -235,8 +241,9 @@ def provide_device_service_stub() -> None:  # pragma: no cover
 def provide_device_service(
     client_repo: ClientRepository,
     device_repo: DeviceRepository,
+    session: AsyncSession
 ) -> DeviceService:
-    return DeviceService(client_repo=client_repo, device_repo=device_repo)
+    return DeviceService(session=session, client_repo=client_repo, device_repo=device_repo)
 
 
 def provide_auth_third_party_oidc_service_stub() -> None:  # pragma: no cover

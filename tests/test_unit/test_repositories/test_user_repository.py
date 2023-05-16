@@ -17,16 +17,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio
 class TestUserRepository:
-    async def test_get_hash_password_user_not_exists(self, engine: AsyncEngine) -> None:
-        self.user_repo = UserRepository(engine)
+    async def test_get_hash_password_user_not_exists(self, connection: AsyncSession) -> None:
+        self.user_repo = UserRepository(connection)
         with pytest.raises(UserNotFoundError):
             await self.user_repo.get_hash_password(user_name="not_exists_user")
 
-    async def test_get_hash_password(self, engine: AsyncEngine, connection: AsyncSession) -> None:
+    async def test_get_hash_password(self, connection: AsyncSession) -> None:
         
         expected_hash_password = "$2b$12$HCAPjlNF9pthdorVPLG7H.skdT1c.yVpfblZ1xRjPxckJqvKUmkn6"
         
-        self.user_repo = UserRepository(engine)
+        self.user_repo = UserRepository(connection)
 
         # The sequence id number is out of sync and raises duplicate key error
         # We manually bring it back in sync
@@ -48,30 +48,30 @@ class TestUserRepository:
         )
         await connection.commit()
 
-    async def test_get_claims(self, engine: AsyncEngine) -> None:
+    async def test_get_claims(self, connection: AsyncSession) -> None:
         expected_given_name = "Ibragim"
         expected_nickname = "Nagibator2000"
 
-        self.user_repo = UserRepository(engine)
+        self.user_repo = UserRepository(connection)
         result = await self.user_repo.get_claims(id=1)
 
         assert result["given_name"] == expected_given_name
         assert result["nickname"] == expected_nickname
 
-    async def test_get_claims_user_not_exists(self, engine: AsyncEngine) -> None:
-        self.user_repo = UserRepository(engine)
+    async def test_get_claims_user_not_exists(self, connection: AsyncSession) -> None:
+        self.user_repo = UserRepository(connection)
         with pytest.raises(ClaimsNotFoundError):
             await self.user_repo.get_claims(id=55555)
 
-    async def test_validate_user_by_username(self, engine: AsyncEngine) -> None:
-        user_repo = UserRepository(engine)
+    async def test_validate_user_by_username(self, connection: AsyncSession) -> None:
+        user_repo = UserRepository(connection)
         validated = await user_repo.validate_user_by_username(
             username="TestClient"
         )
         assert validated is True
 
-    async def test_validate_user_by_username_not_exist(self, engine: AsyncEngine) -> None:
-        user_repo = UserRepository(engine)
+    async def test_validate_user_by_username_not_exist(self, connection: AsyncSession) -> None:
+        user_repo = UserRepository(connection)
         validated = await user_repo.validate_user_by_username(
             username="blaBlabla23"
         )

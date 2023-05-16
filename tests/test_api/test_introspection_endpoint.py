@@ -22,10 +22,10 @@ async def new_check_authorisation_token(*args: Any, **kwargs: Any) -> bool:
 class TestIntrospectionEndpoint:
     @pytest.mark.asyncio
     async def test_successful_introspection_request(
-        self, engine: AsyncEngine, client: AsyncClient
+        self, connection: AsyncSession, client: AsyncClient
     ) -> None:
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(engine)
+        persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
             "sub": 1,
@@ -79,10 +79,10 @@ class TestIntrospectionEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_introspection_request_spoiled_token(
-        self, engine: AsyncEngine, client: AsyncClient
+        self, connection: AsyncSession, client: AsyncClient
     ) -> None:
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(engine)
+        persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {"sub": 1, "exp": time.time(), "aud":["introspection"]}
         introspection_token = await jwt.encode_jwt(
@@ -115,10 +115,10 @@ class TestIntrospectionEndpoint:
 
     @pytest.mark.asyncio
     async def test_unsuccessful_introspection_request_incorrect_token(
-        self, engine: AsyncEngine, client: AsyncClient
+        self,connection: AsyncSession, client: AsyncClient
     ) -> None:
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(engine)
+        persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
             "sub": 1,

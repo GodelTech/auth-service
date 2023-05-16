@@ -15,15 +15,17 @@ from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class IntrospectionServies:
     def __init__(
         self,
-        jwt: JWTService,
+        session:AsyncSession,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
+        jwt:JWTService = JWTService(),
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
@@ -32,6 +34,7 @@ class IntrospectionServies:
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.session = session
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:
@@ -52,6 +55,8 @@ class IntrospectionServies:
                 "access-token",
                 "access_token",
                 "access",
+                "authorization_code",
+                "authorization-code"
             ):
                 response["active"] = True
 

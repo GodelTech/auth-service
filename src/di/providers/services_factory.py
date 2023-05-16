@@ -1,31 +1,33 @@
-from src.business_logic.get_tokens import TokenServiceFactory
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.business_logic.authorization import AuthServiceFactory
 from src.data_access.postgresql.repositories import (
-    BlacklistedTokenRepository,
     ClientRepository,
-    DeviceRepository,
-    PersistentGrantRepository,
     UserRepository,
+    PersistentGrantRepository,
+    DeviceRepository,
 )
-from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
+from src.business_logic.services import JWTService, PasswordHash
 
 
-def provide_token_service_factory_stub() -> None:
+def provide_auth_service_factory_stub() -> None:
     ...
 
 
-def provide_token_service_factory(
-        client_repo: ClientRepository,
-        persistent_grant_repo: PersistentGrantRepository,
-        user_repo: UserRepository,
-        device_repo: DeviceRepository,
-        jwt_service: JWTManagerProtocol,
-        blacklisted_repo: BlacklistedTokenRepository,
-) -> TokenServiceFactory:
-    return TokenServiceFactory(
+def provide_auth_service_factory(
+    session: AsyncSession,
+    client_repo: ClientRepository,
+    persistent_grant_repo: PersistentGrantRepository,
+    user_repo: UserRepository,
+    device_repo: DeviceRepository,
+    jwt_service: JWTService,
+    password_service: PasswordHash,
+) -> AuthServiceFactory:
+    return AuthServiceFactory(
+        session=session,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,
         device_repo=device_repo,
-        jwt_manager=jwt_service,
-        blacklisted_repo=blacklisted_repo
+        jwt_service=jwt_service,
+        password_service=password_service,
     )

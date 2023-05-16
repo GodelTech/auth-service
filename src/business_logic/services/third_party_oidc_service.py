@@ -2,7 +2,7 @@ import json
 import logging
 import secrets
 from typing import Any, Dict, Optional
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
 from src.data_access.postgresql.repositories import (
@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 class AuthThirdPartyOIDCService:
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         oidc_repo: ThirdPartyOIDCRepository,
-        http_client: AsyncClient,
+        http_client = AsyncClient(),
     ) -> None:
         self._request_model: Optional[ThirdPartyOIDCRequestModel] = None
         self._state_request_model: Optional[StateRequestModel] = None
