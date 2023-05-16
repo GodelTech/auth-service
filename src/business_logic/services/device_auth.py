@@ -120,14 +120,10 @@ class DeviceService:
         return self._request_model
 
     @request_model.setter
-<<<<<<< HEAD
-    def request_model(self, request_model: Union[DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel, None]) -> None:
-=======
     def request_model(
         self,
         request_model: Union[
             DeviceRequestModel, DeviceUserCodeModel, DeviceCancelModel, None
         ],
     ) -> None:
->>>>>>> 554e68af55ed2ef99d1517f02e0829bc9df7f401
         self._request_model = request_model

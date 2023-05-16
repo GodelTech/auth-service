@@ -10,11 +10,11 @@ from src.business_logic.get_tokens.validators import (
     ValidateGrantExpired,
 )
 from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
-from src.business_logic.common.validators import ValidateClient
-
+from src.business_logic.common.validators import ClientValidator
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
     from .interfaces import TokenServiceProtocol
     from src.data_access.postgresql.repositories import (
         BlacklistedTokenRepository,
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 class TokenServiceFactory:
     def __init__(
             self,
+            session: AsyncSession,
             client_repo: ClientRepository,
             persistent_grant_repo: PersistentGrantRepository,
             user_repo: UserRepository,
@@ -36,6 +37,7 @@ class TokenServiceFactory:
             jwt_manager: JWTManagerProtocol,
             blacklisted_repo: BlacklistedTokenRepository,
     ) -> None:
+        self._session = session
         self._client_repo = client_repo
         self._persistent_grant_repo = persistent_grant_repo
         self._user_repo = user_repo
@@ -46,9 +48,10 @@ class TokenServiceFactory:
     def get_service_impl(self, grant_type: str) -> TokenServiceProtocol:
         if grant_type == 'authorization_code':
             return AuthorizationCodeTokenService(
+                session=self._session,
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
                 redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
-                client_validator=ValidateClient(client_repo=self._client_repo),
+                client_validator=ClientValidator(client_repo=self._client_repo),
                 code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,
@@ -56,8 +59,9 @@ class TokenServiceFactory:
             )
         elif grant_type == 'refresh_token':
             return RefreshTokenGrantService(
+                session=self._session,
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
-                client_validator=ValidateClient(client_repo=self._client_repo),
+                client_validator=ClientValidator(client_repo=self._client_repo),
                 refresh_token_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,

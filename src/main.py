@@ -171,14 +171,15 @@ def setup_di(app: FastAPI) -> None:
     admin.add_base_view(ui.SeparationLine)
 
 
-app = get_application()
-
 def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
     app.add_exception_handler(InvalidClientIdError, http400_invalid_client_handler)
     app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
     app.add_exception_handler(InvalidRedirectUriError, http400_invalid_grant_handler)
     app.add_exception_handler(UnsupportedGrantTypeError, http400_unsupported_grant_type_handler)
     return app
+
+
+app = get_application()
 
 
 # expose the default Python metrics to the /metrics endpoint

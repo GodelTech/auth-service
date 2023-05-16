@@ -72,3 +72,4 @@ from .jwt_manager import (
     provide_jwt_manager,
     provide_jwt_manager_stub
 )
+from .token_factory import provide_token_service_factory

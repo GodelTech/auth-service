@@ -7,6 +7,7 @@ from src.dyna_config import DOMAIN_NAME
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
     from src.business_logic.common.interfaces import ValidatorProtocol
     from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
     from src.data_access.postgresql.repositories import PersistentGrantRepository
@@ -20,6 +21,7 @@ class AuthorizationCodeTokenService:
     """
     def __init__(
             self,
+            session: AsyncSession,
             grant_validator: ValidatorProtocol,
             redirect_uri_validator: ValidatorProtocol,
             client_validator: ValidatorProtocol,
@@ -28,6 +30,7 @@ class AuthorizationCodeTokenService:
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
     ):
+        self._session = session
         self._grant_validator = grant_validator
         self._redirect_uri_validator = redirect_uri_validator
         self._client_validator = client_validator
@@ -62,6 +65,7 @@ class AuthorizationCodeTokenService:
             grant_type_id=2,
             expiration_time=current_unix_time + 84700
         )
+        await self._session.commit()
 
         return ResponseTokenModel(
             access_token=access_token,

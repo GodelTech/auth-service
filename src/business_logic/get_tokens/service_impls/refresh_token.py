@@ -7,6 +7,7 @@ from src.dyna_config import DOMAIN_NAME
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
     from src.business_logic.common.interfaces import ValidatorProtocol
     from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
     from src.data_access.postgresql.repositories import PersistentGrantRepository
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 class RefreshTokenGrantService:
     def __init__(
             self,
+            session: AsyncSession,
             grant_validator: ValidatorProtocol,
             client_validator: ValidatorProtocol,
             refresh_token_validator: ValidatorProtocol,
@@ -22,6 +24,7 @@ class RefreshTokenGrantService:
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
     ):
+        self._session = session
         self._grant_validator = grant_validator
         self._client_validator = client_validator
         self._refresh_token_validator = refresh_token_validator
