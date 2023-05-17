@@ -387,13 +387,14 @@ def provide_third_party_microsoft_service(
     )
 
 
-def provide_third_party_auth_service_factory_stub() -> (  # TODO move it to services factory
+def provide_third_party_auth_service_factory_stub() -> (
     None
 ):  # pragma: no cover
     ...
 
 
-def provide_third_party_auth_service_factory(  # TODO move it to services factory
+def provide_third_party_auth_service_factory(
+    session: AsyncSession,
     client_repo: ClientRepository,
     user_repo: UserRepository,
     oidc_repo: ThirdPartyOIDCRepository,
@@ -401,6 +402,7 @@ def provide_third_party_auth_service_factory(  # TODO move it to services factor
     async_http_client: AsyncClient,
 ) -> ThirdPartyAuthServiceFactory:
     return ThirdPartyAuthServiceFactory(
+        session=session,
         client_repo=client_repo,
         user_repo=user_repo,
         persistent_grant_repo=persistent_grant_repo,
