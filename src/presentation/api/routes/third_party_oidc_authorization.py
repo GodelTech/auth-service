@@ -34,14 +34,18 @@ auth_oidc_router = APIRouter(
 )
 
 
+ThirdPartyAuthResponse = Union[RedirectResponse, JSONResponse]
+
+
 @auth_oidc_router.get(
     "/github",
     status_code=status.HTTP_302_FOUND,
+    response_model=None,
 )
 async def get_github_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> ThirdPartyAuthResponse:
     session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
@@ -58,11 +62,13 @@ async def get_github_authorize(
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
-@auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND)
+@auth_oidc_router.get(
+    "/linkedin", status_code=status.HTTP_302_FOUND, response_model=None
+)
 async def get_linkedin_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> ThirdPartyAuthResponse:
     session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
@@ -82,11 +88,12 @@ async def get_linkedin_authorize(
 @auth_oidc_router.get(
     "/google",
     status_code=status.HTTP_302_FOUND,
+    response_model=None,
 )
 async def get_google_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> ThirdPartyAuthResponse:
     session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
@@ -106,11 +113,12 @@ async def get_google_authorize(
 @auth_oidc_router.get(
     "/gitlab",
     status_code=status.HTTP_302_FOUND,
+    response_model=None,
 )
 async def get_gitlab_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> ThirdPartyAuthResponse:
     session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
@@ -130,11 +138,12 @@ async def get_gitlab_authorize(
 @auth_oidc_router.get(
     "/microsoft",
     status_code=status.HTTP_302_FOUND,
+    response_model=None,
 )
 async def get_microsoft_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-) -> Union[RedirectResponse, JSONResponse]:
+) -> ThirdPartyAuthResponse:
     session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
