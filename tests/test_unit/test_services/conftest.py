@@ -1,4 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, Mock
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 import pytest
 import pytest_asyncio
@@ -75,6 +77,13 @@ def async_http_client_mock():
     client = AsyncMock()
     yield client
     del client
+
+
+@pytest_asyncio.fixture
+def async_session_mock():
+    session = AsyncSession()
+    yield session
+    del session
 
 
 @pytest.fixture

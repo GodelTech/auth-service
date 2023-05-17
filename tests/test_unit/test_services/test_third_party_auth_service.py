@@ -54,6 +54,7 @@ def state_validator_with_mocked_dependencies(third_party_oidc_repository_mock):
 
 @pytest.fixture
 def third_party_auth_service_factory_with_mocked_dependencies(
+    async_session_mock,
     client_repository_mock,
     user_repository_mock,
     persistent_grant_repository_mock,
@@ -61,6 +62,7 @@ def third_party_auth_service_factory_with_mocked_dependencies(
     async_http_client_mock,
 ):
     factory = ThirdPartyAuthServiceFactory(
+        session=async_session_mock,
         client_repo=client_repository_mock,
         user_repo=user_repository_mock,
         persistent_grant_repo=persistent_grant_repository_mock,
