@@ -118,13 +118,6 @@ class TestAdminUIDelete:
 
         data = {
             'id': pk,
-            'scope':name,
-            'client_id':pk,
-            }
-        await connection.execute(insert(ClientScope).values(data))
-
-        data = {
-            'id': pk,
             'post_logout_redirect_uri':name,
             'client_id':pk,
             }
@@ -295,7 +288,6 @@ class TestAdminUIDelete:
             IdentityResource,
             IdentityProviderMapped
             ]
-        
         tables_cl =[
             Device,
             ClientSecret,
@@ -337,6 +329,7 @@ class TestAdminUIDelete:
             PersistentGrant,
             PersistentGrantType,
         ]
+        
         tables_all = [
             tables_tokens,
             tables_api, 
@@ -358,15 +351,10 @@ class TestAdminUIDelete:
                     part_of_link = 'identity-provider-mapped'
                 if part_of_link == 'client-scope':
                     continue
-                    #part_of_link = 'clients-scope'
             
-                print(part_of_link)
-                print(pk)
-                db_check = (await connection.execute(select(exists().where(table.id == pk)))).first()
-                flag  = f'/admin/api-secret-type/delete?pks={pk}' in  f"/admin/{part_of_link}/delete?pks={pk}"
+                # print(part_of_link)
+                # db_check = (await connection.execute(select(exists().where(table.id == pk)))).first()
                 response = await client.request(
                     "DELETE", f"/admin/{part_of_link}/delete?pks={pk}", cookies={"session": '1'}
                 )
-                if response.status_code != status.HTTP_200_OK:
-                    pause = "||"
                 assert response.status_code == status.HTTP_200_OK
