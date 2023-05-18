@@ -34,5 +34,5 @@ class PersistentGrantTypesFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
         sqlalchemy_get_or_create = ("type_of_grant",)
 
-    id = factory.Sequence(lambda n: n + 1)
+    # id = factory.Sequence(lambda n: n + 1)
     type_of_grant = factory.Iterator(["authorization_code", "refresh_token"])
