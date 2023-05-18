@@ -58,9 +58,8 @@ class PersistentGrant(BaseModel):
         return f":{self.expiration}"
 
 
-class PersistentGrantType(Base):
+class PersistentGrantType(BaseModel):
     __tablename__ = "persistent_grant_types"
-    id = Column(Integer, primary_key=True)
     type_of_grant = Column(String, nullable=False)
 
     def __str__(self) -> str:  # pragma: no cover

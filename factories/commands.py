@@ -36,6 +36,8 @@ class DataBasePopulation:
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()
+        # cls.reset_autoincrement()
+        # cls.get_table_info(print_bool = True)
 
     @classmethod
     def populate_user_password_table(cls) -> None:
@@ -48,67 +50,57 @@ class DataBasePopulation:
 
     @classmethod
     def clean_data_from_database(cls) -> None:
-        sess.session.execute(
-            text("TRUNCATE TABLE user_passwords RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE user_claim_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE api_claim_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE api_scope_claim_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE api_secrets_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE persistent_grant_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE persistent_grants RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE client_secrets RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE user_claims RESTART IDENTITY")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE clients RESTART IDENTITY CASCADE ")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE roles RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE access_token_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE protocol_types RESTART IDENTITY CASCADE")
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE refresh_token_expiration_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text(
-                "TRUNCATE TABLE refresh_token_usage_types RESTART IDENTITY CASCADE"
-            )
-        )
-        sess.session.execute(
-            text("TRUNCATE TABLE identity_providers RESTART IDENTITY CASCADE")
-        )
-
+        tables = sess.engine.table_names()
+        excluded_table = 'alembic_version'
+        for table_name in tables:
+            if table_name != excluded_table:
+                sess.session.execute(text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE"))
         sess.session.commit()
+
+    
+    # @classmethod
+    # def get_table_info(cls, table_names = [], print_bool = True, auto_inc_next=True):
+    #     table_info = []
+    #     part_of_sql = ''
+    #     if auto_inc_next==True:
+    #         part_of_sql = 'nextval'
+    #     else:
+    #         part_of_sql = 'currval'
+
+    #     if table_names == []:
+    #         table_names = sess.engine.table_names()
+
+    #     for table_name in table_names:
+    #         table_dict = {"name": table_name}
+    #         try:
+    #             auto_increment_value = sess.session.execute(f"SELECT {part_of_sql}('{table_name}_id_seq')")
+    #             auto_increment_value = auto_increment_value.fetchone()
+    #         except:
+    #             auto_increment_value = ['error']
+            
+    #         sess.session.rollback()
+    #         count_query = text(f"SELECT COUNT(*) FROM {table_name}")
+    #         count_result =  sess.session.execute(count_query).fetchone()
+    #         table_dict["number_of_inst"] = count_result[0] if count_result else None
+    #         table_dict["auto_increment"] = auto_increment_value[0] if auto_increment_value else None
+    #         table_dict["diff"] = table_dict["auto_increment"] - table_dict["number_of_inst"] if auto_increment_value[0]!= 'error' else None
+
+    #         table_info.append(table_dict)
+    #     return table_info
+
+
+    # @classmethod
+    # def reset_autoincrement(cls, print_bool = True):
+    #     table_info = cls.get_table_info()
+    #     table_names = []
+    #     for i in table_info:
+    #        # print(i)
+    #         if i['diff'] is not None and i['diff']!=1:
+    #            # if print_bool:
+    #             print(i)
+    #             sess.session.execute(f"SELECT setval('{i['name']}_id_seq', {i['number_of_inst']});")
+    #             table_names.append(i['name'])
+    #     sess.session.commit()
 
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
