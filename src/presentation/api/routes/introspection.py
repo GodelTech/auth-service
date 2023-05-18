@@ -1,15 +1,15 @@
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from jwt.exceptions import ExpiredSignatureError
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 
 from src.business_logic.services.introspection import IntrospectionServies
+from src.data_access.postgresql.repositories import ClientRepository, PersistentGrantRepository, UserRepository
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
     ResponceIntrospectionModel,
 )
-from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
+
 logger = logging.getLogger(__name__)
 
 introspection_router = APIRouter(
@@ -19,11 +19,11 @@ introspection_router = APIRouter(
 
 @introspection_router.post("/", response_model=ResponceIntrospectionModel)
 async def post_introspection(
-    request: Request,
-    auth_swagger: Optional[str] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
-    request_body: BodyRequestIntrospectionModel = Depends(),
+        request: Request,
+        auth_swagger: Optional[str] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
+        request_body: BodyRequestIntrospectionModel = Depends(),
 ) -> dict[str, Any]:
     try:
         session = request.state.session
@@ -32,7 +32,7 @@ async def post_introspection(
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
             client_repo=ClientRepository(session)
-            )
+        )
         introspection_class.request = request
 
         token = request.headers.get("authorization") or auth_swagger

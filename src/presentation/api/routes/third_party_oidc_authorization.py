@@ -70,12 +70,6 @@ async def get_github_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -109,12 +103,6 @@ async def get_linkedin_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -153,12 +141,6 @@ async def get_facebook_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -197,12 +179,6 @@ async def get_google_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -241,12 +217,6 @@ async def get_gitlab_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -285,12 +255,6 @@ async def get_microsoft_authorize(
         )
         return response
 
-    except WrongDataError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong data has been passed"},
-        )
     except IndexError as exception:
         logger.exception(exception)
         return JSONResponse(
@@ -309,22 +273,14 @@ async def post_create_state(
     request:Request,
     state_request_model: StateRequestModel = Depends(),
 ) -> Union[None, JSONResponse, int]:
-    try:
-        session = request.state.session
-        auth_class = AuthThirdPartyOIDCService(
-            session = session,
-            client_repo=ClientRepository(session),
-            user_repo=UserRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
-        auth_class.state_request_model = state_request_model
-        await auth_class.create_provider_state()
-        return status.HTTP_200_OK
-
-    except ThirdPartyStateDuplicationError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "Third Party State already exists"},
-        )
+    session = request.state.session
+    auth_class = AuthThirdPartyOIDCService(
+        session=session,
+        client_repo=ClientRepository(session),
+        user_repo=UserRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+        oidc_repo=ThirdPartyOIDCRepository(session)
+    )
+    auth_class.state_request_model = state_request_model
+    await auth_class.create_provider_state()
+    return status.HTTP_200_OK

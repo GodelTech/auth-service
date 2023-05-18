@@ -50,13 +50,6 @@ async def post_device_authorize(
             status_code=status.HTTP_200_OK,
             content=response_data,
         )
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        await session.rollback()
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
     except:
         await session.rollback()
         raise
@@ -87,36 +80,27 @@ async def post_device_user_code(
     request:Request,
     request_model: DeviceUserCodeModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
-    try:
-        session = request.state.session
-        auth_service = DeviceService(
-            session=session,
-            client_repo=ClientRepository(session),
-            device_repo=DeviceRepository(session)
-        )
-        auth_service.request_model = request_model
-        firmed_redirect_uri = await auth_service.get_redirect_uri()
+    session = request.state.session
+    auth_service = DeviceService(
+        session=session,
+        client_repo=ClientRepository(session),
+        device_repo=DeviceRepository(session)
+    )
+    auth_service.request_model = request_model
+    firmed_redirect_uri = await auth_service.get_redirect_uri()
 
-        response = RedirectResponse(
-            firmed_redirect_uri, status_code=status.HTTP_302_FOUND
-        )
+    response = RedirectResponse(
+        firmed_redirect_uri, status_code=status.HTTP_302_FOUND
+    )
 
-        response.set_cookie(
-            key="user_code",
-            value=request_model.user_code,
-            expires=600,
-            domain=BASE_URL_HOST,
-            httponly=True,
-        )  # TODO add secure=True when we'll have https
-        return response
-
-    except UserCodeNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong user code"},
-        )
-
+    response.set_cookie(
+        key="user_code",
+        value=request_model.user_code,
+        expires=600,
+        domain=BASE_URL_HOST,
+        httponly=True,
+    )  # TODO add secure=True when we'll have https
+    return response
 
 
 @device_auth_router.get(
@@ -150,20 +134,6 @@ async def delete_device(
         result = await auth_service.clean_device_data(user_code)
         await session.commit()
         return result
-    except UserCodeNotFoundError as exception:
-        logger.exception(exception)
-        await session.rollback()
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Wrong user code"},
-        )
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        await session.rollback()
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
     except:
         await session.rollback()
         raise

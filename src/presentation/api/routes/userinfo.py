@@ -1,16 +1,17 @@
 import logging
 from typing import Any, Optional, Union
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+
+from fastapi import APIRouter, HTTPException, Header, Request, status
 from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.business_logic.cache.key_builders import builder_with_parametr
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
+from src.data_access.postgresql.repositories import ClientRepository, PersistentGrantRepository, UserRepository
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 
 
 logger = logging.getLogger(__name__)
@@ -25,19 +26,19 @@ userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
     # key_builder=builder_with_parametr,
 )
 async def get_userinfo(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
 ) -> dict[str, Any]:
     try:
-        session = request.state.session 
+        session = request.state.session
         userinfo_class = UserInfoServices(
             session=session,
             user_repo=UserRepository(session),
             client_repo=ClientRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            )
+        )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.debug("Collecting Claims from DataBase.")
@@ -57,7 +58,6 @@ async def get_userinfo(
         )
 
 
-
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
 @cache(
     expire=CacheTimeSettings.USERINFO,
@@ -65,10 +65,10 @@ async def get_userinfo(
     key_builder=builder_with_parametr,
 )
 async def post_userinfo(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
 ) -> dict[str, Any]:
     try:
         session = request.state.session
@@ -77,7 +77,7 @@ async def post_userinfo(
             user_repo=UserRepository(session),
             client_repo=ClientRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            )
+        )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
@@ -103,10 +103,10 @@ async def post_userinfo(
     key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),
 ) -> str:
     try:
         session = request.state.session
@@ -115,7 +115,7 @@ async def get_userinfo_jwt(
             user_repo=UserRepository(session),
             client_repo=ClientRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            )
+        )
         token = request.headers.get("authorization") or auth_swagger
         userinfo_class.authorization = token
         logger.info("Collecting Claims from DataBase.")
@@ -137,9 +137,9 @@ async def get_userinfo_jwt(
 
 @userinfo_router.get("/get_default_token", response_model=str)
 async def get_default_token(
-    with_iss_me: Optional[bool] = None,
-    with_aud: Optional[bool] = None,
-    scope: str = "profile",
+        with_iss_me: Optional[bool] = None,
+        with_aud: Optional[bool] = None,
+        scope: str = "profile",
 ) -> str:
     try:
         jwt = JWTService()
@@ -155,9 +155,9 @@ async def get_default_token(
 
 @userinfo_router.get("/decode_token", response_model=dict)
 async def get_decode_token(
-    token: str,
-    issuer: Optional[str] = None,
-    audience: Optional[str] = None,
+        token: str,
+        issuer: Optional[str] = None,
+        audience: Optional[str] = None,
 ) -> dict[str, Any]:
     jwt = JWTService()
     kwargs = {}
