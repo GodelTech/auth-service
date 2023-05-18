@@ -1,6 +1,7 @@
 import mock
 import os
 import time
+from datetime import datetime
 
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
@@ -283,11 +284,11 @@ async def admin_credentials():
 @pytest_asyncio.fixture
 async def client_create_data():
     return {
-        "access_token_type": "1",
-        "protocol_type": "1",
-        "refresh_token_expiration_type": "1",
-        "refresh_token_usage_type": "1",
-        "response_types": "1",
+        "access_token_type": 1,
+        "protocol_type": 1,
+        "refresh_token_expiration_type": 1,
+        "refresh_token_usage_type": 1,
+        "response_types": 1,
         "client_id": "cli_id",
         "client_name": "cli_name",
         "token_endpoint_auth_method": "client_secret_post",
@@ -295,13 +296,137 @@ async def client_create_data():
     }
 
 @pytest_asyncio.fixture
+async def access_token_types_create_data():
+    return {
+        "type": "new_access_token_type",
+        "client": 1,
+        # "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def protocol_types_create_data():
+    return {
+        "type": "new_protocol_type",
+        "client": 1,
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def refresh_token_usage_types_create_data():
+    return {
+        "type": "new_refresh_token_usage_type",
+        "client": 1,   # new
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def refresh_token_expiration_types_create_data():
+    return {
+        "type": "new_refresh_token_expiration_type",
+        "client": 1,     # new
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_secrets_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'description': 'new_description',
+        'expiration': 1,
+        'type': 'new_type',
+        'value': '18260968-9e17-49a0-aaef-fa39683ffd8f',   # ????
+        "save": "Save"
+    }
+
+
+@pytest_asyncio.fixture
+async def client_grant_types_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'grant_type': 'new_grant_type',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_redirect_uris_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'redirect_uri': 'https://new_red_uri.com',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_cors_origins_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'origin': 'new_origin',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_post_logout_redirect_uris_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'post_logout_redirect_uri': 'post_logout_redirect_uri',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_claims_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'type': 'new_type',
+        'value': 'new_value',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def client_id_restrictions_create_data():
+    return {
+        'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
+        'provider': 'new_provider',
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
 async def device_create_data():
     return {
         'client': 1,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now(),
         'device_code': 'device_code_example',
         'user_code': 'user_code_example',
         'verification_uri': 'https://www.device.com',
-        'verification_uri_complete': 'https://www.device_verif.com'
+        'verification_uri_complete': 'https://www.device_verif.com',
+        'expires_in': 600,
+        'interval': 5,
+        "save": "Save"
+    }
+
+@pytest_asyncio.fixture
+async def user_create_data():
+    return {
+        'username': "new_user",
+    }
+
+@pytest_asyncio.fixture
+async def user_password_create_data():
+    return {
+        'value': "create_password",
     }
 
 
