@@ -54,7 +54,6 @@ async def fake_authenticate(*args, **kwargs):
     return None
 
 @pytest.mark.asyncio
-
 class TestAdminUIDelete:
     async def setup_base(self, connection:AsyncSession, pk: int = 1000) -> None:
         name = 'TEST_DELETE'
