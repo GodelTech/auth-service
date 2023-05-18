@@ -3,7 +3,7 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING
 
-from business_logic.third_party_auth.service_impls.mixins import (
+from src.business_logic.third_party_auth.service_impls.mixins import (
     ThirdPartyAuthMixin,
 )
 from src.business_logic.third_party_auth.constants import (
