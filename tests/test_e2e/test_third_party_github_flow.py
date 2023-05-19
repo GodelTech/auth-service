@@ -1,168 +1,119 @@
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import select, insert, delete, text
+from sqlalchemy import select, insert
 
 from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderState,
     IdentityProviderMapped,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import UserClaim, User
 from src.business_logic.services.jwt_token import JWTService
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 
 
-scope = (
-    "gcp-api%20IdentityServerApi&grant_type="
-    "password&client_id=spider_man&client_secret="
-    "65015c5e-c865-d3d4-3ba1-3abcb4e65500&password="
-    "the_beginner&username=PeterParker"
-)
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
 
 
-# @pytest.mark.asyncio
-# class TestThirdPartyGithubFlow:
-#     async def test_successful_github_code_flow(
-#         self, client: AsyncClient, connection: AsyncSession, mocker: Any
-#     ) -> None:
-#         # 1st stage Authorization endpoint with get request
-#         params = {
-#             "client_id": "spider_man",
-#             "response_type": "code",
-#             "scope": scope,
-#             "redirect_uri": "https://www.google.com/",
-#         }
-#         response = await client.request("GET", "/authorize/", params=params)
-#         assert response.status_code == status.HTTP_200_OK
+@pytest.mark.asyncio
+class TestThirdPartyGithubFlow:
+    async def test_successful_github_code_flow(
+        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    ) -> None:
+        # Stage 1: Authorization endpoint with get request
+        authorization_params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "redirect_uri": "https://www.google.com/",
+        }
+        authorization_response = await client.request(
+            "GET", "/authorize/", params=authorization_params
+        )
+        assert authorization_response.status_code == status.HTTP_200_OK
 
-#         # 2nd stage third party GitHub provider endpoint
-#         await connection.execute(
-#             insert(IdentityProviderState).values(state=STUB_STATE)
-#         )
-#         await connection.commit()
-#         await connection.execute(
-#             insert(IdentityProviderMapped).values(
-#                 identity_provider_id=1,
-#                 provider_client_id="e6a4c6014f35f4acf016",
-#                 provider_client_secret="***REMOVED***",
-#                 enabled=True,
-#             )
-#         )
-#         await connection.commit()
+        # Stage 2: Third party GitHub provider endpoint request to collect username and access_token
+        provider_state_insertion = insert(IdentityProviderState).values(
+            state=STUB_STATE
+        )
+        provider_mapped_insertion = insert(IdentityProviderMapped).values(
+            identity_provider_id=1,
+            provider_client_id="e6a4c6014f35f4acf016",
+            provider_client_secret="***REMOVED***",
+            enabled=True,
+        )
+        await connection.execute(provider_state_insertion)
+        await connection.execute(provider_mapped_insertion)
+        await connection.commit()
 
-#         async def replace_post(*args: Any, **kwargs: Any) -> str:
-#             return "access_token"
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
+            return "access_token"
 
-#         async def replace_get(*args: Any, **kwargs: Any) -> str:
-#             return "NewUserNew"
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
+            return "NewUserNew"
 
-#         patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
+        patch_start = "src.business_logic.third_party_auth.service_impls.github.GithubAuthService"
+        mocker.patch(f"{patch_start}._get_access_token", replace_post)
+        mocker.patch(f"{patch_start}._get_username", replace_get)
+        github_params = {"code": "test_code", "state": STUB_STATE}
+        github_response = await client.request(
+            "GET", "/authorize/oidc/github", params=github_params
+        )
+        assert github_response.status_code == status.HTTP_302_FOUND
 
-#         mocker.patch(
-#             f"{patch_start}.make_request_for_access_token", replace_post
-#         )
-#         mocker.patch(
-#             f"{patch_start}.make_get_request_for_user_data", replace_get
-#         )
-#         params = {"code": "test_code", "state": STUB_STATE}
-#         response = await client.request(
-#             "GET", "/authorize/oidc/github", params=params
-#         )
-#         assert response.status_code == status.HTTP_302_FOUND
-#         await connection.execute(
-#             delete(IdentityProviderMapped).where(
-#                 IdentityProviderMapped.identity_provider_id == 1,
-#                 IdentityProviderMapped.provider_client_id
-#                 == "e6a4c6014f35f4acf016",
-#                 IdentityProviderMapped.provider_client_secret
-#                 == "***REMOVED***",
-#             )
-#         )
-#         await connection.commit()
-#         await connection.execute(
-#             delete(IdentityProviderState).where(
-#                 IdentityProviderState.state == STUB_STATE
-#             )
-#         )
-#         await connection.commit()
+        # Stage 3: Token endpoint changes secrete code in Persistent Grant table to token
+        secret_code = (
+            github_response.headers["location"].split("=")[1].split("&")[0]
+        )
+        token_params = {
+            "client_id": "spider_man",
+            "grant_type": "authorization_code",
+            "code": secret_code,
+            "scope": "test",
+            "redirect_uri": "https://www.google.com/",
+        }
+        token_response = await client.request(
+            "POST",
+            "/token/",
+            data=token_params,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        response_data = token_response.json()
+        access_token = response_data.get("access_token")
+        assert token_response.status_code == status.HTTP_200_OK
 
-#         # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
-#         user_id = await connection.execute(
-#             select(User.id).where(User.username == "NewUserNew")
-#         )
-#         user_id = user_id.first()[0]
-#         secret_code = await connection.execute(
-#             select(PersistentGrant.grant_data).where(
-#                 PersistentGrant.client_id == 8,
-#                 PersistentGrant.user_id == user_id,
-#             )
-#         )
+        # Stage 4: UserInfo endpoint retrieves user data from UserClaims table
+        user_id_query = select(User.id).where(User.username == "NewUserNew")
+        user_id = (
+            await connection.execute(user_id_query)
+        ).scalar_one_or_none()
+        user_claim_insertion = insert(UserClaim).values(
+            user_id=user_id, claim_type_id=1, claim_value="Peter"
+        )
+        await connection.execute(user_claim_insertion)
+        await connection.commit()
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
+        assert response.status_code == status.HTTP_200_OK
 
-#         secret_code = secret_code.first()[0]
+        # Stage 5: EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
+        jwt_service = JWTService()
+        token_hint_data = {
+            "sub": user_id,
+            "client_id": "spider_man",
+            "type": "code",
+        }
 
-#         params = {
-#             "client_id": "spider_man",
-#             "grant_type": "authorization_code",
-#             "code": secret_code,
-#             "scope": "test",
-#             "redirect_uri": "https://www.google.com/",
-#         }
+        id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
 
-#         content_type = "application/x-www-form-urlencoded"
-#         response = await client.request(
-#             "POST",
-#             "/token/",
-#             data=params,
-#             headers={"Content-Type": content_type},
-#         )
-#         response_data = response.json()
-#         access_token = response_data.get("access_token")
-
-#         assert response.status_code == status.HTTP_200_OK
-
-#         # 4th stage UserInfo endpoint retrieves user data from UserClaims table
-
-#         # The sequence id number is out of sync and raises duplicate key error
-#         # We manually bring it back in sync
-#         await connection.execute(
-#             text(
-#                 "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
-#             )
-#         )
-#         await connection.execute(
-#             insert(UserClaim).values(
-#                 user_id=user_id, claim_type_id=1, claim_value="Peter"
-#             )
-#         )
-#         await connection.commit()
-#         response = await client.request(
-#             "GET", "/userinfo/", headers={"authorization": access_token}
-#         )
-#         assert response.status_code == status.HTTP_200_OK
-#         await connection.execute(
-#             delete(UserClaim)
-#             .where(UserClaim.user_id == 8)
-#             .where(UserClaim.claim_type_id == 1)
-#         )
-#         await connection.commit()
-
-#         # 5th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
-#         jwt_service = JWTService()
-#         token_hint_data = {
-#             "sub": user_id,
-#             "client_id": "spider_man",
-#             "type": "code",
-#         }
-
-#         id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
-
-#         params = {
-#             "id_token_hint": id_token_hint,
-#             "post_logout_redirect_uri": "http://www.sparks.net/",
-#             "state": "test_state",
-#         }
-#         response = await client.request("GET", "/endsession/", params=params)
-#         assert response.status_code == status.HTTP_302_FOUND
+        logout_params = {
+            "id_token_hint": id_token_hint,
+            "post_logout_redirect_uri": "http://www.sparks.net/",
+            "state": "test_state",
+        }
+        end_session_response = await client.request(
+            "GET", "/endsession/", params=logout_params
+        )
+        assert end_session_response.status_code == status.HTTP_302_FOUND
