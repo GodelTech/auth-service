@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -159,7 +161,7 @@ class ClientRepository(BaseRepository):
         )
         return result.all()
 
-    async def list_all_scopes_by_client(self, client_id: str) -> str:
+    async def list_all_scopes_by_client(self, client_id: str) -> List[str]:
         scopes = await self.session.scalars(
             select(ClientScope.scope)
             .join(Client, ClientScope.client_id == Client.id)

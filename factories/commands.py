@@ -84,14 +84,14 @@ class DataBasePopulation:
     @classmethod
     def populate_api_scope_claim_types_table(cls) -> None:
         for val in data.API_SCOPE_CLAIM_TYPE:
-            scope_claim_type = res_factory.ApiScopeClaimTypeFactory(
+            res_factory.ApiScopeClaimTypeFactory(
                 scope_claim_type=val
             )
 
     @classmethod
     def populate_persistent_grant_types_table(cls) -> None:
         for val in data.TYPES_OF_GRANTS:
-            type_of_grant = grant_factory.PersistentGrantTypesFactory(
+            grant_factory.PersistentGrantTypesFactory(
                 type_of_grant=val
             )
 
@@ -125,24 +125,24 @@ class DataBasePopulation:
     @classmethod
     def populate_user_claims_table(cls) -> None:
         for key, val in data.DEFAULT_USER_CLAIMS.items():
-            claim = user_factory.UserClaimFactory(
+            user_factory.UserClaimFactory(
                 user_id=1, claim_type_id=key, claim_value=val
             )
 
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls) -> None:
-        for i in range(len(data.POST_LOGOUT_REDIRECT_URL)):
-            uri = cl_factory.ClientPostLogoutRedirectUriFactory(
-                client_id=i + 1,
-                post_logout_redirect_uri=data.POST_LOGOUT_REDIRECT_URL[i],
+        for client_id, post_logout_redirect_uri in data.POST_LOGOUT_REDIRECT_URL.items():
+            cl_factory.ClientPostLogoutRedirectUriFactory(
+                client_id=client_id,
+                post_logout_redirect_uri=post_logout_redirect_uri,
             )
             
 
     @classmethod
     def populate_client_secrets(cls) -> None:
         for client_id, secret in data.CLIENT_SECRETS.items():
-            sec = cl_factory.ClientSecretFactory(
+            cl_factory.ClientSecretFactory(
                 client_id=client_id, value=secret
             )
             
@@ -150,16 +150,16 @@ class DataBasePopulation:
     @classmethod
     def populate_client_scopes(cls) -> None:
         for client_id, scope in data.CLIENT_SCOPES.items():
-            sec = cl_factory.ClientScopeFactory(
+            cl_factory.ClientScopeFactory(
                 client_id=client_id, scope=scope
             )
             
 
     @classmethod
     def populate_client_redirect_uri(cls) -> None:
-        for item in range(len(data.CLIENT_IDS)):
-            uri = cl_factory.ClientRedirectUriFactory(
-                client_id=item + 1, redirect_uri="https://www.google.com/"
+        for client_id, client_name in data.CLIENT_IDS.items():
+            cl_factory.ClientRedirectUriFactory(
+                client_id=client_id, redirect_uri="https://www.google.com/"
             )
             
 
@@ -173,7 +173,18 @@ class DataBasePopulation:
         for grant_type in data.TYPES_OF_GRANTS:
             grant_factory.PersistentGrantTypesFactory()
 
-        for grant in data.TYPES_OF_GRANTS:
+        # For what do we need to populate persistent_grant_types table here?
+        # It's been already populated in populate_persistent_grant_types_table method
+        # It is not being added twice only because of sqlalchemy_get_or_create = ("type_of_grant",) line
+        # in PersistentGrantTypesFactory class
+
+        # for grant_type in data.TYPES_OF_GRANTS:
+        #     grant_factory.PersistentGrantTypesFactory()
+        #     grant_factory.sess.session.commit()
+        #     grant_factory.sess.session.close()
+
+        # for grant in data.TYPES_OF_GRANTS:
+        for i in range(2):
             grant_factory.PersistentGrantFactory()
 
     @classmethod

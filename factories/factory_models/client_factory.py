@@ -13,7 +13,7 @@ class ClientFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
         sqlalchemy_get_or_create = ("client_id",)
 
-    client_id = factory.Iterator(data.CLIENT_IDS)
+    client_id = factory.Iterator(data.CLIENT_IDS.values())
     absolute_refresh_token_lifetime = factory.Faker(
         "pyint", min_value=3600, max_value=50000
     )
@@ -27,8 +27,12 @@ class ClientFactory(SQLAlchemyModelFactory):
     allow_remember_consent = factory.Faker("pybool")
     always_include_user_claims_id_token = factory.Faker("pybool")
     always_send_client_claims = factory.Faker("pybool")
-    authorization_code_lifetime = factory.Faker("random_number")
-    device_code_lifetime = factory.Faker("random_number")
+    authorization_code_lifetime = factory.Faker(
+        "pyint", min_value=600, max_value=50000
+    )
+    device_code_lifetime = factory.Faker(
+        "pyint", min_value=600, max_value=50000
+    )
     client_name = factory.Faker("user_name")
     client_uri = factory.Faker("url")
     enable_local_login = factory.Faker("pybool")
