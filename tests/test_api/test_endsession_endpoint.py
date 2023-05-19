@@ -28,16 +28,11 @@ class TestEndSessionEndpoint:
         self,
         connection: AsyncSession,
         client: AsyncClient,
-        end_session_request_model: RequestEndSessionModel,
         end_session_service: EndSessionService,
+        end_session_request_model: RequestEndSessionModel,
     ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
-
-        secret = await service.client_repo.get_client_secrete_by_client_id(
-            client_id=TOKEN_HINT_DATA["client_id"]
-        )
-        token = await service.jwt_service.encode_jwt(secret=secret, payload={})
         await connection.execute(
             insert(PersistentGrant).values(
                 key="test_key",
@@ -48,7 +43,7 @@ class TestEndSessionEndpoint:
                 expiration=False,
             )
         )
-        await connection.flush()
+        await connection.commit()
         hint = TokenHint()
         token_hint = await hint.get_token_hint()
         params = {
