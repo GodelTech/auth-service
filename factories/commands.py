@@ -43,8 +43,6 @@ class DataBasePopulation:
         finally:
             sess.session.close()
 
-        
-
 
     @classmethod
     def populate_user_password_table(cls) -> None:
