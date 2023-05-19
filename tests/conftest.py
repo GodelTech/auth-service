@@ -520,12 +520,12 @@ async def ui_create_data():
             "secret_type": 1,
             "description": "new_description",
             # "expiration": datetime.now() + timedelta(days=1),
-            "expiration": "2023-05-20 12:00:0",
+            "expiration": "2024-05-20 12:00:0",
             "value": "new_value"
         },
 
-        "api-secret-type": {                  # 500 Internal Server Error
-            "api_resources": None,
+        "api-secret-type": {
+            "secret_type": "type",
         },
         "api-claim": {
             "api_resources": None,
@@ -549,7 +549,7 @@ async def ui_create_data():
             "scope_claim_type": 1                     # ? dependency
         },
         "api-scope-claim-type": {                 # 500 Internal Server Error
-            "api_resources": None,
+            "scope_claim_type": "type",
         },
 
     }
@@ -560,14 +560,12 @@ async def ui_create_data():
 async def device_create_data():
     return {
         'client': 1,
-        # 'created_at': datetime.now(),
-        # 'updated_at': datetime.now(),
-        'device_code': 'device_code_example',
-        'user_code': 'user_code_example',
+        'device_code': 'code',
+        'user_code': 'code',
         'verification_uri': 'https://www.device.com',
         'verification_uri_complete': 'https://www.device_verif.com',
-        # 'expires_in': 600,
-        # 'interval': 5,
+        'expires_in': 600,
+        'interval': 5,
         # "save": "Save"
     }
 

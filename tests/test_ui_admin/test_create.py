@@ -91,11 +91,11 @@ class TestUIAdminCreate:
             ("persistent-grant-type", PersistentGrantType, "type_of_grant", PersistentGrantType.type_of_grant),
             ("api-resource", ApiResource, "name", ApiResource.name),
             ("api-secret", ApiSecret, "value", ApiSecret.value),
-            # ("api-secret-type", ApiSecretType, "api_resources", ApiSecretType.api_resources),  # 500 Internal Server Error
+            ("api-secret-type", ApiSecretType, "secret_type", ApiSecretType.secret_type),  # 500 Internal Server Error
             ("api-claim", ApiClaim, "claim_value", ApiClaim.claim_value),
             ("api-claim-type", ApiClaimType, "claim_type", ApiClaimType.claim_type),
             ("api-scope", ApiScope, "name", ApiScope.name),
-            # ("api-scope-claim-type", ApiScopeClaimType, "api_resources", ApiScopeClaimType.api_resources),   # 500 Internal Server Error
+            ("api-scope-claim-type", ApiScopeClaimType, "scope_claim_type", ApiScopeClaimType.scope_claim_type),   # 500 Internal Server Error
         ]
     )
     async def test_create_all_user_role_client(
@@ -110,13 +110,39 @@ class TestUIAdminCreate:
             data=ui_create_data[url],
             headers={"Content-Type": self.content_type},
         )
-        await connection.flush()
-        assert response.status_code == status.HTTP_302_FOUND #, f"Error in the table \"{Table.__tablename__}\" "
+        assert response.status_code == status.HTTP_302_FOUND
         result = await connection.execute(
             select(Table).where(Table_column == ui_create_data[url][column])
         )
         result = result.first()
         assert result is not None, f"New entity into the table \"{Table.__tablename__}\" was not inserted"
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "url, Table, column, Table_column",
+        [
+            ("client", Client, "client_id", Client.client_id),
+            ]
+    )
+    async def test_create_not_token(
+            self,
+            ui_create_data,
+            connection: AsyncSession,
+            client: AsyncClient,
+            url, Table, column, Table_column,
+    ):
+        response = await client.post(
+            f"/admin/{url}/create",
+            data=ui_create_data[url],
+            headers={"Content-Type": self.content_type},
+            cookies={"session": "any"}
+        )
+        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
+        result = await connection.execute(
+            select(Table).where(Table_column == ui_create_data[url][column])
+        )
+        result = result.first()
+        assert result is None
 
     @pytest.mark.asyncio
     @patch.object(AdminAuthService, 'authenticate', fake_authenticate)
@@ -134,7 +160,7 @@ class TestUIAdminCreate:
         await connection.flush()
         assert response.status_code == status.HTTP_302_FOUND
         result = await connection.execute(
-            select(Device).where(Device.device_code == "device_code_example")
+            select(Device).where(Device.device_code == "code")
         )
         result = result.first()
         assert result is not None, "Device not found"

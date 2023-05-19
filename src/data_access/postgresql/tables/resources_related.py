@@ -61,7 +61,6 @@ class ApiSecret(BaseModel):
     )
     secret_type = relationship(
         "ApiSecretType",
-        backref="api_secret",
         foreign_keys="ApiSecret.secret_type_id",
     )
 
@@ -158,7 +157,6 @@ class ApiScopeClaim(BaseModel):
     )
     scope_claim_type = relationship(
         "ApiScopeClaimType",
-        backref="api_claim",
         foreign_keys="ApiScopeClaim.scope_claim_type_id",
     )
 
