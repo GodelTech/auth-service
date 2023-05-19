@@ -16,5 +16,5 @@ class ScopeValidator:
         scopes_list = await self._client_repo.list_all_scopes_by_client(
             client_id=client_id
         )
-        if not all(scope in scopes_list for scope in scope.split()):
+        if not all(scope in scopes_list[0] for scope in scope.split()):
             raise ClientScopesError("Invalid scope.")

@@ -6,7 +6,7 @@ authors = ["None"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "0.95.1"
+fastapi = "^0.95.2"
 pytest = "^7.2.0"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
 alembic = "^1.8.1"
@@ -31,7 +31,7 @@ testcontainers = "^3.7.1"
 psycopg2-binary = "^2.9.5"
 pytest-mock = "^3.10.0"
 pytest-cov = "^4.0.0"
-starlette = "0.26.1"
+starlette = "0.27.0"
 WTForms = "3.0.1"
 requests = "2.30.0"
 
