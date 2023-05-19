@@ -1,7 +1,7 @@
 import mock
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
@@ -389,6 +389,22 @@ async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
 @pytest_asyncio.fixture
 async def ui_create_data():
     url_data = {
+        "identity-provider-mapped": {
+            "identity_provider": 1,
+            "provider_client_id": 1,
+            "provider_client_secret": "new_provider_client_secret",
+        },
+        "identity-resource": {
+            "description": "new_description",
+            "display_name": "new_display_name",
+            "name": "new_name"
+        },
+        "identity-claim": {
+            "identity_resource": None,
+            "type": "new_type"
+        },
+
+
         "client": {
             "access_token_type": 1,
             "protocol_type": 1,
@@ -503,7 +519,8 @@ async def ui_create_data():
             "api_resources": None,
             "secret_type": 1,
             "description": "new_description",
-            "expiration": datetime.now() + 9999,
+            # "expiration": datetime.now() + timedelta(days=1),
+            "expiration": "2023-05-20 12:00:0",
             "value": "new_value"
         },
 
@@ -512,25 +529,28 @@ async def ui_create_data():
         },
         "api-claim": {
             "api_resources": None,
+            "claim_type": 1,
+            "claim_value": "new_claim_value",
         },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
-        # "REPLACE": {
-        #     "api_resources": None,
-        # },
+        "api-claim-type": {
+            "claim_type": "new_claim_type",
+        },
+        "api-scope": {
+            "api_resources": 1,               # depends on Api Resources. Create first
+            "description": "new_dscription",
+            "name": "new_name",
+            "display_name": "new_display_name",
+            "emphasize": False,
+            "required": False,
+            "show_in_discovery_document": False,
+        },
+        "api-scope-claim": {
+            "api_scopes": None,                 # don't depend on Api Scope. Create first
+            "scope_claim_type": 1                     # ? dependency
+        },
+        "api-scope-claim-type": {                 # 500 Internal Server Error
+            "api_resources": None,
+        },
 
     }
     return url_data

@@ -93,14 +93,14 @@ def setup_di(app: FastAPI) -> None:
         app,
         db_engine,
         templates_dir="src/presentation/admin_ui/controllers/templates",
-        # authentication_backend=ui.AdminAuthController(
-        #     secret_key="1234",
-        #     auth_service=AdminAuthService(
-        #         user_repo=UserRepository(
-        #             session=prov.provide_async_session(db_engine)
-        #         ),
-        #     )
-        # )
+        authentication_backend=ui.AdminAuthController(
+            secret_key="1234",
+            auth_service=AdminAuthService(
+                user_repo=UserRepository(
+                    session=prov.provide_async_session(db_engine)
+                ),
+            )
+        )
     )
 
     # Identity Resourses
