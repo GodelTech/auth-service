@@ -28,7 +28,6 @@ class DataBasePopulation:
         cls.populate_client_table()
         cls.populate_user_password_table()
         cls.populate_user_table()
-
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
