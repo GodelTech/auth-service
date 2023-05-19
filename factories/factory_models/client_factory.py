@@ -141,7 +141,6 @@ class AccessTokenTypeFactory(SQLAlchemyModelFactory):
         model = client.AccessTokenType
         sqlalchemy_session = sess.session
 
-    # id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["jwt", "reference"])
 
 
@@ -150,7 +149,6 @@ class ProtocolTypeFactory(SQLAlchemyModelFactory):
         model = client.ProtocolType
         sqlalchemy_session = sess.session
 
-   # # id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["open_id_connect"])
 
 
@@ -159,7 +157,6 @@ class RefreshTokenExpirationTypeFactory(SQLAlchemyModelFactory):
         model = client.RefreshTokenExpirationType
         sqlalchemy_session = sess.session
 
- #   # id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["absolute", "sliding"])
 
 
@@ -168,5 +165,4 @@ class RefreshTokenUsageTypeFactory(SQLAlchemyModelFactory):
         model = client.RefreshTokenUsageType
         sqlalchemy_session = sess.session
 
-   # # id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["one_time_only", "reuse"])
