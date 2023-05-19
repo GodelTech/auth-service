@@ -418,21 +418,17 @@ async def ui_create_data():
         },
         "access-token-type": {
             "type": "new_access_token_type",
-            "client": 1,
         },
         "protocol-type": {
             "type": "new_protocol_type",
-            "client": 1,
             "save": "Save"
         },
         "refresh-token-usage-type": {
             "type": "new_refresh_token_usage_type",
-            "client": 1,
             "save": "Save"
         },
         "refresh-token-expiration-type": {
             "type": "new_refresh_token_expiration_type",
-            "client": 1,
             "save": "Save"
         },
         "client-secret": {

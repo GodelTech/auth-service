@@ -36,7 +36,11 @@ class ApiResource(BaseModel):
     display_name = Column(String, nullable=True)
     enabled = Column(Boolean, default=True, nullable=True)
     name = Column(String, nullable=False)
-
+    api_scope = relationship(
+        "ApiScope",
+        back_populates="api_resources",
+        foreign_keys="ApiScope.api_resources_id",
+    )
     def __str__(self) -> str:  # pragma: no cover
         return f"Resource {self.id}: {self.name}"
 
@@ -124,7 +128,7 @@ class ApiScope(BaseModel):
     )
     api_resources = relationship(
         "ApiResource",
-        backref="api_scope",
+        back_populates="api_scope",
         foreign_keys="ApiScope.api_resources_id",
     )
     description = Column(String, nullable=True)

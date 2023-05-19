@@ -1,7 +1,7 @@
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert, exists, select
+from sqlalchemy import insert, exists, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
@@ -58,6 +58,8 @@ class TestAdminUIDelete:
     async def setup_base(self, connection:AsyncSession, pk: int = 1000) -> None:
         name = 'TEST_DELETE'
         # Identity
+        await connection.execute(delete(IdentityProviderMapped).where(IdentityProviderMapped.identity_provider_id == 1))
+        await connection.flush()
         data = {
             'id': pk,
             'provider_client_id': name,
