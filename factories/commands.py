@@ -14,10 +14,14 @@ factory.random.reseed_random(0)
 
 class DataBasePopulation:
     @classmethod
+    def clean_and_populate(cls):
+        cls.populate_database()
+
+    @classmethod
     def populate_database(cls) -> None:
         try:
             # Clean data from the tables in database
-            cls.clean_data_from_database()
+            cls.clean_database()
             # Populate database
             cls.populate_identity_providers_table()
             cls.populate_user_claim_types_table()
@@ -43,14 +47,13 @@ class DataBasePopulation:
         finally:
             sess.session.close()
 
-
     @classmethod
     def populate_user_password_table(cls) -> None:
         for i in range(len(data.CLIENT_USERNAMES)):
             password = user_factory.UserPasswordFactory()
 
     @classmethod
-    def clean_data_from_database(cls) -> None:
+    def clean_database(cls) -> None:
         result = sess.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"))
         table_names = [row[0] for row in result]
         excluded_table = 'alembic_version'

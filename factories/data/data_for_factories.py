@@ -122,11 +122,11 @@ DEFAULT_USER_CLAIMS = {
 }
 
 CLIENT_SECRETS = {
-    1: "past",
+    1: "their",
     2: "play",
     3: "health",
     4: "address",
-    5: "their",
+    5: "past",
     6: "line",
     7: "film",
     8: "light",
