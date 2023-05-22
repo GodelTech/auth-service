@@ -1,20 +1,19 @@
+from __future__ import annotations
 import datetime
 import logging
 import time
-import uuid
-from typing import Any, Dict, Optional, Union
+# import uuid
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
     ClientGrantsError,
     ClientNotFoundError,
     ClientScopesError,
     DeviceCodeExpirationTimeError,
-    DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
     GrantTypeNotSupported,
@@ -27,8 +26,12 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.dyna_config import DOMAIN_NAME
-from src.presentation.api.models import BodyRequestRevokeModel
-from src.business_logic.get_tokens.dto import RequestTokenModel
+if TYPE_CHECKING:
+    from src.business_logic.services.jwt_token import JWTService
+    from src.presentation.api.models import (
+        BodyRequestRevokeModel,
+        BodyRequestTokenModel,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -96,7 +99,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         blacklisted_repo: BlacklistedTokenRepository,
-        jwt_service: JWTService = JWTService(),
+        jwt_service: JWTService,
     ) -> None:
         self.session = session
         self.request: Optional[Request] = None

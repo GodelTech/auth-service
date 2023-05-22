@@ -26,7 +26,6 @@ async def get_tokens(
         request_body: RequestTokenModel = Depends(RequestTokenModel.as_form)
 ) -> JSONResponse:
     session: AsyncSession = request.state.session
-
     logger.info("SESSION: ")
     logger.info(session)
 

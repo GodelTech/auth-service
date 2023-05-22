@@ -7,9 +7,7 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services import PasswordHash, JWTService
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     ThirdPartyOIDCRepository,
@@ -19,7 +17,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
-from src.business_logic.services import LoginFormService
+from src.business_logic.services.login_form_service import LoginFormService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientRedirectUriError,
@@ -28,6 +26,8 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
     WrongResponseTypeError,
 )
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.password import PasswordHash
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
 if TYPE_CHECKING:
@@ -113,7 +113,9 @@ async def post_authorize(
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            device_repo=DeviceRepository(session)
+            device_repo=DeviceRepository(session),
+            password_service=PasswordHash(),
+            jwt_service=JWTService()
             )
         setattr(request_body, "user_code", user_code)
         auth_service: AuthServiceProtocol = (

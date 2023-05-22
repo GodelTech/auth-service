@@ -12,6 +12,7 @@ from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
 from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
 
+
 logger = logging.getLogger(__name__)
 
 userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])

@@ -15,14 +15,14 @@ from .factory_methods import (
     _create_token_auth_service,
 )
 
-
-from src.business_logic.services import JWTService, PasswordHash
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
     PersistentGrantRepository,
     UserRepository,
 )
+if TYPE_CHECKING:
+    from src.business_logic.services import JWTService, PasswordHash
 
 
 FactoryMethod = Callable[..., AuthServiceProtocol]
@@ -39,8 +39,8 @@ class AuthServiceFactory:
         user_repo: UserRepository,
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
-        password_service = PasswordHash(),
-        jwt_service: JWTService = JWTService(),
+        password_service: PasswordHash,
+        jwt_service: JWTService,
     ) -> None:
         self.session = session
         self._client_repo = client_repo

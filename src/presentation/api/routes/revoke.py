@@ -3,10 +3,19 @@ from typing import Optional, Union
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
-from src.business_logic.services import JWTService, TokenService
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.errors import GrantNotFoundError
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
-from src.data_access.postgresql.repositories import PersistentGrantRepository, ClientRepository, UserRepository,DeviceRepository, BlacklistedTokenRepository
+from src.data_access.postgresql.repositories import (
+    PersistentGrantRepository,
+    ClientRepository,
+    UserRepository,
+    DeviceRepository,
+    BlacklistedTokenRepository
+)
+
+
 logger = logging.getLogger(__name__)
 
 revoke_router = APIRouter(prefix="/revoke", tags=["Revoke"])
@@ -32,7 +41,8 @@ async def post_revoke_token(
             persistent_grant_repo=PersistentGrantRepository(session),
             user_repo=UserRepository(session),
             device_repo=DeviceRepository(session),
-            blacklisted_repo=BlacklistedTokenRepository(session)
+            blacklisted_repo=BlacklistedTokenRepository(session),
+            jwt_service=JWTService()
             )
         token_class.request = request
         token_class.request_body = request_body
