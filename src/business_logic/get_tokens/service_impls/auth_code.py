@@ -56,7 +56,6 @@ class AuthorizationCodeTokenService:
         refresh_token = await self._get_refresh_token(request_data=request_data)
         id_token = await self._get_id_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
 
-        #  TODO: join this sql requests into one transaction.
         await self._persistent_grant_repo.delete_grant(grant=grant)
         await self._persistent_grant_repo.create_grant(
             client_id=grant.client_id, 

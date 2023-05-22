@@ -2,12 +2,14 @@ from __future__ import annotations
 from src.business_logic.get_tokens.service_impls import (
     AuthorizationCodeTokenService,
     RefreshTokenGrantService,
+    ClientCredentialsTokenService,
 )
 from src.business_logic.get_tokens.validators import (
     ValidatePersistentGrant, 
     ValidateRedirectUri, 
     ValidateGrantByClient,
     ValidateGrantExpired,
+    ValidateClientCredentials,
 )
 from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
 from src.business_logic.common.validators import ClientValidator
@@ -64,6 +66,12 @@ class TokenServiceFactory:
                 client_validator=ClientValidator(client_repo=self._client_repo),
                 refresh_token_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
+                jwt_manager=self._jwt_manager,
+                persistent_grant_repo=self._persistent_grant_repo
+            )
+        elif grant_type == 'client_credentials':
+            return ClientCredentialsTokenService(
+                client_credentials_validator=ValidateClientCredentials(client_repo=self._client_repo),
                 jwt_manager=self._jwt_manager,
                 persistent_grant_repo=self._persistent_grant_repo
             )
