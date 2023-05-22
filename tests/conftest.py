@@ -1,4 +1,5 @@
 import mock
+from sqlalchemy import delete, insert
 
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
@@ -47,6 +48,43 @@ from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
+from src.data_access.postgresql.tables import (
+    IdentityClaim,
+    IdentityResource,
+    IdentityProviderMapped,
+    Device,
+    ClientSecret,
+    ClientRedirectUri,
+    ClientCorsOrigin,
+    ClientPostLogoutRedirectUri,
+    ClientClaim,
+    ClientScope,
+    ClientIdRestriction,
+    Client,
+    RefreshTokenUsageType,
+    RefreshTokenExpirationType,
+    ProtocolType,
+    AccessTokenType,
+    ClientGrantType,
+    UserClaim,
+    UserClaimType,
+    UserPassword,
+    User,
+    Role,
+    Permission,
+    Group,
+    ApiScopeClaim,
+    ApiScope,
+    ApiClaim,
+    ApiSecret,
+    ApiScopeClaimType,
+    ApiClaimType,
+    ApiSecretType,
+    ApiResource,
+    PersistentGrant,
+    PersistentGrantType,
+)
+import datetime
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -411,14 +449,9 @@ async def ui_create_data():
         "identity-resource": {
             "description": "new_description",
             "display_name": "new_display_name",
-            "name": "new_name"
+            "name": "new_name",
         },
-        "identity-claim": {
-            "identity_resource": None,
-            "type": "new_type"
-        },
-
-
+        "identity-claim": {"identity_resource": None, "type": "new_type"},
         "client": {
             "access_token_type": 1,
             "protocol_type": 1,
@@ -428,102 +461,94 @@ async def ui_create_data():
             "client_id": "cli_id",
             "client_name": "cli_name",
             "token_endpoint_auth_method": "client_secret_post",
-            "save": "Save"
+            "save": "Save",
         },
         "access-token-type": {
             "type": "new_access_token_type",
         },
-        "protocol-type": {
-            "type": "new_protocol_type",
-            "save": "Save"
-        },
+        "protocol-type": {"type": "new_protocol_type", "save": "Save"},
         "refresh-token-usage-type": {
             "type": "new_refresh_token_usage_type",
-            "save": "Save"
+            "save": "Save",
         },
         "refresh-token-expiration-type": {
             "type": "new_refresh_token_expiration_type",
-            "save": "Save"
+            "save": "Save",
         },
         "client-secret": {
-            'client': 1,
-            'description': 'new_description',
-            'expiration': 1,
-            'type': 'new_type',
-            'value': '18260968-9e17-49a0-aaef-fa39683ffd8f',
-            "save": "Save"
+            "client": 1,
+            "description": "new_description",
+            "expiration": 1,
+            "type": "new_type",
+            "value": "18260968-9e17-49a0-aaef-fa39683ffd8f",
+            "save": "Save",
         },
         "client-grant-type": {
-            'client': 1,
-            'grant_type': 'new_grant_type',
-            "save": "Save"
+            "client": 1,
+            "grant_type": "new_grant_type",
+            "save": "Save",
         },
         "client-redirect-uri": {
-            'client': 1,
-            'redirect_uri': 'https://new_red_uri.com',
-            "save": "Save"
+            "client": 1,
+            "redirect_uri": "https://new_red_uri.com",
+            "save": "Save",
         },
         "client-cors-origin": {
-            'client': 1,
-            'origin': 'new_origin',
-            "save": "Save"
+            "client": 1,
+            "origin": "new_origin",
+            "save": "Save",
         },
         "client-post-logout-redirect-uri": {
-            'client': 1,
-            'post_logout_redirect_uri': 'https://post_logout_redirect_uri.com',
-            "save": "Save"
+            "client": 1,
+            "post_logout_redirect_uri": "https://post_logout_redirect_uri.com",
+            "save": "Save",
         },
         "client-claim": {
-            'client': 1,
-            'type': 'new_type',
-            'value': 'new_value',
+            "client": 1,
+            "type": "new_type",
+            "value": "new_value",
         },
         "client-id-restriction": {
-            'client': 1,
-            'provider': 'new_provider',
+            "client": 1,
+            "provider": "new_provider",
         },
-
         "user": {
-            'username': "new_user",
+            "username": "new_user",
         },
         "user-password": {
-            'value': "create_password",
+            "value": "create_password",
         },
         "user-claim": {
-            'user': 1,
-            'claim_type': 1,
-            'claim_value': "new_claim_value",
+            "user": 1,
+            "claim_type": 1,
+            "claim_value": "new_claim_value",
         },
         "user-claim-type": {
-            'type_of_claim': "new_type_of_claim",
+            "type_of_claim": "new_type_of_claim",
         },
         "role": {
-            'name': "new_name",
+            "name": "new_name",
         },
         "group": {
-            'name': "new_group",
+            "name": "new_group",
         },
         "permission": {
-            'name': "new_permission",
+            "name": "new_permission",
         },
-
-
         "persistent-grant": {
             "client": 1,
             "user": 1,
             "persistent_grant_type": 1,
             "key": "new_key",
             "grant_data": "new_grant_data",
-            "expiration": 777
+            "expiration": 777,
         },
-        "persistent-grant-type": {
-            "type_of_grant": "new_type_of_grant"
-        },
+        "persistent-grant-type": {"type_of_grant": "new_type_of_grant"},
         "api-resource": {
             "description": "new_description",
             "display_name": "new_display_name",
             "enabled": True,
-            "name": "new_name"
+            "name": "new_name",
         },
         "api-secret": {
             "api_resources": None,
@@ -531,9 +556,8 @@ async def ui_create_data():
             "description": "new_description",
             # "expiration": datetime.now() + timedelta(days=1),
             "expiration": "2024-05-20 12:00:0",
-            "value": "new_value"
+            "value": "new_value",
         },
-
         "api-secret-type": {
             "secret_type": "type",
         },
@@ -546,7 +570,7 @@ async def ui_create_data():
             "claim_type": "new_claim_type",
         },
         "api-scope": {
-            "api_resources": 1,               # depends on Api Resources. Create first
+            "api_resources": 1,  # depends on Api Resources. Create first
             "description": "new_dscription",
             "name": "new_name",
             "display_name": "new_display_name",
@@ -555,13 +579,12 @@ async def ui_create_data():
             "show_in_discovery_document": False,
         },
         "api-scope-claim": {
-            "api_scopes": None,                 # don't depend on Api Scope. Create first
-            "scope_claim_type": 1                     # ? dependency
+            "api_scopes": None,  # don't depend on Api Scope. Create first
+            "scope_claim_type": 1,  # ? dependency
         },
-        "api-scope-claim-type": {                 # 500 Internal Server Error
+        "api-scope-claim-type": {  # 500 Internal Server Error
             "scope_claim_type": "type",
         },
-
     }
     return url_data
 
@@ -569,15 +592,16 @@ async def ui_create_data():
 @pytest_asyncio.fixture
 async def device_create_data():
     return {
-        'client': 1,
-        'device_code': 'code',
-        'user_code': 'code',
-        'verification_uri': 'https://www.device.com',
-        'verification_uri_complete': 'https://www.device_verif.com',
-        'expires_in': 600,
-        'interval': 5,
+        "client": 1,
+        "device_code": "code",
+        "user_code": "code",
+        "verification_uri": "https://www.device.com",
+        "verification_uri_complete": "https://www.device_verif.com",
+        "expires_in": 600,
+        "interval": 5,
         # "save": "Save"
     }
+
 
 # @pytest_asyncio.fixture
 # async def user_create_data():
@@ -606,7 +630,232 @@ async def device_create_data():
 #     }
 
 
+@pytest_asyncio.fixture
+async def get_db(connection: AsyncSession) -> None:
+    name = "TEST"
+    pk = 1000
+    # Identity
+    await connection.execute(
+        delete(IdentityProviderMapped).where(
+            IdentityProviderMapped.identity_provider_id == 1
+        )
+    )
+    await connection.flush()
+    data = {
+        "id": pk,
+        "provider_client_id": name,
+        "provider_client_secret": name,
+        "identity_provider_id": 1,
+    }
+    await connection.execute(insert(IdentityProviderMapped).values(data))
 
+    data = {
+        "id": pk,
+        "display_name": name,
+        "name": name,
+    }
+    await connection.execute(insert(IdentityResource).values(data))
 
+    data = {
+        "id": pk,
+        "identity_resource_id": pk,
+        "type": name,
+    }
+    await connection.execute(insert(IdentityClaim).values(data))
 
+    # Client
+    data = {
+        "id": pk,
+        "client_id": name,
+        "client_name": name,
+        "access_token_type_id": 1,
+        "protocol_type_id": 1,
+        "refresh_token_expiration_type_id": 1,
+        "refresh_token_usage_type_id": 1,
+    }
+    await connection.execute(insert(Client).values(data))
+    data = {
+        "id": pk,
+        "type": name,
+    }
+    await connection.execute(insert(AccessTokenType).values(data))
+    await connection.execute(insert(ProtocolType).values(data))
+    await connection.execute(insert(RefreshTokenExpirationType).values(data))
+    await connection.execute(insert(RefreshTokenUsageType).values(data))
 
+    data = {
+        "id": pk,
+        "client_id": pk,
+        "provider": name,
+    }
+    await connection.execute(insert(ClientIdRestriction).values(data))
+
+    data = {
+        "id": pk,
+        "type": name,
+        "value": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientClaim).values(data))
+
+    data = {
+        "id": pk,
+        "post_logout_redirect_uri": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientPostLogoutRedirectUri).values(data))
+
+    data = {
+        "id": pk,
+        "origin": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientCorsOrigin).values(data))
+
+    data = {
+        "id": pk,
+        "redirect_uri": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientRedirectUri).values(data))
+
+    data = {
+        "id": pk,
+        "grant_type": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientGrantType).values(data))
+
+    data = {
+        "id": pk,
+        "description": name,
+        "expiration": 121212,
+        "type": name,
+        "value": name,
+        "client_id": pk,
+    }
+    await connection.execute(insert(ClientSecret).values(data))
+
+    data = {
+        "id": pk,
+        "client_id": pk,
+        "device_code": name,
+        "user_code": "a",
+        "verification_uri": name,
+        "verification_uri_complete": name,
+        "expires_in": 123,
+        "interval": 123,
+    }
+    await connection.execute(insert(Device).values(data))
+
+    # User
+    data = {
+        "id": pk,
+        "username": name,
+    }
+    await connection.execute(insert(User).values(data))
+
+    data = {
+        "id": pk,
+        "value": name,
+    }
+    await connection.execute(insert(UserPassword).values(data))
+
+    data = {
+        "id": pk,
+        "type_of_claim": name,
+    }
+    await connection.execute(insert(UserClaimType).values(data))
+
+    data = {
+        "id": pk,
+        "user_id": pk,
+        "claim_type_id": pk,
+        "claim_value": name,
+    }
+    await connection.execute(insert(UserClaim).values(data))
+
+    # Groups Roles
+    data = {
+        "id": pk,
+        "name": name,
+    }
+    await connection.execute(insert(Role).values(data))
+    await connection.execute(insert(Group).values(data))
+    await connection.execute(insert(Permission).values(data))
+
+    # Tokens
+    data = {
+        "id": pk,
+        "type_of_grant": name,
+    }
+    await connection.execute(insert(PersistentGrantType).values(data))
+    data = {
+        "id": pk,
+        "key": name,
+        "client_id": pk,
+        "grant_data": name,
+        "expiration": 123123,
+        "user_id": pk,
+        "persistent_grant_type_id": pk,
+    }
+    await connection.execute(insert(PersistentGrant).values(data))
+
+    # API
+    data = {
+        "id": pk,
+        "description": name,
+        "display_name": name,
+        "name": name,
+    }
+    await connection.execute(insert(ApiResource).values(data))
+    data = {
+        "id": pk,
+        "secret_type": name,
+    }
+    await connection.execute(insert(ApiSecretType).values(data))
+    data = {
+        "id": pk,
+        "claim_type": name,
+    }
+    await connection.execute(insert(ApiClaimType).values(data))
+    data = {
+        "id": pk,
+        "scope_claim_type": name,
+    }
+    await connection.execute(insert(ApiScopeClaimType).values(data))
+
+    data = {
+        "id": pk,
+        "api_resources_id": pk,
+        "description": name,
+        "expiration": datetime.date.today(),
+        "secret_type_id": pk,
+        "value": name,
+    }
+    await connection.execute(insert(ApiSecret).values(data))
+
+    data = {
+        "id": pk,
+        "api_resources_id": pk,
+        "claim_type_id": pk,
+        "claim_value": name,
+    }
+    await connection.execute(insert(ApiClaim).values(data))
+
+    data = {
+        "id": pk,
+        "api_resources_id": pk,
+        "description": name,
+        "name": name,
+    }
+    await connection.execute(insert(ApiScope).values(data))
+
+    data = {
+        "id": pk,
+        "api_scopes_id": pk,
+        "scope_claim_type_id": pk,
+    }
+    await connection.execute(insert(ApiScopeClaim).values(data))
+
+    await connection.commit()
