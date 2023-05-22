@@ -12,7 +12,8 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     BlacklistedTokenRepository
 )
-from src.business_logic.services import TokenService, JWTService
+from src.business_logic.services.tokens import TokenService
+from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.errors import (
     ClientBaseException,
     ClientGrantsError,
@@ -60,7 +61,8 @@ async def get_tokens(
             persistent_grant_repo=PersistentGrantRepository(session),
             user_repo=UserRepository(session),
             device_repo=DeviceRepository(session),
-            blacklisted_repo=BlacklistedTokenRepository(session)
+            blacklisted_repo=BlacklistedTokenRepository(session),
+            jwt_service=JWTService()
             )
         token_class.request = request
         token_class.request_model = request_body
