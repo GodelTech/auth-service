@@ -110,7 +110,7 @@ class TestAdminUIRead:
     ]
 
     @patch.object(AdminAuthService, "authenticate", fake_authenticate)
-    async def test_get_list_sucessful(
+    async def test_get_list_successful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:
@@ -133,7 +133,7 @@ class TestAdminUIRead:
                 )
                 assert response.status_code == status.HTTP_200_OK
 
-    async def test_get_list_sucessful(
+    async def test_get_list_successful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:
@@ -159,7 +159,7 @@ class TestAdminUIRead:
                 )
 
     @patch.object(AdminAuthService, "authenticate", fake_authenticate)
-    async def test_get_detail_sucessful(
+    async def test_get_detail_successful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:
@@ -182,7 +182,7 @@ class TestAdminUIRead:
                 )
                 assert response.status_code == status.HTTP_200_OK
 
-    async def test_get_list_unsucessful(
+    async def test_get_list_unsuccessful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:

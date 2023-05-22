@@ -109,7 +109,7 @@ class TestAdminUIDelete:
     ]
 
     @patch.object(AdminAuthService, "authenticate", fake_authenticate)
-    async def test_delete(self, get_db, client: AsyncClient) -> None:
+    async def test_delete_successful(self, get_db, client: AsyncClient) -> None:
         for tables in self.tables_all:
             for table in tables:
                 part_of_link: str = table.__tablename__
@@ -129,3 +129,28 @@ class TestAdminUIDelete:
                     cookies={"session": "1"},
                 )
                 assert response.status_code == status.HTTP_200_OK
+
+    async def test_delete_unsuccessful(
+        self, get_db, client: AsyncClient
+    ) -> None:
+        for tables in self.tables_all:
+            for table in tables:
+                part_of_link: str = table.__tablename__
+                part_of_link = part_of_link.replace("_", "-")
+                part_of_link = part_of_link[:-1]
+
+                if part_of_link == "api-secrets-type":
+                    part_of_link = "api-secret-type"
+                if part_of_link == "identity-providers-mappe":
+                    part_of_link = "identity-provider-mapped"
+                if part_of_link == "client-scope":
+                    continue
+
+                response = await client.request(
+                    "DELETE",
+                    f"/admin/{part_of_link}/delete?pks=1000",
+                    cookies={"session": "1"},
+                )
+                assert (
+                    response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
+                )
