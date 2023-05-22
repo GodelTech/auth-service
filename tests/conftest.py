@@ -1,5 +1,4 @@
 import mock
-import os
 
 mock.patch(
     "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
@@ -46,31 +45,41 @@ from src.data_access.postgresql.tables.base import Base
 from tests.overrides.override_test_container import CustomPostgresContainer
 from factories.commands import DataBasePopulation
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
-@pytest_asyncio.fixture(scope="session")
-async def engine() -> AsyncEngine:
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def container() -> AsyncIterator[CustomPostgresContainer]:
     postgres_container = CustomPostgresContainer(
         "postgres:11.5"
     ).with_bind_ports(5432, 5465)
 
     with postgres_container as postgres:
-        db_url = postgres.get_connection_url()
-        db_url = db_url.replace("psycopg2", "asyncpg")
-        engine = create_async_engine(db_url, echo=True)
-
-        # create all tables
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        # populate database
-        DataBasePopulation.populate_database()
-
-        yield engine
+        yield postgres
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def engine(container: CustomPostgresContainer) -> AsyncEngine:
+    db_url = container.get_connection_url()
+    db_url = db_url.replace("psycopg2", "asyncpg")
+    engine = create_async_engine(db_url, echo=False)
+
+    # create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # populate database
+    DataBasePopulation.clean_and_populate()
+
+    yield engine
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def pre_test_setup() -> None:
+    DataBasePopulation.clean_and_populate()
+
+
+@pytest_asyncio.fixture
 async def connection(engine: AsyncEngine) -> AsyncSession:
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
@@ -102,7 +111,9 @@ def event_loop(request: Request) -> Any:
 
 
 @pytest_asyncio.fixture
-async def authorization_service(connection: AsyncSession) -> AuthorizationService:
+async def authorization_service(
+    connection: AsyncSession,
+) -> AuthorizationService:
     auth_service = AuthorizationService(
         session=connection,
         client_repo=ClientRepository(session=connection),
@@ -127,7 +138,9 @@ async def end_session_service(connection: AsyncSession) -> EndSessionService:
 
 
 @pytest_asyncio.fixture
-async def introspection_service(connection: AsyncSession) -> IntrospectionServies:
+async def introspection_service(
+    connection: AsyncSession,
+) -> IntrospectionServies:
     intro_service = IntrospectionServies(
         session=connection,
         client_repo=ClientRepository(session=connection),
@@ -185,7 +198,9 @@ async def device_service(connection: AsyncSession) -> DeviceService:
 
 
 @pytest_asyncio.fixture
-async def auth_third_party_service(connection: AsyncSession) -> AuthThirdPartyOIDCService:
+async def auth_third_party_service(
+    connection: AsyncSession,
+) -> AuthThirdPartyOIDCService:
     third_party_service = AuthThirdPartyOIDCService(
         session=connection,
         client_repo=ClientRepository(connection),
@@ -224,7 +239,9 @@ async def gitlab_third_party_service(connection) -> ThirdPartyGitLabService:
 
 
 @pytest_asyncio.fixture
-async def microsoft_third_party_service(connection) -> ThirdPartyMicrosoftService:
+async def microsoft_third_party_service(
+    connection,
+) -> ThirdPartyMicrosoftService:
     microsoft_service = ThirdPartyMicrosoftService(
         client_repo=ClientRepository(connection),
         session=connection,

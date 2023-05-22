@@ -40,7 +40,7 @@ class DeviceService:
             user_code = "".join(random.sample(ascii_uppercase, k=8))
             verification_uri = f"http://{DOMAIN_NAME}/device/auth"
             verification_uri_complete = (
-                f"http://{DOMAIN_NAME}/device/outh?user_code={user_code}"
+                f"http://{DOMAIN_NAME}/device/auth?user_code={user_code}"
             )
             if await self._validate_client(
                 client_id=self.request_model.client_id
