@@ -149,7 +149,7 @@ class DataBasePopulation:
 
         # Finally, populating Client
         for id, client_id in data.CLIENT_IDS.items():
-            cl_factory.ClientFactory(id=id, client_id=client_id)
+            cl_factory.ClientFactory(client_id=client_id)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
