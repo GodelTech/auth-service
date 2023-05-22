@@ -165,13 +165,6 @@ class TestAuthorizationService:
         )
         assert created is True
 
-    async def test_create_provider_state_exists(
-        self,
-        auth_third_party_service: AuthThirdPartyOIDCService,
-        state_request_model: StateRequestModel,
-    ) -> None:
-        service = auth_third_party_service
-        service.state_request_model = state_request_model
         with pytest.raises(ThirdPartyStateDuplicationError):
             await service.create_provider_state()
         await service.oidc_repo.delete_state(state=state_request_model.state)
