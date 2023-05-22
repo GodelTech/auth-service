@@ -59,6 +59,7 @@ class DataBasePopulation:
                 sess.session.execute(text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE"))
         sess.session.flush()
 
+
     
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
@@ -80,6 +81,7 @@ class DataBasePopulation:
     def populate_api_secrets_types_table(cls) -> None:
         for val in data.API_SECRET_TYPE:
             secret_type = res_factory.ApiSecretsTypeFactory(secret_type=val)
+
 
     @classmethod
     def populate_api_scope_claim_types_table(cls) -> None:
@@ -120,6 +122,7 @@ class DataBasePopulation:
     def populate_user_table(cls) -> None:
         for i in range(len(data.CLIENT_USERNAMES)):
             user = user_factory.UserFactory(password_hash_id=i + 1)
+
 
 
     @classmethod
