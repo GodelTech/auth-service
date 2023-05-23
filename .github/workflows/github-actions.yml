@@ -1,4 +1,4 @@
-name: Build and Test Auth Server
+#name: Build and Test Auth Server
 
 on: [push, pull_request]
 
