@@ -14,11 +14,16 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     BlacklistedTokenRepository
 )
+from src.presentation.middleware.authorization_validation import authorization_middleware
 
 
 logger = logging.getLogger(__name__)
 
-revoke_router = APIRouter(prefix="/revoke", tags=["Revoke"])
+revoke_router = APIRouter(
+    prefix="/revoke", 
+    tags=["Revoke"], 
+    dependencies=[Depends(authorization_middleware)]
+    )
 
 
 @revoke_router.post(
@@ -56,8 +61,3 @@ async def post_revoke_token(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token"
         )
-
-
-@revoke_router.get("/test_token", status_code=200)
-async def get_test_token(request: Request) -> str:
-    return await JWTService().encode_jwt(payload={"sub": "1"})

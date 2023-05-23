@@ -10,10 +10,14 @@ from src.presentation.api.models.introspection import (
     ResponceIntrospectionModel,
 )
 from src.data_access.postgresql.repositories import UserRepository, ClientRepository, PersistentGrantRepository
+from src.presentation.middleware.authorization_validation import authorization_middleware
+
 logger = logging.getLogger(__name__)
 
 introspection_router = APIRouter(
-    prefix="/introspection", tags=["Introspection"]
+    prefix="/introspection", 
+    tags=["Introspection"], 
+    dependencies=[Depends(authorization_middleware)]
 )
 
 
