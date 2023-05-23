@@ -1,9 +1,9 @@
-
+AUTH SERVICE
+==========
 
 [![pipeline](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml/badge.svg?branch=91_add_and_bump_versions)](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml)
 
 
-[![GitLab latest release](https://badgen.net/gitlab/release/NickBusey/HomelabOS/)](https://gitlab.com/NickBusey/HomelabOS/-/releases)
 [![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://GitHub.com/Naereen/StrapDown.js/releases/)
 
 
