@@ -1,6 +1,6 @@
 
 
-![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/github/docs/actions/workflows/github-actions.yml/badge.svg)
 **main**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/main/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 **main**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/main/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 
