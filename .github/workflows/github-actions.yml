@@ -1,4 +1,4 @@
-#name: Build and Test Auth Server
+name: Pipeline
 
 on: [push, pull_request]
 
