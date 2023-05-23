@@ -1,7 +1,7 @@
 
 
 [![pipeline](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml/badge.svg?branch=91_add_and_bump_versions)](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml)
-[![release](https://github.com/GodelTech/auth-service/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/GodelTech/auth-service/actions/workflows/build-and-push.yml)
+[![release](https://github.com/GodelTech/auth-service/actions/workflows/build-and-push.yml/badge.svg?branch=91_add_and_bump_versions)](https://github.com/GodelTech/auth-service/actions/workflows/build-and-push.yml)
 ![my badge](https://badgen.net/badge/release/1.0.0/red)
 **main**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/main/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 **main**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/main/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
