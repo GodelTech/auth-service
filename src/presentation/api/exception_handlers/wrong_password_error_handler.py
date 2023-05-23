@@ -2,7 +2,7 @@ import logging
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from starlette.status import HTTP_403_FORBIDDEN
+from starlette.status import HTTP_404_NOT_FOUND
 
 from src.data_access.postgresql.errors import WrongPasswordError
 
@@ -15,6 +15,6 @@ async def wrong_password_error_handler(_: Request, exc: WrongPasswordError) -> J
     content = {"message": "Bad password"}
 
     return JSONResponse(
-        status_code=HTTP_403_FORBIDDEN,
+        status_code=HTTP_404_NOT_FOUND,
         content=content,
     )
