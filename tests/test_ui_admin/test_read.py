@@ -133,7 +133,7 @@ class TestAdminUIRead:
                 )
                 assert response.status_code == status.HTTP_200_OK
 
-    async def test_get_list_successful(
+    async def test_get_list_unsuccessful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:
@@ -180,9 +180,11 @@ class TestAdminUIRead:
                     f"/admin/{part_of_link}/details/1000",
                     cookies={"session": "1"},
                 )
-                assert response.status_code == status.HTTP_200_OK, f"Error in {part_of_link}"
+                assert (
+                    response.status_code == status.HTTP_200_OK
+                ), f"Error in {part_of_link}"
 
-    async def test_get_list_unsuccessful(
+    async def test_get_detail_unsuccessful(
         self, get_db, client: AsyncClient
     ) -> None:
         for tables in self.tables_all:
