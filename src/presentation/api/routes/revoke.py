@@ -33,29 +33,22 @@ async def post_revoke_token(
     ),  # crutch for swagger
     request_body: BodyRequestRevokeModel = Depends(),
 ) -> None:
-    try:
-        session = request.state.session
-        token_class = TokenService(
-            session = session,
-            client_repo=ClientRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-            user_repo=UserRepository(session),
-            device_repo=DeviceRepository(session),
-            blacklisted_repo=BlacklistedTokenRepository(session),
-            jwt_service=JWTService()
-            )
-        token_class.request = request
-        token_class.request_body = request_body
-        token = request.headers.get("authorization") or auth_swagger
-        token_class.authorization = token
-        logger.info(f"Revoking for token {request_body.token} started")
-        return await token_class.revoke_token()
-
-    except GrantNotFoundError as e:
-        logger.error(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token"
+    session = request.state.session
+    token_class = TokenService(
+        session = session,
+        client_repo=ClientRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+        user_repo=UserRepository(session),
+        device_repo=DeviceRepository(session),
+        blacklisted_repo=BlacklistedTokenRepository(session),
+        jwt_service=JWTService()
         )
+    token_class.request = request
+    token_class.request_body = request_body
+    token = request.headers.get("authorization") or auth_swagger
+    token_class.authorization = token
+    logger.info(f"Revoking for token {request_body.token} started")
+    return await token_class.revoke_token()
 
 
 @revoke_router.get("/test_token", status_code=200)
