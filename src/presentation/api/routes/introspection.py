@@ -25,23 +25,18 @@ async def post_introspection(
         ),  # crutch for swagger
         request_body: BodyRequestIntrospectionModel = Depends(),
 ) -> dict[str, Any]:
-    try:
-        session = request.state.session
-        introspection_class = IntrospectionServies(
-            session=session,
-            user_repo=UserRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-            client_repo=ClientRepository(session)
-        )
-        introspection_class.request = request
+    session = request.state.session
+    introspection_class = IntrospectionServies(
+        session=session,
+        user_repo=UserRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+        client_repo=ClientRepository(session)
+    )
+    introspection_class.request = request
 
-        token = request.headers.get("authorization") or auth_swagger
-        introspection_class.authorization = token
-        introspection_class.request_body = request_body
-        logger.debug(f"Introspection for token {request_body.token} started")
-        return await introspection_class.analyze_token()
+    token = request.headers.get("authorization") or auth_swagger
+    introspection_class.authorization = token
+    introspection_class.request_body = request_body
+    logger.debug(f"Introspection for token {request_body.token} started")
+    return await introspection_class.analyze_token()
 
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Token"
-        )

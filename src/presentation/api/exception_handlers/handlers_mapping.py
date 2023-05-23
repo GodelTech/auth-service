@@ -1,9 +1,20 @@
 from jwt import DecodeError
 
-from src.data_access.postgresql.errors import ClientNotFoundError, ClientPostLogoutRedirectUriError, \
-    ClientRedirectUriError, ClientScopesError, ThirdPartyStateDuplicationError, UserCodeNotFoundError, \
-    UserNotFoundError, WrongDataError, WrongPasswordError, WrongResponseTypeError
+from src.data_access.postgresql.errors import (
+    ClientNotFoundError,
+    ClientPostLogoutRedirectUriError,
+    ClientRedirectUriError,
+    ClientScopesError,
+    ThirdPartyStateDuplicationError,
+    UserCodeNotFoundError,
+    UserNotFoundError,
+    WrongDataError,
+    WrongPasswordError,
+    WrongResponseTypeError,
+    TokenIncorrectError
+)
 from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
+from .incorrect_token_error_handler import incorrect_token_error_handler
 from .client_not_found_error_handler import client_not_found_error_handler
 from .client_post_logout_redirect_uri_error_handler import client_post_logout_redirect_uri_error_handler
 from .client_redirect_uri_error_handler import client_redirect_uri_error_handler
@@ -30,4 +41,5 @@ exception_handler_mapping = {
     WrongDataError: wrong_data_error_handler,
     WrongPasswordError: wrong_password_error_handler,
     WrongResponseTypeError: wrong_response_type_error_handler,
+    TokenIncorrectError: incorrect_token_error_handler,
 }

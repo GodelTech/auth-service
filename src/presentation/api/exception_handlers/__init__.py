@@ -10,6 +10,7 @@ from .user_code_not_found_error_handler import user_code_not_found_error_handler
 from .user_not_found_error_handler import user_not_found_error_handler
 from .wrong_data_error_handler import wrong_data_error_handler
 from .wrong_password_error_handler import wrong_password_error_handler
+from .incorrect_token_error_handler import incorrect_token_error_handler
 
 __all__ = [
     "client_scopes_error_handler",
@@ -24,4 +25,5 @@ __all__ = [
     "user_not_found_error_handler",
     "wrong_data_error_handler",
     "exception_handler_mapping",
+    "incorrect_token_error_handler",
 ]

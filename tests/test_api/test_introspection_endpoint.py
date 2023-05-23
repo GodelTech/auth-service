@@ -157,4 +157,4 @@ class TestIntrospectionEndpoint:
         response_content = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response_content == {"detail": "Incorrect Token"}
+        assert response_content == {"message": "Incorrect Token"}
