@@ -12,11 +12,15 @@ from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
 from src.data_access.postgresql.repositories import ClientRepository, PersistentGrantRepository, UserRepository
 from src.presentation.api.models.userinfo import ResponseUserInfoModel
-
+from src.presentation.middleware.authorization_validation import authorization_middleware
 
 logger = logging.getLogger(__name__)
 
-userinfo_router = APIRouter(prefix="/userinfo", tags=["UserInfo"])
+userinfo_router = APIRouter(
+    prefix="/userinfo", 
+    tags=["UserInfo"], 
+    dependencies=[Depends(authorization_middleware)]
+    )
 
 
 @userinfo_router.get("/", response_model=dict)
@@ -48,11 +52,11 @@ async def get_userinfo(
 
 
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
-@cache(
-    expire=CacheTimeSettings.USERINFO,
-    coder=JsonCoder,
-    key_builder=builder_with_parametr,
-)
+# @cache(
+#     expire=CacheTimeSettings.USERINFO,
+#     coder=JsonCoder,
+#    # key_builder=builder_with_parametr,
+# )
 async def post_userinfo(
         request: Request,
         auth_swagger: Union[str, None] = Header(
@@ -77,7 +81,7 @@ async def post_userinfo(
 @cache(
     expire=CacheTimeSettings.USERINFO_JWT,
     coder=JsonCoder,
-    key_builder=builder_with_parametr,
+    # key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
         request: Request,
@@ -99,36 +103,8 @@ async def get_userinfo_jwt(
     result = {k: v for k, v in result.items() if v is not None}
     return await userinfo_class.jwt.encode_jwt(payload=result)
 
-
-@userinfo_router.get("/get_default_token", response_model=str)
-async def get_default_token(
-        with_iss_me: Optional[bool] = None,
-        with_aud: Optional[bool] = None,
-        scope: str = "profile",
-) -> str:
-    try:
-        jwt = JWTService()
-        payload: dict[str, Any] = {"sub": "1", "scope": scope}
-        if with_iss_me:
-            payload["iss"] = "me"
-        if with_aud:
-            payload["aud"] = ["admin", "userinfo", "introspection", "revoke"]
-        return await jwt.encode_jwt(payload)
-    except:
-        raise HTTPException(status_code=500)
-
-
-@userinfo_router.get("/decode_token", response_model=dict)
-async def get_decode_token(
-        token: str,
-        issuer: Optional[str] = None,
-        audience: Optional[str] = None,
-) -> dict[str, Any]:
-    jwt = JWTService()
-    kwargs = {}
-    if issuer is not None:
-        kwargs["issuer"] = issuer
-    if audience is not None:
-        kwargs["audience"] = audience
-
-    return await jwt.decode_token(token, **kwargs)
+    except ClaimsNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission for this claims",
+        )

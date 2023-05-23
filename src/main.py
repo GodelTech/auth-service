@@ -11,11 +11,7 @@ from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
-from src.presentation.api.middleware import (
-    AuthorizationMiddleware,
-    AccessTokenMiddleware,
-    SessionManager
-)
+from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -82,12 +78,6 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_async_session_stub
     ] = session
 
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-    )
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-    )
     app.add_middleware(
         middleware_class=SessionManager, session = session
     )
