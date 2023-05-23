@@ -11,7 +11,9 @@ from src.data_access.postgresql.errors import (
     WrongDataError,
     WrongPasswordError,
     WrongResponseTypeError,
-    TokenIncorrectError
+    TokenIncorrectError,
+    GrantNotFoundError,
+    ClaimsNotFoundError
 )
 from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
 from .claims_not_found_error_handler import claims_not_found_error_handler
