@@ -31,25 +31,20 @@ async def get_userinfo(
             default=None, description="Authorization"
         ),  # crutch for swagger
 ) -> dict[str, Any]:
-    try:
-        session = request.state.session
-        userinfo_class = UserInfoServices(
-            session=session,
-            user_repo=UserRepository(session),
-            client_repo=ClientRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-        )
-        token = request.headers.get("authorization") or auth_swagger
-        userinfo_class.authorization = token
-        logger.debug("Collecting Claims from DataBase.")
-        result = await userinfo_class.get_user_info()
-        result = {k: v for k, v in result.items() if v is not None}
-        return result
+    session = request.state.session
+    userinfo_class = UserInfoServices(
+        session=session,
+        user_repo=UserRepository(session),
+        client_repo=ClientRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+    )
+    token = request.headers.get("authorization") or auth_swagger
+    userinfo_class.authorization = token
+    logger.debug("Collecting Claims from DataBase.")
+    result = await userinfo_class.get_user_info()
+    result = {k: v for k, v in result.items() if v is not None}
+    return result
 
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
-        )
 
 
 @userinfo_router.post("/", response_model=ResponseUserInfoModel)
@@ -64,24 +59,18 @@ async def post_userinfo(
             default=None, description="Authorization"
         ),  # crutch for swagger
 ) -> dict[str, Any]:
-    try:
-        session = request.state.session
-        userinfo_class = UserInfoServices(
-            session=session,
-            user_repo=UserRepository(session),
-            client_repo=ClientRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-        )
-        token = request.headers.get("authorization") or auth_swagger
-        userinfo_class.authorization = token
-        logger.info("Collecting Claims from DataBase.")
-        result = await userinfo_class.get_user_info()
-        return {k: v for k, v in result.items() if v is not None}
-
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
-        )
+    session = request.state.session
+    userinfo_class = UserInfoServices(
+        session=session,
+        user_repo=UserRepository(session),
+        client_repo=ClientRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+    )
+    token = request.headers.get("authorization") or auth_swagger
+    userinfo_class.authorization = token
+    logger.info("Collecting Claims from DataBase.")
+    result = await userinfo_class.get_user_info()
+    return {k: v for k, v in result.items() if v is not None}
 
 
 @userinfo_router.get("/jwt", response_model=str)
@@ -96,25 +85,19 @@ async def get_userinfo_jwt(
             default=None, description="Authorization"
         ),
 ) -> str:
-    try:
-        session = request.state.session
-        userinfo_class = UserInfoServices(
-            session=session,
-            user_repo=UserRepository(session),
-            client_repo=ClientRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-        )
-        token = request.headers.get("authorization") or auth_swagger
-        userinfo_class.authorization = token
-        logger.info("Collecting Claims from DataBase.")
-        result = await userinfo_class.get_user_info()
-        result = {k: v for k, v in result.items() if v is not None}
-        return await userinfo_class.jwt.encode_jwt(payload=result)
-
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Token"
-        )
+    session = request.state.session
+    userinfo_class = UserInfoServices(
+        session=session,
+        user_repo=UserRepository(session),
+        client_repo=ClientRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+    )
+    token = request.headers.get("authorization") or auth_swagger
+    userinfo_class.authorization = token
+    logger.info("Collecting Claims from DataBase.")
+    result = await userinfo_class.get_user_info()
+    result = {k: v for k, v in result.items() if v is not None}
+    return await userinfo_class.jwt.encode_jwt(payload=result)
 
 
 @userinfo_router.get("/get_default_token", response_model=str)

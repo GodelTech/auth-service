@@ -79,8 +79,7 @@ class TestUserInfoEndpoint:
             response = await client.request("GET", url, headers=headers)
             response_content = json.loads(response.content.decode("utf-8"))
 
-            assert response.status_code == status.HTTP_403_FORBIDDEN
-            assert response_content == {"detail": "Incorrect Token"}
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
@@ -127,8 +126,7 @@ class TestUserInfoEndpoint:
         response = await client.request("POST", "/userinfo/", headers=headers)
         response_content = json.loads(response.content.decode("utf-8"))
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response_content == {"detail": "Incorrect Token"}
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_user_without_claims(

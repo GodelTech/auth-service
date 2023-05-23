@@ -31,6 +31,7 @@ from .user_not_found_error_handler import user_not_found_error_handler
 from .wrong_data_error_handler import wrong_data_error_handler
 from .wrong_password_error_handler import wrong_password_error_handler
 from .wrong_response_type_error_handler import wrong_response_type_error_handler
+from .base_error_handler import base_error_handler
 
 exception_handler_mapping = {
     ClientNotFoundError: client_not_found_error_handler,
@@ -48,4 +49,5 @@ exception_handler_mapping = {
     TokenIncorrectError: incorrect_token_error_handler,
     GrantNotFoundError: grant_not_found_error_handler,
     ClaimsNotFoundError: claims_not_found_error_handler,
+    KeyError: base_error_handler,
 }

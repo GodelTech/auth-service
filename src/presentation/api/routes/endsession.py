@@ -18,7 +18,6 @@ async def end_session(
         request: Request,
         request_model: RequestEndSessionModel = Depends(),
 ) -> Union[int, RedirectResponse, JSONResponse]:
-    try:
         session = request.state.session
         service_class = EndSessionService(
             session=session,
@@ -34,10 +33,4 @@ async def end_session(
             logout_redirect_uri, status_code=status.HTTP_302_FOUND
         )
         return response
-    except KeyError as exception:
-        message = f"KeyError: key {exception} is not in the id_token_hint"
-        logger.exception(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "The id_token_hint is missing something"},
-        )
+
