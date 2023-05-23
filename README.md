@@ -1,5 +1,12 @@
 AUTH SERVICE
-==========
+============
+
+|pipeline| |release|
+
+.. |pipeline| image:: https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml/badge.svg?branch=91_add_and_bump_versions
+    :target: https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml
+    :alt: pipeline
+
 
 [![pipeline](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml/badge.svg?branch=91_add_and_bump_versions)](https://github.com/GodelTech/auth-service/actions/workflows/build-and-test.yml)
 
@@ -7,8 +14,8 @@ AUTH SERVICE
 [![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://GitHub.com/Naereen/StrapDown.js/releases/)
 
 
-# Project installation
-
+Project installation
+--------------------
 ##### Link to the GIT repository:
 
 - *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
