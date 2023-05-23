@@ -1,0 +1,16 @@
+name: Build and Push
+
+#on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+#
+#      - name: Build Docker image
+#        run: docker build -t auth-server-image .
+
+      - name: Testing
+        run: echo "Hello"
+
