@@ -46,8 +46,7 @@ async def get_jwks(
         request: Request,
 ) -> dict[str, Any]:
     try:
-        logger.debug("JWKS")
-        session = request.state.session
+        session = 'no_session'
         well_known_info_class = WellKnownServices(
             session=session,
             wlk_repo=WellKnownRepository(session)
@@ -59,4 +58,4 @@ async def get_jwks(
             ]
         }
     except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise # HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

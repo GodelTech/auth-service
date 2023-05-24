@@ -1,9 +1,7 @@
 import logging
-
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.status import HTTP_404_NOT_FOUND
-
 from src.data_access.postgresql.errors import UserNotFoundError
 
 logger = logging.getLogger(__name__)

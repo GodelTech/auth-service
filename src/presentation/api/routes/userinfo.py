@@ -1,12 +1,9 @@
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Union
 
-from fastapi import APIRouter, HTTPException, Header, Request, status
+from fastapi import APIRouter, HTTPException, Header, Request, status, Depends
 from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
-
-from src.business_logic.cache.key_builders import builder_with_parametr
-from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.errors.user import ClaimsNotFoundError
