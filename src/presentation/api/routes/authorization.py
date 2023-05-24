@@ -60,45 +60,25 @@ async def get_authorize(
         client_repo=ClientRepository(session),
         oidc_repo=ThirdPartyOIDCRepository(session)
     )
-    try:
-        auth_class.request_model = request_model
-        return_form = await auth_class.get_html_form()
-        external_logins: Optional[dict[str, dict[str, Any]]] = {}
-        if request_model.response_type == "code":
-            external_logins = await auth_class.form_providers_data_for_auth()
+    auth_class.request_model = request_model
+    return_form = await auth_class.get_html_form()
+    external_logins: Optional[dict[str, dict[str, Any]]] = {}
+    if request_model.response_type == "code":
+        external_logins = await auth_class.form_providers_data_for_auth()
 
-        if return_form:
-            return templates.TemplateResponse(
-                "login_form.html",
-                {
-                    "request": request,
-                    "request_model": request_model,
-                    "external_logins": external_logins,
-                    "base_url": DOMAIN_NAME,
-                },
-                status_code=200,
-            )
-        else:
-            raise ValueError
-        
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
+    if return_form:
+        return templates.TemplateResponse(
+            "login_form.html",
+            {
+                "request": request,
+                "request_model": request_model,
+                "external_logins": external_logins,
+                "base_url": DOMAIN_NAME,
+            },
+            status_code=200,
         )
-    except ClientRedirectUriError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Redirect Uri not found"},
-        )
-    except WrongResponseTypeError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "Bad response type"},
-        )
+    else:
+        raise ValueError
 
 
 @auth_router.post("/", status_code=status.HTTP_302_FOUND, response_model=None)
@@ -107,52 +87,20 @@ async def post_authorize(
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     user_code: Optional[str] = Cookie(None),
 ) -> AuthorizePostEndpointResponse:
-    try:
-        session = request.state.session
-        auth_service_factory = AuthServiceFactory(
-            session=session,
-            client_repo=ClientRepository(session),
-            user_repo=UserRepository(session),
-            persistent_grant_repo=PersistentGrantRepository(session),
-            device_repo=DeviceRepository(session),
-            password_service=PasswordHash(),
-            jwt_service=JWTService()
-            )
-        setattr(request_body, "user_code", user_code)
-        auth_service: AuthServiceProtocol = (
-            auth_service_factory.get_service_impl(request_body.response_type)
+    session = request.state.session
+    auth_service_factory = AuthServiceFactory(
+        session=session,
+        client_repo=ClientRepository(session),
+        user_repo=UserRepository(session),
+        persistent_grant_repo=PersistentGrantRepository(session),
+        device_repo=DeviceRepository(session),
+        password_service=PasswordHash(),
+        jwt_service=JWTService()
         )
-        result = await auth_service.get_redirect_url(request_body)
-        await session.commit()
-        return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
-
-    except ClientNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Client not found"},
-        )
-    except UserNotFoundError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "User not found"},
-        )
-    except WrongPasswordError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Bad password"},
-        )
-    except ClientRedirectUriError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Redirect Uri not found"},
-        )
-    except ClientScopesError as e:
-        logger.exception(e)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Invalid scope"},
-        )
+    setattr(request_body, "user_code", user_code)
+    auth_service: AuthServiceProtocol = (
+        auth_service_factory.get_service_impl(request_body.response_type)
+    )
+    result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
+    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
