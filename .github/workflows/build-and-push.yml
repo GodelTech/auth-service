@@ -5,7 +5,12 @@ name: Publish Docker Image
 #  release:
 #    types: [published]
 
-on: [push]
+on:
+  push tag:
+    branches:
+      - '91_add_and_bump_versions'
+    tags:
+      - 'v1.0.0'
 
 jobs:
   push_to_registry:
