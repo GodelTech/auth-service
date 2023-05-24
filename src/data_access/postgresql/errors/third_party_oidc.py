@@ -8,3 +8,7 @@ class ThirdPartyStateDuplicationError(Exception):
 
 class WrongDataError(Exception):
     """Use this class when the final third party redirect uri is None"""
+
+
+class ParsingError(Exception):
+    """Use this class when there is an error in parsing"""

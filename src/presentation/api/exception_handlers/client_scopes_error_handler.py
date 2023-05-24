@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import ClientScopesError
 logger = logging.getLogger(__name__)
 
 
-async def client_scopes_error_handler(_: Request, exc: ClientScopesError) -> JSONResponse:
+async def client_scopes_error_handler(
+    _: Request, exc: ClientScopesError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Invalid scope"}

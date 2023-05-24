@@ -1,10 +1,15 @@
-import logging
-from typing import Any, Optional
-from fastapi import APIRouter, HTTPException
-from src.business_logic.services.jwt_token import JWTService
-import datetime
 import time
-debug_router = APIRouter(prefix="/userinfo", tags=["Debug Swagger"],)
+from typing import Any, Optional
+
+from fastapi import APIRouter
+
+from src.business_logic.services.jwt_token import JWTService
+
+debug_router = APIRouter(
+    prefix="/userinfo",
+    tags=["Debug Swagger"],
+)
+
 
 @debug_router.get("/get_default_token", response_model=str)
 async def get_default_token(

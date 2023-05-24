@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import WrongDataError
 logger = logging.getLogger(__name__)
 
 
-async def wrong_data_error_handler(_: Request, exc: WrongDataError) -> JSONResponse:
+async def wrong_data_error_handler(
+    _: Request, exc: WrongDataError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Wrong data has been passed"}

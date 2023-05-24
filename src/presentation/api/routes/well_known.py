@@ -22,17 +22,18 @@ well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 logger = logging.getLogger(__name__)
 
 
-@well_known_router.get("/openid-configuration", response_model=ResponseOpenIdConfiguration)
+@well_known_router.get(
+    "/openid-configuration", response_model=ResponseOpenIdConfiguration
+)
 @cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
-        request: Request,
+    request: Request,
 ) -> dict[str, Any]:
     try:
         session = request.state.session
         logger.debug("Collecting Data for OpenID Configuration.")
         well_known_info_class = WellKnownServices(
-            session=session,
-            wlk_repo=WellKnownRepository(session)
+            session=session, wlk_repo=WellKnownRepository(session)
         )
         well_known_info_class.request = request
         result = await well_known_info_class.get_openid_configuration()
@@ -43,13 +44,12 @@ async def get_openid_configuration(
 
 @well_known_router.get("/jwks", response_model=ResponseJWKS)
 async def get_jwks(
-        request: Request,
+    request: Request,
 ) -> dict[str, Any]:
     try:
-        session = 'no_session'
+        session = "no_session"
         well_known_info_class = WellKnownServices(
-            session=session,
-            wlk_repo=WellKnownRepository(session)
+            session=session, wlk_repo=WellKnownRepository(session)
         )
         well_known_info_class.request = request
         return {
@@ -58,4 +58,4 @@ async def get_jwks(
             ]
         }
     except:
-        raise # HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise  # HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

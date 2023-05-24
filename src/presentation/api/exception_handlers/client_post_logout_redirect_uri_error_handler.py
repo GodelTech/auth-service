@@ -9,8 +9,9 @@ from src.data_access.postgresql.errors import ClientPostLogoutRedirectUriError
 logger = logging.getLogger(__name__)
 
 
-async def client_post_logout_redirect_uri_error_handler(_: Request,
-                                                        exc: ClientPostLogoutRedirectUriError) -> JSONResponse:
+async def client_post_logout_redirect_uri_error_handler(
+    _: Request, exc: ClientPostLogoutRedirectUriError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Bad post logout redirect uri"}

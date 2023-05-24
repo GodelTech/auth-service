@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import WrongPasswordError
 logger = logging.getLogger(__name__)
 
 
-async def wrong_password_error_handler(_: Request, exc: WrongPasswordError) -> JSONResponse:
+async def wrong_password_error_handler(
+    _: Request, exc: WrongPasswordError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Bad password"}
