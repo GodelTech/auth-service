@@ -6,9 +6,8 @@ name: Publish Docker Image
 #    types: [published]
 
 on:
+  push:
   push tag:
-    branches:
-      - '91_add_and_bump_versions'
     tags:
       - 'v1.0.0'
 
