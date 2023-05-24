@@ -33,6 +33,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: "1.0.0"
-#          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
