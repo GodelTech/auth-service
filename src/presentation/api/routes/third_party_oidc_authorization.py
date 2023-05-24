@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.business_logic.services import (
+from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
     ThirdPartyFacebookService,
     ThirdPartyGitLabService,

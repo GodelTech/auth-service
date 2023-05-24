@@ -5,10 +5,9 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.repositories import ClientRepository, DeviceRepository
-from src.business_logic.services import DeviceService
+from src.business_logic.services.device_auth import DeviceService
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     UserCodeNotFoundError,
