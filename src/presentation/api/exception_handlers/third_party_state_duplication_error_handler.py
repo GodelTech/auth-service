@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
 logger = logging.getLogger(__name__)
 
 
-async def third_party_state_duplication_error_handler(_: Request, exc: ThirdPartyStateDuplicationError) -> JSONResponse:
+async def third_party_state_duplication_error_handler(
+    _: Request, exc: ThirdPartyStateDuplicationError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Third Party State already exists"}

@@ -10,7 +10,9 @@ from jwt.exceptions import InvalidTokenError
 logger = logging.getLogger(__name__)
 
 
-async def incorrect_token_error_handler(_: Request, exc: TokenIncorrectError) -> JSONResponse:
+async def incorrect_token_error_handler(
+    _: Request, exc: TokenIncorrectError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"detail": "Incorrect Token"}

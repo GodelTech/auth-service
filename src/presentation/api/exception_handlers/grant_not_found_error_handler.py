@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import GrantNotFoundError
 logger = logging.getLogger(__name__)
 
 
-async def grant_not_found_error_handler(_: Request, exc: GrantNotFoundError) -> JSONResponse:
+async def grant_not_found_error_handler(
+    _: Request, exc: GrantNotFoundError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"detail": "Incorrect Token"}

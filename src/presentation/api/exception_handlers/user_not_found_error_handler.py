@@ -7,7 +7,9 @@ from src.data_access.postgresql.errors import UserNotFoundError
 logger = logging.getLogger(__name__)
 
 
-async def user_not_found_error_handler(_: Request, exc: UserNotFoundError):
+async def user_not_found_error_handler(
+    _: Request, exc: UserNotFoundError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "User not found"}

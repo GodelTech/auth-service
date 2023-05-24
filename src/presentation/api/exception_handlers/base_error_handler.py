@@ -2,15 +2,14 @@ import logging
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from starlette import status  
-
-from src.data_access.postgresql.errors import TokenIncorrectError
-from jwt.exceptions import InvalidTokenError
+from starlette import status
 
 logger = logging.getLogger(__name__)
 
 
-async def base_bad_request_error_handler(_: Request, exc: BaseException) -> JSONResponse:
+async def base_bad_request_error_handler(
+    _: Request, exc: BaseException
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"details": exc.args}
@@ -20,7 +19,10 @@ async def base_bad_request_error_handler(_: Request, exc: BaseException) -> JSON
         content=content,
     )
 
-async def base_not_found_error_handler(_: Request, exc: BaseException) -> JSONResponse:
+
+async def base_not_found_error_handler(
+    _: Request, exc: BaseException
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"details": "Instance not found"}

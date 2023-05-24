@@ -1,24 +1,26 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Union
 
 from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import JSONResponse, RedirectResponse
+
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
     ThirdPartyFacebookService,
-    ThirdPartyGitLabService,
     ThirdPartyGoogleService,
     ThirdPartyLinkedinService,
     ThirdPartyGitLabService,
     ThirdPartyMicrosoftService,
 )
 from src.data_access.postgresql.errors import (
-    ClientNotFoundError,
-    ThirdPartyStateDuplicationError,
-    ThirdPartyStateNotFoundError,
     WrongDataError,
+)
+from src.data_access.postgresql.errors.third_party_oidc import ParsingError
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    UserRepository,
+    ThirdPartyOIDCRepository,
+    PersistentGrantRepository,
 )
 from src.presentation.api.models import (
     StateRequestModel,
@@ -28,8 +30,6 @@ from src.presentation.api.models import (
     ThirdPartyOIDCRequestModel,
     ThirdPartyMicrosoftRequestModel,
 )
-from src.data_access.postgresql.repositories import ClientRepository, UserRepository, ThirdPartyOIDCRepository, PersistentGrantRepository
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,28 +37,26 @@ auth_oidc_router = APIRouter(
     prefix="/authorize/oidc", tags=["OIDC Authorization"]
 )
 
+
 # http://127.0.0.1:8000/authorize/oidc/github
 
 
 @auth_oidc_router.get(
-    "/github",
-    status_code=status.HTTP_302_FOUND,
-    response_model=None
+    "/github", status_code=status.HTTP_302_FOUND, response_model=None
 )
-
 async def get_github_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = AuthThirdPartyOIDCService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_github_redirect_uri(
             provider_name="github"
@@ -70,28 +68,26 @@ async def get_github_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
-@auth_oidc_router.get("/linkedin", status_code=status.HTTP_302_FOUND, response_model=None)
+@auth_oidc_router.get(
+    "/linkedin", status_code=status.HTTP_302_FOUND, response_model=None
+)
 async def get_linkedin_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyLinkedinRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = ThirdPartyLinkedinService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         linkedin_redirect_uri = await auth_class.get_redirect_uri(
             provider_name="linkedin"
@@ -103,33 +99,26 @@ async def get_linkedin_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
 @auth_oidc_router.get(
-    "/facebook",
-    status_code=status.HTTP_302_FOUND,
-    response_model=None
+    "/facebook", status_code=status.HTTP_302_FOUND, response_model=None
 )
-
 async def get_facebook_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyFacebookRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = ThirdPartyFacebookService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_facebook_redirect_uri(
             provider_name="facebook"
@@ -141,33 +130,26 @@ async def get_facebook_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
 @auth_oidc_router.get(
-    "/google",
-    status_code=status.HTTP_302_FOUND,
-    response_model=None
+    "/google", status_code=status.HTTP_302_FOUND, response_model=None
 )
-
 async def get_google_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyGoogleRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = ThirdPartyGoogleService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_google_redirect_uri(
             provider_name="google"
@@ -179,33 +161,26 @@ async def get_google_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
 @auth_oidc_router.get(
-    "/gitlab",
-    status_code=status.HTTP_302_FOUND,
-    response_model=None
+    "/gitlab", status_code=status.HTTP_302_FOUND, response_model=None
 )
-
 async def get_gitlab_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = ThirdPartyGitLabService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         github_redirect_uri = await auth_class.get_redirect_uri(
             provider_name="gitlab"
@@ -217,33 +192,26 @@ async def get_gitlab_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
 @auth_oidc_router.get(
-    "/microsoft",
-    status_code=status.HTTP_302_FOUND,
-    response_model=None
+    "/microsoft", status_code=status.HTTP_302_FOUND, response_model=None
 )
-
 async def get_microsoft_authorize(
-    request:Request,
+    request: Request,
     request_model: ThirdPartyMicrosoftRequestModel = Depends(),
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
         session = request.state.session
         auth_class = ThirdPartyMicrosoftService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             user_repo=UserRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
-            oidc_repo=ThirdPartyOIDCRepository(session)
-            )
+            oidc_repo=ThirdPartyOIDCRepository(session),
+        )
         auth_class.request_model = request_model
         redirect_uri = await auth_class.get_redirect_uri(
             provider_name="microsoft"
@@ -255,22 +223,15 @@ async def get_microsoft_authorize(
         )
         return response
 
-    except IndexError as exception:
-        logger.exception(exception)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "Error in parsing"},
-        )
+    except IndexError:
+        raise ParsingError
 
 
 @auth_oidc_router.post(
-    "/state",
-    status_code=status.HTTP_200_OK,
-    response_model=None
+    "/state", status_code=status.HTTP_200_OK, response_model=None
 )
-
 async def post_create_state(
-    request:Request,
+    request: Request,
     state_request_model: StateRequestModel = Depends(),
 ) -> Union[None, JSONResponse, int]:
     session = request.state.session
@@ -279,7 +240,7 @@ async def post_create_state(
         client_repo=ClientRepository(session),
         user_repo=UserRepository(session),
         persistent_grant_repo=PersistentGrantRepository(session),
-        oidc_repo=ThirdPartyOIDCRepository(session)
+        oidc_repo=ThirdPartyOIDCRepository(session),
     )
     auth_class.state_request_model = state_request_model
     await auth_class.create_provider_state()

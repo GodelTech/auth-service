@@ -9,7 +9,9 @@ from src.data_access.postgresql.errors import WrongResponseTypeError
 logger = logging.getLogger(__name__)
 
 
-async def wrong_response_type_error_handler(_: Request, exc: WrongResponseTypeError) -> JSONResponse:
+async def wrong_response_type_error_handler(
+    _: Request, exc: WrongResponseTypeError
+) -> JSONResponse:
     logger.exception(exc)
 
     content = {"message": "Bad response type"}

@@ -303,7 +303,7 @@ class UserRepository(BaseRepository):
             )
         
             await self.session.execute(insert(User).values(**kwargs))
-        except BaseException as err:
+        except exc.IntegrityError:
                 raise
 
 
