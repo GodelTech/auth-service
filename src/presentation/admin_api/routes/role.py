@@ -15,32 +15,9 @@ logger = logging.getLogger(__name__)
 admin_role_router = APIRouter(prefix="/roles")
 
 
-def exceptions_wrapper(func:Callable[..., Any]) -> Callable[..., Any]:
-    @wraps(func)
-    async def inner(*args:Any, **kwargs:Any) -> Any:
-        try:
-            return await func(*args, **kwargs)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
-            )
-        except DuplicationError:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Duplication"
-            )
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="INTERNAL_SERVER_ERROR",
-            )
-
-    return inner
-
-
 @admin_role_router.get(
     "/{role_id}", response_model=dict, tags=["Administration Role"], description="Get the Role"
 )
-@exceptions_wrapper
 async def get_role(
     request: Request,
     role_id:int,
@@ -58,7 +35,6 @@ async def get_role(
 @admin_role_router.get(
     "", response_model=dict, tags=["Administration Role"], description="Get All Roles"
 )
-@exceptions_wrapper
 async def get_all_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -74,7 +50,6 @@ async def get_all_roles(
 @admin_role_router.post(
     "", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Create a New Role"
 )
-@exceptions_wrapper
 async def create_role(
     request: Request,
     access_token: str = Header(description="Access token"),
@@ -91,7 +66,6 @@ async def create_role(
 @admin_role_router.put(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Update the Role"
 )
-@exceptions_wrapper
 async def update_role(
     request: Request,
     role_id:int,
@@ -110,7 +84,6 @@ async def update_role(
 @admin_role_router.delete(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
 )
-@exceptions_wrapper
 async def delete_group(
     request: Request,
     role_id:int,

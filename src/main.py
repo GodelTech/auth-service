@@ -9,11 +9,9 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from src.presentation.api.middleware import (
-    AuthorizationMiddleware,
-    AccessTokenMiddleware,
-    SessionManager
-)
+
+from src.presentation.api.exception_handlers import exception_handler_mapping
+from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -48,6 +46,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application = setup_exception_handlers(application)
 
     setup_di(application)
     container = Container()
@@ -79,12 +78,6 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_async_session_stub
     ] = session
 
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-    )
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-    )
     app.add_middleware(
         middleware_class=SessionManager, session = session
     )
@@ -155,6 +148,13 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.ApiScopeClaimAdminController)
     admin.add_view(ui.ApiScopeClaimTypeAdminController)
     admin.add_base_view(ui.SeparationLine)
+
+
+def setup_exception_handlers(app: FastAPI) -> FastAPI:
+    for exception, handler in exception_handler_mapping.items():
+        app.add_exception_handler(exception, handler)
+    return app
+
 
 app = get_application()
 
