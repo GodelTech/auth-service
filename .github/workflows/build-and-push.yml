@@ -15,5 +15,5 @@ jobs:
 #        run: docker build -t auth-server-image .
 
       - name: Testing
-        run: echo "Hello"
+        run: echo "Release just happened"
 
