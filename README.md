@@ -1,6 +1,9 @@
 **main**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/main/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 **main**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/main/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
 
+![image](https://img.shields.io/github/v/release/GodelTech/auth-service?include_prereleases)
+![image](https://img.shields.io/docker/v/levigoldman/auth-service)
+
 # Project installation
 
 ##### Link to the GIT repository:

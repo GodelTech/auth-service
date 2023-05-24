@@ -56,3 +56,14 @@ docker:
 
 docker-test:
 	docker exec -it identity-server-provider sh -c "pytest -ra -cov tests"
+
+
+## Bump2version- 1.1.0
+mark-patch:
+	bump2version --allow-dirty patch
+
+mark-minor:
+	bump2version --allow-dirty minor
+
+mark-major:
+	bump2version --allow-dirty major
