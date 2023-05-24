@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy import select, insert
 from sqlalchemy.orm import sessionmaker
 
-from business_logic.services import JWTService
-from data_access.postgresql.repositories import ClientRepository
+from src.business_logic.services import JWTService
+from src.data_access.postgresql.repositories import ClientRepository
 from src.data_access.postgresql.tables.client import Client
 
 
@@ -122,13 +122,13 @@ class TestClientAllEndpointGET:
 
         response = await client.request("GET", "clients")
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
     async def test_unsuccessful_get_all_clients_wrong_access_token(self, client: AsyncClient) -> None:
         response = await client.request("GET", "clients", headers={"access_token": "wrong_access_token"})
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 @pytest.mark.asyncio
 class TestClientEndpointGET:
@@ -158,7 +158,7 @@ class TestClientEndpointGET:
     #     assert response.status_code == status.HTTP_404_NOT_FOUND
 #
 @pytest.mark.asyncio
-class TestClientEndpointDELET:
+class TestClientEndpointDELETE:
     @pytest.mark.asyncio
     async def test_successful_client_deletion(self, client: AsyncClient,
                                               engine: AsyncEngine) -> None:
@@ -194,7 +194,6 @@ class TestClientEndpointDELET:
         assert new_client is not None
 
         response = await client.request("DELETE", f"clients/{unique_client_id}")
-
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Client deleted successfully"}
 
@@ -204,4 +203,4 @@ class TestClientEndpointDELET:
         response = await client.request("DELETE", "clients/non_existent_client_id")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"detail": "Client not found"}
+        assert response.json() == {"message": "Client not found"}

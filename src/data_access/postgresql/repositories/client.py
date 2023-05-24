@@ -228,7 +228,6 @@ class ClientRepository(BaseRepository):
                 description = description
                 )
             )
-            await self.session.commit()
         except:
             raise DuplicationError
         
@@ -303,7 +302,6 @@ class ClientRepository(BaseRepository):
                         .where(Client.client_id == client_id)
                     )
             await self.session.execute(updates)
-            await self.session.commit()
 
     async def delete_scope(
         self, 
@@ -313,7 +311,6 @@ class ClientRepository(BaseRepository):
             await self.session.execute(
                 delete(ClientScope).where(ClientScope.client_id == client_id_int)
             )
-            await self.session.commit()
 
     async def delete_redirect_uris(
         self, 
@@ -323,7 +320,6 @@ class ClientRepository(BaseRepository):
             await self.session.execute(
                 delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
             )
-            await self.session.commit()
 
     async def delete_client_by_client_id(
         self, 
@@ -334,10 +330,8 @@ class ClientRepository(BaseRepository):
                 delete(Client)
                 .where(Client.client_id == client_id)
             )
-            await self.session.commit()
 
     async def get_all(self) -> None:
-        
             result = await self.session.execute(
                     select(Client)
                 )
@@ -357,7 +351,6 @@ class ClientRepository(BaseRepository):
                             response_type_id=response_type_id
                         )
                     )
-            await self.session.commit()
 
     async def add_grant_type(self, client_id_int, grant_type):
         
@@ -372,19 +365,16 @@ class ClientRepository(BaseRepository):
                             persistent_grant_type_id=grant_type_id
                         )
                     )
-            await self.session.commit()
 
     async def delete_clients_response_types(self, client_id_int):
         
             sql = f"DELETE FROM clients_response_types WHERE client_id = {client_id_int}"
             await self.session.execute(text(sql))
-            await self.session.commit()
     
     async def delete_clients_grant_types(self, client_id_int):
         
             sql = f"DELETE FROM clients_grant_types WHERE client_id = {client_id_int}"
             await self.session.execute(text(sql))
-            await self.session.commit()
         
 
     def __repr__(self) -> str:

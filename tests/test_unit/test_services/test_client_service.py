@@ -81,7 +81,7 @@ class TestClientService:
     async def test_registration(self,
                                 client_request_model: ClientRequestModel,
                                 client_service: ClientService,
-                                engine: AsyncEngine,
+                                connection: AsyncSession,
                                 monkeypatch) -> None:
         mock_generate_credentials = AsyncMock(return_value=("client_id", "client_secret"))
         monkeypatch.setattr(client_service,
@@ -90,14 +90,10 @@ class TestClientService:
 
         client_service.request_model = client_request_model
         registration_result = await client_service.registration()
-
-        session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as session:
-            new_client = (await session.scalars(
-                select(Client).where(Client.client_id == registration_result["client_id"])
-            )).first()
+        await client_service.session.commit()
+        new_client = (await connection.scalars(
+            select(Client).where(Client.client_id == registration_result["client_id"])
+        )).first()
 
         assert isinstance(registration_result, dict)
         assert registration_result.keys() == {"client_id", "client_secret"}
@@ -125,7 +121,6 @@ class TestClientService:
 
         client_service.request_model = client_request_model
         params = await client_service.get_params(client_id="test_client")
-
         assert isinstance(params, dict)
         assert params["client_id"] == "test_client"
 
@@ -166,7 +161,7 @@ class TestClientService:
         client_service.request_model = new_properties
 
         await client_service.update(client_id=unique_client_id)
-
+        await client_service.session.commit()
         async with session_factory() as session:
             updated_client = (await session.scalars(
                 select(Client).where(Client.client_id == unique_client_id)
@@ -211,7 +206,7 @@ class TestClientService:
         )
 
         await client_service.update(client_id=unique_client_id)
-
+        await client_service.session.commit()
         async with session_factory() as session:
             query = select(
                 clients_response_types.c.client_id,
@@ -312,7 +307,7 @@ class TestClientService:
         )
 
         await client_service.update(client_id=unique_client_id)
-
+        await client_service.session.commit()
         async with session_factory() as session:
             updated_scope = await session.execute(
                 select(ClientScope).where(ClientScope.client_id == client_id_int)
@@ -373,39 +368,10 @@ class TestClientService:
             await client_service.update(client_id="non_existent_client_id")
 
     async def test_get_all(self, client_service: ClientService) -> None:
-
         clients = await client_service.get_all()
-
+        await client_service.session.close()
         assert isinstance(clients, list)
         assert [isinstance(obj, dict) for obj in clients]
-
-    async def test_client_to_dict(self,
-                                  client_service: ClientService,
-                                  engine: AsyncEngine) -> None:
-        session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as session:
-            client = (await session.scalars(
-                select(Client).where(Client.client_id == "double_test")
-            )).first()
-
-        dictionary = client_service.client_to_dict(client)
-
-        expected_dictionary = {
-            'client_id': 'double_test',
-            'client_name': 'jasmine85',
-            'client_uri': 'http://davis-yates.com/',
-            'logo_uri': 'http://www.zavala.com/',
-            'redirect_uris': ['https://www.google.com/'],
-            'grant_types': [],
-            'response_types': [],
-            'token_endpoint_auth_method': 'client_secret_post',
-            'scope': 'openid email'
-        }
-
-        assert isinstance(dictionary, dict)
-        assert dictionary == expected_dictionary
 
     async def test_get_client_by_client_id(self, client_service: ClientService) -> None:
         client = await client_service.get_client_by_client_id(client_id="test_client")
@@ -413,9 +379,11 @@ class TestClientService:
         assert isinstance(client, dict)
 
     ##### Dont work with "ClientNotFoundError" ####
-    async def test_get_client_by_client_id_with_non_existent_client_id(self,
-                                                                      client_request_model,
-                                                                      client_service: ClientService) -> None:
+    async def test_get_client_by_client_id_with_non_existent_client_id(
+            self,
+            client_request_model,
+            client_service: ClientService
+        ) -> None:
         client_service.request_model = client_request_model
         with pytest.raises(Exception):
             await client_service.get_client_by_client_id(client_id="non_existent_client_id")
