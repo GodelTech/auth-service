@@ -1,7 +1,7 @@
 from src.data_access.postgresql.tables.identity_resource import (
     IdentityProvider,
 )
-from scripts.populate_data.third_party_providers_config.providers_config import (
+from src.scripts.populate_data.third_party_providers_config.providers_config import (
     IdentityProviderConfig,
 )
 from src.dyna_config import DOMAIN_NAME
