@@ -45,7 +45,6 @@ class ClientAdminController(ModelView, model=Client):
         Client.always_include_user_claims_id_token,
         Client.redirect_uris,
         Client.secrets,
-        Client.devices,
         Client.post_logout_redirect_uris,
         Client.grant_types,
         Client.claims,
@@ -89,7 +88,6 @@ class ResponseTypeAdminController(ModelView, model=ResponseType):
     column_list = [
         ResponseType.id,
         ResponseType.type,
-        ResponseType.clients
     ]
 
 

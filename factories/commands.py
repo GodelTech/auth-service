@@ -52,6 +52,7 @@ class DataBasePopulation:
     @classmethod
     def clean_data_from_database(cls) -> None:
         tables_to_clean = {
+            "response_types",
             "user_passwords",
             "user_claim_types",
             "api_claim_types",
@@ -156,7 +157,7 @@ class DataBasePopulation:
 
         # Finally, populating Client
         for id, client_id in data.CLIENT_IDS.items():
-            cl_factory.ClientFactory(id=id, client_id=client_id)
+            cl_factory.ClientFactory(client_id=client_id)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 

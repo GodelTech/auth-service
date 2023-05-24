@@ -171,14 +171,15 @@ class AdminUserService():
         user_id = (await self.user_repo.get_user_by_email(email=email)).id
         password_hashed = PasswordHash.hash_password(password=password)
         await self.user_repo.change_password(user_id=user_id, password=password_hashed)
+        #if len([v for v in kwargs.values() if v is not None])>6:
         kwargs["birthdate"] = str(kwargs['birthdate'])
         types = await self.user_repo.get_all_claim_types()
         claims = []
         for key in kwargs:
             if key in types.keys() and kwargs[key]:
                 claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":kwargs[key]})
-        
-        await self.user_repo.add_claims(claims=claims)
+        if claims:
+            await self.user_repo.add_claims(claims=claims)
 
     async def validate_password(self, email:str, password:str):
         user:User = await self.user_repo.get_user_by_email(email=email)

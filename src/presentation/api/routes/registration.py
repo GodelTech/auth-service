@@ -28,11 +28,11 @@ def exceptions_wrapper(func:Callable[..., Any]) -> Callable[..., Any]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="BAD_REQUEST"
             )
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="INTERNAL_SERVER_ERROR",
-            )
+        # except:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         detail="INTERNAL_SERVER_ERROR",
+        #     )
     return inner
 
 

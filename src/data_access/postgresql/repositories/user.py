@@ -135,13 +135,10 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:
-        
-            
+    async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:            
             await self.session.execute(
                 insert(UserClaim).values(claims)
             )
-            await self.session.commit()
 
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
             result = await self.session.execute(
@@ -306,7 +303,7 @@ class UserRepository(BaseRepository):
             )
         
             await self.session.execute(insert(User).values(**kwargs))
-        except exc.IntegrityError:
+        except BaseException as err:
                 raise
 
 

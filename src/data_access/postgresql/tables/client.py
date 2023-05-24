@@ -137,11 +137,6 @@ class Client(BaseModel):
         "ClientPostLogoutRedirectUri", back_populates="client"
     )
     scopes = relationship("ClientScope", back_populates="client", lazy = "subquery")
-    devices = relationship(
-        "Device",
-        back_populates="client",
-        foreign_keys="Device.client_id",
-    )
     cors_origins = relationship(
         "ClientCorsOrigin",
         back_populates="client",
@@ -154,15 +149,13 @@ class Client(BaseModel):
         secondary=clients_grant_types,
         cascade="all,delete",
         back_populates="clients",
-        lazy = "subquery"
     )
     
     response_types = relationship(
         "ResponseType",
         secondary=clients_response_types,
         cascade="all,delete",
-        back_populates="clients",
-        lazy = "subquery"
+        backref="clients",
     )
     
     def __str__(self) -> str:  # pragma: no cover
@@ -175,12 +168,6 @@ class ResponseType(Base):
     __tablename__ = "response_types"
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
-    clients = relationship(
-        "Client",
-        secondary=clients_response_types,
-        cascade="all,delete",
-        back_populates="response_types",
-    )
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.type}"
 

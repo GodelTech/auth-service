@@ -137,7 +137,6 @@ class ResponseTypeFactory(SQLAlchemyModelFactory):
         model = client.ResponseType
         sqlalchemy_session = sess.session
 
-    id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(data.RESPONSE_TYPES)
 
 class ProtocolTypeFactory(SQLAlchemyModelFactory):
