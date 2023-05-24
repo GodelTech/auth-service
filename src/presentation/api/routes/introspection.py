@@ -1,6 +1,9 @@
 import logging
 from typing import Any, Optional
+<<<<<<< HEAD
 from typing import Any, Optional
+=======
+>>>>>>> main
 
 from fastapi import APIRouter, Depends, Header, Request
 
@@ -44,11 +47,6 @@ async def post_introspection(
     )
     introspection_class.request = request
 
-    token = request.headers.get("authorization") or auth_swagger
-    introspection_class.authorization = token
-    introspection_class.request_body = request_body
-    logger.debug(f"Introspection for token {request_body.token} started")
-    return await introspection_class.analyze_token()
     token = request.headers.get("authorization") or auth_swagger
     introspection_class.authorization = token
     introspection_class.request_body = request_body

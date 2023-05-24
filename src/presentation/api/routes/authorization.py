@@ -18,20 +18,11 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
     UserRepository,
     PersistentGrantRepository,
-    DeviceRepository
+    DeviceRepository,
 )
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
 from src.business_logic.services.login_form_service import LoginFormService
-from src.data_access.postgresql.errors import (
-    ClientNotFoundError,
-    ClientRedirectUriError,
-    ClientScopesError,
-    UserNotFoundError,
-    WrongPasswordError,
-    WrongResponseTypeError,
-    NotCompleteScopeError
-)
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
 

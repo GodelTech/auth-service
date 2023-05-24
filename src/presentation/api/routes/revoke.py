@@ -16,7 +16,6 @@ from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )
-from src.presentation.middleware.authorization_validation import authorization_middleware
 
 logger = logging.getLogger(__name__)
 

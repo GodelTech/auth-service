@@ -38,4 +38,3 @@ async def end_session(
         logout_redirect_uri, status_code=status.HTTP_302_FOUND
     )
     return response
-
