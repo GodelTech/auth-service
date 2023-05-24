@@ -10,7 +10,7 @@ on:
     branches:
       - '91_add_and_bump_versions'
     tags:
-      - 'v1.0.0'
+      - 'v*'
 
 #on: [push]
 
@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: true
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
