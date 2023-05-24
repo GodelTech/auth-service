@@ -7,8 +7,12 @@ name: Publish Docker Image
 
 on:
   push:
+    branches:
+      - '91_add_and_bump_versions'
     tags:
       - 'v1.0.0'
+
+#on: [push]
 
 jobs:
   push_to_registry:
