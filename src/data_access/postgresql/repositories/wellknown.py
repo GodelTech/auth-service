@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
-    DuplicationError,
     NoPasswordError,
     UserNotFoundError,
 )

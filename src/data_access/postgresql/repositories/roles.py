@@ -67,15 +67,12 @@ class RoleRepository(BaseRepository):
                 raise ValueError
         except ValueError:
             raise ValueError
-        except:
-            raise DuplicationError
+
 
     async def create(self, name: str, id: Optional[int] = None) -> None:
-        try:
-            kwargs = params_to_dict(name=name, id=id)
-            await self.session.execute(insert(Role).values(**kwargs))
-        except:
-            raise DuplicationError
+        kwargs = params_to_dict(name=name, id=id)
+        await self.session.execute(insert(Role).values(**kwargs))
+
 
     async def get_all_roles(self) -> list[Role]:
         quiery = await self.session.execute(select(Role))

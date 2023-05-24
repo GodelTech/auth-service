@@ -100,8 +100,3 @@ async def get_userinfo_jwt(
     result = {k: v for k, v in result.items() if v is not None}
     return await userinfo_class.jwt.encode_jwt(payload=result)
 
-    except ClaimsNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission for this claims",
-        )
