@@ -48,7 +48,7 @@ class TestRevokationEndpoint:
 
     @pytest.mark.asyncio
     async def test_token_does_not_exists(
-        selff, client: AsyncClient
+        self, client: AsyncClient
     ) -> None:
         jwt = JWTService()
         grant_type = "code"

@@ -31,16 +31,14 @@ class UserInfoServices:
     async def get_user_info(
         self,
     ) -> dict[str, Any]:
-        if self.authorization is None:
-            raise ValueError
 
         token = self.authorization
-        decoded_token = None
+        decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
         try:
-            decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
             sub = int(decoded_token["sub"])
-        except (PyJWTError, KeyError):
-            raise ValueError
+        except KeyError:
+            raise KeyError("No parameter 'sub' in token")
+
         
         claims_dict = await self.user_repo.get_claims(id=sub)
         if not claims_dict.get("sub", False):

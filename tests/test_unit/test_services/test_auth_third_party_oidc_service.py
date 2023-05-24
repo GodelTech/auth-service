@@ -2,11 +2,10 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
-from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.tables import IdentityProviderMapped
 from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderState,
@@ -123,7 +122,7 @@ class TestAuthorizationService:
     async def test_create_new_user_already_exists(
         self, auth_third_party_service: AuthThirdPartyOIDCService
     ) -> None:
-        with pytest.raises(DuplicationError):
+        with pytest.raises(exc.IntegrityError):
             await auth_third_party_service.create_new_user(
                 username="TestClient", provider=1
             )

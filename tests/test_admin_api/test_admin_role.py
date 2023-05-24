@@ -12,7 +12,7 @@ from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
-from src.data_access.postgresql.errors.user import DuplicationError
+from sqlalchemy import exc
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from typing import Any
 
@@ -76,7 +76,7 @@ class TestAdminRoleEndpoint:
                             name=name,
                             parent_group=parent_group,
                         )
-            except DuplicationError:
+            except exc.IntegrityError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
                 await connection.rollback()
@@ -111,7 +111,7 @@ class TestAdminRoleEndpoint:
             try:
                 await group_repo.create(**group)
                 await connection.commit()
-            except DuplicationError:
+            except exc.IntegrityError:
                 logger.info(group["name"] + " group already exists")
                 await connection.rollback()
 
@@ -127,7 +127,7 @@ class TestAdminRoleEndpoint:
             try:
                 await group_repo.create(**group)
                 await connection.commit()
-            except DuplicationError:
+            except exc.IntegrityError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
                     await connection.rollback()
@@ -137,7 +137,7 @@ class TestAdminRoleEndpoint:
         for role in ("Standuser", "French", "Italian", "Vampire"):
             try:
                 await role_repo.create(name=role)
-            except DuplicationError:
+            except exc.IntegrityError:
                 logger.info(role + " role already exists")
 
         await connection.commit()
