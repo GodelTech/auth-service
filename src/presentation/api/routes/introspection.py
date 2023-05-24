@@ -1,10 +1,5 @@
 import logging
 from typing import Any, Optional
-<<<<<<< HEAD
-from typing import Any, Optional
-=======
->>>>>>> main
-
 from fastapi import APIRouter, Depends, Header, Request
 
 from src.business_logic.services.introspection import IntrospectionServies
