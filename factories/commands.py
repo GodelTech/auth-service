@@ -241,4 +241,4 @@ class DataBasePopulation:
 
 
 if __name__ == "__main__":
-    DataBasePopulation.populate_database()
+    DataBasePopulation.clean_and_populate()
