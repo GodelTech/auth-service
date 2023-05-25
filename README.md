@@ -1,6 +1,6 @@
 ![image](https://img.shields.io/github/actions/workflow/status/GodelTech/auth-service/build-and-test.yml?logo=github)
 ![image](https://img.shields.io/docker/v/levigoldman/auth-service?logo=docker)
-![image](https://img.shields.io/github/release-date/GodelTech/auth-service?logo=github)
+![image](https://img.shields.io/github/release-date-pre/GodelTech/auth-service?logo=github)
 ![image](https://img.shields.io/github/contributors/GodelTech/auth-service?logo=github)
 
 # Project installation
