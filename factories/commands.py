@@ -21,7 +21,7 @@ class DataBasePopulation:
     @classmethod
     def populate_database(cls) -> None:
         # populate database
-        # cls.populate_identity_providers_table()
+        cls.populate_identity_providers_table()
         cls.populate_user_claim_types_table()
         cls.populate_api_claim_types_table()
         cls.populate_api_secrets_types_table()
@@ -85,12 +85,12 @@ class DataBasePopulation:
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
-    # @classmethod
-    # def populate_identity_providers_table(cls) -> None:
-    #     for val in data.IDENTITY_PROVIDERS:
-    #         id_factory.IdentityProviderFactory(**val)
-    #         cl_factory.sess.session.commit()
-    #         cl_factory.sess.session.close()
+    @classmethod
+    def populate_identity_providers_table(cls) -> None:
+        for val in data.IDENTITY_PROVIDERS:
+            id_factory.IdentityProviderFactory(**val)
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
 
     @classmethod
     def populate_api_claim_types_table(cls) -> None:
