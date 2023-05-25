@@ -1,8 +1,7 @@
-**main**: [![pipeline status](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/badges/main/pipeline.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
-**main**: [![coverage report](https://gitlab.godeltech.com/gte-internal//python/identity-server-poc/badges/main/coverage.svg)](https://gitlab.godeltech.com/gte-internal/python/identity-server-poc/-/commits/main)
-
-![image](https://img.shields.io/github/v/release/GodelTech/auth-service?include_prereleases)
-![image](https://img.shields.io/docker/v/levigoldman/auth-service)
+![image](https://img.shields.io/github/actions/workflow/status/GodelTech/auth-service/build-and-test.yml?logo=github)
+![image](https://img.shields.io/docker/v/levigoldman/auth-service?logo=docker)
+![image](https://img.shields.io/github/release-date-pre/GodelTech/auth-service?logo=github)
+![image](https://img.shields.io/github/contributors/GodelTech/auth-service?logo=github)
 
 # Project installation
 
