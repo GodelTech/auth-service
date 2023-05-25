@@ -6,28 +6,28 @@ from src.scripts.populate_data.third_party_providers_config.providers_config imp
 )
 from src.dyna_config import DOMAIN_NAME
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def populate_identity_providers(session_factory) -> None:
-    async with session_factory() as session:
-        for provider_data in IdentityProviderConfig._providers_config:
-            existing_provider = await session.execute(
-                select(IdentityProvider).where(
-                    IdentityProvider.name == provider_data.name
-                )
+async def populate_identity_providers(session: AsyncSession) -> None:
+    for provider_data in IdentityProviderConfig._providers_config:
+        existing_provider = await session.execute(
+            select(IdentityProvider).where(
+                IdentityProvider.name == provider_data.name
             )
-            if not existing_provider.first():
-                provider = IdentityProvider(
-                    name=provider_data.name,
-                    auth_endpoint_link=provider_data.auth_endpoint_link,
-                    token_endpoint_link=provider_data.token_endpoint_link,
-                    userinfo_link=provider_data.userinfo_link,
-                    internal_redirect_uri=provider_data.internal_redirect_uri,
-                    provider_icon=provider_data.provider_icon,
-                )
-                session.add(provider)
+        )
+        if not existing_provider.first():
+            provider = IdentityProvider(
+                name=provider_data.name,
+                auth_endpoint_link=provider_data.auth_endpoint_link,
+                token_endpoint_link=provider_data.token_endpoint_link,
+                userinfo_link=provider_data.userinfo_link,
+                internal_redirect_uri=provider_data.internal_redirect_uri,
+                provider_icon=provider_data.provider_icon,
+            )
+            session.add(provider)
 
-        await session.commit()
+    await session.commit()
 
 
 google_provider_config = IdentityProviderConfig(

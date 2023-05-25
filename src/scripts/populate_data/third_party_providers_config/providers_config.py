@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Type, ClassVar, Any
-from abc import ABC
 
 
 ProvidersConfigList = list[Type["IdentityProviderConfig"]]

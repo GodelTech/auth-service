@@ -165,9 +165,6 @@ Instrumentator().instrument(app).expose(app)
 # Redis activation
 @app.on_event("startup")
 async def startup() -> None:
-    await populate_identity_providers(
-        session_factory=app.container.db().session_factory
-    )
     logger.info("Identity providers populated successfully.")
     logger.info("Creating Redis connection with DataBase.")
     redis = aioredis.from_url(

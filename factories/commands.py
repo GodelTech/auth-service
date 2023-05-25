@@ -21,7 +21,7 @@ class DataBasePopulation:
     @classmethod
     def populate_database(cls) -> None:
         # populate database
-        cls.populate_identity_providers_table()
+        # cls.populate_identity_providers_table()
         cls.populate_user_claim_types_table()
         cls.populate_api_claim_types_table()
         cls.populate_api_secrets_types_table()
@@ -85,12 +85,12 @@ class DataBasePopulation:
             user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
-    @classmethod
-    def populate_identity_providers_table(cls) -> None:
-        for val in data.IDENTITY_PROVIDERS:
-            id_factory.IdentityProviderFactory(**val)
-            cl_factory.sess.session.commit()
-            cl_factory.sess.session.close()
+    # @classmethod
+    # def populate_identity_providers_table(cls) -> None:
+    #     for val in data.IDENTITY_PROVIDERS:
+    #         id_factory.IdentityProviderFactory(**val)
+    #         cl_factory.sess.session.commit()
+    #         cl_factory.sess.session.close()
 
     @classmethod
     def populate_api_claim_types_table(cls) -> None:
@@ -109,18 +109,14 @@ class DataBasePopulation:
     @classmethod
     def populate_api_scope_claim_types_table(cls) -> None:
         for val in data.API_SCOPE_CLAIM_TYPE:
-            res_factory.ApiScopeClaimTypeFactory(
-                scope_claim_type=val
-            )
+            res_factory.ApiScopeClaimTypeFactory(scope_claim_type=val)
             res_factory.sess.session.commit()
             res_factory.sess.session.close()
 
     @classmethod
     def populate_persistent_grant_types_table(cls) -> None:
         for val in data.TYPES_OF_GRANTS:
-            grant_factory.PersistentGrantTypesFactory(
-                type_of_grant=val
-            )
+            grant_factory.PersistentGrantTypesFactory(type_of_grant=val)
             grant_factory.sess.session.commit()
             grant_factory.sess.session.close()
 
@@ -171,7 +167,10 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls) -> None:
-        for client_id, post_logout_redirect_uri in data.POST_LOGOUT_REDIRECT_URL.items():
+        for (
+            client_id,
+            post_logout_redirect_uri,
+        ) in data.POST_LOGOUT_REDIRECT_URL.items():
             cl_factory.ClientPostLogoutRedirectUriFactory(
                 client_id=client_id,
                 post_logout_redirect_uri=post_logout_redirect_uri,
@@ -182,18 +181,14 @@ class DataBasePopulation:
     @classmethod
     def populate_client_secrets(cls) -> None:
         for client_id, secret in data.CLIENT_SECRETS.items():
-            cl_factory.ClientSecretFactory(
-                client_id=client_id, value=secret
-            )
+            cl_factory.ClientSecretFactory(client_id=client_id, value=secret)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
     @classmethod
     def populate_client_scopes(cls) -> None:
         for client_id, scope in data.CLIENT_SCOPES.items():
-            cl_factory.ClientScopeFactory(
-                client_id=client_id, scope=scope
-            )
+            cl_factory.ClientScopeFactory(client_id=client_id, scope=scope)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 
@@ -215,7 +210,6 @@ class DataBasePopulation:
 
     @classmethod
     def populate_grants(cls) -> None:
-
         # For what do we need to populate persistent_grant_types table here?
         # It's been already populated in populate_persistent_grant_types_table method
         # It is not being added twice only because of sqlalchemy_get_or_create = ("type_of_grant",) line
