@@ -1,8 +1,7 @@
+from __future__ import annotations
 import logging
 import secrets
-from typing import Any, Dict, Optional
-
-from fastapi import Depends
+from typing import Any, Dict, Optional, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.errors import WrongResponseTypeError
@@ -10,7 +9,9 @@ from src.data_access.postgresql.repositories import (
     ClientRepository,
     ThirdPartyOIDCRepository,
 )
-from src.presentation.api.models import RequestModel
+if TYPE_CHECKING:
+    from src.presentation.api.models import RequestModel
+
 
 logger = logging.getLogger(__name__)
 

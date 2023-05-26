@@ -3,16 +3,9 @@ from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data_access.postgresql.repositories import (
-    ClientRepository,
-    PersistentGrantRepository,
-    UserRepository,
-    DeviceRepository,
-    BlacklistedTokenRepository
-)
-from src.business_logic.services import TokenService, JWTService
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.errors import (
     ClientBaseException,
     ClientGrantsError,
@@ -26,6 +19,13 @@ from src.data_access.postgresql.errors import (
     GrantBaseException,
     GrantNotFoundError,
     GrantTypeNotSupported,
+)
+from src.data_access.postgresql.repositories import (
+    ClientRepository,
+    PersistentGrantRepository,
+    UserRepository,
+    DeviceRepository,
+    BlacklistedTokenRepository,
 )
 from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
@@ -42,26 +42,25 @@ from src.presentation.api.routes.utils import (
 
 logger = logging.getLogger(__name__)
 
-
 token_router = APIRouter(prefix="/token", tags=["Token"])
 
 
 @token_router.post("/", response_model=ResponseTokenModel)
-
 async def get_tokens(
     request: Request,
-    request_body: BodyRequestTokenModel = Depends(),    
+    request_body: BodyRequestTokenModel = Depends(),
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
         session = request.state.session
         token_class = TokenService(
-            session = session,
+            session=session,
             client_repo=ClientRepository(session),
             persistent_grant_repo=PersistentGrantRepository(session),
             user_repo=UserRepository(session),
             device_repo=DeviceRepository(session),
-            blacklisted_repo=BlacklistedTokenRepository(session)
-            )
+            blacklisted_repo=BlacklistedTokenRepository(session),
+            jwt_service=JWTService(),
+        )
         token_class.request = request
         token_class.request_model = request_body
         result = await token_class.get_tokens()

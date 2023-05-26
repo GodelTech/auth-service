@@ -9,30 +9,9 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from src.business_logic.common.errors import InvalidClientIdError
-from src.business_logic.get_tokens.errors import (
-    InvalidGrantError,
-    InvalidRedirectUriError,
-    UnsupportedGrantTypeError,
-)
-from src.business_logic.third_party_auth.errors import (
-    ThirdPartyAuthInvalidStateError,
-    ThirdPartyAuthProviderInvalidRequestDataError,
-    UnsupportedThirdPartyAuthProviderError,
-)
-from src.presentation.api.exception_handlers import (
-    http400_invalid_client_handler,
-    http400_invalid_grant_handler,
-    http400_third_party_auth_invalid_request_data_handler,
-    http400_third_party_auth_invalid_state_handler,
-    http400_unsupported_grant_type_handler,
-    http400_unsupported_third_party_auth_provider_handler,
-)
-from src.presentation.api.middleware import (
-    AuthorizationMiddleware,
-    AccessTokenMiddleware,
-    SessionManager,
-)
+
+from src.presentation.api.exception_handlers import exception_handler_mapping
+from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -68,6 +47,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application = setup_exception_handlers(application)
 
     application = setup_exception_handlers(application)
     setup_di(application)
@@ -98,12 +78,6 @@ def setup_di(app: FastAPI) -> None:
 
     app.dependency_overrides[prov.provide_async_session_stub] = session
 
-    app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-    )
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-    )
     app.add_middleware(middleware_class=SessionManager, session=session)
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
@@ -174,29 +148,9 @@ def setup_di(app: FastAPI) -> None:
     admin.add_base_view(ui.SeparationLine)
 
 
-def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
-    app.add_exception_handler(
-        InvalidClientIdError, http400_invalid_client_handler
-    )
-    app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
-    app.add_exception_handler(
-        InvalidRedirectUriError, http400_invalid_grant_handler
-    )
-    app.add_exception_handler(
-        UnsupportedGrantTypeError, http400_unsupported_grant_type_handler
-    )
-    app.add_exception_handler(
-        UnsupportedThirdPartyAuthProviderError,
-        http400_unsupported_third_party_auth_provider_handler,
-    )
-    app.add_exception_handler(
-        ThirdPartyAuthInvalidStateError,
-        http400_third_party_auth_invalid_state_handler,
-    )
-    app.add_exception_handler(
-        ThirdPartyAuthProviderInvalidRequestDataError,
-        http400_third_party_auth_invalid_request_data_handler,
-    )
+def setup_exception_handlers(app: FastAPI) -> FastAPI:
+    for exception, handler in exception_handler_mapping.items():
+        app.add_exception_handler(exception, handler)
     return app
 
 

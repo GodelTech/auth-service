@@ -16,3 +16,7 @@ class WrongDataError(ThirdPartyAuthBaseException):
 
 class ThirdPartyAuthProviderNameError(ThirdPartyAuthBaseException):
     """Use this class when a provider is not supported."""
+
+
+class ParsingError(Exception):
+    """Use this class when there is an error in parsing"""
