@@ -15,7 +15,8 @@ class SessionManager(BaseHTTPMiddleware):
     async def dispatch_func(self, request: Any, call_next:Callable[..., Any]) -> Any:
         if not '.well-known/jwks' in request.url.__str__():
             async for session in self.session_gnerator():
-                session:AsyncSession
+            # async with self.session_gnerator as session:
+            #     session:AsyncSession
                 try:
                     request.state.session = session
                     response = await call_next(request)

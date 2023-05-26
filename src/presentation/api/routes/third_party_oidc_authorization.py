@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
@@ -30,6 +31,7 @@ from src.presentation.api.models import (
     ThirdPartyOIDCRequestModel,
     ThirdPartyMicrosoftRequestModel,
 )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +49,10 @@ auth_oidc_router = APIRouter(
 async def get_github_authorize(
     request: Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = AuthThirdPartyOIDCService(
             session=session,
             client_repo=ClientRepository(session),
@@ -78,9 +81,10 @@ async def get_github_authorize(
 async def get_linkedin_authorize(
     request: Request,
     request_model: ThirdPartyLinkedinRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = ThirdPartyLinkedinService(
             session=session,
             client_repo=ClientRepository(session),
@@ -109,9 +113,10 @@ async def get_linkedin_authorize(
 async def get_facebook_authorize(
     request: Request,
     request_model: ThirdPartyFacebookRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = ThirdPartyFacebookService(
             session=session,
             client_repo=ClientRepository(session),
@@ -140,9 +145,10 @@ async def get_facebook_authorize(
 async def get_google_authorize(
     request: Request,
     request_model: ThirdPartyGoogleRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = ThirdPartyGoogleService(
             session=session,
             client_repo=ClientRepository(session),
@@ -171,9 +177,10 @@ async def get_google_authorize(
 async def get_gitlab_authorize(
     request: Request,
     request_model: ThirdPartyOIDCRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = ThirdPartyGitLabService(
             session=session,
             client_repo=ClientRepository(session),
@@ -202,9 +209,10 @@ async def get_gitlab_authorize(
 async def get_microsoft_authorize(
     request: Request,
     request_model: ThirdPartyMicrosoftRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = request.state.session
+        session = session
         auth_class = ThirdPartyMicrosoftService(
             session=session,
             client_repo=ClientRepository(session),
@@ -233,8 +241,9 @@ async def get_microsoft_authorize(
 async def post_create_state(
     request: Request,
     state_request_model: StateRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[None, JSONResponse, int]:
-    session = request.state.session
+    session = session
     auth_class = AuthThirdPartyOIDCService(
         session=session,
         client_repo=ClientRepository(session),

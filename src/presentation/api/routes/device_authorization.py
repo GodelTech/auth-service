@@ -5,6 +5,7 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.device_auth import DeviceService
 from src.data_access.postgresql.repositories import (
@@ -17,6 +18,7 @@ from src.presentation.api.models import (
     DeviceRequestModel,
     DeviceUserCodeModel,
 )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger("is_app")
 
@@ -31,8 +33,10 @@ device_auth_router = APIRouter(prefix="/device", tags=["Device"])
 async def post_device_authorize(
     request: Request,
     request_model: DeviceRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
+
 ) -> JSONResponse:
-    session = request.state.session
+    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),

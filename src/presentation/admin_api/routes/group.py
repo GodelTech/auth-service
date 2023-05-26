@@ -9,6 +9,7 @@ from src.data_access.postgresql.repositories import GroupRepository
 from src.business_logic.services.admin_api import AdminGroupService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.presentation.admin_api.models.group import *
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,9 @@ async def get_group(
     request: Request,
     group_id:int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -42,9 +44,10 @@ async def get_group(
 )
 async def get_all_groups(
     request: Request,
-    access_token: str = Header(description="Access token"),    
+    access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -60,8 +63,9 @@ async def get_subgroups(
     request: Request,
     group_id:int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -78,8 +82,9 @@ async def create_group(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestNewGroupModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -101,8 +106,9 @@ async def update_group(
     group_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateGroupModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -125,8 +131,9 @@ async def delete_group(
     request: Request,
     group_id:int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
+    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
