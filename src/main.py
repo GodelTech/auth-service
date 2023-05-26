@@ -12,6 +12,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
 from src.presentation.middleware.session_manager import SessionManager
+from src.presentation.middleware.https_global_middleware import HttpsGlobalMiddleware
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -81,6 +82,8 @@ def setup_di(app: FastAPI) -> None:
     app.add_middleware(
         middleware_class=SessionManager, session = session
     )
+    app.add_middleware(middleware_class=HttpsGlobalMiddleware)
+    
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
