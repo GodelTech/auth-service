@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
 from sqlalchemy import (
+    exc,
     exists,
     insert,
     join,
@@ -15,7 +16,6 @@ from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
-    DuplicationError,
     UserNotFoundError,
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
@@ -136,8 +136,6 @@ class UserRepository(BaseRepository):
         return result
 
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
-        
-        
             result = await self.session.execute(
                 select(UserClaim)
                 .where(UserClaim.user_id == sub)
@@ -148,8 +146,6 @@ class UserRepository(BaseRepository):
             return result
 
     async def get_username_by_id(self, id: int) -> str:
-        
-        
             users = await self.session.execute(select(User).where(User.id == id))
             result = users.first()
             result = result[0].username
@@ -194,32 +190,28 @@ class UserRepository(BaseRepository):
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = None,
         ) -> None:
+        kwargs = params_to_dict(
+            id=id,
+            username=username,
+            security_stamp=security_stamp,
+            email=email,
+            email_confirmed=email_confirmed,
+            phone_number=phone_number,
+            phone_number_confirmed=phone_number_confirmed,
+            two_factors_enabled=two_factors_enabled,
+            lockout_end_date_utc=lockout_end_date_utc,
+            lockout_enabled=lockout_enabled,
+            password_hash=password_hash,
+            access_failed_count=access_failed_count,
+        )
         
-        try:
-            kwargs = params_to_dict(
-                id=id,
-                username=username,
-                security_stamp=security_stamp,
-                email=email,
-                email_confirmed=email_confirmed,
-                phone_number=phone_number,
-                phone_number_confirmed=phone_number_confirmed,
-                two_factors_enabled=two_factors_enabled,
-                lockout_end_date_utc=lockout_end_date_utc,
-                lockout_enabled=lockout_enabled,
-                password_hash=password_hash,
-                access_failed_count=access_failed_count,
+        if await self.exists(user_id=user_id):
+            updates = (
+                update(User).values(**kwargs).where(User.id == user_id)
             )
-           
-            if await self.exists(user_id=user_id):
-                updates = (
-                    update(User).values(**kwargs).where(User.id == user_id)
-                )
-                await self.session.execute(updates)
-            else:
-                raise ValueError
-        except:
-            raise DuplicationError
+            await self.session.execute(updates)
+        else:
+            raise ValueError
 
     async def create(
         self,
@@ -255,12 +247,11 @@ class UserRepository(BaseRepository):
             )
         
             await self.session.execute(insert(User).values(**kwargs))
-            
-        except:
-            raise DuplicationError
+        except exc.IntegrityError:
+                raise
+
 
     async def add_group(self, user_id: int, group_id: int) -> None:
-        
         try:
             flag_one = (
                 await self.session.execute(
@@ -282,19 +273,14 @@ class UserRepository(BaseRepository):
                 raise ValueError
         except ValueError:
             raise ValueError
-        except:
-            raise DuplicationError
+
 
     async def add_role(self, user_id: int, role_id: int) -> None:
-        
-        try:
             await self.session.execute(
                 insert(users_roles).values(
                     user_id=user_id, role_id=role_id
                 )
             )
-        except:
-            raise DuplicationError
 
     async def remove_user_groups(self, user_id: int, group_ids: str) -> None:
         # prepare a list of ids for the IN statement

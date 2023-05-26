@@ -1,9 +1,6 @@
 import pytest
-from sqlalchemy import delete
-from sqlalchemy.future import select
-
+from sqlalchemy import delete, exc, select
 from src.data_access.postgresql.repositories.roles import RoleRepository
-from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.tables.users import Role
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,7 +63,7 @@ class TestRoleRepository:
     async def test_create_duplicate(self, connection: AsyncSession)-> None:
         role_repo = RoleRepository(connection)
         new_role = "Journalist, broadcasting"
-        with pytest.raises(DuplicationError):
+        with pytest.raises(exc.IntegrityError):
             await role_repo.create(name=new_role)
 
     async def test_get_all_roles(self, connection: AsyncSession)-> None:

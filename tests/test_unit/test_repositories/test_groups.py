@@ -1,11 +1,11 @@
 import pytest
 
-from sqlalchemy import select
+from sqlalchemy import select, exc
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.tables.group import Group
-from src.data_access.postgresql.errors.user import DuplicationError
+
 
 
 @pytest.mark.asyncio
@@ -49,7 +49,7 @@ class TestGroupRepository:
         await connection.flush()
         created = await group_repo.exists(group_id=group_id)
         assert created is True
-        with pytest.raises(DuplicationError):
+        with pytest.raises(exc.IntegrityError):
             await group_repo.create(id=group_id, name="strange_name", parent_group=None)
 
         # await group_repo.delete(group_id=group_id)
@@ -206,7 +206,7 @@ class TestGroupRepository:
         await group_repo.create(id=(group_id + 1), name="parent", parent_group=None)
         await connection.flush()
 
-        with pytest.raises(DuplicationError):
+        with pytest.raises(exc.IntegrityError):
             await group_repo.update(group_id=group_id, name="parent")
 
         # await group_repo.delete(group_id=group_id)

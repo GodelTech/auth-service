@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories import WellKnownRepository
 from src.data_access.postgresql.tables.group import Group
-from src.data_access.postgresql.errors.user import DuplicationError
 
 
 @pytest.mark.asyncio
