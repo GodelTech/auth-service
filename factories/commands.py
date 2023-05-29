@@ -21,6 +21,7 @@ class DataBasePopulation:
     @classmethod
     def populate_database(cls) -> None:
         # populate database
+        cls.populate_response_types_table()
         cls.populate_identity_providers_table()
         cls.populate_user_claim_types_table()
         cls.populate_api_claim_types_table()
@@ -51,6 +52,7 @@ class DataBasePopulation:
     @classmethod
     def clean_data_from_database(cls) -> None:
         tables_to_clean = {
+            "response_types",
             "user_passwords",
             "user_claim_types",
             "api_claim_types",
@@ -74,7 +76,6 @@ class DataBasePopulation:
             sess.session.execute(
                 text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE")
             )
-
         sess.session.commit()
         sess.session.close()
 
@@ -125,6 +126,13 @@ class DataBasePopulation:
             grant_factory.sess.session.close()
 
     @classmethod
+    def populate_response_types_table(cls) -> None:
+        for val in data.RESPONSE_TYPES:
+            smth = cl_factory.ResponseTypeFactory()
+            cl_factory.sess.session.commit()
+            cl_factory.sess.session.close()
+
+    @classmethod
     def populate_client_table(cls) -> None:
         # Firstly populating types and usages that are needed for the Client
         for i in range(len(data.ACCESS_TOKEN_TYPES)):
@@ -149,7 +157,7 @@ class DataBasePopulation:
 
         # Finally, populating Client
         for id, client_id in data.CLIENT_IDS.items():
-            cl_factory.ClientFactory(id=id, client_id=client_id)
+            cl_factory.ClientFactory(client_id=client_id)
             cl_factory.sess.session.commit()
             cl_factory.sess.session.close()
 

@@ -149,5 +149,54 @@ class AdminUserService():
         
     async def delete_user(self, user_id:int) -> None:
         await self.user_repo.delete(user_id=user_id)
+        
+    async def get_all_users(self, group_id: Optional[int] = None, role_id:Optional[int] = None) -> list[User]:
+        return await self.user_repo.get_all_users(group_id= group_id, role_id = role_id)
+    
+    async def registration(self, kwargs:dict)->None:
+        password = kwargs['password']
+        email = kwargs['email']
+        del kwargs['password']
+        kwargs = kwargs | {
+            "email_confirmed": False,
+            "phone_number_confirmed": False,
+            "access_failed_count":0,
+            }
+        await self.user_repo.create(
+            username = kwargs['username'],
+            email = kwargs['email'],
+            phone_number = kwargs['phone_number'],
+            )
+        
+        user_id = (await self.user_repo.get_user_by_email(email=email)).id
+        password_hashed = PasswordHash.hash_password(password=password)
+        await self.user_repo.change_password(user_id=user_id, password=password_hashed)
+        #if len([v for v in kwargs.values() if v is not None])>6:
+        kwargs["birthdate"] = str(kwargs['birthdate'])
+        types = await self.user_repo.get_all_claim_types()
+        claims = []
+        for key in kwargs:
+            if key in types.keys() and kwargs[key]:
+                claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":kwargs[key]})
+        if claims:
+            await self.user_repo.add_claims(claims=claims)
 
+    async def validate_password(self, email:str, password:str):
+        user:User = await self.user_repo.get_user_by_email(email=email)
+        return PasswordHash.validate_password(str_password=password,hash_password=user.password_hash.value), user
+    
+    def user_to_dict(self, user:User)->dict[str, str]:
+        user_data = user.__dict__
+        for claim in user.claims:
+            user_data[claim.claim_type.type_of_claim] = claim.claim_value
+        return user_data
 
+    async def add_user_info(self, username:str, data:dict):
+        user_id = (await self.user_repo.get_user_by_username(username=username)).id
+        types = await self.user_repo.get_all_claim_types()
+        claims = []
+        for key in data:
+            if key in types.keys() and data[key]:
+                claims.append({"user_id":user_id,"claim_type_id":types[key], "claim_value":data[key]})
+        
+        await self.user_repo.add_claims(claims=claims)

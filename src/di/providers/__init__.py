@@ -19,8 +19,7 @@ from .repositories import (
     provide_blacklisted_repo_stub,
     provide_async_session,
     provide_async_session_stub,
-    ProviderSession
-
+    ProviderSession,
 )
 from .services import (
     provide_wellknown_service,
@@ -47,8 +46,6 @@ from .services import (
     provide_third_party_gitlab_service,
     provide_third_party_microsoft_service_stub,
     provide_third_party_microsoft_service,
-    provide_third_party_auth_service_factory_stub,
-    provide_third_party_auth_service_factory,
     provide_device_service,
     provide_device_service_stub,
     provide_endsession_service,
@@ -65,8 +62,12 @@ from .services import (
     provide_token_service_stub,
     provide_userinfo_service,
     provide_userinfo_service_stub,
+    provide_client_service_stub,
+    provide_client_service,
 )
 from .services_factory import (
     provide_auth_service_factory,
     provide_auth_service_factory_stub,
+    provide_third_party_auth_service_factory_stub,
+    provide_third_party_auth_service_factory,
 )

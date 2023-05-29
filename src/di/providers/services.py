@@ -22,6 +22,7 @@ from src.business_logic.services import (
     TokenService,
     UserInfoServices,
     WellKnownServices,
+    ClientService,
 )
 from src.business_logic.third_party_auth.factory import (
     ThirdPartyAuthServiceFactory,
@@ -387,25 +388,13 @@ def provide_third_party_microsoft_service(
     )
 
 
-def provide_third_party_auth_service_factory_stub() -> (
-    None
-):  # pragma: no cover
+def provide_client_service_stub() -> None:
     ...
 
 
-def provide_third_party_auth_service_factory(
-    session: AsyncSession,
+def provide_client_service(
     client_repo: ClientRepository,
-    user_repo: UserRepository,
-    oidc_repo: ThirdPartyOIDCRepository,
-    persistent_grant_repo: PersistentGrantRepository,
-    async_http_client: AsyncClient,
-) -> ThirdPartyAuthServiceFactory:
-    return ThirdPartyAuthServiceFactory(
-        session=session,
+) -> ClientService:
+    return ClientService(
         client_repo=client_repo,
-        user_repo=user_repo,
-        persistent_grant_repo=persistent_grant_repo,
-        oidc_repo=oidc_repo,
-        async_http_client=async_http_client,
     )

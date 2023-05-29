@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from fastapi import APIRouter, Depends, status, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from src.business_logic.services import ThirdPartyFacebookService
+
 from src.business_logic.third_party_auth import (
     ThirdPartyAuthServiceFactory,
     ThirdPartyAuthServiceProtocol,
@@ -20,12 +20,7 @@ from src.business_logic.third_party_auth.dto import (
     StateRequestModel,
     ThirdPartyAccessTokenRequestModel,
 )
-from src.data_access.postgresql.errors import WrongDataError
-from src.di.providers import (
-    provide_third_party_auth_service_factory_stub,
-    provide_third_party_facebook_service_stub,
-)
-from src.presentation.api.models import ThirdPartyFacebookRequestModel
+
 
 logger = logging.getLogger(__name__)
 
@@ -182,38 +177,3 @@ async def post_create_state(
         status_code=status.HTTP_200_OK,
         content={"message": "State created successfully"},
     )
-
-
-# @auth_oidc_router.get( # TODO not implemented because of https
-#     "/facebook",
-#     status_code=status.HTTP_302_FOUND,
-# )
-# async def get_facebook_authorize(
-#     request_model: ThirdPartyFacebookRequestModel = Depends(),
-#     auth_class: ThirdPartyFacebookService = Depends(
-#         provide_third_party_facebook_service_stub
-#     ),
-# ) -> Union[RedirectResponse, JSONResponse]:
-#     try:
-#         auth_class.request_model = request_model
-#         github_redirect_uri = await auth_class.get_facebook_redirect_uri(
-#             provider_name="facebook"
-#         )
-#         if github_redirect_uri is None:
-#             raise WrongDataError
-#         return RedirectResponse(
-#             github_redirect_uri, status_code=status.HTTP_302_FOUND
-#         )
-
-#     except WrongDataError as exception:
-#         logger.exception(exception)
-#         return JSONResponse(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             content={"message": "Wrong data has been passed"},
-#         )
-#     except IndexError as exception:
-#         logger.exception(exception)
-#         return JSONResponse(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             content={"message": "Error in parsing"},
-#         )

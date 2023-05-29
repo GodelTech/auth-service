@@ -1,4 +1,11 @@
-from src.business_logic.services.password import PasswordHash
+import bcrypt
+
+def hash_password(password: str) -> str:
+        bts = password.encode("utf-8")
+        salt = bcrypt.gensalt()
+        hash_password = bcrypt.hashpw(bts, salt)
+        return str(hash_password).strip("b'")
+
 
 CLIENT_IDS = {
     1: "test_client",
@@ -14,16 +21,16 @@ CLIENT_IDS = {
 }
 
 CLIENT_HASH_PASSWORDS = {
-    1: PasswordHash.hash_password("test_password"),
-    2: PasswordHash.hash_password("double_password"),
-    3: PasswordHash.hash_password("christmas_forever"),
-    4: PasswordHash.hash_password("no_to_christmas"),
-    5: PasswordHash.hash_password("one_ring_to_rule_them_all"),
-    6: PasswordHash.hash_password("son_of_aratorn"),
-    7: PasswordHash.hash_password("best_avenger"),
-    8: PasswordHash.hash_password("the_beginner"),
-    9: PasswordHash.hash_password("god_of_thunder"),
-    10: PasswordHash.hash_password("just_a_guy"),
+    1: hash_password("test_password"),
+    2: hash_password("double_password"),
+    3: hash_password("christmas_forever"),
+    4: hash_password("no_to_christmas"),
+    5: hash_password("one_ring_to_rule_them_all"),
+    6: hash_password("son_of_aratorn"),
+    7: hash_password("best_avenger"),
+    8: hash_password("the_beginner"),
+    9: hash_password("god_of_thunder"),
+    10: hash_password("just_a_guy"),
 }
 
 # It's not correct, according to factories
@@ -218,6 +225,22 @@ IDENTITY_PROVIDERS = [
         "provider_icon": "fa-microsoft",
     },
 ]
+
+# <<<<<<< one_branch_user_client_registration
+# POST_LOGOUT_REDIRECT_URL = [
+#     "http://thompson-chung.com/",
+#     "http://welch-miller.com/",
+#     "https://www.cole.com/",
+#     "https://www.mccarthy-ruiz.info/",
+#     "http://chen-smith.com/",
+#     "http://www.ross-zamora.biz/",
+#     "https://www.king.com/",
+#     "http://www.sparks.net/",
+#     "https://www.villarreal.com/",
+#     "https://meyer-berry.com/",
+# ]
+
+RESPONSE_TYPES = ['code', 'id_token', 'token', 'code id_token']
 
 # POST_LOGOUT_REDIRECT_URL = {
 #     "test_client": "http://thompson-chung.com/",

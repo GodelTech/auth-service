@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 )
 @cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
-    request: Request,
+        request: Request,
 ) -> dict[str, Any]:
     try:
         session = request.state.session
@@ -44,7 +44,7 @@ async def get_openid_configuration(
 
 @well_known_router.get("/jwks", response_model=ResponseJWKS)
 async def get_jwks(
-    request: Request,
+        request: Request,
 ) -> dict[str, Any]:
     try:
         session = "no_session"

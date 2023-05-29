@@ -17,7 +17,7 @@ class BodyRequestIntrospectionModel:
         return f"Model {self.__class__.__name__}"  # pragma: no coverage
 
 
-class ResponceIntrospectionModel(BaseModel):
+class ResponseIntrospectionModel(BaseModel):
     active: bool
     scope: Optional[Union[list[str], str]]
     client_id: Optional[str]

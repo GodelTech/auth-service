@@ -5,13 +5,15 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.staticfiles import StaticFiles
-from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
 from src.presentation.middleware.session_manager import SessionManager
+from src.presentation.middleware.https_global_middleware import (
+    HttpsGlobalMiddleware,
+)
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -79,6 +81,8 @@ def setup_di(app: FastAPI) -> None:
     app.dependency_overrides[prov.provide_async_session_stub] = session
 
     app.add_middleware(middleware_class=SessionManager, session=session)
+    app.add_middleware(middleware_class=HttpsGlobalMiddleware)
+
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
@@ -103,12 +107,13 @@ def setup_di(app: FastAPI) -> None:
 
     # Client
     admin.add_view(ui.ClientAdminController)
+    admin.add_view(ui.ResponseTypeAdminController)
+    admin.add_view(ui.ClientScopeController)
     admin.add_view(ui.AccessTokenTypeAdminController)
     admin.add_view(ui.ProtocolTypeController)
     admin.add_view(ui.RefreshTokenUsageTypeController)
     admin.add_view(ui.RefreshTokenExpirationTypeController)
     admin.add_view(ui.ClientSecretController)
-    admin.add_view(ui.ClientGrantTypeController)
     admin.add_view(ui.ClientRedirectUriController)
     admin.add_view(ui.ClientCorsOriginController)
     admin.add_view(ui.ClientPostLogoutRedirectUriController)
