@@ -137,12 +137,7 @@ class Client(BaseModel):
         "ClientPostLogoutRedirectUri", back_populates="client"
     )
     scopes = relationship("ClientScope", back_populates="client", lazy = "subquery")
-    devices = relationship(
-        "Device",
-        back_populates="client",
-        foreign_keys="Device.client_id",
-        lazy = "subquery"
-    )
+    
     cors_origins = relationship(
         "ClientCorsOrigin",
         back_populates="client",
