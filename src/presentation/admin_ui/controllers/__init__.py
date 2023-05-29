@@ -18,7 +18,6 @@ from .clients import (
     ClientAdminController,
     ClientClaimController,
     ClientCorsOriginController,
-    ClientGrantTypeController,
     ClientIdRestrictionController,
     ClientPostLogoutRedirectUriController,
     ClientRedirectUriController,
@@ -26,6 +25,8 @@ from .clients import (
     ProtocolTypeController,
     RefreshTokenExpirationTypeController,
     RefreshTokenUsageTypeController,
+    ClientScopeController,
+    ResponseTypeAdminController,
 )
 from .device import DeviceAdminController
 from .group import GroupAdminController, PermissionAdminController

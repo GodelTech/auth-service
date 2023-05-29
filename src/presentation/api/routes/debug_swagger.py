@@ -43,3 +43,4 @@ async def get_decode_token(
         kwargs["audience"] = audience
 
     return await jwt.decode_token(token, **kwargs)
+

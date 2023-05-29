@@ -56,9 +56,9 @@ class DeviceAuthService:
             grant_data=await self._device_repo.get_device_code_by_user_code(
                 user_code=request_data.user_code
             ),
-            user_id=await self._user_repo.get_user_id_by_username(
+            user_id=(await self._user_repo.get_user_by_username(
                 request_data.username
-            ),
+            )).id,
             expiration_time=int(time.time()) + grant_duration,
         )
 

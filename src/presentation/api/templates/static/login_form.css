@@ -205,3 +205,22 @@ p.form_auth_block_head_text.credentials_note{
 #base_url{
   display: none;
 }
+
+.register-link {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  flex-direction: column; 
+  height: 100px;
+}
+
+.register-link p {
+  margin: 0;
+  text-align: center; 
+}
+
+.register-link a {
+  color: #0077b3;
+  text-decoration: none;
+}

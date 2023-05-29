@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 @pytest.mark.asyncio
 class TestAuthorizeEndpointGET:
     async def test_successful_authorize_request(
-        self, client: AsyncClient, engine: AsyncEngine,
+      self, 
+      client: AsyncClient, 
+      engine: AsyncEngine,
     ) -> None:
         params = {
             "client_id": "test_client",
