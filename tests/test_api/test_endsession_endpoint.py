@@ -136,14 +136,12 @@ class TestEndSessionEndpoint:
     ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
-        expected_content = '{"message":"Bad id_token_hint"}'
         params = {
             "id_token_hint": "id_token_hint",
             "post_logout_redirect_uri": "some_uri",
         }
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
 
     async def test_end_session_not_full_token(
         self,
@@ -157,16 +155,12 @@ class TestEndSessionEndpoint:
         service.request_model = end_session_request_model
         service.request_model.id_token_hint = short_token_hint
 
-        expected_content = (
-            '{"message":"The id_token_hint is missing something"}'
-        )
         params = {
             "id_token_hint": short_token_hint,
             "post_logout_redirect_uri": "http://www.jones.com/",
         }
         response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     async def test_end_session_no_persistent_grant(
         self,

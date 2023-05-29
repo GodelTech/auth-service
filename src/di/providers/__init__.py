@@ -63,6 +63,8 @@ from .services import (
     provide_token_service_stub,
     provide_userinfo_service,
     provide_userinfo_service_stub,
+    provide_client_service_stub,
+    provide_client_service,
 )
 from .services_factory import (
     provide_auth_service_factory,

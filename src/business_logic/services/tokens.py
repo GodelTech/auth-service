@@ -456,13 +456,10 @@ class ClientCredentialsMaker(BaseMaker):
                 raise ClientNotFoundError
             if not bool(client_from_db):
                 raise ClientNotFoundError
-
-            if (
-                await self.client_repo.get_client_secrete_by_client_id(
+            secret = await self.client_repo.get_client_secrete_by_client_id(
                     client_id=self.request_model.client_id
                 )
-                != self.request_model.client_secret
-            ):
+            if secret != self.request_model.client_secret:
                 raise ClientNotFoundError
         except:
             raise ClientNotFoundError

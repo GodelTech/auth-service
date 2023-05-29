@@ -21,6 +21,7 @@ from src.business_logic.services import (
     TokenService,
     UserInfoServices,
     WellKnownServices,
+    ClientService,
 )
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -365,4 +366,15 @@ def provide_third_party_microsoft_service(
         persistent_grant_repo=persistent_grant_repo,
         oidc_repo=oidc_repo,
         http_client=http_client,
+    )
+
+
+def provide_client_service_stub() -> None:
+    ...
+
+def provide_client_service(
+    client_repo: ClientRepository,
+) -> ClientService:
+    return ClientService(
+        client_repo=client_repo,
     )

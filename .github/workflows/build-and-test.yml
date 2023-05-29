@@ -1,4 +1,4 @@
-name: Build and Test Auth Server
+name: Build and Test
 
 on: [push, pull_request]
 
@@ -10,6 +10,9 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t auth-server-image .
+
+      - name: Testing
+        run: echo "Hello"
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3

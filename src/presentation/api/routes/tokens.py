@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 token_router = APIRouter(prefix="/token", tags=["Token"])
 
 

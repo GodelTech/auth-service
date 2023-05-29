@@ -21,13 +21,10 @@ class GroupRepository(BaseRepository):
     async def create(
         self, name: str, parent_group: Optional[int] = None, id: Optional[int] = None
     ) -> None:
-        try:
-            kwargs = params_to_dict(
-                name=name, parent_group=parent_group, id=id
-            )
-            await self.session.execute(insert(Group).values(**kwargs))
-        except Exception as e:
-            raise DuplicationError(e)
+        kwargs = params_to_dict(
+            name=name, parent_group=parent_group, id=id
+        )
+        await self.session.execute(insert(Group).values(**kwargs))
 
     async def delete(self, group_id: Optional[int] = None) -> None:
 
@@ -92,8 +89,6 @@ class GroupRepository(BaseRepository):
 
         except ValueError:
             raise ValueError
-        except Exception as e:
-            raise DuplicationError(e)
 
     async def get_all_subgroups(self, main_group: Group) -> dict[str, Any]:
         all_groups = await self.get_all_groups()

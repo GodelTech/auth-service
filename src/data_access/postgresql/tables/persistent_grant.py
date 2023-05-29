@@ -9,7 +9,7 @@ from sqlalchemy import (
     String,
 )
 from sqlalchemy.orm import relationship
-
+from .client import clients_grant_types
 from .base import Base, BaseModel
 
 # from src.data_access.postgresql.tables.client import Client
@@ -62,6 +62,11 @@ class PersistentGrantType(Base):
     __tablename__ = "persistent_grant_types"
     id = Column(Integer, primary_key=True)
     type_of_grant = Column(String, nullable=False)
-
+    clients = relationship(
+        "Client",
+        secondary=clients_grant_types,
+        cascade="all,delete",
+        back_populates="grant_types",
+    )
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.type_of_grant}"

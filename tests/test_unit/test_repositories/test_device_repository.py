@@ -21,7 +21,7 @@ TEST_DEVICE_DATA = {
 
 
 @pytest.mark.asyncio
-class TestClientRepository:
+class TestDeviceRepository:
     async def test_create_delete_by_device_code(self, connection: AsyncSession) -> None:
         device_repo = DeviceRepository(session=connection)
         await device_repo.create(

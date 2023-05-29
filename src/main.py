@@ -9,11 +9,10 @@ from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from src.presentation.api.middleware import (
-    AuthorizationMiddleware,
-    AccessTokenMiddleware,
-    SessionManager
-)
+
+from src.presentation.api.exception_handlers import exception_handler_mapping
+from src.presentation.middleware.session_manager import SessionManager
+from src.presentation.middleware.https_global_middleware import HttpsGlobalMiddleware
 from src.presentation.api import router
 from src.presentation.api.exception_handlers import (
     http400_invalid_grant_handler,
@@ -61,6 +60,7 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application = setup_exception_handlers(application)
 
     application = setup_exception_handlers(application)
     setup_di(application)
@@ -94,14 +94,10 @@ def setup_di(app: FastAPI) -> None:
     ] = session
 
     app.add_middleware(
-        middleware_class=AccessTokenMiddleware,
-    )
-    app.add_middleware(
-        middleware_class=AuthorizationMiddleware,
-    )
-    app.add_middleware(
         middleware_class=SessionManager, session = session
     )
+    app.add_middleware(middleware_class=HttpsGlobalMiddleware)
+    
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
@@ -124,14 +120,15 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.IdentityClaimAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    # Client
+    # Client 
     admin.add_view(ui.ClientAdminController)
+    admin.add_view(ui.ResponseTypeAdminController)
+    admin.add_view(ui.ClientScopeController)
     admin.add_view(ui.AccessTokenTypeAdminController)
     admin.add_view(ui.ProtocolTypeController)
     admin.add_view(ui.RefreshTokenUsageTypeController)
     admin.add_view(ui.RefreshTokenExpirationTypeController)
     admin.add_view(ui.ClientSecretController)
-    admin.add_view(ui.ClientGrantTypeController)
     admin.add_view(ui.ClientRedirectUriController)
     admin.add_view(ui.ClientCorsOriginController)
     admin.add_view(ui.ClientPostLogoutRedirectUriController)
@@ -171,11 +168,9 @@ def setup_di(app: FastAPI) -> None:
     admin.add_base_view(ui.SeparationLine)
 
 
-def setup_exception_handlers(app: NewFastApi) -> NewFastApi:
-    app.add_exception_handler(InvalidClientIdError, http400_invalid_client_handler)
-    app.add_exception_handler(InvalidGrantError, http400_invalid_grant_handler)
-    app.add_exception_handler(InvalidRedirectUriError, http400_invalid_grant_handler)
-    app.add_exception_handler(UnsupportedGrantTypeError, http400_unsupported_grant_type_handler)
+def setup_exception_handlers(app: FastAPI) -> FastAPI:
+    for exception, handler in exception_handler_mapping.items():
+        app.add_exception_handler(exception, handler)
     return app
 
 

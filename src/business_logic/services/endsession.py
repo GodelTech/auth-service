@@ -32,18 +32,21 @@ class EndSessionService:
                 user_id=decoded_id_token_hint["sub"],
             )
             if self.request_model.post_logout_redirect_uri:
-                if await self._validate_logout_redirect_uri(
-                    logout_redirect_uri=self.request_model.post_logout_redirect_uri,
-                    client_id=decoded_id_token_hint["client_id"],
-                ):
-                    logout_redirect_uri = (
-                        self.request_model.post_logout_redirect_uri
-                    )
-                    if self.request_model.state:
-                        logout_redirect_uri += (
-                            f"&state={self.request_model.state}"
+                try:
+                    if await self._validate_logout_redirect_uri(
+                        logout_redirect_uri=self.request_model.post_logout_redirect_uri,
+                        client_id=decoded_id_token_hint["client_id"],
+                    ):
+                        logout_redirect_uri = (
+                            self.request_model.post_logout_redirect_uri
                         )
-                    return logout_redirect_uri
+                        if self.request_model.state:
+                            logout_redirect_uri += (
+                                f"&state={self.request_model.state}"
+                            )
+                        return logout_redirect_uri
+                except KeyError:
+                    raise KeyError("The id_token_hint is missing something")
         return None
 
     async def _decode_id_token_hint(

@@ -18,13 +18,18 @@ class DataBasePurge:
 
     @classmethod
     def clean_data_from_database(cls) -> None:
+        sess.session.execute(text("DROP TABLE clients_response_types CASCADE"))
+        sess.session.execute(text("DROP TABLE clients_grant_types CASCADE"))  
+        sess.session.execute(text("DROP TABLE identity_provider_states CASCADE"))
+        sess.session.execute(text("DROP TABLE user_passwords CASCADE")) 
+        sess.session.execute(text("DROP TABLE blacklisted_tokens CASCADE")) 
+        sess.session.execute(text("DROP TABLE response_types CASCADE")) 
         sess.session.execute(text("DROP TABLE api_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_scope_claim_types CASCADE"))
         sess.session.execute(text("DROP TABLE api_secrets_types CASCADE"))
         sess.session.execute(text("DROP TABLE persistent_grant_types CASCADE"))
         sess.session.execute(text("DROP TABLE identity_providers CASCADE"))
         sess.session.execute(text("DROP TABLE identity_providers_mapped CASCADE"))
-
         sess.session.execute(text("DROP TABLE devices CASCADE"))
         sess.session.execute(text("DROP TABLE access_token_types CASCADE"))
         sess.session.execute(text("DROP TABLE protocol_types CASCADE"))
@@ -38,7 +43,7 @@ class DataBasePurge:
         sess.session.execute(text("DROP TABLE api_secrets CASCADE"))
         sess.session.execute(text("DROP TABLE client_claims CASCADE"))
         sess.session.execute(text("DROP TABLE client_cors_origins CASCADE"))
-       # sess.session.execute(text("DROP TABLE client_grant_types CASCADE"))
+        sess.session.execute(text("DROP TABLE client_grant_types CASCADE"))
         sess.session.execute(text("DROP TABLE client_id_restrictions CASCADE"))
         sess.session.execute(text("DROP TABLE client_post_logout_redirect_uris CASCADE"))
         sess.session.execute(text("DROP TABLE client_redirect_uris CASCADE"))

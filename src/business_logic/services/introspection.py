@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from fastapi import Request
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
+from src.data_access.postgresql.errors import TokenIncorrectError
 
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.client import ClientRepository
@@ -37,7 +38,7 @@ class IntrospectionServies:
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:
-            raise ValueError
+            raise TokenIncorrectError
         decoded_token = {}
         response: dict[str, Any] = {}
         try:
@@ -48,7 +49,7 @@ class IntrospectionServies:
         except ExpiredSignatureError:
             return {"active": False}
         except PyJWTError:
-            raise ValueError
+            raise TokenIncorrectError
         else:
             if self.request_body.token_type_hint in (
                 "access-token",
@@ -121,7 +122,7 @@ class IntrospectionServies:
 
     async def get_client_id(self) -> str:
         if self.request_body is None:
-            raise ValueError
+            raise TokenIncorrectError
         grant = await self.persistent_grant_repo.get(
             grant_data=self.request_body.token,
             grant_type=self.request_body.token_type_hint,
@@ -133,7 +134,7 @@ class IntrospectionServies:
 
     def slice_url(self) -> str:
         if self.request is None:
-            raise ValueError
+            raise TokenIncorrectError
         result = str(self.request.url).rsplit("/", 2)
         return result[0]
 
