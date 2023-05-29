@@ -64,9 +64,12 @@ async function redirect(data) {
             if (!response.ok) {
                 throw new Error('Wrong credentials');
             } else {
-                let new_location = response.url;
-                window.location = new_location;
+                return response.json(); // Преобразуем ответ в объект JSON
             }
+        })
+        .then((data) => {
+            let redirectUrl = data.redirect_url; // Извлекаем значение поля "redirect_url"
+            window.location.href = redirectUrl; // Перенаправляем пользователя на указанную страницу
         })
         .catch((err) => {
             if (

@@ -98,4 +98,4 @@ async def post_authorize(
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
+    return JSONResponse({"redirect_url":result})
