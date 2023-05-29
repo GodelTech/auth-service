@@ -29,9 +29,7 @@ class PersistentGrant(BaseModel):
     )
     client = relationship(
         "Client",
-        backref="grants",
-        foreign_keys="PersistentGrant.client_id",
-     #   lazy = "select"
+        back_populates="grants",
     )
     grant_data = Column(String, nullable=False)
     expiration = Column(Integer, nullable=False)

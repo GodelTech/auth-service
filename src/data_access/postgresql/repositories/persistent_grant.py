@@ -75,7 +75,7 @@ class PersistentGrantRepository(BaseRepository):
         grant_type_id = await self.get_type_id(type_of_grant=grant_type)
         result = await self.session.execute(
             select(PersistentGrant)
-            .join(Client, PersistentGrant.client_id == Client.id)
+           # .join(Client, PersistentGrant.client_id == Client.id)
             .where(
                 PersistentGrant.persistent_grant_type_id == grant_type_id,
                 PersistentGrant.grant_data == grant_data,

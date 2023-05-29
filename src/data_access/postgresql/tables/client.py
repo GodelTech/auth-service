@@ -90,7 +90,6 @@ class Client(BaseModel):
     protocol_type = relationship(
         "ProtocolType",
         backref="client",
-        foreign_keys="Client.protocol_type_id",
     )
 
     refresh_token_expiration_type_id = Column(
@@ -101,7 +100,6 @@ class Client(BaseModel):
     refresh_token_expiration_type = relationship(
         "RefreshTokenExpirationType",
         backref="client",
-        foreign_keys="Client.refresh_token_expiration_type_id",
     )
 
     refresh_token_usage_type_id = Column(
@@ -112,7 +110,6 @@ class Client(BaseModel):
     refresh_token_usage_type = relationship(
         "RefreshTokenUsageType",
         backref="client",
-        foreign_keys="Client.refresh_token_usage_type_id",
     )
 
     require_client_secret = Column(Boolean, default=True, nullable=False)
@@ -125,38 +122,39 @@ class Client(BaseModel):
         Boolean, default=False, nullable=False
     )
 
-    # grants = relationship(
-    #     "PersistentGrant",
-    #     back_populates="client",
-    #     foreign_keys="PersistentGrant.client_id",
-    # )  # lazy = "joined")
+    grants = relationship(
+        "PersistentGrant",
+        back_populates="client",
+    )
     secrets = relationship("ClientSecret", back_populates="client",) # lazy="subquery")
     redirect_uris = relationship("ClientRedirectUri", back_populates="client",) # lazy = "subquery")
     claims = relationship("ClientClaim", back_populates="client")
     post_logout_redirect_uris = relationship(
-        "ClientPostLogoutRedirectUri", back_populates="client"
+        "ClientPostLogoutRedirectUri", 
+        back_populates="client"
     )
-    scopes = relationship("ClientScope", back_populates="client",)# lazy = "subquery")
+    scopes = relationship(
+        "ClientScope", 
+        back_populates="client",)
     
     cors_origins = relationship(
         "ClientCorsOrigin",
         back_populates="client",
     )
     id_restrictions = relationship(
-        "ClientIdRestriction", back_populates="client"
+        "ClientIdRestriction", 
+        back_populates="client"
     )
     grant_types = relationship(
         "PersistentGrantType",
         secondary=clients_grant_types,
         cascade="all,delete",
-       # lazy = "subquery"
     )
     
     response_types = relationship(
         "ResponseType",
         secondary=clients_response_types,
         cascade="all,delete",
-       # lazy = "subquery"
     )
     
     def __str__(self) -> str:  # pragma: no cover

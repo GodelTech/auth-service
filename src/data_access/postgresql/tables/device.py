@@ -12,6 +12,7 @@ class Device(BaseModel):
         "Client",
         backref = 'devices',
         foreign_keys="Device.client_id",
+        lazy = 'joined'
     )
 
     device_code = Column(String(80), nullable=False, unique=True)
