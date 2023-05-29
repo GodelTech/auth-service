@@ -93,7 +93,7 @@ def setup_di(app: FastAPI) -> None:
             secret_key="1234",
             auth_service=AdminAuthService(
                 user_repo=UserRepository(
-                    session=prov.provide_async_session(db_engine)
+                    session=session
                 ),
             )
         )

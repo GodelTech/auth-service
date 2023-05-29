@@ -40,4 +40,5 @@ async def end_session(
     response = RedirectResponse(
         logout_redirect_uri, status_code=status.HTTP_302_FOUND
     )
+    await session.commit()
     return response

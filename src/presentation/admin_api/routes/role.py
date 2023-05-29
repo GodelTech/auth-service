@@ -65,6 +65,7 @@ async def create_role(
             role_repo=RoleRepository(session)
         )
     await role_class.create_role(name=request_model.name)
+    await session.commit()
 
 
 @admin_role_router.put(
@@ -85,6 +86,7 @@ async def update_role(
         await role_class.update_role(
             role_id=role_id, name=request_model.name
         )
+        await session.commit()
 
 @admin_role_router.delete(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
@@ -101,3 +103,4 @@ async def delete_group(
         role_repo=RoleRepository(session=session)
     )
     await role_class.delete_role(role_id=role_id)
+    await session.commit()

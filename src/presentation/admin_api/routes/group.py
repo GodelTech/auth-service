@@ -93,6 +93,7 @@ async def create_group(
     await group_class.create_group(
         name=request_model.name, parent_group=request_model.parent_group
     )
+    await session.commit()
 
 
 @admin_group_router.put(
@@ -119,6 +120,7 @@ async def update_group(
         name=request_model.name,
         parent_group=request_model.parent_group,
     )
+    await session.commit()
 
 
 @admin_group_router.delete(
@@ -139,3 +141,4 @@ async def delete_group(
         group_repo=GroupRepository(session=session)
     )
     await group_class.delete_group(group_id=group_id)
+    await session.commit()

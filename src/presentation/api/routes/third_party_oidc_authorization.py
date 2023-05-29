@@ -69,6 +69,7 @@ async def get_github_authorize(
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:
@@ -101,6 +102,7 @@ async def get_linkedin_authorize(
         response = RedirectResponse(
             linkedin_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:
@@ -133,6 +135,7 @@ async def get_facebook_authorize(
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:
@@ -165,6 +168,7 @@ async def get_google_authorize(
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:
@@ -197,6 +201,7 @@ async def get_gitlab_authorize(
         response = RedirectResponse(
             github_redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:
@@ -229,6 +234,7 @@ async def get_microsoft_authorize(
         response = RedirectResponse(
             redirect_uri, status_code=status.HTTP_302_FOUND
         )
+        await session.commit()
         return response
 
     except IndexError:

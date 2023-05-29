@@ -99,6 +99,7 @@ async def update_user(
     await user_class.update_user(
         user_id=user_id, kwargs=data_to_change
     )
+    await session.commit()
 
 @admin_user_router.delete(
     "/{user_id}", status_code=200, tags=["Administration User"], description= "Delete User by ID"
@@ -115,6 +116,7 @@ async def delete_user(
         user_repo=UserRepository(session)
         )
     await user_class.delete_user(user_id=user_id)
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -135,6 +137,7 @@ async def create_user(
     data["access_failed_count"] = 0
 
     await user_class.create_user(kwargs=data)
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -156,6 +159,7 @@ async def add_groups(
     await user_class.add_user_groups(
         user_id=user_id, group_ids=request_body.group_ids
     )
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -176,6 +180,7 @@ async def add_roles(
     await user_class.add_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
     )
+    await session.commit()
     return
 
 
@@ -242,6 +247,7 @@ async def delete_roles(
     await user_class.remove_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
     )
+    await session.commit()
 
 
 @admin_user_router.delete(
@@ -263,6 +269,7 @@ async def delete_groups(
     await user_class.remove_user_groups(
         user_id=user_id, group_ids=request_model.group_ids
     )
+    await session.commit()
 
 
 @admin_user_router.put(
@@ -284,3 +291,4 @@ async def change_user_password(
     await user_class.change_password(
         user_id=user_id, new_password=request_model.new_password
     )
+    await session.commit()

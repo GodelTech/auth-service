@@ -17,7 +17,7 @@ from .repositories import (
     provide_user_repo_stub,
     provide_blacklisted_repo,
     provide_blacklisted_repo_stub,
-    provide_async_session,
+    # provide_async_session,
     provide_async_session_stub,
     ProviderSession
 
