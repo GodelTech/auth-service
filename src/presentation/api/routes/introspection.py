@@ -12,7 +12,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
-    ResponceIntrospectionModel,
+    ResponseIntrospectionModel,
 )
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
@@ -28,7 +28,7 @@ introspection_router = APIRouter(
 )
 
 
-@introspection_router.post("/", response_model=ResponceIntrospectionModel)
+@introspection_router.post("/", response_model=ResponseIntrospectionModel)
 async def post_introspection(
     request: Request,
     auth_swagger: Optional[str] = Header(
