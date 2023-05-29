@@ -369,7 +369,6 @@ class TestClientService:
 
     async def test_get_all(self, client_service: ClientService) -> None:
         clients = await client_service.get_all()
-        await client_service.session.close()
         assert isinstance(clients, list)
         assert [isinstance(obj, dict) for obj in clients]
 

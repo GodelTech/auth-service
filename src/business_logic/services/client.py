@@ -158,7 +158,10 @@ class ClientService:
 
     async def get_all(self):
         clients:list[Client] = await self.client_repo.get_all()
-        return [self.client_to_dict(client) for client in  clients]
+        result =[]
+        for client in  clients:
+            result.append(self.client_to_dict(client))
+        return result
     
     def client_to_dict(self, client:Client):
         return{
@@ -167,7 +170,7 @@ class ClientService:
             "client_uri": client.client_uri,
             "logo_uri": client.logo_uri,
             "redirect_uris": [uri.redirect_uri for uri in client.redirect_uris],
-            "grant_types": [grant_type.type_of_grant for grant_type in client.grant_types],
+          #  "grant_types": [grant_type.type_of_grant for grant_type in client.grant_types],
             "response_types": [r_type.type for r_type in client.response_types], 
             "token_endpoint_auth_method": client.token_endpoint_auth_method, 
             "scope" : client.scopes[0].scope if client.scopes else ""

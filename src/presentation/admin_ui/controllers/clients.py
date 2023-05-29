@@ -136,7 +136,7 @@ class ClientPostLogoutRedirectUriController(
     column_list = [
         ClientPostLogoutRedirectUri.id,
         ClientPostLogoutRedirectUri.post_logout_redirect_uri,
-        ClientPostLogoutRedirectUri.client,
+        ClientPostLogoutRedirectUri.client_id,
     ]
 
 
