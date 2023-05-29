@@ -1,7 +1,7 @@
 """access_token_type_id_update
 
 Revision ID: c9363d376df0
-Revises: 7a5ee88941c1
+Revises: fa27d2e2c4fd
 Create Date: 2023-05-18 11:39:10.967510
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'c9363d376df0'
-down_revision = '7a5ee88941c1'
+down_revision = 'fa27d2e2c4fd'
 branch_labels = None
 depends_on = None
 
