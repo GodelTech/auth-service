@@ -784,11 +784,11 @@ async def get_db(connection: AsyncSession) -> None:
     await connection.execute(insert(Permission).values(data))
 
     # Tokens
-    # data = {
-    #     "id": pk,
-    #     "type_of_grant": name,
-    # }
-    # await connection.execute(insert(PersistentGrantType).values(data))
+    data = {
+        "id": pk,
+        "type_of_grant": name,
+    }
+    await connection.execute(insert(PersistentGrantType).values(data))
     
     data = {
         "id": pk,

@@ -478,7 +478,7 @@ class UserRepository(BaseRepository):
             result = await self.session.execute(
                 select(UserClaimType.id, UserClaimType.type_of_claim)
             )
-            return result.scalar()
+            return {k: v for v, k in result.all()}
 
     # async def get_hashed_password_by_username(self, username: str) -> str:
     #     session_factory = sessionmaker(
