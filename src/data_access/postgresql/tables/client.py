@@ -176,9 +176,8 @@ class ResponseType(Base):
         return f"{self.type}"
 
 
-class AccessTokenType(Base):
+class AccessTokenType(BaseModel):
     __tablename__ = "access_token_types"
-    id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
@@ -188,7 +187,7 @@ class AccessTokenType(Base):
         return f"{self.type}"
 
 
-class ProtocolType(Base):
+class ProtocolType(BaseModel):
     __tablename__ = "protocol_types"
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
@@ -200,9 +199,8 @@ class ProtocolType(Base):
         return f"{self.type}"
 
 
-class RefreshTokenExpirationType(Base):
+class RefreshTokenExpirationType(BaseModel):
     __tablename__ = "refresh_token_expiration_types"
-    id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
@@ -212,9 +210,8 @@ class RefreshTokenExpirationType(Base):
         return f"{self.type}"
 
 
-class RefreshTokenUsageType(Base):
+class RefreshTokenUsageType(BaseModel):
     __tablename__ = "refresh_token_usage_types"
-    id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
