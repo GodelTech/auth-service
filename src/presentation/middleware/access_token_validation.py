@@ -1,6 +1,6 @@
 import logging
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError, InvalidKeyError, MissingRequiredClaimError
-from fastapi import Request
+from fastapi import Request, Depends
 from typing import Any
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.blacklisted_token import BlacklistedTokenRepository
@@ -8,14 +8,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.errors.auth_token import (
     IncorrectAuthTokenError
     )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
 
-async def access_token_middleware(request: Request) -> Any:
+async def access_token_middleware(
+        request: Request,
+        session: AsyncSession = Depends(provide_async_session_stub)
+) -> Any:
     jwt_service = JWTService()
     token = request.headers.get("access-token")
-    session = request.state.session
+    session = session
     blacklisted_repo = BlacklistedTokenRepository(session)
     
     if token is None:

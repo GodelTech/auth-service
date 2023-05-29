@@ -68,6 +68,7 @@ async def get_tokens(
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
+        await session.commit()
         return JSONResponse(content=result, headers=headers)
 
     except (

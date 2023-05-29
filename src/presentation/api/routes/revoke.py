@@ -40,7 +40,7 @@ async def post_revoke_token(
     request_body: BodyRequestRevokeModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
+    session = session
     token_class = TokenService(
         session=session,
         client_repo=ClientRepository(session),
@@ -55,4 +55,6 @@ async def post_revoke_token(
     token = request.headers.get("authorization") or auth_swagger
     token_class.authorization = token
     logger.info(f"Revoking for token {request_body.token} started")
-    return await token_class.revoke_token()
+    revoke_token = await token_class.revoke_token()
+    await session.commit()
+    return revoke_token

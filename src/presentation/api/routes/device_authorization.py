@@ -34,7 +34,6 @@ async def post_device_authorize(
     request: Request,
     request_model: DeviceRequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
-
 ) -> JSONResponse:
     session = session
     auth_service = DeviceService(
@@ -42,19 +41,13 @@ async def post_device_authorize(
         client_repo=ClientRepository(session),
         device_repo=DeviceRepository(session),
     )
-    try:
-        auth_service.request_model = request_model
-        response_data = await auth_service.get_response()
-        await session.commit()
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=response_data,
-        )
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    auth_service.request_model = request_model
+    response_data = await auth_service.get_response()
+    await session.commit()
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=response_data,
+    )
 
 
 @device_auth_router.get(
@@ -79,8 +72,9 @@ async def get_device_user_code(
 async def post_device_user_code(
     request: Request,
     request_model: DeviceUserCodeModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
-    session = request.state.session
+    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),
@@ -123,24 +117,20 @@ async def delete_device(
     request: Request,
     request_model: DeviceCancelModel = Depends(),
     user_code: Optional[str] = Cookie(None),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[str, JSONResponse]:
-    session = request.state.session
+    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),
         device_repo=DeviceRepository(session),
     )
-    try:
-        auth_service.request_model = request_model
-        user_code = request_model.scope.split("=")[1]
-        result = await auth_service.clean_device_data(user_code)
-        await session.commit()
-        return result
-    except:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    auth_service.request_model = request_model
+    user_code = request_model.scope.split("=")[1]
+    result = await auth_service.clean_device_data(user_code)
+    await session.commit()
+    return result
+
 
 
 @device_auth_router.get(
