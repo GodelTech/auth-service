@@ -24,9 +24,7 @@ from src.business_logic.services import (
     WellKnownServices,
     ClientService,
 )
-from src.business_logic.third_party_auth.factory import (
-    ThirdPartyAuthServiceFactory,
-)
+
 from src.data_access.postgresql.repositories import (
     BlacklistedTokenRepository,
     ClientRepository,

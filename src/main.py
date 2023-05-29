@@ -51,7 +51,6 @@ def get_application(test: bool = False) -> NewFastApi:
     )
     application = setup_exception_handlers(application)
 
-    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
