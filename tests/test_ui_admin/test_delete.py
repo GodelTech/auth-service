@@ -24,7 +24,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-    ClientGrantType,
+   # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -75,7 +75,7 @@ class TestAdminUIDelete:
         RefreshTokenExpirationType,
         ProtocolType,
         AccessTokenType,
-        ClientGrantType,
+       # ClientGrantType,
     ]
     tables_user = [
         UserClaim,

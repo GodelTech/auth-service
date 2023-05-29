@@ -24,7 +24,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-    ClientGrantType,
+   # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -75,7 +75,7 @@ class TestAdminUIRead:
         RefreshTokenExpirationType,
         ProtocolType,
         AccessTokenType,
-        ClientGrantType,
+       # ClientGrantType,
     ]
     tables_user = [
         UserClaim,
@@ -131,7 +131,7 @@ class TestAdminUIRead:
                     f"/admin/{part_of_link}/list",
                     cookies={"session": "1"},
                 )
-                assert response.status_code == status.HTTP_200_OK
+                assert response.status_code == status.HTTP_200_OK, f"---->{part_of_link}"
 
     async def test_get_list_unsuccessful(
         self, get_db, client: AsyncClient

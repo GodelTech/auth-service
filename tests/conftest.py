@@ -64,7 +64,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-    ClientGrantType,
+   # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -718,12 +718,12 @@ async def get_db(connection: AsyncSession) -> None:
     }
     await connection.execute(insert(ClientRedirectUri).values(data))
 
-    data = {
-        "id": pk,
-        "grant_type": name,
-        "client_id": pk,
-    }
-    await connection.execute(insert(ClientGrantType).values(data))
+    # data = {
+    #     "id": pk,
+    #     "grant_type": name,
+    #     "client_id": pk,
+    # }
+    # await connection.execute(insert(ClientGrantType).values(data))
 
     data = {
         "id": pk,
@@ -784,11 +784,12 @@ async def get_db(connection: AsyncSession) -> None:
     await connection.execute(insert(Permission).values(data))
 
     # Tokens
-    data = {
-        "id": pk,
-        "type_of_grant": name,
-    }
-    await connection.execute(insert(PersistentGrantType).values(data))
+    # data = {
+    #     "id": pk,
+    #     "type_of_grant": name,
+    # }
+    # await connection.execute(insert(PersistentGrantType).values(data))
+    
     data = {
         "id": pk,
         "key": name,

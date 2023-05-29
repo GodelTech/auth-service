@@ -125,18 +125,18 @@ class Client(BaseModel):
         Boolean, default=False, nullable=False
     )
 
-    grants = relationship(
-        "PersistentGrant",
-        back_populates="client",
-        foreign_keys="PersistentGrant.client_id",
-    )  # lazy = "joined")
-    secrets = relationship("ClientSecret", back_populates="client", lazy="subquery")
-    redirect_uris = relationship("ClientRedirectUri", back_populates="client", lazy = "subquery")
+    # grants = relationship(
+    #     "PersistentGrant",
+    #     back_populates="client",
+    #     foreign_keys="PersistentGrant.client_id",
+    # )  # lazy = "joined")
+    secrets = relationship("ClientSecret", back_populates="client",) # lazy="subquery")
+    redirect_uris = relationship("ClientRedirectUri", back_populates="client",) # lazy = "subquery")
     claims = relationship("ClientClaim", back_populates="client")
     post_logout_redirect_uris = relationship(
         "ClientPostLogoutRedirectUri", back_populates="client"
     )
-    scopes = relationship("ClientScope", back_populates="client", lazy = "subquery")
+    scopes = relationship("ClientScope", back_populates="client",)# lazy = "subquery")
     
     cors_origins = relationship(
         "ClientCorsOrigin",
@@ -149,14 +149,14 @@ class Client(BaseModel):
         "PersistentGrantType",
         secondary=clients_grant_types,
         cascade="all,delete",
-        lazy = "subquery"
+       # lazy = "subquery"
     )
     
     response_types = relationship(
         "ResponseType",
         secondary=clients_response_types,
         cascade="all,delete",
-        lazy = "subquery"
+       # lazy = "subquery"
     )
     
     def __str__(self) -> str:  # pragma: no cover

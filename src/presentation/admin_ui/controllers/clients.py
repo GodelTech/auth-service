@@ -16,7 +16,7 @@ class ClientAdminController(ModelView, model=Client):
         Client.created_at,
     ]
     create_excluded_columns = [
-        Client.grants,
+        # Client.grants,
         Client.created_at,
         Client.updated_at,
         Client.absolute_refresh_token_lifetime,

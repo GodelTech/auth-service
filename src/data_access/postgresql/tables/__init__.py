@@ -8,7 +8,7 @@ from .client import (
     ClientRedirectUri,
     ClientScope,
     ClientSecret,
-
+    
     AccessTokenType,
     ProtocolType,
     RefreshTokenExpirationType,
