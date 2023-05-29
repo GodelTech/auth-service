@@ -13,6 +13,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import DataRequestModel
+from src.data_access.postgresql.errors import NotCompleteScopeError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -226,3 +227,17 @@ class AuthorizationService:
         if self.request_model.state:
             redirect_uri += f"&state={self.request_model.state}"
         return redirect_uri
+    
+    async def validate_scope(
+        self, scope:str, username: str
+    ) -> None:
+        user_id = (await self.user_repo.get_user_by_username(username=username)).id
+        claims = await self.user_repo.get_claims(id=user_id)
+        claim_types = claims.keys()
+        if "profile" in scope:
+            for claim_type in ('name', 'gender', 'birthdate', 'phone_number', 'address', 'zoneinfo'):
+                if claim_type not in claim_types:
+                    raise NotCompleteScopeError
+
+        if "email" in scope and "email" not in claim_types:
+            raise NotCompleteScopeError

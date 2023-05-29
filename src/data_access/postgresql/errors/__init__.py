@@ -26,6 +26,7 @@ from .third_party_oidc import (
     ThirdPartyStateNotFoundError,
     WrongDataError,
 )
-from .user import ClaimsNotFoundError, UserNotFoundError
+from .user import ClaimsNotFoundError, UserNotFoundError, DuplicationError, NotCompleteScopeError
 from .auth_token import IncorrectAuthTokenError
 from .token import TokenIncorrectError
+

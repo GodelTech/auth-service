@@ -33,10 +33,10 @@ userinfo_router = APIRouter(
     # key_builder=builder_with_parametr,
 )
 async def get_userinfo(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
 ) -> dict[str, Any]:
     session = request.state.session
     userinfo_class = UserInfoServices(
@@ -60,10 +60,10 @@ async def get_userinfo(
 #    # key_builder=builder_with_parametr,
 # )
 async def post_userinfo(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
 ) -> dict[str, Any]:
     session = request.state.session
     userinfo_class = UserInfoServices(
@@ -86,10 +86,10 @@ async def post_userinfo(
     # key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
-    request: Request,
-    auth_swagger: Union[str, None] = Header(
-        default=None, description="Authorization"
-    ),
+        request: Request,
+        auth_swagger: Union[str, None] = Header(
+            default=None, description="Authorization"
+        ),
 ) -> str:
     session = request.state.session
     userinfo_class = UserInfoServices(

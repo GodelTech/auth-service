@@ -1,0 +1,58 @@
+<!-- <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Form</title>
+    
+  </head>
+  <body>
+    <div class="container">
+      <form id="login-form" method="POST" action="/user/login">
+        <h2>Login Form</h2>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/login.css')}}">
+  </head>
+  <body>
+    <div class="container">
+      <form id="login-form">
+        <h2>Login Form</h2>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+          <div class="register-link">
+            <p>Don't have an account?<br></p>
+          </div>
+            <div class="register-link">
+            <a href="/user/register">Register here</a>
+          </div>
+          
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+    <script src="{{ url_for('static', path='/login.js')}}"></script>
+  </body>
+</html>

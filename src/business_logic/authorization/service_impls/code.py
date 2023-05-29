@@ -56,9 +56,9 @@ class CodeAuthService(UpdateRedirectUrlMixin):
             client_id=request_data.client_id,
             grant_type="authorization_code",
             grant_data=self._secret_code,
-            user_id=await self._user_repo.get_user_id_by_username(
+            user_id=(await self._user_repo.get_user_by_username(
                 request_data.username
-            ),
+            )).id,
             expiration_time=auth_code_lifetime + int(time.time()),
         )
 

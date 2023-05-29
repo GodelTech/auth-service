@@ -118,9 +118,11 @@ class TestDeviceService:
             expires_in=600,
             interval=5,
         )
+        await service.session.commit()
         result = await service.get_redirect_uri()
         assert result == expected_uri
         await service.device_repo.delete_by_user_code(user_code="GHJKTYUI")
+        await service.session.commit()
         with pytest.raises(UserCodeNotFoundError):
             await service._validate_user_code(user_code="GHJKTYUI")
 
