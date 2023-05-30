@@ -5,7 +5,7 @@ from src.data_access.postgresql.tables import PersistentGrant, PersistentGrantTy
 class PersistentGrantAdminController(ModelView, model=PersistentGrant):
     icon = "fa-solid fa-key"
     column_list = [PersistentGrant.id, 
-                   PersistentGrant.client_id, 
+                  # PersistentGrant.client_id, 
                    PersistentGrant.expiration,
                    PersistentGrant.grant_data
                    ]

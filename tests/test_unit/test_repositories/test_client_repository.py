@@ -566,11 +566,10 @@ class TestClientRepository:
 
     async def test_get_all(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
-        clients = await connection.scalars(select(Client))
-        repo_clients_lst = [str(client) for client in clients.all()]
-        await connection.commit()
+        clients = await connection.execute(select(Client))
+        repo_clients_lst = [client[0] for client in clients.all()]
 
-        function_clients_lst = [str(client) for client in await client_repo.get_all()]
+        function_clients_lst = await client_repo.get_all()
 
         assert isinstance(repo_clients_lst, list)
         assert repo_clients_lst == function_clients_lst
