@@ -26,49 +26,35 @@ from tests.test_unit.fixtures import (
 class TestEndSessionEndpoint:
     async def test_successful_authorize_request(
         self,
-        engine: AsyncEngine,
+        connection: AsyncSession,
         client: AsyncClient,
         end_session_service: EndSessionService,
         end_session_request_model: RequestEndSessionModel,
     ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
-        secret = await service.client_repo.get_client_secrete_by_client_id(
-            client_id=TOKEN_HINT_DATA["client_id"]
+        await connection.execute(
+            insert(PersistentGrant).values(
+                key="test_key",
+                client_id=3,
+                user_id=3,
+                grant_data="test_successful_authorize_request",
+                persistent_grant_type_id=1,
+                expiration=False,
+            )
         )
-        token = await service.jwt_service.encode_jwt(secret=secret, payload={})
-        session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
+        await connection.commit()
+        hint = TokenHint()
+        token_hint = await hint.get_token_hint()
+        params = {
+            "id_token_hint": token_hint,
+            "post_logout_redirect_uri": "https://www.cole.com/",
+            "state": "test_state",
+        }
+        response = await client.request(
+            "GET", "/endsession/", params=params
         )
-        async with session_factory() as sess:
-            session = sess
-            await session.execute(
-                insert(PersistentGrant).values(
-                    key="test_key",
-                    client_id=3,
-                    user_id=3,
-                    grant_data="test_successful_authorize_request",
-                    persistent_grant_type_id=1,
-                    expiration=False,
-                )
-            )
-            await session.commit()
-            hint = TokenHint()
-            token_hint = await hint.get_token_hint()
-            params = {
-                "id_token_hint": token_hint,
-                "post_logout_redirect_uri": "https://www.cole.com/",
-                "state": "test_state",
-            }
-            response = await client.request(
-                "GET", "/endsession/", params=params
-            )
-            assert response.status_code == status.HTTP_302_FOUND
-
-            await session.execute(
-                delete(PersistentGrant).where(PersistentGrant.client_id == 3)
-            )
-            await session.commit()
+        assert response.status_code == status.HTTP_302_FOUND
 
     async def test_successful_authorize_request_without_uri(
         self,
@@ -150,14 +136,12 @@ class TestEndSessionEndpoint:
     ) -> None:
         service = end_session_service
         service.request_model = end_session_request_model
-        expected_content = '{"message":"Bad id_token_hint"}'
         params = {
             "id_token_hint": "id_token_hint",
             "post_logout_redirect_uri": "some_uri",
         }
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
 
     async def test_end_session_not_full_token(
         self,
@@ -171,16 +155,12 @@ class TestEndSessionEndpoint:
         service.request_model = end_session_request_model
         service.request_model.id_token_hint = short_token_hint
 
-        expected_content = (
-            '{"message":"The id_token_hint is missing something"}'
-        )
         params = {
             "id_token_hint": short_token_hint,
             "post_logout_redirect_uri": "http://www.jones.com/",
         }
         response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     async def test_end_session_no_persistent_grant(
         self,

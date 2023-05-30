@@ -16,7 +16,7 @@ class ClientAdminController(ModelView, model=Client):
         Client.created_at,
     ]
     create_excluded_columns = [
-        Client.grants,
+        # Client.grants,
         Client.created_at,
         Client.updated_at,
         Client.absolute_refresh_token_lifetime,
@@ -45,7 +45,6 @@ class ClientAdminController(ModelView, model=Client):
         Client.always_include_user_claims_id_token,
         Client.redirect_uris,
         Client.secrets,
-        Client.devices,
         Client.post_logout_redirect_uris,
         Client.grant_types,
         Client.claims,
@@ -72,7 +71,6 @@ class ClientAdminController(ModelView, model=Client):
             model=self.model,
             engine=self.engine,
             exclude=exclude,
-            only=[i[1].key or i[1].name for i in self._form_attrs],
             column_labels={k.key: v for k, v in self._column_labels.items()},
             form_args=self.form_args,
             form_widget_args=self.form_widget_args,
@@ -81,6 +79,16 @@ class ClientAdminController(ModelView, model=Client):
             form_ajax_refs=self._form_ajax_refs,
             form_include_pk=self.form_include_pk,
         )
+
+class ResponseTypeAdminController(ModelView, model=ResponseType):
+    icon = "fa-solid fa-mobile-screen-button"
+    can_create = False
+    can_delete = False
+    can_edit = False
+    column_list = [
+        ResponseType.id,
+        ResponseType.type,
+    ]
 
 
 class AccessTokenTypeAdminController(ModelView, model=AccessTokenType):
@@ -128,7 +136,7 @@ class ClientPostLogoutRedirectUriController(
     column_list = [
         ClientPostLogoutRedirectUri.id,
         ClientPostLogoutRedirectUri.post_logout_redirect_uri,
-        ClientPostLogoutRedirectUri.client,
+        ClientPostLogoutRedirectUri.client_id,
     ]
 
 
@@ -141,10 +149,9 @@ class ClientRedirectUriController(ModelView, model=ClientRedirectUri):
     icon = "fa-solid fa-mobile-screen-button"
     column_list = [ClientRedirectUri.id, ClientRedirectUri.redirect_uri]
 
-
-class ClientGrantTypeController(ModelView, model=ClientGrantType):
+class ClientScopeController(ModelView, model=ClientScope):
     icon = "fa-solid fa-mobile-screen-button"
-    column_list = [ClientGrantType.id, ClientGrantType.grant_type]
+    column_list = [ClientScope.id, ClientScope.scope]
 
 
 class ClientSecretController(ModelView, model=ClientSecret):

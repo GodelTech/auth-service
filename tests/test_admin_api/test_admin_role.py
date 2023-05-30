@@ -12,7 +12,7 @@ from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
 from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
-from src.data_access.postgresql.errors.user import DuplicationError
+from sqlalchemy import exc
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from typing import Any
 
@@ -22,17 +22,17 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 class TestAdminRoleEndpoint:
-    async def setup_base(self, engine: AsyncEngine, user_id: int = 1000) -> None:
+    async def setup_base(self, connection:AsyncSession, user_id: int = 1000) -> None:
         self.access_token = await JWTService().encode_jwt(
             payload={
                 "stand": "CrazyDiamond",
                 "aud":["admin"]
             }
         )
-        self.group_repo = GroupRepository(engine)
-        self.role_repo = RoleRepository(engine)
+        self.group_repo = GroupRepository(connection)
+        self.role_repo = RoleRepository(connection)
 
-        self.user_repo = UserRepository(engine)
+        self.user_repo = UserRepository(connection)
         try:
             if await self.user_repo.exists(user_id=user_id):
                 await self.user_repo.delete(user_id=user_id)
@@ -47,16 +47,6 @@ class TestAdminRoleEndpoint:
         except:
             pass
 
-        data = {
-            "id": user_id,
-            "username": "DioBrando",
-            "email": "theworld@timestop.com",
-            "email_confirmed": True,
-            "phone_number": "+20-123-123-123",
-            "phone_number_confirmed": False,
-            #  "password_hash": "1",
-            "two_factors_enabled": False,
-        }
         await self.user_repo.create( 
             id=user_id,
             username="DioBrando",
@@ -69,10 +59,10 @@ class TestAdminRoleEndpoint:
         await self.user_repo.change_password(
             user_id=user_id, password="WalkLikeAnEgiptian"
         )
-
-    async def setup_groups_roles(self, engine: AsyncEngine) -> None:
-        await self.setup_base(engine)
-        group_repo = GroupRepository(engine)
+        await connection.commit()
+        
+    async def setup_groups_roles(self, connection:AsyncSession) -> None:
+        group_repo = GroupRepository(connection)
         groups:list[dict[str, Any]] = [
             {"name": "Polnareff", "parent_group": None},
             {"name": "Giorno", "parent_group": None},
@@ -86,10 +76,11 @@ class TestAdminRoleEndpoint:
                             name=name,
                             parent_group=parent_group,
                         )
-            except DuplicationError:
+            except exc.IntegrityError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
-
+                await connection.rollback()
+        await connection.commit()
         groups = [
             {
                 "name": "Gold",
@@ -119,8 +110,10 @@ class TestAdminRoleEndpoint:
         for group in groups:
             try:
                 await group_repo.create(**group)
-            except DuplicationError:
+                await connection.commit()
+            except exc.IntegrityError:
                 logger.info(group["name"] + " group already exists")
+                await connection.rollback()
 
         groups = [
             {
@@ -133,23 +126,25 @@ class TestAdminRoleEndpoint:
         for group in groups:
             try:
                 await group_repo.create(**group)
-            except DuplicationError:
+                await connection.commit()
+            except exc.IntegrityError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
+                    await connection.rollback()
 
-        role_repo = RoleRepository(engine)
+        role_repo = RoleRepository(connection)
         role_repo.delete
         for role in ("Standuser", "French", "Italian", "Vampire"):
             try:
                 await role_repo.create(name=role)
-            except DuplicationError:
+            except exc.IntegrityError:
                 logger.info(role + " role already exists")
 
-    async def test_get_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_groups_roles(engine)
+        await connection.commit()
+
+    async def test_get_role(self, connection: AsyncSession, client: AsyncClient) -> None:
+        await self.setup_base(connection)
+        await self.setup_groups_roles(connection)
 
         headers = {
             "access-token": self.access_token,
@@ -168,11 +163,9 @@ class TestAdminRoleEndpoint:
         logger.info(response_content)
         assert response_content["role"]["name"] == "Standuser"
 
-    async def test_get_all_roles(self, engine: AsyncEngine, client: AsyncClient) -> None:
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_groups_roles(engine)
+    async def test_get_all_roles(self, connection: AsyncSession, client: AsyncClient) -> None:
+        await self.setup_base(connection)
+        await self.setup_groups_roles(connection)
 
         headers = {
             "access-token": self.access_token,
@@ -188,11 +181,9 @@ class TestAdminRoleEndpoint:
         assert len(response_content["all_roles"])
 
 
-    async def test_delete_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
-        await self.setup_base(
-            engine,
-        )
-        await self.setup_groups_roles(engine)
+    async def test_delete_role(self, connection: AsyncSession, client: AsyncClient) -> None:
+        await self.setup_base(connection)
+        await self.setup_groups_roles(connection)
 
         headers = {
             "access-token": self.access_token,
@@ -214,10 +205,8 @@ class TestAdminRoleEndpoint:
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    async def test_create_update_role(self, engine: AsyncEngine, client: AsyncClient) -> None:
-        await self.setup_base(
-            engine,
-        )
+    async def test_create_update_role(self, connection: AsyncSession, client: AsyncClient) -> None:
+        await self.setup_base(connection)
         try:
             await self.role_repo.delete(
                 (await self.role_repo.get_role_by_name("Pillar Man")).id

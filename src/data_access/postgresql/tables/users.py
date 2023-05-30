@@ -103,7 +103,10 @@ class User(BaseModel):
         "Group", secondary="users_groups", back_populates="users"
     )
     claims = relationship(
-        "UserClaim", back_populates="user", foreign_keys="UserClaim.user_id"
+        "UserClaim", 
+        back_populates="user", 
+        foreign_keys="UserClaim.user_id", 
+      #  lazy = "subquery"
     )
     grants = relationship(
         "PersistentGrant",
@@ -154,7 +157,7 @@ class UserClaim(BaseModel):
         ForeignKey("user_claim_types.id", ondelete="CASCADE"),
         nullable=False,
     )
-    claim_type = relationship("UserClaimType", backref="claim", lazy="joined")
+    claim_type = relationship("UserClaimType", backref="claim", lazy = "subquery")
     claim_value = Column(String, nullable=False)
 
     def __str__(self) -> str:  # pragma: no cover

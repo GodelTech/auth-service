@@ -8,13 +8,34 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Table
 )
 from sqlalchemy.orm import relationship
 
 from .base import Base, BaseModel
 
-# from sqlalchemy_utils import ChoiceType
 
+clients_response_types = Table(
+    "clients_response_types",
+    BaseModel.metadata,
+    Column(
+        "client_id", ForeignKey("clients.id", ondelete="CASCADE"),  primary_key=True,
+    ),
+    Column(
+        "response_type_id", ForeignKey("response_types.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
+clients_grant_types = Table(
+    "clients_grant_types",
+    BaseModel.metadata,
+    Column(
+        "client_id", ForeignKey("clients.id", ondelete="CASCADE"),  primary_key=True,
+    ),
+    Column(
+        "persistent_grant_type_id", ForeignKey("persistent_grant_types.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
 
 class Client(BaseModel):
     __tablename__ = "clients"
@@ -33,6 +54,7 @@ class Client(BaseModel):
         "AccessTokenType",
         backref="client",
         foreign_keys="Client.access_token_type_id",
+        lazy = 'joined'
     )
     allow_access_token_via_browser = Column(
         Boolean, default=False, nullable=False
@@ -55,6 +77,7 @@ class Client(BaseModel):
     logo_uri = Column(String, default="*enter_here*", nullable=False)
     logout_session_required = Column(Boolean, default=False, nullable=False)
     logout_uri = Column(String, default="*enter_here*", nullable=False)
+    token_endpoint_auth_method = Column(String, default="client_secret_post", nullable=False)
     prefix_client_claims = Column(
         String,
         default="*enter_here*",
@@ -68,7 +91,6 @@ class Client(BaseModel):
     protocol_type = relationship(
         "ProtocolType",
         backref="client",
-        foreign_keys="Client.protocol_type_id",
     )
 
     refresh_token_expiration_type_id = Column(
@@ -79,7 +101,7 @@ class Client(BaseModel):
     refresh_token_expiration_type = relationship(
         "RefreshTokenExpirationType",
         backref="client",
-        foreign_keys="Client.refresh_token_expiration_type_id",
+        lazy = 'joined'
     )
 
     refresh_token_usage_type_id = Column(
@@ -90,7 +112,7 @@ class Client(BaseModel):
     refresh_token_usage_type = relationship(
         "RefreshTokenUsageType",
         backref="client",
-        foreign_keys="Client.refresh_token_usage_type_id",
+        lazy = 'joined'
     )
 
     require_client_secret = Column(Boolean, default=True, nullable=False)
@@ -105,28 +127,49 @@ class Client(BaseModel):
 
     grants = relationship(
         "PersistentGrant",
-        back_populates="client",
-        foreign_keys="PersistentGrant.client_id",
-    )  # lazy = "joined")
-    secrets = relationship("ClientSecret", back_populates="client")
-    redirect_uris = relationship("ClientRedirectUri", back_populates="client")
+        back_populates="client"
+    )
+    secrets = relationship("ClientSecret", back_populates="client", lazy="subquery")
+    redirect_uris = relationship("ClientRedirectUri", backref="client", lazy = "subquery")
     claims = relationship("ClientClaim", back_populates="client")
     post_logout_redirect_uris = relationship(
-        "ClientPostLogoutRedirectUri", back_populates="client"
-    )
-    scopes = relationship("ClientScope", back_populates="client")
-    grant_types = relationship("ClientGrantType", back_populates="client")
-    devices = relationship(
-        "Device",
+        "ClientPostLogoutRedirectUri", 
         back_populates="client",
-        foreign_keys="Device.client_id",
+        lazy = 'subquery'
     )
+    scopes = relationship(
+        "ClientScope", 
+        back_populates="client",
+        lazy = 'subquery'
+        )
+    
     cors_origins = relationship(
         "ClientCorsOrigin",
         back_populates="client",
+        lazy = 'subquery'
     )
     id_restrictions = relationship(
-        "ClientIdRestriction", back_populates="client"
+        "ClientIdRestriction", 
+        back_populates="client",
+        lazy = 'subquery'
+    )
+    grant_types = relationship(
+        "PersistentGrantType",
+        secondary=clients_grant_types,
+        cascade="all,delete",
+        # lazy = '
+    )
+    
+    response_types = relationship(
+        "ResponseType",
+        secondary=clients_response_types,
+        cascade="all,delete",
+        lazy = "subquery"
+    )
+    
+    devices = relationship(
+        "Device",
+        back_populates = 'client',    
     )
 
     def __str__(self) -> str:  # pragma: no cover
@@ -135,10 +178,19 @@ class Client(BaseModel):
     def __repr__(self) -> str:  # pragma: no cover
         return f"{self.id} id: {self.client_name}"
 
-
-class AccessTokenType(Base):
-    __tablename__ = "access_token_types"
+class ResponseType(Base):
+    __tablename__ = "response_types"
     id = Column(Integer, primary_key=True)
+    type = Column(String, unique=True)
+    def __str__(self) -> str:  # pragma: no cover
+        return f"{self.type}"
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"{self.type}"
+
+
+class AccessTokenType(BaseModel):
+    __tablename__ = "access_token_types"
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
@@ -148,7 +200,7 @@ class AccessTokenType(Base):
         return f"{self.type}"
 
 
-class ProtocolType(Base):
+class ProtocolType(BaseModel):
     __tablename__ = "protocol_types"
     id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
@@ -160,9 +212,8 @@ class ProtocolType(Base):
         return f"{self.type}"
 
 
-class RefreshTokenExpirationType(Base):
+class RefreshTokenExpirationType(BaseModel):
     __tablename__ = "refresh_token_expiration_types"
-    id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
@@ -172,9 +223,8 @@ class RefreshTokenExpirationType(Base):
         return f"{self.type}"
 
 
-class RefreshTokenUsageType(Base):
+class RefreshTokenUsageType(BaseModel):
     __tablename__ = "refresh_token_usage_types"
-    id = Column(Integer, primary_key=True)
     type = Column(String, unique=True)
 
     def __str__(self) -> str:  # pragma: no cover
@@ -217,7 +267,7 @@ class ClientScope(BaseModel):
     __tablename__ = "client_scopes"
 
     scope = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), unique=True)
     client = relationship(
         "Client",
         back_populates="scopes",
@@ -234,7 +284,7 @@ class ClientPostLogoutRedirectUri(BaseModel):
     __tablename__ = "client_post_logout_redirect_uris"
 
     post_logout_redirect_uri = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), )
     client = relationship(
         "Client",
         back_populates="post_logout_redirect_uris",
@@ -266,21 +316,7 @@ class ClientRedirectUri(BaseModel):
 
     redirect_uri = Column(String, nullable=False)
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
-    client = relationship("Client", back_populates="redirect_uris")
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"Model {self.__class__.__name__}: {self.id}"
-
-
-class ClientGrantType(BaseModel):
-    __tablename__ = "client_grant_types"
-
-    grant_type = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
-    client = relationship(
-        "Client",
-        back_populates="grant_types",
-    )
+    # client = relationship("Client", back_populates="redirect_uris")
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"Model {self.__class__.__name__}: {self.id}"
@@ -293,7 +329,7 @@ class ClientSecret(BaseModel):
     expiration = Column(Integer, nullable=False)
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), unique=True)
     client = relationship("Client", back_populates="secrets")
 
     def __repr__(self) -> str:  # pragma: no cover

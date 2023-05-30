@@ -3,10 +3,10 @@ from typing import Any, Optional
 
 from fastapi import Request
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
+from src.data_access.postgresql.errors import TokenIncorrectError
 
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
@@ -16,15 +16,17 @@ from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class IntrospectionServies:
     def __init__(
         self,
-        jwt: JWTService,
+        session:AsyncSession,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
+        jwt:JWTService = JWTService(),
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
@@ -33,10 +35,11 @@ class IntrospectionServies:
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.session = session
 
     async def analyze_token(self) -> dict[str, Any]:
         if self.request_body is None:
-            raise ValueError
+            raise TokenIncorrectError
         decoded_token = {}
         response: dict[str, Any] = {}
         try:
@@ -47,12 +50,14 @@ class IntrospectionServies:
         except ExpiredSignatureError:
             return {"active": False}
         except PyJWTError:
-            raise ValueError
+            raise TokenIncorrectError
         else:
             if self.request_body.token_type_hint in (
                 "access-token",
                 "access_token",
                 "access",
+                "authorization_code",
+                "authorization-code"
             ):
                 response["active"] = True
 
@@ -118,7 +123,7 @@ class IntrospectionServies:
 
     async def get_client_id(self) -> str:
         if self.request_body is None:
-            raise ValueError
+            raise TokenIncorrectError
         grant = await self.persistent_grant_repo.get(
             grant_data=self.request_body.token,
             grant_type=self.request_body.token_type_hint,
@@ -130,7 +135,7 @@ class IntrospectionServies:
 
     def slice_url(self) -> str:
         if self.request is None:
-            raise ValueError
+            raise TokenIncorrectError
         result = str(self.request.url).rsplit("/", 2)
         return result[0]
 

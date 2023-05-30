@@ -1,13 +1,20 @@
+from __future__ import annotations
+
+import base64
 import base64
 import datetime
+import hashlib
 import hashlib
 import json
 import logging
 import time
+# import uuid
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING
+
+from cryptography.fernet import Fernet
 import uuid
 from typing import Any, Dict, Optional, Union
 from cryptography.fernet import Fernet
-
 from fastapi import Request
 from itsdangerous import base64_encode
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,7 +27,6 @@ from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientScopesError,
     DeviceCodeExpirationTimeError,
-    DeviceCodeNotFoundError,
     DeviceRegistrationError,
     GrantNotFoundError,
     GrantTypeNotSupported,
@@ -33,10 +39,14 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.dyna_config import DOMAIN_NAME
-from src.presentation.api.models import (
-    BodyRequestRevokeModel,
-    BodyRequestTokenModel,
-)
+
+
+if TYPE_CHECKING:
+    from src.business_logic.services.jwt_token import JWTService
+    from src.presentation.api.models import (
+        BodyRequestRevokeModel,
+        BodyRequestTokenModel,
+    )
 
 logger = logging.getLogger(__name__)
 from jwt.exceptions import ExpiredSignatureError
@@ -97,13 +107,15 @@ async def get_single_token(
 class TokenService:
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
         user_repo: UserRepository,
         device_repo: DeviceRepository,
-        jwt_service: JWTService,
         blacklisted_repo: BlacklistedTokenRepository,
+        jwt_service: JWTService,
     ) -> None:
+        self.session = session
         self.request: Optional[Request] = None
         self.request_model: Optional[BodyRequestTokenModel] = None
         self.request_body: Optional[BodyRequestRevokeModel] = None
@@ -385,7 +397,9 @@ class DeviceCodeMaker(BaseMaker):
                         device_code=self.request_model.device_code
                     )
                     raise DeviceCodeExpirationTimeError("Device code expired")
-                raise DeviceRegistrationError("Device registration in progress")
+                raise DeviceRegistrationError(
+                    "Device registration in progress"
+                )
         elif (
             self.request_model.device_code is None
             or not await self.persistent_grant_repo.exists(
@@ -469,13 +483,10 @@ class ClientCredentialsMaker(BaseMaker):
                 raise ClientNotFoundError
             if not bool(client_from_db):
                 raise ClientNotFoundError
-
-            if (
-                await self.client_repo.get_client_secrete_by_client_id(
+            secret = await self.client_repo.get_client_secrete_by_client_id(
                     client_id=self.request_model.client_id
                 )
-                != self.request_model.client_secret
-            ):
+            if secret != self.request_model.client_secret:
                 raise ClientNotFoundError
         except:
             raise ClientNotFoundError

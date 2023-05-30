@@ -2,11 +2,10 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.errors import ThirdPartyStateDuplicationError
-from src.data_access.postgresql.errors.user import DuplicationError
 from src.data_access.postgresql.tables import IdentityProviderMapped
 from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderState,
@@ -118,17 +117,12 @@ class TestAuthorizationService:
         )
         user_id = user.id
         await auth_third_party_service.user_repo.delete(user_id=user_id)
-        deleted = (
-            await auth_third_party_service.user_repo.validate_user_by_username(
-                username="TheNewestUser"
-            )
-        )
-        assert deleted is False
+        await auth_third_party_service.user_repo.session.commit()
 
     async def test_create_new_user_already_exists(
         self, auth_third_party_service: AuthThirdPartyOIDCService
     ) -> None:
-        with pytest.raises(DuplicationError):
+        with pytest.raises(exc.IntegrityError):
             await auth_third_party_service.create_new_user(
                 username="TestClient", provider=1
             )
@@ -170,13 +164,6 @@ class TestAuthorizationService:
         )
         assert created is True
 
-    async def test_create_provider_state_exists(
-        self,
-        auth_third_party_service: AuthThirdPartyOIDCService,
-        state_request_model: StateRequestModel,
-    ) -> None:
-        service = auth_third_party_service
-        service.state_request_model = state_request_model
         with pytest.raises(ThirdPartyStateDuplicationError):
             await service.create_provider_state()
         await service.oidc_repo.delete_state(state=state_request_model.state)

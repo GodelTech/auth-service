@@ -24,10 +24,10 @@ class TestTokenEndpoint:
     async def test_code_authorization(
         self,
         client: AsyncClient,
-        engine: AsyncEngine,
+        connection: AsyncSession,
         token_service: TokenService,
     ) -> None:
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
+        self.persistent_grant_repo = PersistentGrantRepository(connection)
         service = token_service
         await service.persistent_grant_repo.create(
             client_id="double_test",
@@ -36,7 +36,7 @@ class TestTokenEndpoint:
             grant_type="authorization_code",
             expiration_time=3600,
         )
-
+        await connection.commit()
         params = {
             "client_id": "double_test",
             "grant_type": "authorization_code",
@@ -65,9 +65,9 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_code_authorization_wrong_client_id(
-        self, client: AsyncClient, engine: AsyncEngine
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
+        self.persistent_grant_repo = PersistentGrantRepository(connection)
 
         await self.persistent_grant_repo.create(
             client_id="double_test",
@@ -76,7 +76,7 @@ class TestTokenEndpoint:
             grant_type="authorization_code",
             expiration_time=3600,
         )
-
+        await connection.commit()
         wrong_params = {
             "client_id": "wrong_id",
             "grant_type": "authorization_code",
@@ -100,9 +100,9 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_code_authorization_without_redirect_uri(
-        self, client: AsyncClient, engine: AsyncEngine
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
+        self.persistent_grant_repo = PersistentGrantRepository(connection)
 
         await self.persistent_grant_repo.create(
             client_id="double_test",
@@ -111,6 +111,7 @@ class TestTokenEndpoint:
             grant_type="authorization_code",
             expiration_time=3600,
         )
+        await connection.commit()
 
         wrong_params = {
             "client_id": "double_test",
@@ -134,9 +135,9 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_code_authorization_without_code(
-        self, client: AsyncClient, engine: AsyncEngine
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
+        self.persistent_grant_repo = PersistentGrantRepository(connection)
 
         await self.persistent_grant_repo.create(
             client_id="double_test",
@@ -168,9 +169,9 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_code_authorization_client_with_without_grants(
-        self, client: AsyncClient, engine: AsyncEngine
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
+        self.persistent_grant_repo = PersistentGrantRepository(connection)
 
         await self.persistent_grant_repo.create(
             client_id="double_test",
@@ -186,6 +187,8 @@ class TestTokenEndpoint:
             grant_type="authorization_code",
             expiration_time=3600,
         )
+
+        await connection.commit()
 
         wrong_params = {
             "client_id": "test_client",
@@ -235,7 +238,7 @@ class TestTokenEndpoint:
 
     @pytest.mark.asyncio
     async def test_refresh_token_authorization(
-        self, client: AsyncClient, engine: AsyncEngine
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         """
         It can pass only if the test above (test_code_authorization) passed.
@@ -248,14 +251,14 @@ class TestTokenEndpoint:
             payload={"sub": 1, "exp": time.time() + 3600}
         )
 
-        persistent_grant_repo = PersistentGrantRepository(engine)
+        persistent_grant_repo = PersistentGrantRepository(connection)
         await persistent_grant_repo.create(
             client_id="test_client",
             grant_data=test_token,
             user_id=1,
             grant_type="refresh_token",
         )
-
+        await connection.commit()
         params = {
             "client_id": "test_client",
             "grant_type": "refresh_token",

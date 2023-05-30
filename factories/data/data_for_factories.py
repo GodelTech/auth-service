@@ -1,56 +1,51 @@
-from src.main import app
-from src.business_logic.services.password import PasswordHash
+import bcrypt
 
-CLIENT_IDS = [
-    "test_client",
-    "double_test",
-    "santa",
-    "krampus",
-    "frodo",
-    "aragorn",
-    "iron_man",
-    "spider_man",
-    "thor",
-    "samuel",
-]
+def hash_password(password: str) -> str:
+        bts = password.encode("utf-8")
+        salt = bcrypt.gensalt()
+        hash_password = bcrypt.hashpw(bts, salt)
+        return str(hash_password).strip("b'")
+
+
+CLIENT_IDS = {
+    1: "test_client",
+    2: "double_test",
+    3: "santa",
+    4: "krampus",
+    5: "frodo",
+    6: "aragorn",
+    7: "iron_man",
+    8: "spider_man",
+    9: "thor",
+    10: "samuel",
+}
 
 CLIENT_HASH_PASSWORDS = {
-    "test_client": PasswordHash.hash_password("test_password"),
-    "double_test": PasswordHash.hash_password("double_password"),
-    "santa": PasswordHash.hash_password("christmas_forever"),
-    "krampus": PasswordHash.hash_password("no_to_christmas"),
-    "frodo": PasswordHash.hash_password("one_ring_to_rule_them_all"),
-    "aragorn": PasswordHash.hash_password("son_of_aratorn"),
-    "iron_man": PasswordHash.hash_password("best_avenger"),
-    "spider_man": PasswordHash.hash_password("the_beginner"),
-    "thor": PasswordHash.hash_password("god_of_thunder"),
-    "samuel": PasswordHash.hash_password("just_a_guy"),
+    1: hash_password("test_password"),
+    2: hash_password("double_password"),
+    3: hash_password("christmas_forever"),
+    4: hash_password("no_to_christmas"),
+    5: hash_password("one_ring_to_rule_them_all"),
+    6: hash_password("son_of_aratorn"),
+    7: hash_password("best_avenger"),
+    8: hash_password("the_beginner"),
+    9: hash_password("god_of_thunder"),
+    10: hash_password("just_a_guy"),
 }
 
-CLIENT_PASSWORDS = {
-    "test_client": "test_password",
-    "double_test": "double_password",
-    "santa": "christmas_forever",
-    "krampus": "no_to_christmas",
-    "frodo": "one_ring_to_rule_them_all",
-    "aragorn": "son_of_aratorn",
-    "iron_man": "best_avenger",
-    "spider_man": "the_beginner",
-    "thor": "god_of_thunder",
-    "samuel": "just_a_guy",
-}
-
+# It's not correct, according to factories
+# client_id <-> username relation may be different from test to test
 CLIENT_USERNAMES = {
-    "test_client": "TestClient",
-    "double_test": "Doubl",
-    "santa": "SantaClaus",
-    "krampus": "Krampus",
-    "frodo": "FrodoBaggins",
-    "aragorn": "Aragorn",
-    "iron_man": "TonyStark",
-    "spider_man": "PeterParker",
-    "thor": "Thor",
-    "samuel": "SamuelGamgy",
+    1: "TestClient",
+    2: "Doubl",
+    3: "SantaClaus",
+    4: "Krampus",
+    5: "FrodoBaggins",
+    6: "Aragorn",
+    7: "TonyStark",
+    8: "PeterParker",
+    9: "Thor",
+    10: "SamuelGamgy",
 }
 
 USER_CLAIM_TYPE = [
@@ -111,7 +106,6 @@ API_SCOPE_CLAIM_TYPE = [
     "updated_at",
 ]
 
-
 DEFAULT_USER_CLAIMS = {
     1: "Daniil",
     2: "Ibragim",
@@ -167,7 +161,6 @@ ROLES = [
     "Air cabin crew",
     "Scientist, research (maths)",
 ]
-
 
 ACCESS_TOKEN_TYPES = ["jwt", "reference"]
 
@@ -233,15 +226,44 @@ IDENTITY_PROVIDERS = [
     },
 ]
 
-POST_LOGOUT_REDIRECT_URL = [
-    "http://thompson-chung.com/",
-    "http://welch-miller.com/",
-    "https://www.cole.com/",
-    "https://www.mccarthy-ruiz.info/",
-    "http://chen-smith.com/",
-    "http://www.ross-zamora.biz/",
-    "https://www.king.com/",
-    "http://www.sparks.net/",
-    "https://www.villarreal.com/",
-    "https://meyer-berry.com/",
-]
+# <<<<<<< one_branch_user_client_registration
+# POST_LOGOUT_REDIRECT_URL = [
+#     "http://thompson-chung.com/",
+#     "http://welch-miller.com/",
+#     "https://www.cole.com/",
+#     "https://www.mccarthy-ruiz.info/",
+#     "http://chen-smith.com/",
+#     "http://www.ross-zamora.biz/",
+#     "https://www.king.com/",
+#     "http://www.sparks.net/",
+#     "https://www.villarreal.com/",
+#     "https://meyer-berry.com/",
+# ]
+
+RESPONSE_TYPES = ['code', 'id_token', 'token', 'code id_token']
+
+# POST_LOGOUT_REDIRECT_URL = {
+#     "test_client": "http://thompson-chung.com/",
+#     "double_test": "http://welch-miller.com/",
+#     "santa": "https://www.cole.com/",
+#     "krampus": "https://www.mccarthy-ruiz.info/",
+#     "frodo": "http://chen-smith.com/",
+#     "aragorn": "http://www.ross-zamora.biz/",
+#     "iron_man": "https://www.king.com/",
+#     "spider_man": "http://www.sparks.net/",
+#     "thor": "https://www.villarreal.com/",
+#     "samuel": "https://meyer-berry.com/",
+# }
+
+POST_LOGOUT_REDIRECT_URL = {
+    1: "http://thompson-chung.com/",
+    2: "http://welch-miller.com/",
+    3: "https://www.cole.com/",
+    4: "https://www.mccarthy-ruiz.info/",
+    5: "http://chen-smith.com/",
+    6: "http://www.ross-zamora.biz/",
+    7: "https://www.king.com/",
+    8: "http://www.sparks.net/",
+    9: "https://www.villarreal.com/",
+    10: "https://meyer-berry.com/",
+}

@@ -16,10 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class TestRevokationEndpoint:
     @pytest.mark.asyncio
     async def test_successful_revoke_request(
-        self, engine: AsyncEngine, client: AsyncClient
+        self, connection: AsyncSession, client: AsyncClient
     ) -> None:
         jwt = JWTService()
-        persistent_grant_repo = PersistentGrantRepository(engine)
+        persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "refresh_token"
         revoke_token = "----token_to_delete-----"
 
@@ -30,6 +30,7 @@ class TestRevokationEndpoint:
             client_id="test_client",
             expiration_time=3600,
         )
+        await connection.commit()
         headers = {
             "authorization": await jwt.encode_jwt(
                 payload={"sub": "1", "aud":["revoke"]}
@@ -47,11 +48,9 @@ class TestRevokationEndpoint:
 
     @pytest.mark.asyncio
     async def test_token_does_not_exists(
-        self, engine: AsyncEngine, client: AsyncClient
+        self, client: AsyncClient
     ) -> None:
         jwt = JWTService()
-        self.persistent_grant_repo = PersistentGrantRepository(engine)
-
         grant_type = "code"
         revoke_token = "----token_not_exists-----"
         headers = {

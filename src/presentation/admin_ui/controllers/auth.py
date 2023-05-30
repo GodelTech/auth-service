@@ -2,7 +2,8 @@ import logging
 
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
-
+from typing import Union
+from fastapi.responses import RedirectResponse
 from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services import AdminAuthService
 
@@ -34,6 +35,6 @@ class AdminAuthController(AuthenticationBackend):
         request.session.clear()
         return True
 
-    async def authenticate(self, request: Request) -> bool:
+    async def authenticate(self, request: Request) -> Union[None, RedirectResponse]:
         token = request.session.get("Token")
         return await self.auth_service.authenticate(token)

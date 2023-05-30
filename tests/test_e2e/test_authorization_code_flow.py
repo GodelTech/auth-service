@@ -1,16 +1,18 @@
 import base64
 import hashlib
 import os
+import base64
+import hashlib
+import os
+
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import select, insert, delete, text
-
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
-from src.data_access.postgresql.tables.users import UserClaim
-from src.business_logic.services.jwt_token import JWTService
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
+
+from src.business_logic.services.jwt_token import JWTService
+from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
     "gcp-api%20IdentityServerApi&grant_type="
@@ -19,101 +21,80 @@ scope = (
     "the_beginner&username=PeterParker"
 )
 
-TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
+TOKEN_HINT_DATA = {"sub": None, "client_id": "spider_man", "type": "code"}
 
 
-# @pytest.mark.asyncio
-# class TestAuthorizationCodeFlow:
-#     async def test_successful_authorization_code_flow(
-#         self, client: AsyncClient, connection: AsyncSession
-#     ) -> None:
-#         # 1st stage Authorization endpoint creates record with secrete code in Persistent grant table
-#         params = {
-#             "client_id": "spider_man",
-#             "response_type": "code",
-#             "scope": "openid profile",
-#             "redirect_uri": "https://www.google.com/",
-#         }
-#         response = await client.request("GET", "/authorize/", params=params)
-#         assert response.status_code == status.HTTP_200_OK
+@pytest.mark.asyncio
+class TestAuthorizationCodeFlow:
 
-#         content_type = "application/x-www-form-urlencoded"
-#         response = await client.request(
-#             "POST",
-#             "/authorize/",
-#             data=params
-#             | {"username": "PeterParker", "password": "the_beginner"},
-#             headers={"Content-Type": content_type},
-#         )
-#         assert response.status_code == status.HTTP_302_FOUND
+    async def test_successful_authorization_code_flow(
+            self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
+        # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
+        authorization_params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "redirect_uri": "https://www.google.com/",
+        }
+        authorization_response = await client.request("GET", "/authorize/", params=authorization_params)
+        assert authorization_response.status_code == status.HTTP_200_OK
 
-#         # 2nd stage Token endpoint changes secrete code in Persistent grant table to token
-#         secret_code = await connection.execute(
-#             select(PersistentGrant.grant_data).where(
-#                 PersistentGrant.client_id == 8
-#             )
-#         )
+        user_credentials = {"username": "PeterParker", "password": "the_beginner"}
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data={**authorization_params, **user_credentials},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == status.HTTP_302_FOUND
 
-#         secret_code = secret_code.first()[0]
+        # Stage 2: Token endpoint changes the secret code in the Persistent Grant table to a token
+        secret_code = response.headers["location"].split("=")[1]
 
-#         params = {
-#             "client_id": "spider_man",
-#             "grant_type": "authorization_code",
-#             "code": secret_code,
-#             "redirect_uri": "https://www.google.com/",
-#         }
+        token_params = {
+            "client_id": "spider_man",
+            "grant_type": "authorization_code",
+            "code": secret_code,
+            "redirect_uri": "https://www.google.com/",
+        }
+        token_response = await client.request(
+            "POST",
+            "/token/",
+            data=token_params,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        response_data = token_response.json()
+        access_token = response_data.get("access_token")
+        assert token_response.status_code == status.HTTP_200_OK
 
-#         content_type = "application/x-www-form-urlencoded"
+        # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
+        user_id_query = select(User.id).where(User.username == "PeterParker")
+        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
-#         response = await client.request(
-#             "POST",
-#             "/token/",
-#             data=params,
-#             headers={"Content-Type": content_type},
-#         )
-#         response_data = response.json()
-#         access_token = response_data.get("access_token")
-#         assert response.status_code == status.HTTP_200_OK
+        user_claim_insertion = insert(UserClaim).values(user_id=user_id, claim_type_id=1, claim_value="Peter")
+        await connection.execute(user_claim_insertion)
+        await connection.commit()
 
-#         # 3rd stage UserInfo endpoint retrieves user data from UserClaims table
+        user_info_response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
+        assert user_info_response.status_code == status.HTTP_200_OK
 
-#         # The sequence id number is out of sync and raises duplicate key error
-#         # We manually bring it back in sync
-#         await connection.execute(
-#             text(
-#                 "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
-#             )
-#         )
+        # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
+        jwt_service = JWTService()
 
-#         await connection.execute(
-#             insert(UserClaim).values(
-#                 user_id=8, claim_type_id=1, claim_value="Peter"
-#             )
-#         )
-#         await connection.commit()
-#         response = await client.request(
-#             "GET", "/userinfo/", headers={"authorization": access_token}
-#         )
-#         assert response.status_code == status.HTTP_200_OK
-#         await connection.execute(
-#             delete(UserClaim)
-#             .where(UserClaim.user_id == 8)
-#             .where(UserClaim.claim_type_id == 1)
-#         )
-#         await connection.commit()
+        TOKEN_HINT_DATA["sub"] = user_id
 
-#         # 4th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
-#         jwt_service = JWTService()
+        id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
 
-#         id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
-
-#         params = {
-#             "id_token_hint": id_token_hint,
-#             "post_logout_redirect_uri": "http://www.sparks.net/",
-#             "state": "test_state",
-#         }
-#         response = await client.request("GET", "/endsession/", params=params)
-#         assert response.status_code == status.HTTP_302_FOUND
+        logout_params = {
+            "id_token_hint": id_token_hint,
+            "post_logout_redirect_uri": "http://www.sparks.net/",
+            "state": "test_state",
+        }
+        end_session_response = await client.request("GET", "/endsession/", params=logout_params)
+        assert end_session_response.status_code == status.HTTP_302_FOUND
 
 
 @pytest.mark.asyncio

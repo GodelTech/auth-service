@@ -13,7 +13,7 @@ class ClientFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
         sqlalchemy_get_or_create = ("client_id",)
 
-    client_id = factory.Iterator(data.CLIENT_IDS)
+    client_id = factory.Iterator(data.CLIENT_IDS.values())
     absolute_refresh_token_lifetime = factory.Faker(
         "pyint", min_value=3600, max_value=50000
     )
@@ -27,8 +27,12 @@ class ClientFactory(SQLAlchemyModelFactory):
     allow_remember_consent = factory.Faker("pybool")
     always_include_user_claims_id_token = factory.Faker("pybool")
     always_send_client_claims = factory.Faker("pybool")
-    authorization_code_lifetime = factory.Faker("random_number")
-    device_code_lifetime = factory.Faker("random_number")
+    authorization_code_lifetime = factory.Faker(
+        "pyint", min_value=600, max_value=50000
+    )
+    device_code_lifetime = factory.Faker(
+        "pyint", min_value=600, max_value=50000
+    )
     client_name = factory.Faker("user_name")
     client_uri = factory.Faker("url")
     enable_local_login = factory.Faker("pybool")
@@ -121,36 +125,25 @@ class ClientSecretFactory(SQLAlchemyModelFactory):
     value = factory.Faker("word")
     client_id = factory.SubFactory(ClientFactory)
 
-
-class ClientGrantTypeFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = client.ClientGrantType
-        sqlalchemy_session = sess.session
-
-    grant_type = FuzzyChoice(
-        [
-            "authorization_code",
-            "refresh_token",
-        ]
-    )
-    client_id = factory.SubFactory(ClientFactory)
-
-
 class AccessTokenTypeFactory(SQLAlchemyModelFactory):
     class Meta:
         model = client.AccessTokenType
         sqlalchemy_session = sess.session
 
-    id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["jwt", "reference"])
 
+class ResponseTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = client.ResponseType
+        sqlalchemy_session = sess.session
+
+    type = factory.Iterator(data.RESPONSE_TYPES)
 
 class ProtocolTypeFactory(SQLAlchemyModelFactory):
     class Meta:
         model = client.ProtocolType
         sqlalchemy_session = sess.session
 
-    id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["open_id_connect"])
 
 
@@ -159,7 +152,6 @@ class RefreshTokenExpirationTypeFactory(SQLAlchemyModelFactory):
         model = client.RefreshTokenExpirationType
         sqlalchemy_session = sess.session
 
-    id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["absolute", "sliding"])
 
 
@@ -168,5 +160,4 @@ class RefreshTokenUsageTypeFactory(SQLAlchemyModelFactory):
         model = client.RefreshTokenUsageType
         sqlalchemy_session = sess.session
 
-    id = factory.Sequence(lambda n: n + 1)
     type = factory.Iterator(["one_time_only", "reuse"])

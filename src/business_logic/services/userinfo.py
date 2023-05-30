@@ -4,41 +4,41 @@ from jwt.exceptions import PyJWTError
 
 from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
 )
 from src.data_access.postgresql.repositories.user import UserRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserInfoServices:
     def __init__(
         self,
-        jwt: JWTService,
+        session:AsyncSession,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
+        jwt: JWTService = JWTService(),
     ) -> None:
         self.jwt = jwt
         self.authorization: Optional[str] = None
         self.user_repo = user_repo
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
+        self.session = session
 
     async def get_user_info(
         self,
     ) -> dict[str, Any]:
-        if self.authorization is None:
-            raise ValueError
 
         token = self.authorization
-        decoded_token = None
+        decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
         try:
-            decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
             sub = int(decoded_token["sub"])
-        except (PyJWTError, KeyError):
-            raise ValueError
+        except KeyError:
+            raise KeyError("No parameter 'sub' in token")
+
         
         claims_dict = await self.user_repo.get_claims(id=sub)
         if not claims_dict.get("sub", False):

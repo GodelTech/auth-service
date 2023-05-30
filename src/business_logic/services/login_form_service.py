@@ -1,6 +1,8 @@
+from __future__ import annotations
 import logging
 import secrets
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import (
@@ -8,6 +10,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
 )
 from src.presentation.api.models import RequestModel
+from src.data_access.postgresql.errors.client import ClientNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +18,12 @@ logger = logging.getLogger(__name__)
 class LoginFormService:
     def __init__(
         self,
+        session: AsyncSession,
         client_repo: ClientRepository,
         oidc_repo: ThirdPartyOIDCRepository,
     ) -> None:
         self._request_model: Optional[RequestModel] = None
+        self.session = session
         self.client_repo = client_repo
         self.oidc_repo = oidc_repo
 
@@ -78,6 +83,8 @@ class LoginFormService:
                         "provider_link": provider_link,
                     }
                 return providers_data
+            else:
+                raise ClientNotFoundError
         return None
 
     async def _validate_client(self, client_id: str) -> bool:

@@ -1,5 +1,5 @@
 from .config import provide_config
-from .db import provide_db
+from .db import provide_db, provide_db_only
 from .repositories import (
     provide_wellknown_repo,
     provide_wellknown_repo_stub,
@@ -17,6 +17,10 @@ from .repositories import (
     provide_user_repo_stub,
     provide_blacklisted_repo,
     provide_blacklisted_repo_stub,
+    provide_async_session,
+    provide_async_session_stub,
+    ProviderSession
+
 )
 from .services import (
     provide_wellknown_service,
@@ -59,6 +63,8 @@ from .services import (
     provide_token_service_stub,
     provide_userinfo_service,
     provide_userinfo_service_stub,
+    provide_client_service_stub,
+    provide_client_service,
 )
 from .services_factory import (
     provide_auth_service_factory,

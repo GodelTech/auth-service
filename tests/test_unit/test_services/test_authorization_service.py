@@ -128,20 +128,6 @@ class TestAuthorizationService:
         with pytest.raises(ClientScopesError):
             await self.auth_service._validate_scope()
 
-    # @patch.object(
-    #     AuthorizationService, "_validate_scope", new_callable=AsyncMock
-    # )
-    # async def test_validate_auth_data(self, _validate_scope_mock):
-    #     user_id = 1
-    #     result = await self.auth_service._validate_client_data()
-    #     assert result == user_id
-
-    # async def test_validate_auth_data_invalid_password(self):
-    #     self.auth_service.password_service.validate_password.side_effect = (
-    #         WrongPasswordError
-    #     )
-    #     with pytest.raises(WrongPasswordError):
-    #         await self.auth_service._validate_client_data()
 
     async def test_validate_auth_data_invalid_client(self):
         self.auth_service.client_repo.validate_client_redirect_uri.side_effect = (
@@ -149,13 +135,6 @@ class TestAuthorizationService:
         )
         with pytest.raises(ClientNotFoundError):
             await self.auth_service._validate_client_data()
-
-    # async def test_validate_auth_data_invalid_username(self):
-    #     self.auth_service.user_repo.get_hash_password.side_effect = (
-    #         UserNotFoundError
-    #     )
-    #     with pytest.raises(UserNotFoundError):
-    #         await self.auth_service._validate_client_data()
 
     @patch("secrets.token_urlsafe")
     async def test_get_redirect_url(self, token_urlsafe_mock):
