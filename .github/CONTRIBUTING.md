@@ -1,5 +1,8 @@
 # Contributing to Auth Service
 
+- if you have found a bug or a discrepancy with technical specifications <!-- Insert link to specs -->, consider creating an issue
+- to submit a change, consider opening a PR with a concise description and preferably a link to an issue it solves (consider first creating one if it doesn't exist)
+
 # Developer setup
 
 ## Environment
@@ -53,7 +56,7 @@ make migrate
 ```
 To make changes:
 ```bash
-alembic revision --autogenerate -m "YOUR_MESSAGE"
+alembic revision --autogenerate -m "[YOUR_MESSAGE]"
 ```
 
 ### PostgreSQL Admin
