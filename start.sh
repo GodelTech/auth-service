@@ -17,8 +17,8 @@ elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" 
 else # production
   echo "Migrations"
   alembic upgrade head
-  # echo "Create initial data in DB"
-  # python -m src.initial_data
+  echo "Create initial data in DB"
+  python -m src.initial_data
 fi
 
 
