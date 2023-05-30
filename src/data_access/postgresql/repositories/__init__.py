@@ -7,3 +7,4 @@ from .third_party_oidc import ThirdPartyOIDCRepository
 from .user import UserRepository
 from .wellknown import WellKnownRepository
 from .blacklisted_token import BlacklistedTokenRepository
+from .code_challenge import CodeChallengeRepository
