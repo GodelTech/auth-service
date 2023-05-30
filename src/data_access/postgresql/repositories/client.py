@@ -331,7 +331,7 @@ class ClientRepository(BaseRepository):
                 .where(Client.client_id == client_id)
             )
 
-    async def get_all(self) -> None:
+    async def get_all(self) -> list[Client]:
             result = await self.session.execute(
                     select(Client)
                 )

@@ -67,6 +67,7 @@ class TestUserEndpoint:
             "family_name":"polnareff",
             "middle_name":"polnareff",
             }
+        
         response = await client.request(
             "POST", "/user/add_info/polnareff", headers=headers, data=data
         )

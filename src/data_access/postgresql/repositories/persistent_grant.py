@@ -81,7 +81,8 @@ class PersistentGrantRepository(BaseRepository):
                 PersistentGrant.grant_data == grant_data,
             )
         )
-        return result.first()[0]
+        result = result.first()[0]
+        return result
 
     async def delete(self, grant_type: str, grant_data: str) -> int:
         #TODO: no http errors must be in the data_access layer.
