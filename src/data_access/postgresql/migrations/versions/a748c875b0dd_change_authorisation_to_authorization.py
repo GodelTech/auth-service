@@ -35,6 +35,6 @@ def downgrade() -> None:
         "authorization_code_lifetime",
         existing_type=sa.INTEGER(),
         nullable=False,
-        new_column_name="authorization_code_lifetime",
+        new_column_name="authorisation_code_lifetime",
     )
     # ### end Alembic commands ####
