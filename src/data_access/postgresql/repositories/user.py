@@ -205,31 +205,7 @@ class UserRepository(BaseRepository):
             select(User).where(User.username == username).exists().select()
         )
         return result.scalar()
-    
-# =======
-#         try:
-#             user = await self.session.execute(
-#                 select(User)
-#                 .join(
-#                     UserPassword,
-#                     User.password_hash_id == UserPassword.id,
-#                     isouter=True,
-#                 )
-#                 .join(
-#                     IdentityProvider,
-#                     User.identity_provider_id == IdentityProvider.id,
-#                     isouter=True,
-#                 )
-#                 .where(User.username == username)
-#             )
-#             user = user.first()
-# >>>>>>> main
-
-#             return user[0]
-#         except:
-#             raise ValueError
-
- 
+     
     async def update(
         self,
         user_id: int,
@@ -479,38 +455,6 @@ class UserRepository(BaseRepository):
                 select(UserClaimType.id, UserClaimType.type_of_claim)
             )
             return {k: v for v, k in result.all()}
-
-    # async def get_hashed_password_by_username(self, username: str) -> str:
-    #     session_factory = sessionmaker(
-    #         self.engine, expire_on_commit=False, class_=AsyncSession
-    #     )
-    #     async with session_factory() as session:
-    #         result = await session.execute(
-    #             select(UserPassword.value)
-    #             .join(User, User.password_hash_id == UserPassword.id)
-    #             .where(User.username == username)
-    #         )
-    #         return result.scalar()
-    #
-    # async def exists_user(self, username: str) -> bool:
-    #     session_factory = sessionmaker(
-    #         self.engine, expire_on_commit=False, class_=AsyncSession
-    #     )
-    #     async with session_factory() as session:
-    #         result = await session.execute(
-    #             select(User).where(User.username == username).exists().select()
-    #         )
-    #         return result.scalar()
-    #
-    # async def get_user_id_by_username(self, username: str) -> int:
-    #     session_factory = sessionmaker(
-    #         self.engine, expire_on_commit=False, class_=AsyncSession
-    #     )
-    #     async with session_factory() as session:
-    #         result = await session.execute(
-    #             select(User.id).where(User.username == username)
-    #         )
-    #         return result.scalar()
-
-    def __repr__(self) -> str:  # pragma: no cover
+        
+    def __repr__(self) -> str: 
         return "User repository"
