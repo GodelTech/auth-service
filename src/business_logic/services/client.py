@@ -158,10 +158,7 @@ class ClientService:
 
     async def get_all(self):
         clients:list[Client] = await self.client_repo.get_all()
-        result =[]
-        for client in  clients:
-            result.append(self.client_to_dict(client))
-        return result
+        return [self.client_to_dict(client) for client in  clients]
     
     def client_to_dict(self, client:Client):
         return{
