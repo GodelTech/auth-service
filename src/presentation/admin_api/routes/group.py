@@ -25,7 +25,6 @@ async def get_group(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -47,7 +46,6 @@ async def get_all_groups(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -65,7 +63,6 @@ async def get_subgroups(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -84,7 +81,6 @@ async def create_group(
     request_model: RequestNewGroupModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -109,7 +105,6 @@ async def update_group(
     request_model: RequestUpdateGroupModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)
@@ -135,7 +130,6 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     group_class = AdminGroupService(
         session=session,
         group_repo=GroupRepository(session=session)

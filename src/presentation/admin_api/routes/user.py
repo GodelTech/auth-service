@@ -24,8 +24,6 @@ async def get_user(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -55,7 +53,6 @@ async def get_all_users(
     session: AsyncSession = Depends(provide_async_session_stub)
     
 ) -> dict[str, Any]:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -77,7 +74,6 @@ async def update_user(
     request_model: RequestUpdateUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -110,7 +106,6 @@ async def delete_user(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -128,7 +123,6 @@ async def create_user(
     request_body: RequestCreateUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -150,7 +144,6 @@ async def add_groups(
     request_body: RequestGroupsUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -172,7 +165,6 @@ async def add_roles(
     request_model: RequestRolesUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -194,7 +186,6 @@ async def get_user_groups(
     request_model: RequestUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 )  -> dict[str, Any]:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -217,7 +208,6 @@ async def get_user_roles(
     request_model: RequestUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -238,7 +228,6 @@ async def delete_roles(
     request_model: RequestRolesUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -260,7 +249,6 @@ async def delete_groups(
     request_model: RequestGroupsUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)
@@ -282,7 +270,6 @@ async def change_user_password(
     request_model: RequestPasswordUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     user_class = AdminUserService(
         session = session,
         user_repo=UserRepository(session)

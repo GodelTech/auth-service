@@ -28,7 +28,6 @@ async def add_info(
     request: Request,
     session: AsyncSession = Depends(provide_async_session_stub)
     ) -> _TemplateResponse:
-    session = session
     user_service = AdminUserService(
         session=session, 
         user_repo=UserRepository(session)
@@ -75,7 +74,6 @@ async def add_info(
     request_body:RequestAddInfoUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
     ) -> None:
-    session = session
     user_service = AdminUserService(
         session=session, 
         user_repo=UserRepository(session)
@@ -92,7 +90,6 @@ async def register_user(
     request_body: RequestUserModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
     ) -> _TemplateResponse:
-    session = session
     user_service = AdminUserService(
         session=session, 
         user_repo=UserRepository(session)

@@ -34,7 +34,6 @@ async def get_openid_configuration(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
     try:
-        session = session
         logger.debug("Collecting Data for OpenID Configuration.")
         well_known_info_class = WellKnownServices(
             session=session, wlk_repo=WellKnownRepository(session)

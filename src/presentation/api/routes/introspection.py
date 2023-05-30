@@ -40,7 +40,6 @@ async def post_introspection(
     request_body: BodyRequestIntrospectionModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     introspection_class = IntrospectionServies(
         session=session,
         user_repo=UserRepository(session),

@@ -40,7 +40,6 @@ async def post_revoke_token(
     request_body: BodyRequestRevokeModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     token_class = TokenService(
         session=session,
         client_repo=ClientRepository(session),

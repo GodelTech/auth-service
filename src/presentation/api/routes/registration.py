@@ -24,7 +24,6 @@ async def register_client(
     request_body: ClientRequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
     ) -> dict[str, str]:
-    session = session
     client_service = ClientService(
         session=session, 
         client_repo=ClientRepository(session)
@@ -42,7 +41,6 @@ async def update_client(
     request_body: ClientUpdateRequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
     ) -> dict[str, str]:
-    session = session
     client_service = ClientService(
         session=session, 
         client_repo=ClientRepository(session)
@@ -61,7 +59,6 @@ async def get_all_clients(
     auth:None = Depends(access_token_middleware),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str,list[dict[str, Any]]]:
-    session = session
     client_service = ClientService(
         session=session, 
         client_repo=ClientRepository(session)
@@ -75,7 +72,6 @@ async def get_client(
     client_service: ClientService = Depends(provide_client_service_stub),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str, Any]:
-    session = session
     client_service = ClientService(
         session=session, 
         client_repo=ClientRepository(session)
@@ -90,7 +86,6 @@ async def delete_client(
     client_service: ClientService = Depends(provide_client_service_stub),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str, Any]:
-    session = session
     client_service = ClientService(
         session=session, 
         client_repo=ClientRepository(session)

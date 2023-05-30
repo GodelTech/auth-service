@@ -41,7 +41,6 @@ async def get_userinfo(
     ),  # crutch for swagger
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),
@@ -69,7 +68,6 @@ async def post_userinfo(
     ),  # crutch for swagger
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),
@@ -96,7 +94,6 @@ async def get_userinfo_jwt(
     ),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> str:
-    session = session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),

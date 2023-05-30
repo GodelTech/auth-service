@@ -52,7 +52,6 @@ async def get_github_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = AuthThirdPartyOIDCService(
             session=session,
             client_repo=ClientRepository(session),
@@ -85,7 +84,6 @@ async def get_linkedin_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = ThirdPartyLinkedinService(
             session=session,
             client_repo=ClientRepository(session),
@@ -118,7 +116,6 @@ async def get_facebook_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = ThirdPartyFacebookService(
             session=session,
             client_repo=ClientRepository(session),
@@ -151,7 +148,6 @@ async def get_google_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = ThirdPartyGoogleService(
             session=session,
             client_repo=ClientRepository(session),
@@ -184,7 +180,6 @@ async def get_gitlab_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = ThirdPartyGitLabService(
             session=session,
             client_repo=ClientRepository(session),
@@ -217,7 +212,6 @@ async def get_microsoft_authorize(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
     try:
-        session = session
         auth_class = ThirdPartyMicrosoftService(
             session=session,
             client_repo=ClientRepository(session),
@@ -249,7 +243,6 @@ async def post_create_state(
     state_request_model: StateRequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[None, JSONResponse, int]:
-    session = session
     auth_class = AuthThirdPartyOIDCService(
         session=session,
         client_repo=ClientRepository(session),

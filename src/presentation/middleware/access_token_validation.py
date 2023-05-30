@@ -19,7 +19,6 @@ async def access_token_middleware(
 ) -> Any:
     jwt_service = JWTService()
     token = request.headers.get("access-token")
-    session = session
     blacklisted_repo = BlacklistedTokenRepository(session)
     
     if token is None:

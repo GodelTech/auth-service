@@ -35,7 +35,6 @@ async def post_device_authorize(
     request_model: DeviceRequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> JSONResponse:
-    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),
@@ -74,7 +73,6 @@ async def post_device_user_code(
     request_model: DeviceUserCodeModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[RedirectResponse, JSONResponse]:
-    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),
@@ -119,7 +117,6 @@ async def delete_device(
     user_code: Optional[str] = Cookie(None),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[str, JSONResponse]:
-    session = session
     auth_service = DeviceService(
         session=session,
         client_repo=ClientRepository(session),

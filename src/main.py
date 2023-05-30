@@ -11,7 +11,6 @@ from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
-from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.middleware.https_global_middleware import HttpsGlobalMiddleware
 from src.presentation.api import router
 from src.di import Container
@@ -79,9 +78,6 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_async_session_stub
     ] = session
 
-    # app.add_middleware(
-    #     middleware_class=SessionManager, session = session
-    # )
     app.add_middleware(middleware_class=HttpsGlobalMiddleware)
     
     # Register admin-ui controllers on application start-up.
@@ -93,7 +89,7 @@ def setup_di(app: FastAPI) -> None:
             secret_key="1234",
             auth_service=AdminAuthService(
                 user_repo=UserRepository(
-                    session=session
+                    session=prov.provide_async_session(db_engine)
                 ),
             )
         )

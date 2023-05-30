@@ -25,7 +25,6 @@ async def get_role(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-        session = session
         role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -42,7 +41,6 @@ async def get_all_roles(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 )-> dict[str, Any]:
-    session = session
     role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -59,7 +57,6 @@ async def create_role(
     request_model: RequestNewRoleModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -78,7 +75,6 @@ async def update_role(
     request_model: RequestUpdateRoleModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-        session = session
         role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -97,7 +93,6 @@ async def delete_group(
     access_token: str = Header(description="Access token"),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = session
     role_class = AdminRoleService(
         session=session,
         role_repo=RoleRepository(session=session)

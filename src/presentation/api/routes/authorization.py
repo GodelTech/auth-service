@@ -49,7 +49,6 @@ async def get_authorize(
     request_model: RequestModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizeGetEndpointResponse:
-    session = session
     auth_class = LoginFormService(
         session=session,
         client_repo=ClientRepository(session),
@@ -83,7 +82,6 @@ async def post_authorize(
     user_code: Optional[str] = Cookie(None),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizePostEndpointResponse:
-    session = session
     auth_service_factory = AuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),

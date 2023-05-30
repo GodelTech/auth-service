@@ -54,7 +54,6 @@ async def get_tokens(
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        session = session
         token_class = TokenService(
             session=session,
             client_repo=ClientRepository(session),

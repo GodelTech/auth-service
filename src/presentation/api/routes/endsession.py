@@ -26,7 +26,6 @@ async def end_session(
     request_model: RequestEndSessionModel = Depends(),
     session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[int, RedirectResponse, JSONResponse]:
-    session = session
     service_class = EndSessionService(
         session=session,
         client_repo=ClientRepository(session),

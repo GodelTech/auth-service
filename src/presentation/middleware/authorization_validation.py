@@ -21,7 +21,6 @@ async def authorization_middleware(
     if token is None:
         raise IncorrectAuthTokenError("No authorization or auth-swagger in Request")
 
-    session = session
     blacklisted_repo = BlacklistedTokenRepository(session)
     if await blacklisted_repo.exists(
             token=token,
