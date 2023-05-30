@@ -30,8 +30,7 @@ class PersistentGrant(BaseModel):
     client = relationship(
         "Client",
         back_populates="grants",
-        foreign_keys="PersistentGrant.client_id",
-        lazy="joined",
+        lazy = 'immediate'
     )
     grant_data = Column(String, nullable=False)
     expiration = Column(Integer, nullable=False)
@@ -39,7 +38,7 @@ class PersistentGrant(BaseModel):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     user = relationship(
-        "User", back_populates="grants", foreign_keys="PersistentGrant.user_id"
+        "User", back_populates="grants",
     )
 
     persistent_grant_type_id = Column(
@@ -50,23 +49,23 @@ class PersistentGrant(BaseModel):
     persistent_grant_type = relationship(
         "PersistentGrantType",
         backref="grants",
-        foreign_keys="PersistentGrant.persistent_grant_type_id",
-        lazy="joined",
+        lazy = 'joined'
     )
 
     def __str__(self) -> str:  # pragma: no cover
         return f":{self.expiration}"
 
 
-class PersistentGrantType(Base):
+class PersistentGrantType(BaseModel):
     __tablename__ = "persistent_grant_types"
-    id = Column(Integer, primary_key=True)
     type_of_grant = Column(String, nullable=False)
+    
     clients = relationship(
         "Client",
         secondary=clients_grant_types,
         cascade="all,delete",
         back_populates="grant_types",
+        lazy = "noload",
     )
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.type_of_grant}"

@@ -3,6 +3,9 @@
 ![image](https://img.shields.io/github/release-date-pre/GodelTech/auth-service?logo=github)
 ![image](https://img.shields.io/github/contributors/GodelTech/auth-service?logo=github)
 
+![image](https://img.shields.io/github/v/release/GodelTech/auth-service?include_prereleases)
+![image](https://img.shields.io/docker/v/levigoldman/auth-service)
+
 # Project installation
 
 ##### Link to the GIT repository:

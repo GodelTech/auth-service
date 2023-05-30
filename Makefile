@@ -40,6 +40,10 @@ check:
 populate-db:
 	python -m factories.commands
 
+## Drop tables in database and truncate "alembic_version" table
+purge:
+	python -m factories.purge
+
 
 ## Run pytests
 test:

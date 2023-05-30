@@ -18,6 +18,9 @@ from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )
 from src.di.providers import provide_async_session_stub
+from src.presentation.middleware.authorization_validation import (
+    authorization_middleware,
+)
 
 logger = logging.getLogger(__name__)
 

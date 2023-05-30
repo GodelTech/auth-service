@@ -106,7 +106,7 @@ class User(BaseModel):
         "UserClaim", 
         back_populates="user", 
         foreign_keys="UserClaim.user_id", 
-        lazy = "subquery"
+      #  lazy = "subquery"
     )
     grants = relationship(
         "PersistentGrant",
