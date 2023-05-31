@@ -10,9 +10,8 @@ class Device(BaseModel):
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
     client = relationship(
         "Client",
-        back_populates = 'devices',
-        foreign_keys="Device.client_id",
-        lazy = "subquery"
+        back_populates = 'devices',    
+        lazy = 'immediate'
     )
 
     device_code = Column(String(80), nullable=False, unique=True)

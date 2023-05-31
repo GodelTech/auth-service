@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Optional
+
 from fastapi import APIRouter, Depends, Header, Request
 
 from src.business_logic.services.introspection import IntrospectionServies
@@ -11,6 +12,9 @@ from src.data_access.postgresql.repositories import (
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
     ResponseIntrospectionModel,
+)
+from src.presentation.middleware.authorization_validation import (
+    authorization_middleware,
 )
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
