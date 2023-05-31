@@ -68,7 +68,7 @@ async function redirect(data) {
             }
         })
         .then((data) => {
-            showConfirmationModal(text = data.some_text, redirect_url = data.redirect_url);
+            showConfirmationModal(text = data.confirm_text, header_text = data.header_text, redirect_url = data.redirect_url);
         })
         .catch((err) => {
             if (
@@ -156,7 +156,7 @@ function handleDeviceButton(butt) {
     window.location.href = device_link;
 }
 
-function showConfirmationModal(text, redirect_url) {
+function showConfirmationModal(text, header_text, redirect_url) {
     let confirmationText = document.querySelector('#modal_window .form_auth_block_head_text');
     let modalOverlay = document.querySelector('#overlay_modal');
     let modalWindow = document.querySelector('#modal_window');
@@ -165,7 +165,7 @@ function showConfirmationModal(text, redirect_url) {
   
     let modalTitle = document.createElement("p");
     modalTitle.classList.add("modal_title");
-    modalTitle.textContent = "The service wants to get access to:";
+    modalTitle.textContent = header_text;
     modalTitle.style.fontFamily = "Arial, sans-serif";
     modalTitle.style.textAlign = "left";
     modalTitle.style.fontWeight = "bold";

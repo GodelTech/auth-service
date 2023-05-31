@@ -99,5 +99,6 @@ async def post_authorize(
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    some_text = ScopeService().get_scope_description(scope=request_body.scope)
-    return JSONResponse({"redirect_url":result, "some_text":some_text})
+    confirm_text = ScopeService().get_scope_description(scope=request_body.scope)
+    header_text = 'The service want to get access to:'
+    return JSONResponse({"redirect_url":result, "confirm_text":confirm_text, "header_text":header_text})

@@ -480,7 +480,8 @@ class ClientCredentialsMaker(BaseMaker):
         access_token = await self.jwt_service.encode_jwt(
             {
                 # "arc" : client_from_db.arc,
-                # # ACR value is a set of arbitrary values that the client and idp agreed upon to communicate the level of authentication that happened. This is to give the client a level of confidence on the qualify of the authentication that took place.
+                # # ACR value is a set of arbitrary values that the client and idp agreed upon to communicate the level of authentication that happened. 
+                # This is to give the client a level of confidence on the qualify of the authentication that took place.
                 # "jti" : str(uuid.uuid4()),
                 # # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.7
                 "aud": audience,
