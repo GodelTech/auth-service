@@ -33,6 +33,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     WellKnownRepository,
     BlacklistedTokenRepository,
+    CodeChallengeRepository,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -119,6 +120,7 @@ def provide_token_service(
     persistent_grant_repo: PersistentGrantRepository,
     user_repo: UserRepository,
     device_repo: DeviceRepository,
+    code_challenge_repo: CodeChallengeRepository,
     jwt_service: JWTService,
     blacklisted_repo: BlacklistedTokenRepository,
 ) -> TokenService:
@@ -128,6 +130,7 @@ def provide_token_service(
         persistent_grant_repo=persistent_grant_repo,
         user_repo=user_repo,
         device_repo=device_repo,
+        code_challenge_repo=code_challenge_repo,
         jwt_service=jwt_service,
         blacklisted_repo=blacklisted_repo,
     )

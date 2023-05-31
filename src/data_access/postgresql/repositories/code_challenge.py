@@ -1,3 +1,5 @@
+from typing import Optional, Dict
+
 from sqlalchemy import insert, select, delete
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
@@ -34,13 +36,7 @@ class CodeChallengeRepository(BaseRepository):
             )
         )
 
-        try:
-            code_challenge = result.scalars().scalar_one()
-        except NoResultFound:
-            raise ValueError("Code Challenge not found")
-        except MultipleResultsFound:
-            raise ValueError("More than one code challenge found")
-
+        code_challenge = result.scalars().one()
         return code_challenge
 
     async def get_code_challenge_method_id(self, code_challenge_method: str) -> int:

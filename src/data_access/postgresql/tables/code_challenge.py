@@ -7,12 +7,7 @@ from .base import BaseModel
 class CodeChallenge(BaseModel):
     __tablename__ = "code_challenges"
 
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
-    client = relationship(
-        "Client",
-        back_populates='code_challenges',
-        lazy='immediate'
-    )
+    client_id = Column(String, ForeignKey("clients.client_id", ondelete="CASCADE"))
     code_challenge = Column(String, nullable=False)
     code_challenge_method_id = Column(
         Integer,
@@ -32,11 +27,6 @@ class CodeChallenge(BaseModel):
 class CodeChallengeMethod(BaseModel):
     __tablename__ = "code_challenge_methods"
     method = Column(String, nullable=False)
-    code_challenges = relationship(
-        "CodeChallenge",
-        backref="code_challenge_methods",
-        lazy='noload',
-    )
 
     def __str__(self) -> str:  # pragma: no cover
         return f"CodeChallengeMethod: {self.method}"

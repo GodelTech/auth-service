@@ -11,6 +11,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     DeviceRepository,
     BlacklistedTokenRepository,
+    CodeChallengeRepository,
 )
 from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.presentation.middleware.authorization_validation import (
@@ -44,6 +45,7 @@ async def post_revoke_token(
         persistent_grant_repo=PersistentGrantRepository(session),
         user_repo=UserRepository(session),
         device_repo=DeviceRepository(session),
+        code_challenge_repo=CodeChallengeRepository(session),
         blacklisted_repo=BlacklistedTokenRepository(session),
         jwt_service=JWTService(),
     )

@@ -94,165 +94,311 @@ class TestAuthorizationCodeFlow:
         assert end_session_response.status_code == status.HTTP_302_FOUND
 
 
-# @pytest.mark.asyncio
-# class TestAuthorizationCodeFlowWithPKCE:
-#     # https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-proof-key-for-code-exchange-pkce
-#     async def test_successful(
-#         self, client: AsyncClient, connection: AsyncSession
-#     ):
-#         # 1. The user clicks Login within the application.
-#         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-#         def base64_urlencode(data):
-#             data = base64.urlsafe_b64encode(data)
-#             return data.decode("utf-8")
-#
-#         code_verifier = os.urandom(32)
-#         code_verifier = base64_urlencode(code_verifier)
-#         code_challenge = base64_urlencode(
-#             hashlib.sha256(code_verifier.encode("utf-8")).digest()
-#         )
-#
-#         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
-#         # along with the `code_challenge`.
-#         params = {
-#             "client_id": "spider_man",
-#             "response_type": "code",
-#             "scope": "openid profile",
-#             "code_challenge": code_challenge,
-#             "code_challenge_method": "S256",
-#             "redirect_uri": "https://www.google.com/",
-#         }
-#         response = await client.request("GET", "/authorize/", params=params)
-#         assert response.status_code == status.HTTP_200_OK
-#
-#         # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
-#         # 5. The user authenticates using one of the configured login options
-#         # and may see a consent page listing the permissions Auth0 will give to the application.
-#         response = await client.request(
-#             "POST",
-#             "/authorize/",
-#             data=params
-#             | {"username": "PeterParker", "password": "the_beginner"},
-#             headers={"Content-Type": "application/x-www-form-urlencoded"},
-#         )
-#
-#         # 6. Your Auth0 Authorization Server stores the `code_challenge`
-#         # and redirects the user back to the application with an authorization `code`, which is good for one use.
-#         from urllib.parse import urlparse, parse_qs
-#
-#         assert response.status_code == status.HTTP_302_FOUND
-#         url = response.headers["location"]
-#         parsed_url = urlparse(url)
-#         query = parse_qs(parsed_url.query)
-#         code = query.get("code", [None])[0]
-#
-#         # 7. Auth0's SDK sends this `code` and the `code_verifier` (created in step 2)
-#         # to the Auth0 Authorization Server (`/oauth/token` endpoint).
-#         response = await client.request(
-#             "POST",
-#             "/token/",
-#             data={
-#                 "client_id": "spider_man",
-#                 "grant_type": "authorization_code",
-#                 "code": code,
-#                 "code_verifier": code_verifier,
-#                 "redirect_uri": "https://www.google.com/",
-#             },
-#             headers={"Content-Type": "application/x-www-form-urlencoded"},
-#         )
-#
-#         # 8. Your Auth0 Authorization Server verifies the `code_challenge` and `code_verifier`.
-#         # 9. Your Auth0 Authorization Server responds with an ID token and access token (and optionally, a refresh token).
-#         response_data = response.json()
-#         access_token = response_data.get("access_token")
-#         assert response.status_code == status.HTTP_200_OK
-#
-#         user_id_query = select(User.id).where(User.username == "PeterParker")
-#         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
-#
-#         # Prepare data for the next stage
-#         await connection.execute(
-#             insert(UserClaim).values(
-#                 user_id=user_id, claim_type_id=1, claim_value="Peter"
-#             )
-#         )
-#         await connection.commit()
-#
-#         # 10. Your application can use the access token to call an API to access information about the user.
-#         response = await client.request(
-#             "GET", "/userinfo/", headers={"authorization": access_token}
-#         )
-#
-#         # 11. The API responds with requested data.
-#         data = response.json()
-#         breakpoint()
-#         assert data == {"sub": str(user_id)}
+@pytest.mark.asyncio
+class TestAuthorizationCodeFlowWithPKCE:
+    # https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-proof-key-for-code-exchange-pkce
+    async def test_successful_s256(
+            self, client: AsyncClient, connection: AsyncSession,
+    ):
+        # 1. The user clicks Login within the application.
+        # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
+        def base64_urlencode(data):
+            data = base64.urlsafe_b64encode(data)
+            return data.decode("utf-8")
 
-    # async def test_auth_request_fails_with_invalid_code_verifier(
-    #     self, client: AsyncClient, connection: AsyncSession
-    # ):
-    #     # 1. The user clicks Login within the application.
-    #     # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-    #     def base64_urlencode(data):
-    #         data = base64.urlsafe_b64encode(data).rstrip(b"=")
-    #         return data.decode("utf-8")
-    #
-    #     code_verifier = base64_urlencode(os.urandom(32))
-    #     code_challenge = base64_urlencode(
-    #         hashlib.sha256(code_verifier.encode("utf-8")).digest()
-    #     )
-    #     breakpoint()
-    #
-    #     # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
-    #     # along with the `code_challenge`.
-    #     params = {
-    #         "client_id": "spider_man",
-    #         "response_type": "code",
-    #         "scope": "openid profile",
-    #         "code_challenge": code_challenge,
-    #         "code_challenge_method": "S256",
-    #         "redirect_uri": "https://www.google.com/",
-    #     }
-    #     response = await client.request("GET", "/authorize/", params=params)
-    #     breakpoint()
-    #     assert response.status_code == status.HTTP_200_OK
-    #
-    #     # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
-    #     # 5. The user authenticates using one of the configured login options
-    #     # and may see a consent page listing the permissions Auth0 will give to the application.
-    #     response = await client.request(
-    #         "POST",
-    #         "/authorize/",
-    #         data=params
-    #         | {"username": "PeterParker", "password": "the_beginner"},
-    #         headers={"Content-Type": "application/x-www-form-urlencoded"},
-    #     )
-    #
-    #     # 6. Your Auth0 Authorization Server stores the `code_challenge`
-    #     # and redirects the user back to the application with an authorization `code`, which is good for one use.
-    #     from urllib.parse import urlparse, parse_qs
-    #
-    #     assert response.status_code == status.HTTP_302_FOUND
-    #     url = response.headers["location"]
-    #     parsed_url = urlparse(url)
-    #     query = parse_qs(parsed_url.query)
-    #     code = query.get("code", [None])[0]
-    #
-    #     breakpoint()
-    #
-    #     # 7. Authorization Code Interception Attack
-    #     # https://www.rfc-editor.org/rfc/rfc7636#page-4
-    #     response = await client.request(
-    #         "POST",
-    #         "/token/",
-    #         data={
-    #             "client_id": "spider_man",
-    #             "grant_type": "authorization_code",
-    #             "code": code,
-    #             "code_verifier": "INVALID_CODE_VERIFIER",
-    #             "redirect_uri": "https://www.google.com/",
-    #         },
-    #         headers={"Content-Type": "application/x-www-form-urlencoded"},
-    #     )
-    #
-    #     assert response.status_code == status.HTTP_400_BAD_REQUEST
+        code_verifier = os.urandom(32)
+        code_verifier = base64_urlencode(code_verifier)
+        code_challenge = base64_urlencode(
+            hashlib.sha256(code_verifier.encode("utf-8")).digest()
+        )
+
+        # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
+        # along with the `code_challenge`.
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "redirect_uri": "https://www.google.com/",
+        }
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
+        # 5. The user authenticates using one of the configured login options
+        # and may see a consent page listing the permissions Auth0 will give to the application.
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+                 | {"username": "PeterParker", "password": "the_beginner"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 6. Your Auth0 Authorization Server stores the `code_challenge`
+        # and redirects the user back to the application with an authorization `code`, which is good for one use.
+        from urllib.parse import urlparse, parse_qs
+
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["location"]
+        parsed_url = urlparse(url)
+        query = parse_qs(parsed_url.query)
+        code = query.get("code", [None])[0]
+
+        # 7. Auth0's SDK sends this `code` and the `code_verifier` (created in step 2)
+        # to the Auth0 Authorization Server (`/oauth/token` endpoint).
+        response = await client.request(
+            "POST",
+            "/token/",
+            data={
+                "client_id": "spider_man",
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "redirect_uri": "https://www.google.com/",
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 8. Your Auth0 Authorization Server verifies the `code_challenge` and `code_verifier`.
+        # 9. Your Auth0 Authorization Server responds with an ID token and access token (and optionally, a refresh token).
+        response_data = response.json()
+        access_token = response_data.get("access_token")
+        assert response.status_code == status.HTTP_200_OK
+
+        user_id_query = select(User.id).where(User.username == "PeterParker")
+        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
+
+        # Prepare data for the next stage
+        await connection.execute(
+            insert(UserClaim).values(
+                user_id=user_id, claim_type_id=1, claim_value="Peter"
+            )
+        )
+        await connection.commit()
+
+        # 10. Your application can use the access token to call an API to access information about the user.
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
+
+        # 11. The API responds with requested data.
+        data = response.json()
+        assert data == {"sub": str(user_id)}
+
+    async def test_successful_plain(
+            self, client: AsyncClient, connection: AsyncSession
+    ):
+        # 1. The user clicks Login within the application.
+        # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
+        def base64_urlencode(data):
+            data = base64.urlsafe_b64encode(data)
+            return data.decode("utf-8")
+
+        code_verifier = os.urandom(32)
+        code_verifier = base64_urlencode(code_verifier)
+        code_challenge = code_verifier
+
+        # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
+        # along with the `code_challenge`.
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "code_challenge": code_challenge,
+            "code_challenge_method": "plain",
+            "redirect_uri": "https://www.google.com/",
+        }
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
+        # 5. The user authenticates using one of the configured login options
+        # and may see a consent page listing the permissions Auth0 will give to the application.
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+                 | {"username": "PeterParker", "password": "the_beginner"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 6. Your Auth0 Authorization Server stores the `code_challenge`
+        # and redirects the user back to the application with an authorization `code`, which is good for one use.
+        from urllib.parse import urlparse, parse_qs
+
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["location"]
+        parsed_url = urlparse(url)
+        query = parse_qs(parsed_url.query)
+        code = query.get("code", [None])[0]
+
+        # 7. Auth0's SDK sends this `code` and the `code_verifier` (created in step 2)
+        # to the Auth0 Authorization Server (`/oauth/token` endpoint).
+        response = await client.request(
+            "POST",
+            "/token/",
+            data={
+                "client_id": "spider_man",
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "redirect_uri": "https://www.google.com/",
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 8. Your Auth0 Authorization Server verifies the `code_challenge` and `code_verifier`.
+        # 9. Your Auth0 Authorization Server responds with an ID token and access token (and optionally, a refresh token).
+        response_data = response.json()
+        access_token = response_data.get("access_token")
+        assert response.status_code == status.HTTP_200_OK
+
+        user_id_query = select(User.id).where(User.username == "PeterParker")
+        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
+
+        # Prepare data for the next stage
+        await connection.execute(
+            insert(UserClaim).values(
+                user_id=user_id, claim_type_id=1, claim_value="Peter"
+            )
+        )
+        await connection.commit()
+
+        # 10. Your application can use the access token to call an API to access information about the user.
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
+
+        # 11. The API responds with requested data.
+        data = response.json()
+        assert data == {"sub": str(user_id)}
+
+    async def test_unsuccessful_s256(
+            self, client: AsyncClient
+    ):
+        # 1. The user clicks Login within the application.
+        # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
+        def base64_urlencode(data):
+            data = base64.urlsafe_b64encode(data).rstrip(b"=")
+            return data.decode("utf-8")
+
+        code_verifier = base64_urlencode(os.urandom(32))
+        code_challenge = base64_urlencode(
+            hashlib.sha256(code_verifier.encode("utf-8")).digest()
+        )
+
+        # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
+        # along with the `code_challenge`.
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "redirect_uri": "https://www.google.com/",
+        }
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
+        # 5. The user authenticates using one of the configured login options
+        # and may see a consent page listing the permissions Auth0 will give to the application.
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+                 | {"username": "PeterParker", "password": "the_beginner"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 6. Your Auth0 Authorization Server stores the `code_challenge`
+        # and redirects the user back to the application with an authorization `code`, which is good for one use.
+        from urllib.parse import urlparse, parse_qs
+
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["location"]
+        parsed_url = urlparse(url)
+        query = parse_qs(parsed_url.query)
+        code = query.get("code", [None])[0]
+
+        # 7. Authorization Code Interception Attack
+        # https://www.rfc-editor.org/rfc/rfc7636#page-4
+        response = await client.request(
+            "POST",
+            "/token/",
+            data={
+                "client_id": "spider_man",
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": "INVALID_CODE_VERIFIER",
+                "redirect_uri": "https://www.google.com/",
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    async def test_unsuccessful_plain(
+            self, client: AsyncClient
+    ):
+        # 1. The user clicks Login within the application.
+        # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
+        def base64_urlencode(data):
+            data = base64.urlsafe_b64encode(data).rstrip(b"=")
+            return data.decode("utf-8")
+
+        code_verifier = base64_urlencode(os.urandom(32))
+        code_challenge = code_verifier
+
+        # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
+        # along with the `code_challenge`.
+        params = {
+            "client_id": "spider_man",
+            "response_type": "code",
+            "scope": "openid profile",
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "redirect_uri": "https://www.google.com/",
+        }
+        response = await client.request("GET", "/authorize/", params=params)
+        assert response.status_code == status.HTTP_200_OK
+
+        # 4. Your Auth0 Authorization Server redirects the user to the login and authorization prompt.
+        # 5. The user authenticates using one of the configured login options
+        # and may see a consent page listing the permissions Auth0 will give to the application.
+        response = await client.request(
+            "POST",
+            "/authorize/",
+            data=params
+                 | {"username": "PeterParker", "password": "the_beginner"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        # 6. Your Auth0 Authorization Server stores the `code_challenge`
+        # and redirects the user back to the application with an authorization `code`, which is good for one use.
+        from urllib.parse import urlparse, parse_qs
+
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["location"]
+        parsed_url = urlparse(url)
+        query = parse_qs(parsed_url.query)
+        code = query.get("code", [None])[0]
+
+        # 7. Authorization Code Interception Attack
+        # https://www.rfc-editor.org/rfc/rfc7636#page-4
+        response = await client.request(
+            "POST",
+            "/token/",
+            data={
+                "client_id": "spider_man",
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": "INVALID_CODE_VERIFIER",
+                "redirect_uri": "https://www.google.com/",
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

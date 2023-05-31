@@ -100,25 +100,11 @@ class AuthorizationService:
         if self.request_model is None:
             return None
 
-        # I left this code because I want to implement PKCE
-        # and this class is not used anymore, this functionality will be implemented in different place
-
-        # encrypted_code_challenge = None
-        # if (
-        #     not hasattr(self.request_model.code_challenge, "default")
-        #     and self.request_model.code_challenge
-        # ):  # Check if code_challenge was included in the request
-        #     fernet = Fernet(AppSettings().secret_key.get_secret_value())
-        #     encrypted_code_challenge = fernet.encrypt(
-        #         self.request_model.code_challenge.encode()
-        #     ).decode()
-
         secret_code = secrets.token_urlsafe(32)
         await self.persistent_grant_repo.create(
             client_id=self.request_model.client_id,
             grant_data=secret_code,
             user_id=user_id,
-            # code_challenge=encrypted_code_challenge,
         )
         return await self._update_redirect_url_with_params(
             secret_code=secret_code

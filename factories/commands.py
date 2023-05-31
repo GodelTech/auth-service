@@ -7,6 +7,7 @@ import factories.factory_models.identity_factory as id_factory
 import factories.factory_models.persistent_grant_factory as grant_factory
 import factories.factory_models.resources_related_factory as res_factory
 import factories.factory_models.user_factory as user_factory
+import factories.factory_models.code_challenge_factory as code_challenge_factory
 import factories.factory_session as sess
 
 factory.random.reseed_random(0)
@@ -39,6 +40,7 @@ class DataBasePopulation:
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()
+        cls.populate_code_challenge_methods()
         sess.session.commit()
         sess.session.close()
 
@@ -188,6 +190,13 @@ class DataBasePopulation:
         # for grant in data.TYPES_OF_GRANTS:
         for i in range(2):
             grant_factory.PersistentGrantFactory()
+
+    @classmethod
+    def populate_code_challenge_methods(cls) -> None:
+        for code_challenge_method in data.CODE_CHALLENGE_METHODS:
+            code_challenge_factory.CodeChallengeMethodFactory(
+                method=code_challenge_method
+            )
 
 
 if __name__ == "__main__":
