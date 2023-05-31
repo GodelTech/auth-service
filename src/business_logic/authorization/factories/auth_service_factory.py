@@ -21,6 +21,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
+
 if TYPE_CHECKING:
     from src.business_logic.services import JWTService, PasswordHash
 
@@ -30,6 +31,21 @@ ResponseTypeToFactoryMethod = Dict[str, FactoryMethod]
 
 
 class AuthServiceFactory:
+    """
+    Factory class for creating instances of AuthServiceProtocol based on the response type.
+
+    Usage:
+    - Register response types and corresponding factory methods before creating instances:
+        AuthServiceFactory._register_factory(ResponseType.CODE.value, _create_code_auth_service)
+
+    - Create an instance of AuthServiceFactory:
+        factory = AuthServiceFactory(session, client_repo, user_repo, persistent_grant_repo,
+                                 device_repo, password_service, jwt_service)
+
+    - Get an authentication service instance based on the response type:
+        service = factory.get_service_impl(response_type)
+    """
+
     _response_type_to_factory_method: ResponseTypeToFactoryMethod = {}
 
     def __init__(
@@ -42,6 +58,18 @@ class AuthServiceFactory:
         password_service: PasswordHash,
         jwt_service: JWTService,
     ) -> None:
+        """
+        Initialize the AuthServiceFactory with the required dependencies.
+
+        Args:
+            session: The async SQLAlchemy session.
+            client_repo: The repository for accessing client-related data.
+            user_repo: The repository for accessing user-related data.
+            persistent_grant_repo: The repository for accessing persistent grant-related data.
+            device_repo: The repository for accessing device-related data.
+            password_service: The service for password hashing and verification.
+            jwt_service: The service for JWT generation and verification.
+        """
         self.session = session
         self._client_repo = client_repo
         self._user_repo = user_repo
@@ -54,9 +82,28 @@ class AuthServiceFactory:
     def _register_factory(
         cls, response_type: str, factory_method: FactoryMethod
     ) -> None:
+        """
+        Register a factory method for a specific response type.
+
+        Args:
+            response_type: The response type for which the factory method is registered.
+            factory_method: The factory method to register.
+        """
         cls._response_type_to_factory_method[response_type] = factory_method
 
     def get_service_impl(self, response_type: str) -> AuthServiceProtocol:
+        """
+        Get the implementation of AuthServiceProtocol for the specified response type.
+
+        Args:
+            response_type: The response type for which to get the service implementation.
+
+        Returns:
+            An instance of AuthServiceProtocol for the specified response type.
+
+        Raises:
+            WrongResponseTypeError: If the provided response_type is not supported.
+        """
         auth_service = self._response_type_to_factory_method.get(response_type)
 
         if auth_service is None:
