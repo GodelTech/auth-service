@@ -20,14 +20,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class IntrospectionServies:
+    """Class for performing token introspection and analysis."""
+
     def __init__(
         self,
-        session:AsyncSession,
+        session: AsyncSession,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt:JWTService = JWTService(),
+        jwt: JWTService = JWTService(),
     ) -> None:
+        """Initialize the IntrospectionServices class.
+
+        Args:
+            session (AsyncSession): The async session object.
+            user_repo (UserRepository): The user repository object.
+            client_repo (ClientRepository): The client repository object.
+            persistent_grant_repo (PersistentGrantRepository): The persistent grant repository object.
+            jwt (JWTService): The JWT service object. Defaults to JWTService()
+
+        Returns:
+            None
+        """
         self.jwt = jwt
         self.request: Optional[Request] = None
         self.authorization: Optional[str] = None
@@ -38,14 +52,21 @@ class IntrospectionServies:
         self.session = session
 
     async def analyze_token(self) -> dict[str, Any]:
+        """Analyze the token and return the results as a dictionary.
+
+        Raises:
+            TokenIncorrectError: If the request body is None.
+
+        Returns:
+            dict[str, Any]: The analysis result as a dictionary.
+        """
         if self.request_body is None:
             raise TokenIncorrectError
         decoded_token = {}
         response: dict[str, Any] = {}
         try:
             decoded_token = await self.jwt.decode_token(
-                token=self.request_body.token, 
-                audience = "introspection"
+                token=self.request_body.token, audience="introspection"
             )
         except ExpiredSignatureError:
             return {"active": False}
@@ -57,7 +78,7 @@ class IntrospectionServies:
                 "access_token",
                 "access",
                 "authorization_code",
-                "authorization-code"
+                "authorization-code",
             ):
                 response["active"] = True
 
@@ -122,6 +143,14 @@ class IntrospectionServies:
         return response
 
     async def get_client_id(self) -> str:
+        """Get the client ID of the inspected token.
+
+        Raises:
+            TokenIncorrectError: If the request body is None.
+
+        Returns:
+            str: the client ID.
+        """
         if self.request_body is None:
             raise TokenIncorrectError
         grant = await self.persistent_grant_repo.get(
@@ -131,17 +160,39 @@ class IntrospectionServies:
         return grant.client_id
 
     def get_token_type(self) -> str:
+        """Get the token type of inspected token.
+
+        Returns:
+            str: The token type.
+        """
         return "Bearer"
 
     def slice_url(self) -> str:
+        """Slice the URL to get the required part.
+
+        Raises:
+            TokenIncorrectError: If the request is None.
+
+        Returns:
+            str: The sliced URL part.
+        """
         if self.request is None:
             raise TokenIncorrectError
         result = str(self.request.url).rsplit("/", 2)
         return result[0]
 
+    # This method is not used anywhere
     def time_diff_in_seconds(
         self,
         finish: datetime.datetime = datetime.datetime.now(),
         start: datetime.datetime = datetime.datetime(1970, 1, 1),
     ) -> int:
+        """Calculate the time difference between two datetyime objects in seconds.
+        Args:
+            finish (datetime.datetime, optional): The finish datetime object. Defaults to datetime.datetime.now().
+            start (datetime.datetime, optional): The start datetime object. Defaults to datetime.datetime(1970, 1, 1).
+
+        Returns:
+            int: The time difference in seconds.
+        """
         return int((finish - start).total_seconds())
