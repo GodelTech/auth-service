@@ -34,7 +34,8 @@ def _create_device_auth_service(
     **kwargs: Any,
 ) -> AuthServiceProtocol:
     """
-    Factory method for creating an instance of DeviceAuthService.
+    Factory method for creating an instance of DeviceAuthService, which is used for
+    a device authorization flow (https://www.rfc-editor.org/rfc/rfc8628).
 
     Args:
         client_repo: The repository for accessing client-related data.

@@ -38,11 +38,11 @@ class AuthServiceFactory:
     - Register response types and corresponding factory methods before creating instances:
         AuthServiceFactory._register_factory(ResponseType.CODE.value, _create_code_auth_service)
 
-    - Create an instance of AuthServiceFactory:
+    - Create an instance of AuthServiceFactory in presentation layer:
         factory = AuthServiceFactory(session, client_repo, user_repo, persistent_grant_repo,
                                  device_repo, password_service, jwt_service)
 
-    - Get an authentication service instance based on the response type:
+    - Get an authentication service instance based on the response type in presentation layer:
         service = factory.get_service_impl(response_type)
     """
 

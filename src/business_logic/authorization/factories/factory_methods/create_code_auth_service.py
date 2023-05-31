@@ -31,7 +31,8 @@ def _create_code_auth_service(
     **kwargs: Any,
 ) -> AuthServiceProtocol:
     """
-    Factory method for creating an instance of CodeAuthService.
+    Factory method for creating an instance of CodeAuthService, which is used for
+    an authorization code flow (https://www.rfc-editor.org/rfc/rfc6749#section-4.1).
 
     Args:
         client_repo: The repository for accessing client-related data.
