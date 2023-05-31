@@ -23,6 +23,7 @@ from src.data_access.postgresql.repositories import (
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
 from src.business_logic.services.login_form_service import LoginFormService
+from src.business_logic.services.scope import ScopeService
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
 
@@ -98,4 +99,5 @@ async def post_authorize(
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    return JSONResponse({"redirect_url":result})
+    some_text = ScopeService().get_scope_description(scope=request_body.scope)
+    return JSONResponse({"redirect_url":result, "some_text":some_text})
