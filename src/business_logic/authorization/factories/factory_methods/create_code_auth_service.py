@@ -30,6 +30,19 @@ def _create_code_auth_service(
     password_service: PasswordHash,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
+    """
+    Factory method for creating an instance of CodeAuthService.
+
+    Args:
+        client_repo: The repository for accessing client-related data.
+        user_repo: The repository for accessing user-related data.
+        persistent_grant_repo: The repository for accessing persistent grant-related data.
+        password_service: The service for password hashing and verification.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        An instance of CodeAuthService.
+    """
     return CodeAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),

@@ -29,6 +29,19 @@ def _create_id_token_auth_service(
     jwt_service: JWTService,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
+    """
+    Factory method for creating an instance of IdTokenAuthService.
+
+    Args:
+        client_repo: The repository for accessing client-related data.
+        user_repo: The repository for accessing user-related data.
+        password_service: The service for password hashing and verification.
+        jwt_service: The service for JWT generation and verification.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        An instance of IdTokenAuthService.
+    """
     return IdTokenAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),

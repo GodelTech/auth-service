@@ -33,6 +33,21 @@ def _create_device_auth_service(
     password_service: PasswordHash,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
+    """
+    Factory method for creating an instance of DeviceAuthService.
+
+    Args:
+        client_repo: The repository for accessing client-related data.
+        user_repo: The repository for accessing user-related data.
+        persistent_grant_repo: The repository for accessing persistent grant-related data.
+        device_repo: The repository for accessing device-related data.
+        password_service: The service for password hashing and verification.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        An instance of DeviceAuthService.
+
+    """
     return DeviceAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
