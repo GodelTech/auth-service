@@ -20,6 +20,13 @@ from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
 from src.data_access.postgresql.errors.third_party_oidc import ParsingError
+from src.business_logic.get_tokens.errors import (
+    InvalidGrantError, 
+    InvalidRedirectUriError, 
+    UnsupportedGrantTypeError,
+    InvalidClientCredentialsError
+)
+from src.business_logic.common.errors import InvalidClientIdError
 from .auth_token_errors_handler import incorrect_token_auth_error_handler
 from .base_error_handler import (
     base_bad_request_error_handler,
@@ -48,6 +55,10 @@ from .user_not_found_error_handler import user_not_found_error_handler
 from .wrong_data_error_handler import wrong_data_error_handler
 from .wrong_password_error_handler import wrong_password_error_handler
 from .wrong_response_type_error_handler import wrong_response_type_error_handler
+from .http400_invalid_client import http400_invalid_client_handler
+from .http400_invalid_grant import http400_invalid_grant_handler
+from .http400_unsupported_grant_type import http400_unsupported_grant_type_handler
+
 
 exception_handler_mapping = {
     ClientNotFoundError: client_not_found_error_handler,
@@ -70,4 +81,9 @@ exception_handler_mapping = {
     exc.IntegrityError: integryty_error_handler,
     ValueError: base_not_found_error_handler,
     ParsingError: parsing_error_handler,
+    InvalidClientIdError: http400_invalid_client_handler,
+    InvalidGrantError: http400_invalid_grant_handler,
+    InvalidRedirectUriError: http400_invalid_grant_handler,
+    UnsupportedGrantTypeError: http400_unsupported_grant_type_handler,
+    InvalidClientCredentialsError: http400_invalid_client_handler
 }

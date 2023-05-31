@@ -10,5 +10,7 @@ class ValidateClientCredentials:
         self._client_repo = client_repo
     
     async def __call__(self, client_id: str, client_secret: str) -> None:
-        client = await self._client_repo.get_client_by_client_id(client_id=client_id)
-        ...
+        if not await self._client_repo.exists_client_with_provided_client_secret(
+            client_id=client_id, client_secret=client_secret
+        ):
+            raise InvalidClientCredentialsError

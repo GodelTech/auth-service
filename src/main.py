@@ -14,11 +14,6 @@ from src.presentation.api.exception_handlers import exception_handler_mapping
 from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.middleware.https_global_middleware import HttpsGlobalMiddleware
 from src.presentation.api import router
-from src.presentation.api.exception_handlers import (
-    http400_invalid_grant_handler,
-    http400_unsupported_grant_type_handler,
-    http400_invalid_client_handler
-)
 from src.di import Container
 from src.dyna_config import (
     DB_MAX_CONNECTION_COUNT,
@@ -31,12 +26,6 @@ import logging
 from src.log import LOGGING_CONFIG
 from src.data_access.postgresql.repositories import UserRepository
 from src.business_logic.services.admin_auth import AdminAuthService
-from src.business_logic.get_tokens.errors import (
-    InvalidGrantError, 
-    InvalidRedirectUriError, 
-    UnsupportedGrantTypeError
-)
-from src.business_logic.common.errors import InvalidClientIdError
 
 
 logger = logging.getLogger(__name__)

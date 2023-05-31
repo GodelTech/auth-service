@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Any
+from typing import Optional, Any, Union
 
 
 class BaseJWTPayload(BaseModel):
@@ -7,7 +7,7 @@ class BaseJWTPayload(BaseModel):
     iss: str  # auth service uri
     iat: int  # time of creation
     exp: int  # time when token will expire
-    aud: str  # name for whom token was generated
+    aud: Union[str, list[str]]  # name for whom token was generated
     client_id: str  # id of the client who issued a token
     jti: str  # uniques identifier for token, UUID4
     acr: Optional[int]  # default 0
