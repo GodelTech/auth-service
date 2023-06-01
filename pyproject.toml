@@ -51,6 +51,8 @@ types-mock = "^5.0.0"
 fastapi-utils = "^0.2.1"
 deptry = "^0.11.0"
 bump2version = "^1.0.1"
+locust = "^2.15.1"
+
 
 [tool.deptry]
 ignore_unused = [
