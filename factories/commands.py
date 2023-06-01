@@ -218,7 +218,7 @@ class DataBasePopulation:
     def populate_roles(cls) -> None:
         for role in data.ROLES:
             user_factory.RoleFactory(name=role)
-            user_factory.sess.session.commit()  # cl/user?
+            user_factory.sess.session.commit()
             user_factory.sess.session.close()
 
     @classmethod
@@ -239,7 +239,13 @@ class DataBasePopulation:
             grant_factory.PersistentGrantFactory()
             grant_factory.sess.session.commit()
             grant_factory.sess.session.close()
-
+    @classmethod
+    def populate_resourses_related(cls)->None:
+        for kwargs in data.API_RESOURCES:
+            res_factory.ApiResourceFactory(
+                kwargs
+            )
+        sess.session.commit() 
 
 if __name__ == "__main__":
     DataBasePopulation.clean_and_populate()

@@ -83,12 +83,18 @@ TYPES_OF_GRANTS = [
 ]
 
 API_SECRET_TYPE = [
-    "sha256",
-    "sha512",
+    "Shared",
+    "Encrypt",
 ]
 
 API_CLAIM_TYPE = [
-    "string",
+    "mobile app"
+    "products",
+    "documents",
+    "analytics",
+    "payments",
+    "shipping",
+    "services",
 ]
 
 API_SCOPE_CLAIM_TYPE = [
@@ -267,3 +273,16 @@ POST_LOGOUT_REDIRECT_URL = {
     9: "https://www.villarreal.com/",
     10: "https://meyer-berry.com/",
 }
+
+API_RESOURCES = {
+    "description":"API Resource for Alarm App",
+    "display_name":"Alarm API",
+    "name":"alarm-api-resource",
+}
+
+API_CLAIMS =[
+    {
+        "api_resource_id": 1,
+        "type":1
+    }
+]
