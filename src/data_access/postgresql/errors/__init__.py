@@ -22,6 +22,8 @@ from .grant import (
 from .password import WrongPasswordError, WrongPasswordFormatError
 from .response_type import WrongResponseTypeError
 from .third_party_oidc import (
+    ThirdPartyAuthBaseException,
+    ThirdPartyAuthProviderNameError,
     ThirdPartyStateDuplicationError,
     ThirdPartyStateNotFoundError,
     WrongDataError,
