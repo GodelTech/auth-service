@@ -19,14 +19,14 @@ from src.presentation.api.models.introspection import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class IntrospectionServies:
+class IntrospectionService:
     def __init__(
         self,
-        session:AsyncSession,
+        session: AsyncSession,
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt:JWTService = JWTService(),
+        jwt: JWTService = JWTService(),
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
@@ -44,8 +44,7 @@ class IntrospectionServies:
         response: dict[str, Any] = {}
         try:
             decoded_token = await self.jwt.decode_token(
-                token=self.request_body.token, 
-                audience = "introspection"
+                token=self.request_body.token, audience="introspection"
             )
         except ExpiredSignatureError:
             return {"active": False}
@@ -57,7 +56,7 @@ class IntrospectionServies:
                 "access_token",
                 "access",
                 "authorization_code",
-                "authorization-code"
+                "authorization-code",
             ):
                 response["active"] = True
 

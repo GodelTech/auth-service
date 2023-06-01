@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, Header, Request
 
-from src.business_logic.services.introspection import IntrospectionServies
+from src.business_logic.services.introspection import IntrospectionService
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
@@ -31,14 +31,14 @@ introspection_router = APIRouter(
 
 @introspection_router.post("/", response_model=ResponseIntrospectionModel)
 async def post_introspection(
-        request: Request,
-        auth_swagger: Optional[str] = Header(
-            default=None, description="Authorization"
-        ),  # crutch for swagger
-        request_body: BodyRequestIntrospectionModel = Depends(),
+    request: Request,
+    auth_swagger: Optional[str] = Header(
+        default=None, description="Authorization"
+    ),  # crutch for swagger
+    request_body: BodyRequestIntrospectionModel = Depends(),
 ) -> dict[str, Any]:
     session = request.state.session
-    introspection_class = IntrospectionServies(
+    introspection_class = IntrospectionService(
         session=session,
         user_repo=UserRepository(session),
         persistent_grant_repo=PersistentGrantRepository(session),

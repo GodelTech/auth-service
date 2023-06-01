@@ -10,7 +10,7 @@ from src.business_logic.services import (
     ThirdPartyMicrosoftService,
     DeviceService,
     EndSessionService,
-    IntrospectionServies,
+    IntrospectionService,
     JWTService,
     LoginFormService,
     PasswordHash,
@@ -100,8 +100,8 @@ def provide_introspection_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> IntrospectionServies:
-    return IntrospectionServies(
+) -> IntrospectionService:
+    return IntrospectionService(
         jwt=jwt,
         user_repo=user_repo,
         client_repo=client_repo,
@@ -138,14 +138,10 @@ def provide_admin_user_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_user_service(
-    user_repo: UserRepository,
-    role_repo: RoleRepository,
-    session:AsyncSession
+    user_repo: UserRepository, role_repo: RoleRepository, session: AsyncSession
 ) -> AdminUserService:
     return AdminUserService(
-        user_repo=user_repo,
-        role_repo=role_repo,
-        session=session
+        user_repo=user_repo, role_repo=role_repo, session=session
     )
 
 
@@ -154,13 +150,9 @@ def provide_admin_group_service_stub() -> None:  # pragma: no cover
 
 
 def provide_admin_group_service(
-    session: AsyncSession,
-    group_repo: GroupRepository
+    session: AsyncSession, group_repo: GroupRepository
 ) -> AdminGroupService:
-    return AdminGroupService(
-        session=session,
-        group_repo=group_repo
-    )
+    return AdminGroupService(session=session, group_repo=group_repo)
 
 
 def provide_admin_role_service_stub() -> None:  # pragma: no cover
@@ -214,9 +206,11 @@ def provide_login_form_service_stub() -> None:  # pragma: no cover
 def provide_login_form_service(
     client_repo: ClientRepository,
     oidc_repo: ThirdPartyOIDCRepository,
-    session: AsyncSession
+    session: AsyncSession,
 ) -> LoginFormService:
-    return LoginFormService(client_repo=client_repo, oidc_repo=oidc_repo, session=session)
+    return LoginFormService(
+        client_repo=client_repo, oidc_repo=oidc_repo, session=session
+    )
 
 
 def provide_admin_auth_service_stub() -> None:  # pragma: no cover
@@ -242,9 +236,11 @@ def provide_device_service_stub() -> None:  # pragma: no cover
 def provide_device_service(
     client_repo: ClientRepository,
     device_repo: DeviceRepository,
-    session: AsyncSession
+    session: AsyncSession,
 ) -> DeviceService:
-    return DeviceService(session=session, client_repo=client_repo, device_repo=device_repo)
+    return DeviceService(
+        session=session, client_repo=client_repo, device_repo=device_repo
+    )
 
 
 def provide_auth_third_party_oidc_service_stub() -> None:  # pragma: no cover
@@ -371,6 +367,7 @@ def provide_third_party_microsoft_service(
 
 def provide_client_service_stub() -> None:
     ...
+
 
 def provide_client_service(
     client_repo: ClientRepository,
