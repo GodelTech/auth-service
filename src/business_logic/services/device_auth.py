@@ -5,11 +5,11 @@ import time
 from string import ascii_uppercase
 from typing import Any, Optional, Union
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
 )
+from src.data_access.postgresql.errors.client import ClientNotFoundError
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import (
     DeviceCancelModel,
@@ -65,6 +65,8 @@ class DeviceService:
                 )
 
                 return device_data
+            else:
+                raise ClientNotFoundError
         return None
 
     async def get_redirect_uri(self) -> str:
@@ -88,6 +90,8 @@ class DeviceService:
         if await self._validate_client(client_id=self.request_model.client_id):
             if await self._validate_user_code(user_code=user_code):
                 await self.device_repo.delete_by_user_code(user_code=user_code)
+        else:
+                raise ClientNotFoundError
         return f"http://{DOMAIN_NAME}/device/auth/cancel"
 
     async def _parse_scope_data(self, scope: str) -> dict[str, str]:
@@ -109,6 +113,8 @@ class DeviceService:
         client = await self.client_repo.validate_client_by_client_id(
             client_id=client_id
         )
+        if not client:
+            raise ClientNotFoundError
         return client
 
     @property

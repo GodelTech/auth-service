@@ -1,6 +1,5 @@
 from jwt import DecodeError
 from sqlalchemy import exc
-
 from src.data_access.postgresql.errors import (
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,

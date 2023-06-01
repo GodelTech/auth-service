@@ -11,7 +11,10 @@ from src.data_access.postgresql.repositories import (
 )
 from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
-    ResponceIntrospectionModel,
+    ResponseIntrospectionModel,
+)
+from src.presentation.middleware.authorization_validation import (
+    authorization_middleware,
 )
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
@@ -26,13 +29,13 @@ introspection_router = APIRouter(
 )
 
 
-@introspection_router.post("/", response_model=ResponceIntrospectionModel)
+@introspection_router.post("/", response_model=ResponseIntrospectionModel)
 async def post_introspection(
-    request: Request,
-    auth_swagger: Optional[str] = Header(
-        default=None, description="Authorization"
-    ),  # crutch for swagger
-    request_body: BodyRequestIntrospectionModel = Depends(),
+        request: Request,
+        auth_swagger: Optional[str] = Header(
+            default=None, description="Authorization"
+        ),  # crutch for swagger
+        request_body: BodyRequestIntrospectionModel = Depends(),
 ) -> dict[str, Any]:
     session = request.state.session
     introspection_class = IntrospectionServies(

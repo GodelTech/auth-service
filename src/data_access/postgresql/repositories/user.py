@@ -135,6 +135,11 @@ class UserRepository(BaseRepository):
 
         return result
 
+    async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:            
+            await self.session.execute(
+                insert(UserClaim).values(claims)
+            )
+
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
             result = await self.session.execute(
                 select(UserClaim)
@@ -153,27 +158,54 @@ class UserRepository(BaseRepository):
 
     async def get_user_by_username(self, username: str) -> User:
         try:
-            user = await self.session.execute(
-                select(User)
-                .join(
-                    UserPassword,
-                    User.password_hash_id == UserPassword.id,
-                    isouter=True,
+                user = await self.session.execute(
+                    select(User)
+                    .join(
+                        UserPassword,
+                        User.password_hash_id == UserPassword.id,
+                        isouter=True,
+                    )
+                    .join(
+                        IdentityProvider,
+                        User.identity_provider_id == IdentityProvider.id,
+                        isouter=True,
+                    )
+                    .where(User.username == username)
                 )
-                .join(
-                    IdentityProvider,
-                    User.identity_provider_id == IdentityProvider.id,
-                    isouter=True,
-                )
-                .where(User.username == username)
-            )
-            user = user.first()
+                user = user.first()
 
-            return user[0]
+                return user[0]
         except:
             raise ValueError
+        
+    async def get_user_by_email(self, email:str,) -> User:
+        try:
+                user = await self.session.execute(
+                    select(User)
+                    .join(
+                        UserPassword,
+                        User.password_hash_id == UserPassword.id,
+                        isouter=True,
+                    )
+                    .join(
+                        IdentityProvider,
+                        User.identity_provider_id == IdentityProvider.id,
+                        isouter=True,
+                    )
+                    .where(User.email == email)
+                )
+                user = user.first()
 
- 
+                return user[0]
+        except:
+            raise ValueError
+    
+    async def exists_user(self, username: str) -> bool:
+        result = await self.session.execute(
+            select(User).where(User.username == username).exists().select()
+        )
+        return result.scalar()
+     
     async def update(
         self,
         user_id: int,
@@ -398,19 +430,31 @@ class UserRepository(BaseRepository):
                 .join(User, User.password_hash_id == UserPassword.id)
                 .where(User.username == username)
             )
-            return result.scalar()
-
-    async def exists_user(self, username: str) -> bool:
-        result = await self.session.execute(
-            select(User).where(User.username == username).exists().select()
-        )
-        return result.scalar()
-
-    async def get_user_id_by_username(self, username: str) -> int:
+            result = result.first()
+            return result[0]
+    
+    async def validate_user_by_email(self, email: str) -> bool:
+        
             result = await self.session.execute(
-                select(User.id).where(User.username == username)
+                select(exists().where(User.email == email))
             )
-            return result.scalar()
+            result = result.first()
+            return result[0]
+    
+    async def validate_user_by_phone_number(self, phone_number: str) -> bool:
+        
+            result = await self.session.execute(
+                select(exists().where(User.phone_number == phone_number))
+            )
+            result = result.first()
+            return result[0]
 
-    def __repr__(self) -> str:  # pragma: no cover
+    async def get_all_claim_types(self) -> dict[str, int]:
+        
+            result = await self.session.execute(
+                select(UserClaimType.id, UserClaimType.type_of_claim)
+            )
+            return {k: v for v, k in result.all()}
+        
+    def __repr__(self) -> str: 
         return "User repository"

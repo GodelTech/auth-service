@@ -3,13 +3,12 @@ from .client import (
     Client,
     ClientClaim,
     ClientCorsOrigin,
-    ClientGrantType,
     ClientIdRestriction,
     ClientPostLogoutRedirectUri,
     ClientRedirectUri,
     ClientScope,
     ClientSecret,
-
+    
     AccessTokenType,
     ProtocolType,
     RefreshTokenExpirationType,
@@ -39,7 +38,7 @@ from .resources_related import (
 )
 from .identity_resource import IdentityClaim, IdentityResource, IdentityProviderMapped, IdentityProvider
 from .group import Group, Permission
-
+from .device import Device
 from .blacklisted_token import BlacklistedToken
 
 __all__ = [
@@ -50,7 +49,6 @@ __all__ = [
     ClientPostLogoutRedirectUri,
     ClientCorsOrigin,
     ClientSecret,
-    ClientGrantType,
     ClientRedirectUri,
     Base,
 ]
