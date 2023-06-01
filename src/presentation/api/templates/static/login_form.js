@@ -188,7 +188,7 @@ function showConfirmationModal(text, header_text, redirect_url) {
     declineButton.addEventListener('click', async () => {
       modalOverlay.classList.remove('active');
       modalWindow.classList.remove('active');
-      let updated_url = redirect_url.replace(/code=.*$/, "code=user_refused_to_give_permission");
+      let updated_url = redirect_url.replace(/\?code=.*$/, "access-denied");
       window.location.href = updated_url;
     });
   }

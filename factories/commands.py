@@ -168,7 +168,7 @@ class DataBasePopulation:
     def populate_client_redirect_uri(cls) -> None:
         for client_id, client_name in data.CLIENT_IDS.items():
             cl_factory.ClientRedirectUriFactory(
-                client_id=client_id, redirect_uri="https://www.google.com/"
+                client_id=client_id, redirect_uri="http://127.0.0.1:8888/callback/"
             )
 
     @classmethod

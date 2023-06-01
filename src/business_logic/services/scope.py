@@ -3,6 +3,8 @@ from src.dyna_config import DOMAIN_NAME
 from fastapi import Request
 from typing import Any, Union
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.data_access.postgresql.repositories.resources_related import ResourcesRepository
+from src.data_access.postgresql.tables.resources_related import ApiResource, ApiScope, ApiScopeClaim, ApiScopeClaim
 
 
 logger = logging.getLogger(__name__)
@@ -10,12 +12,27 @@ logger = logging.getLogger(__name__)
 class ScopeService:
     def __init__(
             self,
-            #session:AsyncSession, 
+            session:AsyncSession,
+            resource_repo: ResourcesRepository,
         ) -> None:
-       # self.session = session
-       self.a = 1 
+       self.session = session
+       self.resource_repo = resource_repo
 
-    def get_scope_description(
+    async def get_resource_api_description(self, scope:str) -> dict[str:str]:
+        scope = scope.split('.')
+        resource = await self.resource_repo.get_by_name(name=scope[0])
+        result ={}
+        for api_scope in resource.api_scope:
+            if api_scope.name == scope[1]:
+                for scope_claim in api_scope.api_scope_claims:
+                    if scope[2]  == scope_claim.scope_claim_type.scope_claim_type:
+                        result[resource.display_name] = f'{api_scope.description} : {scope_claim.scope_claim_type.scope_claim_type}'
+                        return result
+        
+        return {'Impossible':'Error'}
+
+
+    async def get_scope_description(
         self, scope:str
     ) -> list[str]:
         scope:list = scope.split(' ')
@@ -44,8 +61,7 @@ class ScopeService:
                 "birthdate",
                 "zoneinfo",
                 "locale",
-                "phone number",
-                "phone number is verified or not",
+                "phone number and is it verified or not",
                 "address",
                 "profile updated last time",
             ]
@@ -53,13 +69,26 @@ class ScopeService:
         if 'email' in scope:
             scope.remove('email')
             response = response | {
-                "email",
-                "email is verified or not",
+                "email and is it verified or not",
             }
 
         result = 'Information:\n'
         for info in response['userinfo']:
             result += f'- Your {info}\n'
+        
+        dict_of_descriptions = {}
+        for scope_str in scope:
+            if '.' in scope_str:
+                dict_answer = await self.get_resource_api_description(scope_str)
+                if list(dict_answer.keys())[0] in dict_of_descriptions.keys():
+                    dict_of_descriptions[list(dict_answer.keys())[0]] += dict_answer.values[0]
+                else:
+                    dict_of_descriptions |= dict_answer
+        result += '\nAccess to resources:'
+        for n, key in enumerate(dict_of_descriptions.keys()):
+            result += f'\n{n+1}. {key}:\n- {dict_of_descriptions[key]}'
 
         return result
+ 
+
  

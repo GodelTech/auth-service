@@ -19,6 +19,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     PersistentGrantRepository,
     DeviceRepository,
+    ResourcesRepository,
 )
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
@@ -93,12 +94,16 @@ async def post_authorize(
         password_service=PasswordHash(),
         jwt_service=JWTService(),
     )
+    scope_service = ScopeService(
+        session=session,
+        resource_repo=ResourcesRepository(session)
+        )
     setattr(request_body, "user_code", user_code)
     auth_service: AuthServiceProtocol = auth_service_factory.get_service_impl(
         request_body.response_type
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    confirm_text = ScopeService().get_scope_description(scope=request_body.scope)
+    confirm_text = await scope_service.get_scope_description(scope=request_body.scope)
     header_text = 'The service want to get access to:'
     return JSONResponse({"redirect_url":result, "confirm_text":confirm_text, "header_text":header_text})

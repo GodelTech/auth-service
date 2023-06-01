@@ -88,7 +88,7 @@ API_SECRET_TYPE = [
 ]
 
 API_CLAIM_TYPE = [
-    "mobile app"
+    "mobile app",
     "products",
     "documents",
     "analytics",
@@ -141,7 +141,7 @@ CLIENT_SECRETS = {
 }
 
 CLIENT_SCOPES = {
-    1: "openid",
+    1: "openid profile alarm-api-resource.time.read",
     2: "openid email",
     3: "openid profile",
     4: "openid email",
