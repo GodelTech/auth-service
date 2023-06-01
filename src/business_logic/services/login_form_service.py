@@ -10,7 +10,8 @@ from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import (
     ClientRepository,
-    ThirdPartyOIDCRepository, CodeChallengeRepository,
+    ThirdPartyOIDCRepository,
+    CodeChallengeRepository,
 )
 from src.presentation.api.models import RequestModel
 from src.data_access.postgresql.errors.client import ClientNotFoundError
