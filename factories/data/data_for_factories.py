@@ -98,18 +98,11 @@ API_CLAIM_TYPE = [
 ]
 
 API_SCOPE_CLAIM_TYPE = [
-    "name",
-    "family_name",
-    "middle_name",
-    "nickname",
-    "preferred_username",
-    "profile_picture",
-    "website",
-    "gender",
-    "birthdate",
-    "zone_info",
-    "locale",
-    "updated_at",
+    "read",
+    "write",
+    "delete",
+    "process",
+    "manage",
 ]
 
 DEFAULT_USER_CLAIMS = {
@@ -274,15 +267,46 @@ POST_LOGOUT_REDIRECT_URL = {
     10: "https://meyer-berry.com/",
 }
 
-API_RESOURCES = {
-    "description":"API Resource for Alarm App",
-    "display_name":"Alarm API",
-    "name":"alarm-api-resource",
-}
+API_RESOURCES = [
+    {
+        "description":"API Resource for Alarm App",
+        "display_name":"Alarm API",
+        "name":"alarm-api-resource",
+    }
+]
 
 API_CLAIMS =[
     {
         "api_resource_id": 1,
         "type":1
+    }
+]
+
+API_SECRET =[
+    {
+       # "api_resource_id": 1,
+        # "type":1,
+        "description":"Secret for Alarm API Resource",
+        "value" : "0123456789abcdef",
+        "expiration": '1234-01-01 00:00:00',
+    }
+]
+
+API_SCOPES =[
+    {
+       # "api_resource_id": 1,
+        "name": "time",
+        "description" : "Gives posibility to manage alarm's time",
+        "display_name": "Manage Time",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+       # "api_resource_id": 1,
+        "name": "music",
+        "description" : "Gives posibility to manage alarm's music",
+        "display_name": "Manage Music",
+        "required": True,
+        "emphasize": False,
     }
 ]

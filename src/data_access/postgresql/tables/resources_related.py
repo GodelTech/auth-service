@@ -53,7 +53,7 @@ class ApiSecret(BaseModel):
     api_resources = relationship(
         "ApiResource",
         backref="api_secret",
-        foreign_keys="ApiSecret.api_resources_id",
+        lazy = 'joined'
     )
     description = Column(String, nullable=True)
     expiration = Column(DateTime, nullable=False)
@@ -65,7 +65,7 @@ class ApiSecret(BaseModel):
     )
     secret_type = relationship(
         "ApiSecretType",
-        foreign_keys="ApiSecret.secret_type_id",
+        lazy = 'joined'
     )
 
     value = Column(String, nullable=True)
@@ -161,7 +161,7 @@ class ApiScopeClaim(BaseModel):
     )
     scope_claim_type = relationship(
         "ApiScopeClaimType",
-        foreign_keys="ApiScopeClaim.scope_claim_type_id",
+        lazy = 'joined'
     )
 
     def __str__(self) -> str:  # pragma: no cover

@@ -39,6 +39,10 @@ class DataBasePopulation:
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()
+        cls.populate_api_resourses()
+        cls.populate_api_secrets()
+        cls.populate_api_scope()
+        cls.populate_api_scope_claims()
         sess.session.commit()
         sess.session.close()
 
@@ -191,11 +195,44 @@ class DataBasePopulation:
             grant_factory.PersistentGrantFactory()
             
     @classmethod
-    def populate_resourses_related(cls)->None:
-        for kwargs in data.API_RESOURCES:
+    def populate_api_resourses(cls)->None:
+        for res in data.API_RESOURCES:
             res_factory.ApiResourceFactory(
-                kwargs
+                description = res['description'],
+                display_name = res['display_name'],
+                name = res['name'],
             )
+    @classmethod
+    def populate_api_secrets(cls)->None:   
+        for res in data.API_SECRET:
+            res_factory.ApiSecretFactory(
+                secret_type_id = 1,
+                api_resources_id = 1,
+                description = res['description'],
+                expiration = res['expiration'],
+                value = res['value'],
+            )
+
+    @classmethod
+    def populate_api_scope(cls):
+        for res in data.API_SCOPES:
+            res_factory.ApiScopeFactory(
+                name = res['name'],
+                api_resources_id = 1,
+                description = res['description'],
+                display_name = res['display_name'],
+                required = res['required'],
+                emphasize = res['emphasize'],
+            )
+
+    @classmethod
+    def populate_api_scope_claims(cls):
+        for scope in range(2):
+            for claim in range(3):
+                res_factory.ApiScopeClaimFactory(
+                    api_scopes_id = scope + 1,
+                    scope_claim_type_id = claim + 1
+                )
 
 if __name__ == "__main__":
     DataBasePopulation.clean_and_populate()
