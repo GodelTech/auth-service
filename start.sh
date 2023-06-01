@@ -11,6 +11,7 @@ if [ "$ENV_FOR_DYNACONF" = "test" ] || [ "$ENV_FOR_DYNACONF" = "pipeline" ]; the
   echo "Test or Pipeline environment. Migration and population of database done inside the tests execution"
 elif [ "$ENV_FOR_DYNACONF" = "local" ] || [ "$ENV_FOR_DYNACONF" = "development" ]; then
   echo "Migrations"
+  python -m factories.purge
   alembic upgrade head
   echo "Population of database"
   python -m factories.commands

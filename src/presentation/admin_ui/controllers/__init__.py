@@ -1,5 +1,5 @@
 import uuid
-
+from sqladmin.authentication import  login_required
 from fastapi import HTTPException, Request, status
 from sqladmin import Admin, BaseView, ModelView, expose
 from sqlalchemy import Boolean, Column
@@ -75,6 +75,7 @@ class SeparationLine(BaseView):
 
 class CustomAdmin(Admin):
     @no_type_check
+    @login_required
     async def create(self, request: Request) -> _TemplateResponse:
         # Create model endpoint.
         try:

@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
-from sqlalchemy import exc, exists, insert, join, select, text, update, delete
+from sqlalchemy import exc, exists, insert, select, update, delete
 from sqlalchemy.engine.result import ChunkedIteratorResult
 
 from src.data_access.postgresql.errors.user import (
@@ -429,7 +429,7 @@ class UserRepository(BaseRepository):
         result = await self.session.execute(
             select(UserClaimType.id, UserClaimType.type_of_claim)
         )
-        return {value[1]: int(value[0]) for value in result.all()}
+        return {k: v for v, k in result.all()}
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self) -> str:
         return "User repository"
