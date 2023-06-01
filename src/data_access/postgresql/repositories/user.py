@@ -1,18 +1,7 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
-from sqlalchemy import (
-    exc,
-    exists,
-    insert,
-    join,
-    select,
-    text,
-    update,
-    delete
-)
+from sqlalchemy import exc, exists, insert, select, update, delete
 from sqlalchemy.engine.result import ChunkedIteratorResult
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.user import (
     ClaimsNotFoundError,
@@ -49,9 +38,7 @@ class UserRepository(BaseRepository):
             return [user[0] for user in query]
         elif group_id is None and role_id is not None:
             iterator = await self.session.execute(
-                select(User)
-                .join(Role, User.roles)
-                .where(Role.id == role_id)
+                select(User).join(Role, User.roles).where(Role.id == role_id)
             )
             return [user[0] for user in iterator.all()]
         elif group_id is not None and role_id is None:
@@ -71,11 +58,11 @@ class UserRepository(BaseRepository):
             return [user[0] for user in iterator.all()]
 
     async def exists(self, user_id: int) -> bool:
-            result = await self.session.execute(
-                select(exists().where(User.id == user_id))
-            )
-            result = result.first()
-            return result[0]
+        result = await self.session.execute(
+            select(exists().where(User.id == user_id))
+        )
+        result = result.first()
+        return result[0]
 
     async def delete(self, user_id: int) -> None:
         if await self.exists(user_id=user_id):
@@ -115,9 +102,7 @@ class UserRepository(BaseRepository):
         user = user.first()
 
         if user is None:
-            raise UserNotFoundError(
-                "User you are looking for does not exist"
-            )
+            raise UserNotFoundError("User you are looking for does not exist")
 
         return user[0].password_hash.value, user[0].id
 
@@ -135,77 +120,76 @@ class UserRepository(BaseRepository):
 
         return result
 
-    async def add_claims(self, claims:list[dict[str,Any]]) -> Dict[str, Any]:            
-            await self.session.execute(
-                insert(UserClaim).values(claims)
-            )
+    async def add_claims(self, claims: list[dict[str, Any]]) -> Dict[str, Any]:
+        await self.session.execute(insert(UserClaim).values(claims))
 
     async def request_DB_for_claims(self, sub: int) -> ChunkedIteratorResult:
-            result = await self.session.execute(
-                select(UserClaim)
-                .where(UserClaim.user_id == sub)
-                .join(
-                    UserClaimType, UserClaimType.id == UserClaim.claim_type_id
-                )
-            )
-            return result
+        result = await self.session.execute(
+            select(UserClaim)
+            .where(UserClaim.user_id == sub)
+            .join(UserClaimType, UserClaimType.id == UserClaim.claim_type_id)
+        )
+        return result
 
     async def get_username_by_id(self, id: int) -> str:
-            users = await self.session.execute(select(User).where(User.id == id))
-            result = users.first()
-            result = result[0].username
-            return result
+        users = await self.session.execute(select(User).where(User.id == id))
+        result = users.first()
+        result = result[0].username
+        return result
 
     async def get_user_by_username(self, username: str) -> User:
         try:
-                user = await self.session.execute(
-                    select(User)
-                    .join(
-                        UserPassword,
-                        User.password_hash_id == UserPassword.id,
-                        isouter=True,
-                    )
-                    .join(
-                        IdentityProvider,
-                        User.identity_provider_id == IdentityProvider.id,
-                        isouter=True,
-                    )
-                    .where(User.username == username)
+            user = await self.session.execute(
+                select(User)
+                .join(
+                    UserPassword,
+                    User.password_hash_id == UserPassword.id,
+                    isouter=True,
                 )
-                user = user.first()
+                .join(
+                    IdentityProvider,
+                    User.identity_provider_id == IdentityProvider.id,
+                    isouter=True,
+                )
+                .where(User.username == username)
+            )
+            user = user.first()
 
-                return user[0]
+            return user[0]
         except:
             raise ValueError
-        
-    async def get_user_by_email(self, email:str,) -> User:
+
+    async def get_user_by_email(
+        self,
+        email: str,
+    ) -> User:
         try:
-                user = await self.session.execute(
-                    select(User)
-                    .join(
-                        UserPassword,
-                        User.password_hash_id == UserPassword.id,
-                        isouter=True,
-                    )
-                    .join(
-                        IdentityProvider,
-                        User.identity_provider_id == IdentityProvider.id,
-                        isouter=True,
-                    )
-                    .where(User.email == email)
+            user = await self.session.execute(
+                select(User)
+                .join(
+                    UserPassword,
+                    User.password_hash_id == UserPassword.id,
+                    isouter=True,
                 )
-                user = user.first()
+                .join(
+                    IdentityProvider,
+                    User.identity_provider_id == IdentityProvider.id,
+                    isouter=True,
+                )
+                .where(User.email == email)
+            )
+            user = user.first()
 
-                return user[0]
+            return user[0]
         except:
             raise ValueError
-    
+
     async def exists_user(self, username: str) -> bool:
         result = await self.session.execute(
             select(User).where(User.username == username).exists().select()
         )
         return result.scalar()
-     
+
     async def update(
         self,
         user_id: int,
@@ -221,7 +205,7 @@ class UserRepository(BaseRepository):
         password_hash: Union[None, str] = None,
         lockout_enabled: Union[None, bool] = False,
         access_failed_count: Union[None, int] = None,
-        ) -> None:
+    ) -> None:
         kwargs = params_to_dict(
             id=id,
             username=username,
@@ -236,11 +220,9 @@ class UserRepository(BaseRepository):
             password_hash=password_hash,
             access_failed_count=access_failed_count,
         )
-        
+
         if await self.exists(user_id=user_id):
-            updates = (
-                update(User).values(**kwargs).where(User.id == user_id)
-            )
+            updates = update(User).values(**kwargs).where(User.id == user_id)
             await self.session.execute(updates)
         else:
             raise ValueError
@@ -277,11 +259,10 @@ class UserRepository(BaseRepository):
                 password_hash_id=password_hash_id,
                 access_failed_count=access_failed_count,
             )
-        
+
             await self.session.execute(insert(User).values(**kwargs))
         except exc.IntegrityError:
-                raise
-
+            raise
 
     async def add_group(self, user_id: int, group_id: int) -> None:
         try:
@@ -306,13 +287,10 @@ class UserRepository(BaseRepository):
         except ValueError:
             raise ValueError
 
-
     async def add_role(self, user_id: int, role_id: int) -> None:
-            await self.session.execute(
-                insert(users_roles).values(
-                    user_id=user_id, role_id=role_id
-                )
-            )
+        await self.session.execute(
+            insert(users_roles).values(user_id=user_id, role_id=role_id)
+        )
 
     async def remove_user_groups(self, user_id: int, group_ids: str) -> None:
         # prepare a list of ids for the IN statement
@@ -330,7 +308,6 @@ class UserRepository(BaseRepository):
             raise ValueError
 
     async def remove_user_roles(self, user_id: int, role_ids: str) -> None:
-
         # prepare a list of ids for the IN statement
         role_ids_list = list(map(int, role_ids.split(",")))
 
@@ -348,9 +325,7 @@ class UserRepository(BaseRepository):
     async def get_roles(self, user_id: int) -> list[Role]:
         try:
             iterator = await self.session.execute(
-                select(Role)
-                .join(User, Role.users)
-                .where(User.id == user_id)
+                select(Role).join(User, Role.users).where(User.id == user_id)
             )
             result = [role[0] for role in iterator.all()]
             return result
@@ -360,9 +335,7 @@ class UserRepository(BaseRepository):
     async def get_groups(self, user_id: int) -> list[Group]:
         try:
             iterator = await self.session.execute(
-                select(Group)
-                .join(User, Group.users)
-                .where(User.id == user_id)
+                select(Group).join(User, Group.users).where(User.id == user_id)
             )
             result = [group[0] for group in iterator.all()]
             return result
@@ -425,36 +398,38 @@ class UserRepository(BaseRepository):
         return result[0]
 
     async def get_hashed_password_by_username(self, username: str) -> str:
-            result = await self.session.execute(
-                select(UserPassword.value)
-                .join(User, User.password_hash_id == UserPassword.id)
-                .where(User.username == username)
-            )
-            result = result.first()
-            return result[0]
-    
+        result = await self.session.execute(
+            select(UserPassword.value)
+            .join(User, User.password_hash_id == UserPassword.id)
+            .where(User.username == username)
+        )
+        return result.scalar()
+
+    async def get_user_id_by_username(self, username: str) -> int:
+        result = await self.session.execute(
+            select(User.id).where(User.username == username)
+        )
+        return result.scalar()
+
     async def validate_user_by_email(self, email: str) -> bool:
-        
-            result = await self.session.execute(
-                select(exists().where(User.email == email))
-            )
-            result = result.first()
-            return result[0]
-    
+        result = await self.session.execute(
+            select(exists().where(User.email == email))
+        )
+        result = result.first()
+        return result[0]
+
     async def validate_user_by_phone_number(self, phone_number: str) -> bool:
-        
-            result = await self.session.execute(
-                select(exists().where(User.phone_number == phone_number))
-            )
-            result = result.first()
-            return result[0]
+        result = await self.session.execute(
+            select(exists().where(User.phone_number == phone_number))
+        )
+        result = result.first()
+        return result[0]
 
     async def get_all_claim_types(self) -> dict[str, int]:
-        
-            result = await self.session.execute(
-                select(UserClaimType.id, UserClaimType.type_of_claim)
-            )
-            return {k: v for v, k in result.all()}
-        
-    def __repr__(self) -> str: 
+        result = await self.session.execute(
+            select(UserClaimType.id, UserClaimType.type_of_claim)
+        )
+        return {k: v for v, k in result.all()}
+
+    def __repr__(self) -> str:
         return "User repository"

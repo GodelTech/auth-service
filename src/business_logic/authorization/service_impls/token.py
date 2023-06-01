@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class TokenAuthService:
-    def __init__(  # TODO create base class with __init__ for all token auth services?
+    def __init__(
         self,
         client_validator: ValidatorProtocol,
         redirect_uri_validator: ValidatorProtocol,
