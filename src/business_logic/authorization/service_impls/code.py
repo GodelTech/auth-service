@@ -20,9 +20,10 @@ class CodeAuthService(UpdateRedirectUrlMixin):
     """
     Service for handling authorization code flow in an authentication system.
 
-    Inherits from UpdateRedirectUrlMixin.
+    Inherits from UpdateRedirectUrlMixin, which provides functionality for updating
+    the redirect URL with additional state parameter if it's present in a request model.
 
-    Based on: https://www.rfc-editor.org/rfc/rfc6749#section-4.1
+    Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4.1
     """
 
     def __init__(
@@ -61,6 +62,13 @@ class CodeAuthService(UpdateRedirectUrlMixin):
         """
         Validate the request data for authorization.
 
+        Mainly we check if requested data matches the data which is in a database.
+        Data to be validated:
+            - client_id,
+            - redirect_uri,
+            - scope
+            - username and password.
+
         Args:
             request_data: An instance of AuthRequestModel containing the request data.
 
@@ -78,7 +86,8 @@ class CodeAuthService(UpdateRedirectUrlMixin):
 
     async def _create_grant(self, request_data: AuthRequestModel):
         """
-        Create a persistent grant for the authorization code.
+        Create a persistent grant for the authorization code. We need this grant to get an access
+        token later on in an authorization process.
 
         Args:
             request_data: An instance of AuthRequestModel containing the request data.

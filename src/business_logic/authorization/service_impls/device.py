@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 class DeviceAuthService:
     """
     Service for handling device authorization flow in an authentication system.
+
+    Reference: https://www.rfc-editor.org/rfc/rfc8628
     """
 
     def __init__(
@@ -57,6 +59,14 @@ class DeviceAuthService:
         """
         Validate the request data for device authorization.
 
+        Mainly we check if requested data matches the data which is in a database.
+        Data to be validated:
+            - client_id,
+            - redirect_uri,
+            - scope
+            - username and password,
+            - user_code.
+
         Args:
             request_data: An instance of AuthRequestModel containing the request data.
 
@@ -77,7 +87,8 @@ class DeviceAuthService:
         self, request_data: AuthRequestModel, grant_duration: int
     ):
         """
-        Create a persistent grant for the device authorization code.
+        Create a persistent grant for the device authorization code. We need this grant
+        to get an access token later on in an authorization process.
 
         Args:
             request_data: An instance of AuthRequestModel containing the request data.

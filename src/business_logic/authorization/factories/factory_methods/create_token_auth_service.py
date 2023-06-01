@@ -31,7 +31,9 @@ def _create_token_auth_service(
 ) -> AuthServiceProtocol:
     """
     Factory method for creating an instance of TokenAuthService, which is used for
-    an implicit flow (https://www.rfc-editor.org/rfc/rfc6749#section-4.2).
+    an implicit flow.
+
+    Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4.2.
 
     Args:
         client_repo: The repository for accessing client-related data.

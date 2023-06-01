@@ -7,7 +7,8 @@ from pydantic import BaseModel, SecretStr
 class RequestModel(BaseModel):
     """
     Represents a GET method request model for authentication.
-    Based on: https://www.rfc-editor.org/rfc/rfc6749#section-4
+
+    Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4
     """
 
     client_id: str
@@ -36,7 +37,8 @@ class RequestModel(BaseModel):
 class AuthRequestModel(BaseModel):
     """
     Represents a POST method request model for authentication.
-    Based on: https://www.rfc-editor.org/rfc/rfc6749#section-4
+
+    Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4
     """
 
     client_id: str

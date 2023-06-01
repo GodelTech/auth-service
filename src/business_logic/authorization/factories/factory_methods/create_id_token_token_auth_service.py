@@ -33,7 +33,9 @@ def _create_id_token_token_auth_service(
 ) -> AuthServiceProtocol:
     """
     Factory method for creating an instance of IdTokenTokenAuthService, which is used for
-    an implicit flow (https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth).
+    an implicit flow.
+
+    Reference: https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth.
 
     Args:
         client_repo: The repository for accessing client-related data.
