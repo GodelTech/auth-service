@@ -1,24 +1,24 @@
-from typing import Any
-
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, insert
 
-from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.identity_resource import (
-    IdentityProviderMapped,
     IdentityProviderState,
+    IdentityProviderMapped,
 )
-from src.data_access.postgresql.tables.users import User, UserClaim
+from src.data_access.postgresql.tables.users import UserClaim, User
+from src.business_logic.services.jwt_token import JWTService
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
+
 
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
 
 
 @pytest.mark.asyncio
-class TestThirdPartyLinkedinFlow:
-    async def test_successful_linkedin_code_flow(
+class TestThirdPartyMicrosoftFlow:
+    async def test_successful_microsoft_code_flow(
         self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
         # Stage 1: Authorization endpoint with get request
@@ -33,7 +33,7 @@ class TestThirdPartyLinkedinFlow:
         )
         assert authorization_response.status_code == status.HTTP_200_OK
 
-        # Stage 2: Third party Linkedin provider endpoint request to collect username and access_token
+        # Stage 2: Third party Microsoft provider endpoint request to collect username and access_token
         provider_state_insertion = insert(IdentityProviderState).values(
             state=STUB_STATE
         )
@@ -53,18 +53,18 @@ class TestThirdPartyLinkedinFlow:
         async def replace_get(*args: Any, **kwargs: Any) -> str:
             return "NewUserNew"
 
-        patch_start = "src.business_logic.third_party_auth.service_impls.linkedin.LinkedinAuthService"
+        patch_start = "src.business_logic.third_party_auth.service_impls.microsoft.MicrosoftAuthService"
         mocker.patch(f"{patch_start}._get_access_token", replace_post)
         mocker.patch(f"{patch_start}._get_username", replace_get)
-        linkedin_params = {"code": "test_code", "state": STUB_STATE}
-        linkedin_response = await client.request(
-            "GET", "/authorize/oidc/linkedin", params=linkedin_params
+        microsoft_params = {"code": "test_code", "state": STUB_STATE}
+        microsoft_response = await client.request(
+            "GET", "/authorize/oidc/microsoft", params=microsoft_params
         )
-        assert linkedin_response.status_code == status.HTTP_302_FOUND
+        assert microsoft_response.status_code == status.HTTP_302_FOUND
 
         # Stage 3: Token endpoint changes secrete code in Persistent Grant table to token
         secret_code = (
-            linkedin_response.headers["location"].split("=")[1].split("&")[0]
+            microsoft_response.headers["location"].split("=")[1].split("&")[0]
         )
         token_params = {
             "client_id": "spider_man",
