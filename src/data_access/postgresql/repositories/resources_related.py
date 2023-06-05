@@ -85,5 +85,6 @@ class ResourcesRepository(BaseRepository):
             select(res.ApiScopeClaim.scope_claim_type).join(res.ApiResource).join(res.ApiScope).where(join_condition)
         )
         return [scope_claim_type[0].scope_claim_type for scope_claim_type in result]
+   
     def __repr__(self) -> str:  # pragma: no cover
         return "Resorces Related repository"
