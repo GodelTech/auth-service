@@ -2,10 +2,8 @@ import logging
 import uuid
 
 from fastapi import status
-from sqlalchemy import delete, exists, insert, select, text
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy import delete, exists, insert, select
+from typing import Optional
 from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
@@ -21,14 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class PersistentGrantRepository(BaseRepository):
+   
     async def create(
         self,
         client_id: str,
         grant_data: str,
         user_id: int,
-        scope: str,
+        scope: Optional[str],
         grant_type: str = "authorization_code",
         expiration_time: int = 600,
+        
     ) -> None:
         grant_type_id = await self.get_type_id(grant_type)
         client_id_int = await self.get_client_id_int(client_id=client_id)
@@ -40,7 +40,7 @@ class PersistentGrantRepository(BaseRepository):
             "expiration": expiration_time,
             "user_id": user_id,
             "persistent_grant_type_id": grant_type_id,
-            "scope":scope,
+            "scope": scope
         }
 
         await self.session.execute(
