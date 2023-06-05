@@ -57,7 +57,7 @@ class ResourcesRepository(BaseRepository):
         
         resource = result[0]
         if not resource.enabled:
-            raise err.ResourceDisabledError(f"{resource[0].name} enabled: {resource[0].enabled}")
+            raise err.ResourceDisabledError(f"{resource.name} enabled: {resource.enabled}")
         
         return resource
 

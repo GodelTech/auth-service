@@ -95,7 +95,6 @@ class ScopeService:
             "oidc.introspection.get",
             "oidc.revoke.post",
         ]
-#        resource = await self.resource_repo.get_by_name(name="oidc")
 
         if 'openid' in scope:
             aud_result.append("oidc.userinfo.openid")
@@ -116,4 +115,11 @@ class ScopeService:
         
         return aud_result
 
- 
+    async def get_all_scopes_of_resource_by_name(self, name:str) -> dict[str:str]:
+        resource = await self.resource_repo.get_by_name(name=name)
+        result ={}
+        for api_scope in resource.api_scope:
+                for scope_claim in api_scope.api_scope_claims:
+                        result[f'{resource.name}.{api_scope.name}.{scope_claim.scope_claim_type.scope_claim_type}'] = api_scope.description
+        return result
+    

@@ -60,6 +60,7 @@ class CodeAuthService(UpdateRedirectUrlMixin):
                 request_data.username
             )).id,
             expiration_time=auth_code_lifetime + int(time.time()),
+            scope=request_data.scope
         )
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:

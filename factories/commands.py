@@ -43,6 +43,7 @@ class DataBasePopulation:
         cls.populate_api_secrets()
         cls.populate_api_scope()
         cls.populate_api_scope_claims()
+        cls.populate_oidc_resource()
         sess.session.commit()
         sess.session.close()
 
@@ -87,7 +88,7 @@ class DataBasePopulation:
 
     @classmethod
     def populate_api_scope_claim_types_table(cls) -> None:
-        for val in data.API_SCOPE_CLAIM_TYPE:
+        for val in data.API_SCOPE_CLAIM_TYPE + data.API_SCOPE_CLAIM_TYPE_INTOSPECT_REVOKE + data.API_SCOPE_CLAIM_TYPE_USERINFO:
             res_factory.ApiScopeClaimTypeFactory(
                 scope_claim_type=val
             )
@@ -179,18 +180,6 @@ class DataBasePopulation:
 
     @classmethod
     def populate_grants(cls) -> None:
-
-        # For what do we need to populate persistent_grant_types table here?
-        # It's been already populated in populate_persistent_grant_types_table method
-        # It is not being added twice only because of sqlalchemy_get_or_create = ("type_of_grant",) line
-        # in PersistentGrantTypesFactory class
-
-        # for grant_type in data.TYPES_OF_GRANTS:
-        #     grant_factory.PersistentGrantTypesFactory()
-        #     grant_factory.
-        #     grant_factory.
-
-        # for grant in data.TYPES_OF_GRANTS:
         for i in range(2):
             grant_factory.PersistentGrantFactory()
             
@@ -227,12 +216,47 @@ class DataBasePopulation:
 
     @classmethod
     def populate_api_scope_claims(cls):
-        for scope in range(2):
-            for claim in range(3):
+        for scope_id in range(2):
+            for type_id in range(2):
                 res_factory.ApiScopeClaimFactory(
-                    api_scopes_id = scope + 1,
-                    scope_claim_type_id = claim + 1
+                    api_scopes_id = scope_id + 1,
+                    scope_claim_type_id = type_id +1
                 )
+
+    @classmethod
+    def populate_oidc_resource(cls):
+        cls.populate_api_scope_oidc()
+        cls.populate_api_scope_claims_oidc()
+
+
+    @classmethod
+    def populate_api_scope_oidc(cls):
+        for res in data.API_SCOPES_OIDC:
+            res_factory.ApiScopeFactory(
+                name = res['name'],
+                api_resources_id = 2,
+                description = res['description'],
+                display_name = res['display_name'],
+                required = True,
+                emphasize = True,
+            )
+
+    @classmethod
+    def populate_api_scope_claims_oidc(cls):
+        for type_id in range(8, 27):
+                res_factory.ApiScopeClaimFactory(
+                    api_scopes_id = 3,
+                    scope_claim_type_id = type_id
+                )
+                
+        res_factory.ApiScopeClaimFactory(
+                api_scopes_id = 4,
+                scope_claim_type_id = 6
+            )
+        res_factory.ApiScopeClaimFactory(
+                api_scopes_id = 5,
+                scope_claim_type_id = 7
+            )
 
 if __name__ == "__main__":
     DataBasePopulation.clean_and_populate()

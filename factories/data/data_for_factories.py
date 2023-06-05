@@ -272,6 +272,11 @@ API_RESOURCES = [
         "description":"API Resource for Alarm App",
         "display_name":"Alarm API",
         "name":"alarm-api-resource",
+    },
+    {
+        "description":"Our OIDC",
+        "display_name":"OIDC auth-service",
+        "name":"oidc",
     }
 ]
 
@@ -294,7 +299,7 @@ API_SECRET =[
 
 API_SCOPES =[
     {
-       # "api_resource_id": 1,
+        "api_resource_id": 1,
         "name": "time",
         "description" : "Gives posibility to manage alarm's time",
         "display_name": "Manage Time",
@@ -302,11 +307,65 @@ API_SCOPES =[
         "emphasize": False,
     },
     {
-       # "api_resource_id": 1,
+        "api_resource_id": 1,
         "name": "music",
         "description" : "Gives posibility to manage alarm's music",
         "display_name": "Manage Music",
         "required": True,
         "emphasize": False,
     }
+]
+
+API_SCOPES_OIDC =[
+    {
+        "api_resource_id": 2,
+        "name": "userinfo",
+        "description" : "Gives posibility to get user information",
+        "display_name": "UserInfo",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+        "api_resource_id": 2,
+        "name": "intorospect",
+        "description" : "Gives posibility to check token",
+        "display_name": "Intorospection",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+        "api_resource_id": 2,
+        "name": "revoke",
+        "description" : "Gives posibility to revoke token",
+        "display_name": "Revocation",
+        "required": True,
+        "emphasize": False,
+    }
+]
+
+API_SCOPE_CLAIM_TYPE_INTOSPECT_REVOKE =[
+        'get', 'post'
+]
+
+API_SCOPE_CLAIM_TYPE_USERINFO = [
+    "openid",
+    "profile",
+    "email",
+    "name",
+    "given_name",
+    "family_name",
+    "middle_name",
+    "nickname",
+    "preferred_username",
+    "picture",
+    "website",
+    "email_verified",
+    "gender",
+    "birthdate",
+    "zoneinfo",
+    "locale",
+    "phone_number",
+    "phone_number_verified",
+    "address",
+    "updated_at",
 ]
