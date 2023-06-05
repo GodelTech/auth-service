@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import resources_related as res
 from typing import Any, Dict, Union, Optional
+from ..errors import resource as err
+
 
 def params_to_dict(**kwargs: Any) -> Dict[str, Any]:
     result = {}
@@ -31,27 +33,33 @@ class ResourcesRepository(BaseRepository):
 
 
     async def get_by_id(self, api_res_id: int) -> res.ApiResource:
-        try:
-            result = await self.session.execute(
-                select(res.ApiResource).where(
-                    res.ApiResource.id == api_res_id,
-                )
+        result = await self.session.execute(
+            select(res.ApiResource).where(
+                res.ApiResource.id == api_res_id,
             )
-            return result.first()[0]
-        except Exception as e:
-            raise ValueError(e)
+        )
 
+        resource = result.first()
+        if resource is None:
+            raise err.ResourceNotFoundError(str(api_res_id))
+        if not resource[0].enabled:
+            raise err.ResourceDisabledError(f"{resource[0].name} enabled: {resource[0].enabled}")
+        return resource[0]
 
     async def get_by_name(self, name: str) -> res.ApiResource:
-        try:
-            group = await self.session.execute(
-                select(res.ApiResource).where(res.ApiResource.name == name)
-            )
-            group = group.first()
-            
-            return group[0]
-        except:
-            raise ValueError
+        result = await self.session.execute(
+            select(res.ApiResource).where(res.ApiResource.name == name)
+        )
+        result = result.first()
+
+        if result is None:
+            raise err.ResourceNotFoundError(name)
+        
+        resource = result[0]
+        if not resource.enabled:
+            raise err.ResourceDisabledError(f"{resource[0].name} enabled: {resource[0].enabled}")
+        
+        return resource
 
 
     async def get_all(self) -> list[res.ApiResource]:
@@ -69,8 +77,13 @@ class ResourcesRepository(BaseRepository):
             )
             await self.session.execute(updates)
         else:
-            raise ValueError(f"Api Resource id {api_res_id} does not exist")
+            raise err.ResourceNotFoundError(f"Api Resource id {api_res_id} does not exist")
 
-
+    async def get_scope_claims(self, resource_name: str, scope_name: str):
+        join_condition = res.ApiResource.name == resource_name and res.ApiResource.id == res.ApiScope.api_resources_id and res.ApiScope.name == scope_name
+        result = self.session.execute(
+            select(res.ApiScopeClaim.scope_claim_type).join(res.ApiResource).join(res.ApiScope).where(join_condition)
+        )
+        return [scope_claim_type[0].scope_claim_type for scope_claim_type in result]
     def __repr__(self) -> str:  # pragma: no cover
         return "Resorces Related repository"

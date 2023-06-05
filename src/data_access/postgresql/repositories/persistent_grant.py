@@ -26,6 +26,7 @@ class PersistentGrantRepository(BaseRepository):
         client_id: str,
         grant_data: str,
         user_id: int,
+        scope: str,
         grant_type: str = "authorization_code",
         expiration_time: int = 600,
     ) -> None:
@@ -39,6 +40,7 @@ class PersistentGrantRepository(BaseRepository):
             "expiration": expiration_time,
             "user_id": user_id,
             "persistent_grant_type_id": grant_type_id,
+            "scope":scope,
         }
 
         await self.session.execute(

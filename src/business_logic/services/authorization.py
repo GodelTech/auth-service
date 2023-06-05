@@ -101,6 +101,7 @@ class AuthorizationService:
             client_id=self.request_model.client_id,
             grant_data=secret_code,
             user_id=user_id,
+            scope=self.request_model.scope,
         )
         return await self._update_redirect_url_with_params(
             secret_code=secret_code

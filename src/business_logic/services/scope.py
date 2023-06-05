@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories.resources_related import ResourcesRepository
 from src.data_access.postgresql.tables.resources_related import ApiResource, ApiScope, ApiScopeClaim, ApiScopeClaim
 
-
 logger = logging.getLogger(__name__)
+
 
 class ScopeService:
     def __init__(
@@ -30,7 +30,6 @@ class ScopeService:
                         return result
         
         return {'Impossible':'Error'}
-
 
     async def get_scope_description(
         self, scope:str
@@ -90,5 +89,31 @@ class ScopeService:
 
         return result
  
+    async def get_aud(self, scope:str = "openid") -> dict[str:str]:
+        scope:list = scope.split(' ')
+        aud_result = [
+            "oidc.introspection.get",
+            "oidc.revoke.post",
+        ]
+#        resource = await self.resource_repo.get_by_name(name="oidc")
+
+        if 'openid' in scope:
+            aud_result.append("oidc.userinfo.openid")
+            scope.remove('email')
+        if 'profile' in scope:
+            aud_result.append("oidc.userinfo.profile")
+            scope.remove('email')
+        if 'email' in scope:
+            aud_result.append("oidc.userinfo.email")
+            scope.remove('email')
+        
+        for recorde in scope:
+            if '.' in recorde:
+                aud_result.append(recorde)
+            else:
+                await self.resource_repo.get_scope_claims(resource_name='oidc', scope_name='userinfo')
+                aud_result.append(f"oidc.userinfo.{recorde}")
+        
+        return aud_result
 
  
