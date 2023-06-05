@@ -1,3 +1,4 @@
+from business_logic.dto.open_id_config import OpenIdConfiguration
 from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
@@ -13,12 +14,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
+
 class WellKnownServices:
     def __init__(
-            self,
-            session:AsyncSession, 
-            wlk_repo: WellKnownRepository
-        ) -> None:
+        self, session: AsyncSession, wlk_repo: WellKnownRepository
+    ) -> None:
         self.request: Union[Request, Any] = None
         self.wlk_repo = wlk_repo
         self.session = session
@@ -36,29 +36,27 @@ class WellKnownServices:
             for route in self.request.app.routes
         } | {"false": "/ Not ready yet"}
 
-    def get_algorithms(self):
+    def get_algorithms(self) -> list[str]:
         return JWTService().algorithms
 
-    async def get_claims(self):
+    async def get_claims(self) -> list[str]:
         result = await self.wlk_repo.get_user_claim_types()
         # result += await self.wlk_repo.get_client_claim_types()
         return result
 
-    async def get_grant_types(self):
+    async def get_grant_types(self) -> list[str]:
         result = await self.wlk_repo.get_grant_types()
         # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_openid_configuration(
         self,
-    ) -> dict[str, Any]:
+    ) -> OpenIdConfiguration:
         if self.request is None:
             raise ValueError
 
-        # For key description: https://ldapwiki.com/wiki/Openid-configuration
-
         # REQUIRED
-        result: dict[str, Any] = {}
+        result: Dict[str, Any] = {}
         result["issuer"] = DOMAIN_NAME
 
         urls_dict = self.get_all_urls(result)
@@ -75,9 +73,9 @@ class WellKnownServices:
             "id_token token",
             "urn:ietf:params:oauth:grant-type:device_code",
         ]
+        result["token_endpoint"] = urls_dict["get_tokens"]
 
         # may be REQUIRED
-        result["token_endpoint"] = urls_dict["get_tokens"]
         result["end_session_endpoint"] = urls_dict["end_session"]
         result["check_session_iframe"] = urls_dict["false"]
 
@@ -95,8 +93,9 @@ class WellKnownServices:
             "client_credentials",
             "urn:ietf:params:oauth:grant-type:device_code",
         ]
+        result_model = OpenIdConfiguration(**result)
 
-        return result
+        return result_model
 
     async def get_jwks(self) -> dict[str, Any]:
         jwt_service = JWTService()
