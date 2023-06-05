@@ -32,7 +32,7 @@ class TestLoginFormService:
         self, login_form_service: LoginFormService
     ) -> None:
         uri = await login_form_service._validate_client_redirect_uri(
-            client_id="santa", redirect_uri="https://www.google.com/"
+            client_id="santa", redirect_uri="http://127.0.0.1:8888/callback/"
         )
         assert uri is True
 

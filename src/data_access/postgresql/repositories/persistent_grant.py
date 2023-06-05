@@ -25,7 +25,7 @@ class PersistentGrantRepository(BaseRepository):
         client_id: str,
         grant_data: str,
         user_id: int,
-        scope: Optional[str],
+        scope: Optional[str] = None,
         grant_type: str = "authorization_code",
         expiration_time: int = 600,
         

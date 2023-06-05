@@ -46,6 +46,6 @@ class AdminAuthService:
         if await self.jwt_service.verify_token(token=token, aud="admin"):
             return None
         else:
-            return None
+            # return None
             return RedirectResponse(f"/admin/login")
         

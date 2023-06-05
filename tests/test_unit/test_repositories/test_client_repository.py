@@ -113,7 +113,7 @@ class TestClientRepository:
                             mock_get_client_by_client_id)
         client_repo = ClientRepository(connection)
         uri = await client_repo.validate_client_redirect_uri(
-            client_id="test_client", redirect_uri="https://www.google.com/"
+            client_id="test_client", redirect_uri="http://127.0.0.1:8888/callback/"
         )
         assert uri is True
 
@@ -136,7 +136,7 @@ class TestClientRepository:
         )
         assert isinstance(uri, str)
         assert len(uri) > 0
-        assert uri == "openid"
+        assert "openid" in uri
 
     async def test_get_client_scopes_not_exists(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)

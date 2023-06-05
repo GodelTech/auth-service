@@ -470,8 +470,11 @@ class ClientCredentialsMaker(BaseMaker):
             client_id=client_from_db.id
         )
 
-        if requested_scope and requested_scope != scopes:
-            raise ClientScopesError
+        
+        if requested_scope:
+            for scope in requested_scope.split(' '):
+                if scope not in scopes.split(' '):
+                    raise ClientScopesError
 
         if len(scopes) == 0:
             scopes = ["No scope"]
