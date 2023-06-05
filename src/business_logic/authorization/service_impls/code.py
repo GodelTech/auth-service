@@ -20,8 +20,9 @@ class CodeAuthService(UpdateRedirectUrlMixin):
     """
     Service for handling authorization code flow in an authentication system.
 
-    Inherits from UpdateRedirectUrlMixin, which provides functionality for updating
-    the redirect URL with additional state parameter if it's present in a request model.
+    Inherits:
+        UpdateRedirectUrlMixin, which provides functionality for updating
+        the redirect URL with additional state parameter if it's present in a request model.
 
     Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4.1
     """

@@ -27,6 +27,16 @@ if TYPE_CHECKING:
 
 
 class GoogleAuthService(ThirdPartyAuthMixin):
+    """
+    Service class for handling authentication with Google as a third-party provider.
+
+    This class implements the necessary methods and functionality to authenticate users
+    using Google's OAuth 2.0 flow.
+
+    Inherits:
+        ThirdPartyAuthMixin: A mixin class providing common methods for third-party authentication.
+    """
+
     def __init__(
         self,
         state_validator: ValidatorProtocol,
@@ -36,6 +46,17 @@ class GoogleAuthService(ThirdPartyAuthMixin):
         oidc_repo: ThirdPartyOIDCRepository,
         async_http_client: AsyncClient,
     ) -> None:
+        """
+        Initializes a new instance of the GoogleAuthService.
+
+        Args:
+            state_validator (ValidatorProtocol): The validator for the state parameter.
+            client_repo (ClientRepository): The repository for client-related operations.
+            user_repo (UserRepository): The repository for user-related operations.
+            persistent_grant_repo (PersistentGrantRepository): The repository for persistent grant-related operations.
+            oidc_repo (ThirdPartyOIDCRepository): The repository for OpenID Connect-related operations.
+            async_http_client (AsyncClient): The asynchronous HTTP client for making HTTP requests.
+        """
         self._state_validator = state_validator
         self._client_repo = client_repo
         self._user_repo = user_repo
@@ -47,6 +68,19 @@ class GoogleAuthService(ThirdPartyAuthMixin):
     async def get_redirect_url(
         self, request_data: ThirdPartyAccessTokenRequestModel
     ) -> str:
+        """
+        Generates the redirect URL for the Google authentication flow.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the authorization code and state.
+
+        Returns:
+            str: The generated redirect URL.
+
+        Raises:
+            ThirdPartyAuthInvalidStateError: If the requested scope is invalid.
+            ThirdPartyAuthProviderInvalidRequestDataError: If the request to Google returns an error response.
+        """
         await self._state_validator(request_data.state)
         await self._create_grant(
             request_data,
