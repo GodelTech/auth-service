@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from src.business_logic.services.jwt_token import JWTService
     from src.presentation.api.models import (
         BodyRequestRevokeModel,
-        BodyRequestTokenModel,
+        BodyRequestTokenModel
     )
 
 
@@ -103,7 +103,7 @@ class TokenService:
     ) -> None:
         self.session = session
         self.request: Optional[Request] = None
-        self.request_model: Optional[RequestTokenModel] = None
+        self.request_model: Optional[BodyRequestTokenModel] = None
         self.request_body: Optional[BodyRequestRevokeModel] = None
         self.authorization: Optional[str] = None
         self.client_repo = client_repo
