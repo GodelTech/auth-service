@@ -171,7 +171,7 @@ class IntrospectionService:
         """A helper method that returns the type of the token.
 
         Returns:
-            str: a token type
+            str: a token type.
         """
         return "Bearer"
 
