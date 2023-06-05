@@ -1,5 +1,4 @@
 from business_logic.dto.open_id_config import OpenIdConfiguration
-from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
@@ -41,12 +40,10 @@ class WellKnownServices:
 
     async def get_claims(self) -> list[str]:
         result = await self.wlk_repo.get_user_claim_types()
-        # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_grant_types(self) -> list[str]:
         result = await self.wlk_repo.get_grant_types()
-        # result += await self.wlk_repo.get_client_claim_types()
         return result
 
     async def get_openid_configuration(
@@ -56,7 +53,7 @@ class WellKnownServices:
             raise ValueError
 
         # REQUIRED
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         result["issuer"] = DOMAIN_NAME
 
         urls_dict = self.get_all_urls(result)
@@ -115,7 +112,8 @@ class WellKnownServices:
             "n": long_to_base64(await jwt_service.get_module()),
             "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
         }
-        logger.debug(
+        logger.info(
             f"n =  {base64_to_long(result['n'])}\ne = {base64_to_long(result['e'])}"
         )
+
         return result

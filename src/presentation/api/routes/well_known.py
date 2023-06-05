@@ -3,9 +3,7 @@ from typing import Any
 
 from fastapi import (
     APIRouter,
-    HTTPException,
     Request,
-    status,
 )
 from fastapi_cache.decorator import cache
 
@@ -16,6 +14,7 @@ from src.presentation.api.models.well_known import (
     ResponseJWKS,
     ResponseOpenIdConfiguration,
 )
+from fastapi.responses import JSONResponse
 
 well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 
@@ -27,8 +26,8 @@ logger = logging.getLogger(__name__)
 )
 @cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
-        request: Request,
-) -> dict[str, Any]:
+    request: Request,
+) -> JSONResponse:
     try:
         session = request.state.session
         logger.debug("Collecting Data for OpenID Configuration.")
@@ -37,14 +36,15 @@ async def get_openid_configuration(
         )
         well_known_info_class.request = request
         result = await well_known_info_class.get_openid_configuration()
-        return {k: v for k, v in result.items() if v is not None}
-    except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        result_dict = {k: v for k, v in result.dict().items() if v is not None}
+        return JSONResponse(content=result_dict)
+    except Exception as exception:
+        logger.exception(exception)
 
 
 @well_known_router.get("/jwks", response_model=ResponseJWKS)
 async def get_jwks(
-        request: Request,
+    request: Request,
 ) -> dict[str, Any]:
     try:
         session = "no_session"
@@ -57,5 +57,5 @@ async def get_jwks(
                 await well_known_info_class.get_jwks(),
             ]
         }
-    except:
+    except Exception:
         raise  # HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
