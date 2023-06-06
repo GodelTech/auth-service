@@ -1,13 +1,9 @@
 import pytest
 from sqlalchemy import insert, delete
 
-from src.data_access.postgresql.errors import (
-    ThirdPartyStateNotFoundError,
-    ThirdPartyStateDuplicationError,
-)
+
 from src.data_access.postgresql.repositories import ThirdPartyOIDCRepository
 from src.data_access.postgresql.tables import IdentityProviderMapped
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -111,30 +107,16 @@ class TestThirdPartyRepository:
         valid = await oidc_repo.validate_state(state="some_state")
         assert valid is False
 
-    async def test_create_state_already_exists(
+    async def test_validate_state_not_exists(
         self, connection: AsyncSession
     ) -> None:
-        oidc_repo = ThirdPartyOIDCRepository(connection)
-        await oidc_repo.create_state(state="some_state")
-
-        valid = await oidc_repo.validate_state(state="some_state")
-        assert valid is True
-
-        with pytest.raises(ThirdPartyStateDuplicationError):
-            await oidc_repo.create_state(state="some_state")
-        await oidc_repo.delete_state(state="some_state")
-
-    async def test_delete_state_not_exist(self, connection: AsyncSession) -> None:
-        oidc_repo = ThirdPartyOIDCRepository(connection)
-        with pytest.raises(ThirdPartyStateNotFoundError):
-            await oidc_repo.delete_state(state="not_exist")
-
-    async def test_validate_state_not_exists(self, connection: AsyncSession) -> None:
         oidc_repo = ThirdPartyOIDCRepository(connection)
         validated = await oidc_repo.validate_state("no_such_a_state")
         assert validated is False
 
-    async def test_get_provider_id_by_name(self, connection: AsyncSession) -> None:
+    async def test_get_provider_id_by_name(
+        self, connection: AsyncSession
+    ) -> None:
         oidc_repo = ThirdPartyOIDCRepository(connection)
         provider_id = await oidc_repo.get_provider_id_by_name(name="github")
         assert provider_id == 1

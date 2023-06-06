@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import Form
 from pydantic import BaseModel
@@ -16,21 +16,9 @@ class ThirdPartyOIDCRequestModel(BaseModel):
         return f"Model {self.__class__.__name__}"
 
 
-class ThirdPartyFacebookRequestModel(BaseModel):
-    state: str
-    response_type: Optional[str]
-    scope: Optional[str]
-
-    class Config:
-        orm_mode = True
-
-    def __repr__(self) -> str:
-        return f"Model {self.__class__.__name__}"
-
-
 class ThirdPartyGoogleRequestModel(BaseModel):
-    state: str
     code: Optional[str]
+    state: str
     scope: Optional[str]
 
     class Config:
@@ -41,8 +29,8 @@ class ThirdPartyGoogleRequestModel(BaseModel):
 
 
 class ThirdPartyLinkedinRequestModel(BaseModel):
-    state: str
     code: Optional[str]
+    state: str
     scope: Optional[str]
 
     class Config:
@@ -53,8 +41,8 @@ class ThirdPartyLinkedinRequestModel(BaseModel):
 
 
 class ThirdPartyMicrosoftRequestModel(BaseModel):
-    state: str
     code: str
+    state: str
 
     class Config:
         orm_mode = True
@@ -66,3 +54,15 @@ class ThirdPartyMicrosoftRequestModel(BaseModel):
 @dataclass
 class StateRequestModel:
     state: str = Form(...)
+
+
+class ThirdPartyFacebookRequestModel(BaseModel):
+    state: str
+    response_type: Optional[str]
+    scope: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+    def __repr__(self) -> str:
+        return f"Model {self.__class__.__name__}"

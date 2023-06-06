@@ -18,7 +18,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
     UserRepository,
     PersistentGrantRepository,
-    DeviceRepository,
+    DeviceRepository, CodeChallengeRepository,
 )
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
@@ -51,6 +51,7 @@ async def get_authorize(
         session=session,
         client_repo=ClientRepository(session),
         oidc_repo=ThirdPartyOIDCRepository(session),
+        code_challenge_repo=CodeChallengeRepository(session),
     )
     auth_class.request_model = request_model
     return_form = await auth_class.get_html_form()

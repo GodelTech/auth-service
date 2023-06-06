@@ -1,14 +1,19 @@
 import datetime
+from typing import Generator
 
+import pytest
 import pytest_asyncio
 from pydantic import SecretStr
 
 from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.third_party_auth.dto.request import (
+    StateRequestModel,
+    ThirdPartyAccessTokenRequestModel,
+)
 from src.presentation.api.models import (
     DeviceCancelModel,
     DeviceRequestModel,
     DeviceUserCodeModel,
-    StateRequestModel,
     ThirdPartyGoogleRequestModel,
     ThirdPartyMicrosoftRequestModel,
     ThirdPartyOIDCRequestModel,
@@ -208,12 +213,6 @@ async def third_party_oidc_request_model() -> ThirdPartyOIDCRequestModel:
 
 
 @pytest_asyncio.fixture
-async def state_request_model() -> StateRequestModel:
-    request_model = StateRequestModel(state="some_crazy_state")
-    return request_model
-
-
-@pytest_asyncio.fixture
 async def third_party_google_request_model() -> ThirdPartyGoogleRequestModel:
     oidc_request_model = ThirdPartyGoogleRequestModel(
         code="test_code", state="test_state", scope="test_scope"
@@ -227,3 +226,21 @@ async def third_party_microsoft_request_model() -> ThirdPartyMicrosoftRequestMod
         code="test_code", state="test_state"
     )
     return oidc_request_model
+
+
+@pytest.fixture
+def state_request_model() -> Generator[StateRequestModel, None, None]:
+    request_model = StateRequestModel(state="test_state")
+    yield request_model
+    del request_model
+
+
+@pytest.fixture
+def third_party_access_token_request_model() -> (
+    Generator[ThirdPartyAccessTokenRequestModel, None, None]
+):
+    request_model = ThirdPartyAccessTokenRequestModel(
+        code="test_code", state="test_state"
+    )
+    yield request_model
+    del request_model
