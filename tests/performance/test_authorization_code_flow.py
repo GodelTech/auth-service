@@ -115,14 +115,13 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
         # await connection.commit()
         # ##### ----------------------- ##############
         #
-    # @task
-    # def test_userinfo_GET(self):
-    #
-    #     self.user_info_response = self.client.request(
-    #         "GET", "/userinfo/", headers={"authorization": self.access_token},
-    #         name="4/userinfo/"
-    #     )
-    #
+    @task
+    def test_userinfo_GET(self):
+        self.user_info_response = self.client.request(
+            "GET", "/userinfo/", headers={"authorization": self.access_token},
+            name="4/userinfo/"
+        )
+        logging.info(f"test_userinfo_GET; status_code: {self.user_info_response.status_code}")
     #     logging.info(f"test_userinfo_GET; self.user_info_response.json(): {self.user_info_response.json()}")
     #     self.user_id = self.user_info_response["user_id"]
     #     logging.info(f"test_userinfo_GET; self.user_id: {self.user_id}")
