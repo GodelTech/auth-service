@@ -8,3 +8,4 @@ from .user import UserRepository
 from .wellknown import WellKnownRepository
 from .blacklisted_token import BlacklistedTokenRepository
 from .resources_related import ResourcesRepository
+from .code_challenge import CodeChallengeRepository

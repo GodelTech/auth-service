@@ -7,6 +7,7 @@ import factories.factory_models.identity_factory as id_factory
 import factories.factory_models.persistent_grant_factory as grant_factory
 import factories.factory_models.resources_related_factory as res_factory
 import factories.factory_models.user_factory as user_factory
+import factories.factory_models.code_challenge_factory as code_challenge_factory
 import factories.factory_session as sess
 
 factory.random.reseed_random(0)
@@ -44,6 +45,7 @@ class DataBasePopulation:
         cls.populate_api_scope()
         cls.populate_api_scope_claims()
         cls.populate_oidc_resource()
+        cls.populate_code_challenge_methods()
         sess.session.commit()
         sess.session.close()
 
@@ -56,15 +58,21 @@ class DataBasePopulation:
 
     @classmethod
     def clean_data_from_database(cls) -> None:
-        result = sess.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"))
+        result = sess.session.execute(
+            text(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+            )
+        )
         table_names = [row[0] for row in result]
-        excluded_table = 'alembic_version'
+        excluded_table = "alembic_version"
         for table_name in table_names:
             if table_name != excluded_table:
-                sess.session.execute(text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE"))
+                sess.session.execute(
+                    text(
+                        f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE"
+                    )
+                )
         sess.session.flush()
-        
-        
 
     @classmethod
     def populate_user_claim_types_table(cls) -> None:
@@ -96,6 +104,7 @@ class DataBasePopulation:
     @classmethod
     def populate_persistent_grant_types_table(cls) -> None:
         for val in data.TYPES_OF_GRANTS:
+            grant_factory.PersistentGrantTypesFactory(type_of_grant=val)
             grant_factory.PersistentGrantTypesFactory(
                 type_of_grant=val
             )
@@ -145,7 +154,10 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_post_logout_redirect_uri(cls) -> None:
-        for client_id, post_logout_redirect_uri in data.POST_LOGOUT_REDIRECT_URL.items():
+        for (
+            client_id,
+            post_logout_redirect_uri,
+        ) in data.POST_LOGOUT_REDIRECT_URL.items():
             cl_factory.ClientPostLogoutRedirectUriFactory(
                 client_id=client_id,
                 post_logout_redirect_uri=post_logout_redirect_uri,
@@ -154,16 +166,12 @@ class DataBasePopulation:
     @classmethod
     def populate_client_secrets(cls) -> None:
         for client_id, secret in data.CLIENT_SECRETS.items():
-            cl_factory.ClientSecretFactory(
-                client_id=client_id, value=secret
-            )
+            cl_factory.ClientSecretFactory(client_id=client_id, value=secret)
 
     @classmethod
     def populate_client_scopes(cls) -> None:
         for client_id, scope in data.CLIENT_SCOPES.items():
-            cl_factory.ClientScopeFactory(
-                client_id=client_id, scope=scope
-            )
+            cl_factory.ClientScopeFactory(client_id=client_id, scope=scope)
 
     @classmethod
     def populate_client_redirect_uri(cls) -> None:
@@ -176,12 +184,30 @@ class DataBasePopulation:
     def populate_roles(cls) -> None:
         for role in data.ROLES:
             user_factory.RoleFactory(name=role)
-           
 
     @classmethod
     def populate_grants(cls) -> None:
+        # For what do we need to populate persistent_grant_types table here?
+        # It's been already populated in populate_persistent_grant_types_table method
+        # It is not being added twice only because of sqlalchemy_get_or_create = ("type_of_grant",) line
+        # in PersistentGrantTypesFactory class
+
+        # for grant_type in data.TYPES_OF_GRANTS:
+        #     grant_factory.PersistentGrantTypesFactory()
+        #     grant_factory.
+        #     grant_factory.
+
+        # for grant in data.TYPES_OF_GRANTS:
         for i in range(2):
             grant_factory.PersistentGrantFactory()
+
+    @classmethod
+    def populate_code_challenge_methods(cls) -> None:
+        for code_challenge_method in data.CODE_CHALLENGE_METHODS:
+            code_challenge_factory.CodeChallengeMethodFactory(
+                method=code_challenge_method
+            )
+
             
     @classmethod
     def populate_api_resourses(cls)->None:

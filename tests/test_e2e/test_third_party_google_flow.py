@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete, insert, select, text
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
@@ -11,15 +11,9 @@ from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderMapped,
     IdentityProviderState,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.tables.users import User, UserClaim
 
-scope = (
-    "gcp-api%20IdentityServerApi&grant_type="
-    "password&client_id=spider_man&client_secret="
-    "65015c5e-c865-d3d4-3ba1-3abcb4e65500&password="
-    "the_beginner&username=PeterParker"
-)
+
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
 
 
@@ -28,132 +22,84 @@ class TestThirdPartyGoogleFlow:
     async def test_successful_google_code_flow(
         self, client: AsyncClient, connection: AsyncSession, mocker: Any
     ) -> None:
-        # 1st stage Authorization endpoint with get request
-        params = {
+        # Stage 1: Authorization endpoint with get request
+        authorization_params = {
             "client_id": "spider_man",
             "response_type": "code",
-            "scope": scope,
-            "redirect_uri": "http://127.0.0.1:8888/callback/",
+            "scope": "openid profile",
+            "redirect_uri": "https://www.google.com/",
         }
-        response = await client.request("GET", "/authorize/", params=params)
-        assert response.status_code == status.HTTP_200_OK
-
-        # 2nd stage third party Google provider endpoint
-        await connection.execute(
-            insert(IdentityProviderState).values(state=STUB_STATE)
+        authorization_response = await client.request(
+            "GET", "/authorize/", params=authorization_params
         )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=4,
-                provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
+        assert authorization_response.status_code == status.HTTP_200_OK
+
+        # Stage 2: Third party Google provider endpoint request to collect username and access_token
+        provider_state_insertion = insert(IdentityProviderState).values(
+            state=STUB_STATE
         )
+        provider_mapped_insertion = insert(IdentityProviderMapped).values(
+            identity_provider_id=1,
+            provider_client_id="e6a4c6014f35f4acf016",
+            provider_client_secret="***REMOVED***",
+            enabled=True,
+        )
+        await connection.execute(provider_state_insertion)
+        await connection.execute(provider_mapped_insertion)
         await connection.commit()
 
-        async def replace_post(*args, **kwargs):
+        async def replace_post(*args: Any, **kwargs: Any) -> str:
             return "access_token"
 
-        async def replace_get(*args, **kwargs):
-            return "UserNewEmail"
+        async def replace_get(*args: Any, **kwargs: Any) -> str:
+            return "NewUserNew"
 
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGoogleService"
-
-        mocker.patch(f"{patch_start}.get_google_access_token", replace_post)
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_email", replace_get
+        patch_start = "src.business_logic.third_party_auth.service_impls.google.GoogleAuthService"
+        mocker.patch(f"{patch_start}._get_access_token", replace_post)
+        mocker.patch(f"{patch_start}._get_username", replace_get)
+        google_params = {"code": "test_code", "state": STUB_STATE}
+        google_response = await client.request(
+            "GET", "/authorize/oidc/google", params=google_params
         )
+        assert google_response.status_code == status.HTTP_302_FOUND
 
-        params = {
-            "code": "test_code",
-            "state": STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/google", params=params
+        # Stage 3: Token endpoint changes secrete code in Persistent Grant table to token
+        secret_code = (
+            google_response.headers["location"].split("=")[1].split("&")[0]
         )
-        assert response.status_code == status.HTTP_302_FOUND
-
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 4,
-                IdentityProviderMapped.provider_client_id
-                == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == STUB_STATE
-            )
-        )
-        await connection.commit()
-
-        # 3nd stage Token endpoint changes secrete code in Persistent grant table to token (application side)
-        user_id = await connection.execute(
-            select(User.id).where(User.username == "UserNewEmail")
-        )
-        user_id = user_id.first()[0]
-        secret_code = await connection.execute(
-            select(PersistentGrant.grant_data).where(
-                PersistentGrant.client_id == 8,
-                PersistentGrant.user_id == user_id,
-            )
-        )
-
-        secret_code = secret_code.first()[0]
-
-        params = {
+        token_params = {
             "client_id": "spider_man",
             "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
             "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
-
-        content_type = "application/x-www-form-urlencoded"
-        response = await client.request(
+        token_response = await client.request(
             "POST",
             "/token/",
-            data=params,
-            headers={"Content-Type": content_type},
+            data=token_params,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        response_data = response.json()
+        response_data = token_response.json()
         access_token = response_data.get("access_token")
+        assert token_response.status_code == status.HTTP_200_OK
 
-        assert response.status_code == status.HTTP_200_OK
-
-        # 4th stage UserInfo endpoint retrieves user data from UserClaims table
-
-        # The sequence id number is out of sync and raises duplicate key error
-        # We manually bring it back in sync
-        await connection.execute(
-            text(
-                "SELECT setval(pg_get_serial_sequence('user_claims', 'id'), (SELECT MAX(id) FROM user_claims)+1);"
-            )
+        # Stage 4: UserInfo endpoint retrieves user data from UserClaims table
+        user_id_query = select(User.id).where(User.username == "NewUserNew")
+        user_id = (
+            await connection.execute(user_id_query)
+        ).scalar_one_or_none()
+        user_claim_insertion = insert(UserClaim).values(
+            user_id=user_id, claim_type_id=1, claim_value="Peter"
         )
-        await connection.execute(
-            insert(UserClaim).values(
-                user_id=user_id, claim_type_id=1, claim_value="Peter"
-            )
-        )
+        await connection.execute(user_claim_insertion)
         await connection.commit()
         response = await client.request(
             "GET", "/userinfo/", headers={"authorization": access_token}
         )
         assert response.status_code == status.HTTP_200_OK
-        await connection.execute(
-            delete(UserClaim)
-            .where(UserClaim.user_id == 8)
-            .where(UserClaim.claim_type_id == 1)
-        )
-        await connection.commit()
 
-        # 5th stage EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
+        # Stage 5: EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
         jwt_service = JWTService()
         token_hint_data = {
             "sub": user_id,
@@ -163,10 +109,12 @@ class TestThirdPartyGoogleFlow:
 
         id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
 
-        params = {
+        logout_params = {
             "id_token_hint": id_token_hint,
             "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
-        response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_302_FOUND
+        end_session_response = await client.request(
+            "GET", "/endsession/", params=logout_params
+        )
+        assert end_session_response.status_code == status.HTTP_302_FOUND

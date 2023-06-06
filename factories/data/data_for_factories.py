@@ -267,6 +267,8 @@ POST_LOGOUT_REDIRECT_URL = {
     10: "https://meyer-berry.com/",
 }
 
+CODE_CHALLENGE_METHODS = ["plain", "S256"]
+
 API_RESOURCES = [
     {
         "description":"API Resource for Alarm App",

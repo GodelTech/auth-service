@@ -20,6 +20,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     DeviceRepository,
     ResourcesRepository,
+    CodeChallengeRepository,
 )
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
@@ -56,6 +57,7 @@ async def get_authorize(
         session=session,
         client_repo=ClientRepository(session),
         oidc_repo=ThirdPartyOIDCRepository(session),
+        code_challenge_repo=CodeChallengeRepository(session),
     )
     auth_class.request_model = request_model
     return_form = await auth_class.get_html_form()

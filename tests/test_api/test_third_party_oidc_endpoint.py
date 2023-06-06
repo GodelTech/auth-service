@@ -1,591 +1,428 @@
-from typing import Any
+from typing import Generator
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete, insert
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data_access.postgresql.tables.identity_resource import (
-    IdentityProviderMapped,
-    IdentityProviderState,
+from src.business_logic.third_party_auth import ThirdPartyAuthServiceProtocol
+from src.business_logic.third_party_auth.errors import (
+    ThirdPartyAuthInvalidStateError,
+    ThirdPartyAuthProviderInvalidRequestDataError,
+    UnsupportedThirdPartyAuthProviderError,
 )
 
-STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!test_client!_!https://www.google.com/"
-SHORT_STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg"
+GetServiceImpl = Generator[MagicMock, None, None]
+GetServiceImplWithSideEffect = Generator[Mock, None, None]
+
+
+@pytest.fixture
+def mocked_get_service_impl() -> GetServiceImpl:
+    with patch(
+        "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.get_service_impl"
+    ) as mocked_data:
+        mock_auth_service = MagicMock(spec=ThirdPartyAuthServiceProtocol)
+        mock_auth_service.get_redirect_url.return_value = (
+            "http://www.test.com/"
+        )
+        mocked_data.return_value = mock_auth_service
+        yield mock_auth_service
+        del mock_auth_service
+
+
+@pytest.fixture
+def mocked_get_service_impl_with_side_effect() -> GetServiceImplWithSideEffect:
+    with patch(
+        "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.get_service_impl"
+    ) as mocked_data:
+        mocked_data.side_effect = UnsupportedThirdPartyAuthProviderError
+        yield mocked_data
+        del mocked_data
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGitHubEndpoint:
-    async def test_successful_github_request_get(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+class TestCreateState:
+    @patch(
+        "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.create_provider_state"
+    )
+    async def test_successful_create_state_request(
+        self, mocked_data: Mock, client: AsyncClient
     ) -> None:
-        await connection.execute(
-            insert(IdentityProviderState).values(state=STUB_STATE)
-        )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=1,
-                provider_client_id="e6a4c6014f35f4acf016",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
-        )
-        await connection.commit()
-
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "NewUserNew"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-        params = {"code": "test_code", "state": STUB_STATE}
-        response = await client.request(
-            "GET", "/authorize/oidc/github", params=params
-        )
-        assert response.status_code == status.HTTP_302_FOUND
-
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 1,
-                IdentityProviderMapped.provider_client_id
-                == "e6a4c6014f35f4acf016",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_github_request_get_index_error(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
-    ) -> None:
-        expected_content = '{"message":"Error in parsing"}'
-
-        await connection.execute(
-            insert(IdentityProviderState).values(state=SHORT_STUB_STATE)
-        )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=1,
-                provider_client_id="e6a4c6014f35f4acf016",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
-        )
-
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "NewUserNew"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.AuthThirdPartyOIDCService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-        params = {"code": "test_code", "state": SHORT_STUB_STATE}
-        response = await client.request(
-            "GET", "/authorize/oidc/github", params=params
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 1,
-                IdentityProviderMapped.provider_client_id
-                == "e6a4c6014f35f4acf016",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == SHORT_STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_github_request_get_wrong_state(
-        self, client: AsyncClient
-    ) -> None:
-        expected_content = '{"message":"Wrong data has been passed"}'
-
-        params = {"code": "test_code", "state": "test_state"}
-        response = await client.request(
-            "GET", "/authorize/oidc/github", params=params
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-
-
-@pytest.mark.asyncio
-class TestCreateStateEndpoint:
-    async def test_successful_create_state(
-        self, client: AsyncClient, connection: AsyncSession
-    ) -> None:
-        content_type = "application/x-www-form-urlencoded"
-
-        params = {
-            "state": "some_new_state",
-        }
-        response = await client.request(
-            "POST",
+        mocked_data.return_value = "test"
+        response = await client.post(
             "/authorize/oidc/state",
-            data=params,
-            headers={"Content-Type": content_type},
+            data={"state": "some_state"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == status.HTTP_200_OK
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == "some_new_state"
-            )
-        )
-        await connection.commit()
+        assert response.json() == {"message": "State created successfully"}
 
-    async def test_unsuccessful_create_state_duplication(
-        self, client: AsyncClient, connection: AsyncSession
+    @patch(
+        "src.presentation.api.routes.third_party_oidc_authorization.ThirdPartyAuthServiceFactory.create_provider_state"
+    )
+    async def test_unsuccessful_create_state_request(
+        self, mocked_data: Mock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Third Party State already exists"}'
-
-        await connection.execute(
-            insert(IdentityProviderState).values(state="already_exists")
-        )
-        await connection.commit()
-
-        content_type = "application/x-www-form-urlencoded"
-
-        params = {
-            "state": "already_exists",
-        }
-        response = await client.request(
-            "POST",
+        mocked_data.side_effect = ThirdPartyAuthInvalidStateError
+        response = await client.post(
             "/authorize/oidc/state",
-            data=params,
-            headers={"Content-Type": content_type},
+            data={"state": "some_state"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.content.decode("UTF-8") == expected_content
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == "already_exists"
-            )
-        )
-        await connection.commit()
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGoogleEndpoint:
-    async def test_successful_google_request_get(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+class TestGithubAuthEndpoint:
+    async def test_successful_github_get_request(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        await connection.execute(
-            insert(IdentityProviderState).values(state=STUB_STATE)
-        )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=4,
-                provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
-        )
-        await connection.commit()
-
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "UserNewEmail"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGoogleService"
-
-        mocker.patch(f"{patch_start}.get_google_access_token", replace_post)
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_email", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/google", params=params
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code", "state": "state"},
         )
         assert response.status_code == status.HTTP_302_FOUND
+        assert response.headers["location"] == "http://www.test.com/"
 
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 4,
-                IdentityProviderMapped.provider_client_id
-                == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_google_request_get_index_error(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    async def test_unsuccessful_github_get_request_invalid_state(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Error in parsing"}'
-
-        await connection.execute(
-            insert(IdentityProviderState).values(state=SHORT_STUB_STATE)
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthInvalidStateError
         )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=4,
-                provider_client_id="419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code", "state": "state"},
         )
-        await connection.commit()
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
 
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "UserNewEmail"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGoogleService"
-
-        mocker.patch(f"{patch_start}.get_google_access_token", replace_post)
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_email", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": SHORT_STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/google", params=params
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 4,
-                IdentityProviderMapped.provider_client_id
-                == "419477723901-3tt7r3i0scubumglh5a7r8lmmff6k20g.apps.googleusercontent.com",
-                IdentityProviderMapped.provider_client_secret
-                == "***REMOVED***",
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == SHORT_STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_google_request_get_wrong_state(
-        self, client: AsyncClient
+    async def test_unsuccessful_github_get_request_invalid_request_data(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Wrong data has been passed"}'
-
-        params = {
-            "code": "test_code",
-            "state": "test_state",
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/google", params=params
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthProviderInvalidRequestDataError(
+                "invalid_request_data"
+            )
         )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_request_data"}
+
+    async def test_unsuccessful_github_get_request_unsupported_provider(
+        self,
+        mocked_get_service_impl_with_side_effect: Mock,
+        client: AsyncClient,
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_github_get_request_without_state_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_github_get_request_without_code_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/github",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.asyncio
-class TestThirdPartyGitlabEndpoint:
-    async def test_successful_gitlab_request_get(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+class TestLinkedinAuthEndpoint:
+    async def test_successful_linkedin_get_request(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        await connection.execute(
-            insert(IdentityProviderState).values(state=STUB_STATE)
-        )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=5,
-                provider_client_id="***REMOVED***",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
-        )
-        await connection.commit()
-
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "UserNewNickname"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGitLabService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/gitlab", params=params
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code", "state": "state"},
         )
         assert response.status_code == status.HTTP_302_FOUND
+        assert response.headers["location"] == "http://www.test.com/"
 
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 5,
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_gitlab_request_get_index_error(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    async def test_unsuccessful_linkedin_get_request_invalid_state(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Error in parsing"}'
-
-        await connection.execute(
-            insert(IdentityProviderState).values(state=SHORT_STUB_STATE)
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthInvalidStateError
         )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=5,
-                provider_client_id="***REMOVED***",
-                provider_client_secret="***REMOVED***",
-                enabled=True,
-            )
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code", "state": "state"},
         )
-        await connection.commit()
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
 
-        async def replace_post(*args, **kwargs) -> str:
-            return "access_token"
-
-        async def replace_get(*args, **kwargs) -> str:
-            return "UserNewNickname"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyGitLabService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": SHORT_STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/gitlab", params=params
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 5,
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == SHORT_STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_gitlab_request_get_wrong_state(
-        self, client: AsyncClient
+    async def test_unsuccessful_linkedin_get_request_invalid_request_data(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Wrong data has been passed"}'
-
-        params = {
-            "code": "test_code",
-            "state": "test_state",
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/gitlab", params=params
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthProviderInvalidRequestDataError(
+                "invalid_request_data"
+            )
         )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_request_data"}
+
+    async def test_unsuccessful_linkedin_get_request_unsupported_provider(
+        self,
+        mocked_get_service_impl_with_side_effect: Mock,
+        client: AsyncClient,
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_linkedin_get_request_without_state_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_linkedin_get_request_without_code_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/linkedin",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.asyncio
-class TestThirdPartyMicrosoftEndpoint:
-    async def test_successful_gitlab_request_get(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+class TestGoogleAuthEndpoint:
+    async def test_successful_google_get_request(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        await connection.execute(
-            insert(IdentityProviderState).values(state=STUB_STATE)
-        )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=6,
-                provider_client_id="***REMOVED***",
-                provider_client_secret="5_e8Q~oGsgilQM-TofukM.HRPyiChks_lGsNwbpD",
-                enabled=True,
-            )
-        )
-        await connection.commit()
-
-        async def replace_post(*args: Any, **kwargs: Any) -> None:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> None:
-            return "UserNewEmail"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyMicrosoftService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/microsoft", params=params
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code", "state": "state"},
         )
         assert response.status_code == status.HTTP_302_FOUND
+        assert response.headers["location"] == "http://www.test.com/"
 
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 6,
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_gitlab_request_get_index_error(
-        self, client: AsyncClient, connection: AsyncSession, mocker: Any
+    async def test_unsuccessful_google_get_request_invalid_state(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Error in parsing"}'
-
-        await connection.execute(
-            insert(IdentityProviderState).values(state=SHORT_STUB_STATE)
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthInvalidStateError
         )
-        await connection.commit()
-        await connection.execute(
-            insert(IdentityProviderMapped).values(
-                identity_provider_id=6,
-                provider_client_id="***REMOVED***",
-                provider_client_secret="5_e8Q~oGsgilQM-TofukM.HRPyiChks_lGsNwbpD",
-                enabled=True,
-            )
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code", "state": "state"},
         )
-        await connection.commit()
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
 
-        async def replace_post(*args: Any, **kwargs: Any) -> str:
-            return "access_token"
-
-        async def replace_get(*args: Any, **kwargs: Any) -> str:
-            return "UserNewEmail"
-
-        patch_start = "src.business_logic.services.third_party_oidc_service.ThirdPartyMicrosoftService"
-
-        mocker.patch(
-            f"{patch_start}.make_request_for_access_token", replace_post
-        )
-        mocker.patch(
-            f"{patch_start}.make_get_request_for_user_data", replace_get
-        )
-
-        params = {
-            "code": "test_code",
-            "state": SHORT_STUB_STATE,
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/microsoft", params=params
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
-        await connection.execute(
-            delete(IdentityProviderMapped).where(
-                IdentityProviderMapped.identity_provider_id == 6,
-            )
-        )
-        await connection.commit()
-        await connection.execute(
-            delete(IdentityProviderState).where(
-                IdentityProviderState.state == SHORT_STUB_STATE
-            )
-        )
-        await connection.commit()
-
-    async def test_unsuccessful_microsoft_request_get_wrong_state(
-        self, client: AsyncClient
+    async def test_unsuccessful_google_get_request_invalid_request_data(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
     ) -> None:
-        expected_content = '{"message":"Wrong data has been passed"}'
-
-        params = {
-            "code": "test_code",
-            "state": "test_state",
-            "scope": "test_scope",
-        }
-        response = await client.request(
-            "GET", "/authorize/oidc/microsoft", params=params
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthProviderInvalidRequestDataError(
+                "invalid_request_data"
+            )
         )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_request_data"}
+
+    async def test_unsuccessful_google_get_request_unsupported_provider(
+        self,
+        mocked_get_service_impl_with_side_effect: Mock,
+        client: AsyncClient,
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_google_get_request_without_state_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_google_get_request_without_code_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/google",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
+class TestGitlabAuthEndpoint:
+    async def test_successful_gitlab_get_request(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_302_FOUND
+        assert response.headers["location"] == "http://www.test.com/"
+
+    async def test_unsuccessful_gitlab_get_request_invalid_state(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthInvalidStateError
+        )
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
+
+    async def test_unsuccessful_gitlab_get_request_invalid_request_data(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthProviderInvalidRequestDataError(
+                "invalid_request_data"
+            )
+        )
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_request_data"}
+
+    async def test_unsuccessful_gitlab_get_request_unsupported_provider(
+        self,
+        mocked_get_service_impl_with_side_effect: Mock,
+        client: AsyncClient,
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_gitlab_get_request_without_state_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_gitlab_get_request_without_code_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/gitlab",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
+class TestMicrosoftAuthEndpoint:
+    async def test_successful_microsoft_get_request(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_302_FOUND
+        assert response.headers["location"] == "http://www.test.com/"
+
+    async def test_unsuccessful_microsoft_get_request_invalid_state(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthInvalidStateError
+        )
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_state"}
+
+    async def test_unsuccessful_microsoft_get_request_invalid_request_data(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        mocked_get_service_impl.get_redirect_url.side_effect = (
+            ThirdPartyAuthProviderInvalidRequestDataError(
+                "invalid_request_data"
+            )
+        )
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "invalid_request_data"}
+
+    async def test_unsuccessful_microsoft_get_request_unsupported_provider(
+        self,
+        mocked_get_service_impl_with_side_effect: Mock,
+        client: AsyncClient,
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code", "state": "state"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": "unsupported_auth_provider"}
+
+    async def test_unsuccessful_microsoft_get_request_without_state_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"code": "test_code"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    async def test_unsuccessful_microsoft_get_request_without_code_parameter(
+        self, mocked_get_service_impl: MagicMock, client: AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/authorize/oidc/microsoft",
+            params={"state": "test_state"},
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

@@ -40,6 +40,7 @@ from .identity_resource import IdentityClaim, IdentityResource, IdentityProvider
 from .group import Group, Permission
 from .device import Device
 from .blacklisted_token import BlacklistedToken
+from .code_challenge import CodeChallenge, CodeChallengeMethod
 
 __all__ = [
     Client,

@@ -21,7 +21,9 @@ class AppSettings(BaseAppSettings):
     )
     max_connection_count: int = 10
 
-    secret_key: SecretStr = "secret"
+    # TODO: Read from environment variable.
+    # Must be a URL-safe base64-encoded 32-byte key.
+    secret_key: SecretStr = "fJUQ1csIdQRUDMuc-be4yaSodeFQQtbIKyoLdhhlwi4="
 
     allowed_hosts: List[str] = ["*"]
 
