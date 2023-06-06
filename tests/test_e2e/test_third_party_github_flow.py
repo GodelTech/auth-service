@@ -20,7 +20,7 @@ scope = (
     "65015c5e-c865-d3d4-3ba1-3abcb4e65500&password="
     "the_beginner&username=PeterParker"
 )
-STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
+STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!http://127.0.0.1:8888/callback/"
 
 
 @pytest.mark.asyncio
@@ -33,7 +33,7 @@ class TestThirdPartyGithubFlow:
             "client_id": "spider_man",
             "response_type": "code",
             "scope": scope,
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -108,7 +108,7 @@ class TestThirdPartyGithubFlow:
             "grant_type": "authorization_code",
             "code": secret_code,
             "scope": "test",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         content_type = "application/x-www-form-urlencoded"

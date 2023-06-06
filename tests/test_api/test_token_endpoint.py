@@ -42,7 +42,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(
@@ -82,7 +82,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(
@@ -195,7 +195,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(

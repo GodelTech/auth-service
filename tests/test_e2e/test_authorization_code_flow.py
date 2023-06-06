@@ -3,7 +3,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import json
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.users import User, UserClaim
 
@@ -28,7 +28,7 @@ class TestAuthorizationCodeFlow:
             "client_id": "spider_man",
             "response_type": "code",
             "scope": "openid profile",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         authorization_response = await client.request("GET", "/authorize/", params=authorization_params)
         assert authorization_response.status_code == status.HTTP_200_OK
@@ -40,16 +40,17 @@ class TestAuthorizationCodeFlow:
             data={**authorization_params, **user_credentials},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        assert response.status_code == status.HTTP_302_FOUND
+        assert response.status_code == status.HTTP_200_OK
 
         # Stage 2: Token endpoint changes the secret code in the Persistent Grant table to a token
-        secret_code = response.headers["location"].split("=")[1]
+        secret_code = json.load(response)['redirect_url']
+        secret_code = secret_code.split('=')[1]
 
         token_params = {
             "client_id": "spider_man",
             "grant_type": "authorization_code",
             "code": secret_code,
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         token_response = await client.request(
             "POST",
