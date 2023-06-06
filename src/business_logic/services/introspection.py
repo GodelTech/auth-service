@@ -69,28 +69,28 @@ class IntrospectionService:
 
     async def analyze_token(self) -> dict[str, Any]:
         """Analyzes the token and returns the introspection response as a dictionary.
-        The result dictionary contains required parameter "active" which contains information
-        about whether the presented token is active. can contain many optional parameters:
-        scope - a string containing a space-separated list of scopes associated with this token,
-        client_id - client identifier for the OAuth 2.0 client that requested this token,
-        username - human-readable identifier for the resource owner who authorized this token,
-        token_type - type of the supplied token,
-        exp - timestamp indicating when will the token expire,
-        iat - timestamp indicating when the token was issued,
-        nbf - timestamp indicating when this token is not to be used before,
-        sub - subject of the token, usually a machine-readable identifier of the resource owner who
-        authorized this token.
-        aud - service-specific string identifier or list of string identifiers representing the intended
-        audience for this token,
-        iss - string representing the issuer of this token,
-        jti - string identifier for the token.
+
 
         More detalis about the functionality can be found in the
         [official documentation](https://www.rfc-editor.org/rfc/rfc7662#section-2.2)
 
 
         Returns:
-            dict[str, Any]: The introspection response.
+            dict[str, Any]: The introspection response. The result dictionary contains required parameter
+            "active" which contains information about whether the presented token is active. can contain many optional parameters:
+            scope - a string containing a space-separated list of scopes associated with this token,
+            client_id - client identifier for the OAuth 2.0 client that requested this token,
+            username - human-readable identifier for the resource owner who authorized this token,
+            token_type - type of the supplied token,
+            exp - timestamp indicating when will the token expire,
+            iat - timestamp indicating when the token was issued,
+            nbf - timestamp indicating when this token is not to be used before,
+            sub - subject of the token, usually a machine-readable identifier of the resource owner who
+            authorized this token.
+            aud - service-specific string identifier or list of string identifiers representing the intended
+            audience for this token,
+            iss - string representing the issuer of this token,
+            jti - string identifier for the token.
 
         Raises:
             TokenIncorrectError: If the token is incorrect or missing.
