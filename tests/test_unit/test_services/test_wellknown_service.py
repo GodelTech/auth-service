@@ -6,7 +6,7 @@ from jwkest import base64_to_long
 
 from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.well_known import WellKnownServices
+from src.business_logic.services.well_known import WellKnownService
 from typing import Any, no_type_check
 
 
@@ -30,9 +30,9 @@ async def decode_token(self, token: str) -> dict[str, Any]:
 
 
 @pytest.mark.asyncio
-class TestWellKnownServices:
+class TestWellKnownService:
     # def setup_class(self) -> None:
-    #     self.wks = WellKnownServices()
+    #     self.wks = WellKnownService()
     #     self.wks.request = RequestMock()
     #     self.wks.request.url = "/localhost/.well-known/openid-configuration"
 
@@ -56,10 +56,10 @@ class TestWellKnownServices:
 
     async def test_well_known_openid_cofig(
         self,
-        wlk_services: WellKnownServices,
+        wlk_services: WellKnownService,
     ) -> None:
         with mock.patch.object(
-            WellKnownServices, "get_all_urls", new=self.new_get_all_urls
+            WellKnownService, "get_all_urls", new=self.new_get_all_urls
         ):
             wks = wlk_services
             wks.request = RequestMock
@@ -139,7 +139,7 @@ class TestWellKnownServices:
 
     async def test_jwks_RSA(
         self,
-        wlk_services: WellKnownServices,
+        wlk_services: WellKnownService,
     ) -> None:
         wks = wlk_services
         jwt_service = JWTService()

@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 logger = logging.getLogger(__name__)
 
 
-class WellKnownServices:
+class WellKnownService:
     """A class that provides a metadata that an OAuth 2.0 client can use to
     obtain the information needed to interact with an OAuth 2.0 authorization server
     including its endpoint locations and authorization server capabilities.
@@ -28,7 +28,7 @@ class WellKnownServices:
     def __init__(
         self, session: AsyncSession, wlk_repo: WellKnownRepository
     ) -> None:
-        """Initialize the WellKnownServices.
+        """Initialize the WellKnownService.
 
         Args:
             session (AsyncSession): The session object.

@@ -17,5 +17,5 @@ from .third_party_oidc_service import (
 )
 from .tokens import TokenService
 from .userinfo import UserInfoServices
-from .well_known import WellKnownServices
+from .well_known import WellKnownService
 from .client import ClientService

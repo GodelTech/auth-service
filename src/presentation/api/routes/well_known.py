@@ -7,7 +7,7 @@ from fastapi import (
 )
 from fastapi_cache.decorator import cache
 
-from src.business_logic.services.well_known import WellKnownServices
+from src.business_logic.services.well_known import WellKnownService
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.repositories import WellKnownRepository
 from src.presentation.api.models.well_known import (
@@ -31,7 +31,7 @@ async def get_openid_configuration(
     try:
         session = request.state.session
         logger.debug("Collecting Data for OpenID Configuration.")
-        well_known_info_class = WellKnownServices(
+        well_known_info_class = WellKnownService(
             session=session, wlk_repo=WellKnownRepository(session)
         )
         well_known_info_class.request = request
@@ -48,7 +48,7 @@ async def get_jwks(
 ) -> dict[str, Any]:
     try:
         session = "no_session"
-        well_known_info_class = WellKnownServices(
+        well_known_info_class = WellKnownService(
             session=session, wlk_repo=WellKnownRepository(session)
         )
         well_known_info_class.request = request
