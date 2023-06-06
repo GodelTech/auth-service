@@ -1,4 +1,4 @@
-from business_logic.dto.open_id_config import OpenIdConfiguration
+from src.business_logic.dto.open_id_config import OpenIdConfiguration
 from src.business_logic.services.jwt_token import JWTService
 from jwkest import long_to_base64, base64_to_long
 import logging
