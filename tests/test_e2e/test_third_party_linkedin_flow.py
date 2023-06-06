@@ -13,7 +13,7 @@ from src.data_access.postgresql.tables.identity_resource import (
 )
 from src.data_access.postgresql.tables.users import User, UserClaim
 
-STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
+STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!http://127.0.0.1:8888/callback/"
 
 
 @pytest.mark.asyncio
@@ -26,7 +26,7 @@ class TestThirdPartyLinkedinFlow:
             "client_id": "spider_man",
             "response_type": "code",
             "scope": "openid profile",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         authorization_response = await client.request(
             "GET", "/authorize/", params=authorization_params
