@@ -12,6 +12,7 @@ TOKEN_HINT_DATA = {
     "sub": None,
     "client_id": "test_client",
     "type": "urn:ietf:params:oauth:grant-type:device_code",
+    "aud":'revoke' 
 }
 
 

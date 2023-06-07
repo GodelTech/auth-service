@@ -53,7 +53,10 @@ class EndSessionService:
     async def _decode_id_token_hint(
         self, id_token_hint: str
     ) -> dict[str, Any]:
-        decoded_data = await self.jwt_service.decode_token(token=id_token_hint)
+        decoded_data = await self.jwt_service.decode_token(
+            token=id_token_hint,
+            audience='revoke'
+            )
         return decoded_data
 
     async def _logout(self, client_id: str, user_id: int) -> None:
