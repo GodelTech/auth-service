@@ -33,7 +33,7 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
             "scope": "openid profile",
             "redirect_uri": "https://www.google.com/",
         }
-        self.user_credentials = {"username": "PeterParker", "password": "the_beginner"}
+        self.user_credentials = {"username": "TestClient", "password": "test_password"}
 
    # client: AsyncClient, connection: AsyncSession
     @task
@@ -84,7 +84,9 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
         )
         self.response_data = self.token_response.json()
         self.access_token = self.response_data.get("access_token")
+        self.id_token = self.response_data.get("id_token")
         logging.info(f"test_obtain_access_token; self.access_token; {self.access_token}")
+        logging.info(f"test_obtain_id_token; self.access_token; {self.id_token}")
         # logging.info(f"test_obtain_access_token; sself.token_response.status_code; {self.token_response.status_code}")
         # assert self.token_response.status_code == status.HTTP_200_OK
 
@@ -116,36 +118,55 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
         # ##### ----------------------- ##############
         #
     @task
-    def test_userinfo_GET(self):
+    def test_userinfo_get(self):
         self.user_info_response = self.client.request(
             "GET", "/userinfo/", headers={"authorization": self.access_token},
             name="4/userinfo/"
         )
-        logging.info(f"test_userinfo_GET; status_code: {self.user_info_response.status_code}")
-    #     logging.info(f"test_userinfo_GET; self.user_info_response.json(): {self.user_info_response.json()}")
-    #     self.user_id = self.user_info_response["user_id"]
-    #     logging.info(f"test_userinfo_GET; self.user_id: {self.user_id}")
-    #     # assert self.user_info_response.status_code == status.HTTP_200_OK
+        # logging.info(f"test_userinfo_GET; status_code: {self.user_info_response.status_code}")
+        # logging.info(f"test_userinfo_GET; self.user_info_response.json(): {self.user_info_response.json()}")
+        # self.user_id = self.user_info_response["user_id"]
+        # logging.info(f"test_userinfo_GET; self.user_id: {self.user_id}")
+        # assert self.user_info_response.status_code == status.HTTP_200_OK
+
+    @task
+    def test_userinfo_post(self):
+        self.user_info_response = self.client.request(
+            "POST", "/userinfo/", headers={"authorization": self.access_token},
+            name="5/userinfo/"
+        )
+
+    @task
+    def test_userinfo_get_jwt(self):
+        self.user_info_response = self.client.request(
+            "GET", "/userinfo/jwt",
+            headers={
+                "authorization": self.access_token,
+                "accept": "application/json"
+            },
+            name="6/userinfo/jwt"
+        )
+
     #
     #     # ?????????????????? ##
-    #     # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
 
 
-    # @task
-    # def test_end_session(self):
-    #     self.id_token_hint = asyncio.run(self._get_id_token_hint())
-    #
-    #     self.logout_params = {
-    #         "id_token_hint": self.id_token_hint,
-    #         "post_logout_redirect_uri": "http://www.sparks.net/",
-    #         "state": "test_state",
-    #     }
-    #     self.end_session_response = self.client.request("GET", "/endsession/",
-    #                                                     params=self.logout_params,
-    #                                                     name="5/endsession/")
-    #
-    #     logging.info(f"test_end_session; self.end_session_response.status_code: {self.end_session_response.status_code}")
-    #     assert self.end_session_response.status_code == status.HTTP_302_FOUND
+    @task
+    def test_end_session(self):
+        # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
+        # self.id_token_hint = asyncio.run(self._get_id_token_hint())
+
+        self.logout_params = {
+            "id_token_hint": self.id_token,
+            "post_logout_redirect_uri": "http://www.sparks.net/",
+            "state": "test_state",
+        }
+        self.end_session_response = self.client.request("GET", "/endsession/",
+                                                        params=self.logout_params,
+                                                        name="5/endsession/")
+
+        logging.info(f"test_end_session; self.end_session_response.status_code: {self.end_session_response.status_code}")
+        # assert self.end_session_response.status_code == status.HTTP_302_FOUND
 
     # async def _get_id_token_hint(self, connection=connection):
     #     self.user_id_query = select(User.id).where(User.username == "PeterParker")

@@ -79,7 +79,7 @@ class TaskSetInfoEndpoint(SequentialTaskSet):
         # jwt = JWTService()
         # token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         self.headers = {
-            "authorization": self.access_token,
+            "authorization": "Bearer " + self.access_token,
         }
         # self.headers = asyncio.run(self._get_header())
         self.response = self.client.request("GET", "/userinfo/", headers=self.headers)
