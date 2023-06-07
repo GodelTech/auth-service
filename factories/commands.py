@@ -266,7 +266,16 @@ class DataBasePopulation:
                 required = True,
                 emphasize = True,
             )
-
+        res_factory.ApiScopeFactory(
+                name = 'admin',
+                api_resources_id = 2,
+                description = "Administration rights",
+                display_name = 'Admin',
+                required = True,
+                emphasize = True,
+            )
+            
+        
     @classmethod
     def populate_api_scope_claims_oidc(cls):
         for type_id in range(8, 27):
@@ -282,6 +291,10 @@ class DataBasePopulation:
         res_factory.ApiScopeClaimFactory(
                 api_scopes_id = 5,
                 scope_claim_type_id = 7
+            )
+        res_factory.ApiScopeClaimFactory(
+                api_scopes_id = 6,
+                scope_claim_type_id = 5
             )
 
 if __name__ == "__main__":
