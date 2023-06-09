@@ -11,4 +11,5 @@ from tests.performance.test_device_flow import (
 from tests.performance.test_authorization_code_flow import TaskSetAuthorizationCodeFlow
 from tests.performance.test_userinfo_endpoint import TaskSetInfoEndpoint
 from tests.performance.test_user import TaskSetUserEndpoint
+from tests.performance.test_endsession_endpoint import TaskSetEndsessionEndpoint
 # from tests.performance.test_revoke_endpoint import TaskSetRevokationEndpoint
