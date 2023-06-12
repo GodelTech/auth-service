@@ -23,7 +23,7 @@ from src.data_access.postgresql.repositories import (
 )
 
 if TYPE_CHECKING:
-    from src.business_logic.services import JWTService, PasswordHash
+    from src.business_logic.services import JWTService, PasswordHash, ScopeService
 
 
 FactoryMethod = Callable[..., AuthServiceProtocol]
@@ -42,6 +42,7 @@ class AuthServiceFactory:
         device_repo: DeviceRepository,
         password_service: PasswordHash,
         jwt_service: JWTService,
+        scope_service: ScopeService
     ) -> None:
         self.session = session
         self._client_repo = client_repo
@@ -50,6 +51,7 @@ class AuthServiceFactory:
         self._device_repo = device_repo
         self._password_service = password_service
         self._jwt_service = jwt_service
+        self.scope_service = scope_service
 
     @classmethod
     def _register_factory(
@@ -72,6 +74,7 @@ class AuthServiceFactory:
             device_repo=self._device_repo,
             password_service=self._password_service,
             jwt_service=self._jwt_service,
+            scope_service = self.scope_service
         )
 
 

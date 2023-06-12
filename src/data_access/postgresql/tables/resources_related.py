@@ -165,7 +165,10 @@ class ApiScopeClaimType(BaseModel):
         lazy = 'immediate'
     )
     def __str__(self) -> str:  # pragma: no cover
-        return f"Scope-Claim Type: {self.scope_claim_type}"
+        return self.scope_claim_type
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return self.scope_claim_type
 
 
 class ClientScope(BaseModel):
@@ -177,7 +180,7 @@ class ClientScope(BaseModel):
     client = relationship(
         "Client",
         back_populates="scopes",
-        lazy = 'noload'
+        lazy = 'immediate'
     )
 
     resource_id = Column(

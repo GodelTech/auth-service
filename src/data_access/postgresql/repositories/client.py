@@ -169,12 +169,8 @@ class ClientRepository(BaseRepository):
         return result.all()
 
     async def list_all_scopes_by_client(self, client_id: str) -> List[str]:
-        scopes = await self.session.scalars(
-            select(ClientScope.scope)
-            .join(Client, ClientScope.client_id == Client.id)
-            .where(Client.client_id == client_id)
-        )
-        return scopes.all()
+        client = await self.get_client_by_client_id(client_id)
+        return [f'{scope.resource.name}.{scope.scope.name}.{scope.claim}'for scope in client.scopes]
 
     async def exists(self, client_id: str) -> bool:
         result = await self.session.execute(

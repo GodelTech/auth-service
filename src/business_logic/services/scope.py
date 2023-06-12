@@ -92,13 +92,17 @@ class ScopeService:
             result += f'\n{n+1}. {key}:\n- {dict_of_descriptions[key]}'
 
         return result
- 
-    async def get_aud(self, scope:str = "openid") -> dict[str:str]:
-        scope:list = scope.split(' ')
-        aud_result = [
+    
+    async def get_aud(self, scope:str = "openid") -> list[str]:
+        result = await self.get_full_names(scope)
+        return result + [
             "oidc.introspection.get",
             "oidc.revoke.post",
         ]
+
+    async def get_full_names(self, scope:str = "openid") -> list[str]:
+        scope:list = scope.split(' ')
+        aud_result = []
 
         if 'openid' in scope:
             aud_result.append("oidc.userinfo.openid")

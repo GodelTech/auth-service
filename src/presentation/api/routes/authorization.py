@@ -95,6 +95,10 @@ async def post_authorize(
         device_repo=DeviceRepository(session),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
+        scope_service=ScopeService(
+            resource_repo=ResourcesRepository(session),
+            session=session
+        )
     )
     scope_service = ScopeService(
         session=session,
