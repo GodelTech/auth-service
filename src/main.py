@@ -5,14 +5,15 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.staticfiles import StaticFiles
-from httpx import AsyncClient
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
 from src.presentation.middleware.session_manager import SessionManager
-from src.presentation.middleware.https_global_middleware import HttpsGlobalMiddleware
+from src.presentation.middleware.https_global_middleware import (
+    HttpsGlobalMiddleware,
+)
 from src.presentation.api import router
 from src.di import Container
 from src.dyna_config import (
@@ -20,13 +21,13 @@ from src.dyna_config import (
     DB_URL,
     REDIS_URL,
 )
+
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
 import logging
 from src.log import LOGGING_CONFIG
 from src.data_access.postgresql.repositories import UserRepository
 from src.business_logic.services.admin_auth import AdminAuthService
-
 
 logger = logging.getLogger(__name__)
 
@@ -78,15 +79,11 @@ def setup_di(app: FastAPI) -> None:
     )
     session = prov.ProviderSession(db.session_factory).get_session
 
-    app.dependency_overrides[
-        prov.provide_async_session_stub
-    ] = session
+    app.dependency_overrides[prov.provide_async_session_stub] = session
 
-    app.add_middleware(
-        middleware_class=SessionManager, session = session
-    )
+    app.add_middleware(middleware_class=SessionManager, session=session)
     app.add_middleware(middleware_class=HttpsGlobalMiddleware)
-    
+
     # Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
@@ -98,8 +95,8 @@ def setup_di(app: FastAPI) -> None:
                 user_repo=UserRepository(
                     session=prov.provide_async_session(db_engine)
                 ),
-            )
-        )
+            ),
+        ),
     )
 
     # Identity Resourses
@@ -109,7 +106,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.IdentityClaimAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    # Client 
+    # Client
     admin.add_view(ui.ClientAdminController)
     admin.add_view(ui.ResponseTypeAdminController)
     admin.add_view(ui.ClientScopeController)
@@ -174,6 +171,8 @@ Instrumentator().instrument(app).expose(app)
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
+    redis = aioredis.from_url(
+        REDIS_URL, encoding="utf8", decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")

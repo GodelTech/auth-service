@@ -2,12 +2,16 @@ from __future__ import annotations
 import logging
 import secrets
 from typing import Any, Dict, Optional, TYPE_CHECKING
+
+from cryptography.fernet import Fernet
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import WrongResponseTypeError
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     ThirdPartyOIDCRepository,
+    CodeChallengeRepository,
 )
 from src.presentation.api.models import RequestModel
 from src.data_access.postgresql.errors.client import ClientNotFoundError
@@ -21,11 +25,13 @@ class LoginFormService:
         session: AsyncSession,
         client_repo: ClientRepository,
         oidc_repo: ThirdPartyOIDCRepository,
+        code_challenge_repo: CodeChallengeRepository,
     ) -> None:
         self._request_model: Optional[RequestModel] = None
         self.session = session
         self.client_repo = client_repo
         self.oidc_repo = oidc_repo
+        self.code_challenge_repo = code_challenge_repo
 
     async def get_html_form(self) -> Optional[bool]:
         if self.request_model is not None:
@@ -40,6 +46,9 @@ class LoginFormService:
                         "id_token token",
                         "urn:ietf:params:oauth:grant-type:device_code",
                     ]:
+                        if self.request_model.response_type == "code" and (
+                                self.request_model.code_challenge and self.request_model.code_challenge_method):
+                            await self._save_code_challenge()
                         return True
                     else:
                         raise WrongResponseTypeError(
@@ -72,11 +81,9 @@ class LoginFormService:
                         f"response_type={self.request_model.response_type}"
                     )
                     # TODO
-                    if provider[0] in ["google", "linkedin"]:
-                        provider_link += "&scope=openid profile email"
                     if provider[0] == "gitlab":
                         provider_link += "&scope=openid"
-                    if provider[0] == "microsoft":
+                    else:
                         provider_link += "&scope=openid+profile+email"
                     providers_data[provider[0]] = {
                         "provider_icon": provider[5],
@@ -106,6 +113,19 @@ class LoginFormService:
             client_id=client_id, redirect_uri=redirect_uri
         )
         return client
+
+    async def _save_code_challenge(self) -> None:
+        code_challenge = self.request_model.code_challenge
+
+        if self.request_model.code_challenge_method == "S256":
+            fernet = Fernet(AppSettings().secret_key.get_secret_value())
+            code_challenge = fernet.encrypt(
+                code_challenge.encode()
+            ).decode()
+
+        await self.code_challenge_repo.create(client_id=self.request_model.client_id,
+                                              code_challenge_method=self.request_model.code_challenge_method,
+                                              code_challenge=code_challenge)
 
     @property
     def request_model(self) -> Optional[RequestModel]:

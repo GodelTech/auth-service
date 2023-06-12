@@ -1,13 +1,27 @@
 from __future__ import annotations
+
+import base64
+import base64
 import datetime
+import hashlib
+import hashlib
+import json
 import logging
 import time
 # import uuid
 from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
+from cryptography.fernet import Fernet
+import uuid
+from typing import Any, Dict, Optional, Union
+from cryptography.fernet import Fernet
 from fastapi import Request
+from itsdangerous import base64_encode
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.business_logic.services.jwt_token import JWTService
+from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
     ClientGrantsError,
@@ -24,6 +38,7 @@ from src.data_access.postgresql.repositories import (
     DeviceRepository,
     PersistentGrantRepository,
     UserRepository,
+    CodeChallengeRepository,
 )
 from src.dyna_config import DOMAIN_NAME
 if TYPE_CHECKING:
@@ -99,6 +114,7 @@ class TokenService:
         user_repo: UserRepository,
         device_repo: DeviceRepository,
         blacklisted_repo: BlacklistedTokenRepository,
+        code_challenge_repo: CodeChallengeRepository,
         jwt_service: JWTService,
     ) -> None:
         self.session = session
@@ -112,6 +128,7 @@ class TokenService:
         self.device_repo = device_repo
         self.jwt_service = jwt_service
         self.blacklisted_repo = blacklisted_repo
+        self.code_challenge_repo = code_challenge_repo
 
     async def get_tokens(self) -> dict[str, Any]:
         if (
@@ -187,6 +204,9 @@ class BaseMaker:
         self.persistent_grant_repo: PersistentGrantRepository = (
             token_service.persistent_grant_repo
         )
+        self.code_challenge_repo: CodeChallengeRepository = (
+            token_service.code_challenge_repo
+        )
         self.user_repo: UserRepository = token_service.user_repo
         self.jwt_service: JWTService = token_service.jwt_service
         self.blacklisted_repo: BlacklistedTokenRepository = (
@@ -251,6 +271,32 @@ class BaseMaker:
                 "Client from request has been found in the database\
                 but don't have provided grants"
             )
+        try:
+            code_challenge = await self.code_challenge_repo.get_code_challenge_by_client_id(
+                client_id=client_id
+            )
+            code_challenge_method = code_challenge.code_challenge_method.method
+            code_challenge = code_challenge.code_challenge
+        except NoResultFound:
+            code_challenge = None
+            code_challenge_method = None
+        if str(grant.persistent_grant_type) == "authorization_code" and code_challenge:
+            if code_challenge_method == "plain":
+                if not self.request_model.code_verifier == code_challenge:
+                    raise ValueError("Code challenge not match")
+            elif code_challenge_method == "S256":
+                fernet = Fernet(AppSettings().secret_key.get_secret_value())
+                expected_code_challenge = fernet.decrypt(
+                    code_challenge.encode()
+                ).decode()
+                actual_code_challenge = base64.urlsafe_b64encode(
+                    hashlib.sha256(
+                        self.request_model.code_verifier.encode("utf-8")
+                    ).digest()
+                ).decode()
+                if not expected_code_challenge == actual_code_challenge:
+                    raise ValueError("Code challenge not match")
+            await self.code_challenge_repo.delete_code_challenge_by_client_id(client_id=client_id)
 
         user_id = grant.user_id
         scopes = {"scope": self.request_model.scope}
