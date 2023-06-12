@@ -6,6 +6,7 @@ from wtforms import Form
 
 from src.data_access.postgresql.tables.client import *
 
+from src.data_access.postgresql.tables import ClientScope
 
 class ClientAdminController(ModelView, model=Client):
     icon = "fa-solid fa-mobile-screen-button"
@@ -151,7 +152,7 @@ class ClientRedirectUriController(ModelView, model=ClientRedirectUri):
 
 class ClientScopeController(ModelView, model=ClientScope):
     icon = "fa-solid fa-mobile-screen-button"
-    column_list = [ClientScope.id, ClientScope.scope]
+    column_list = [ClientScope.id, ClientScope.resource, ClientScope.scope, ClientScope.claim]
 
 
 class ClientSecretController(ModelView, model=ClientSecret):

@@ -15,7 +15,6 @@ from src.data_access.postgresql.tables.client import (
     ClientClaim,
     ClientPostLogoutRedirectUri,
     ClientRedirectUri,
-    ClientScope,
     ClientSecret,
     AccessTokenType,
     RefreshTokenExpirationType,
@@ -24,7 +23,7 @@ from src.data_access.postgresql.tables.client import (
     clients_response_types,
     clients_grant_types,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
+from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 from typing import Optional, Any, Union
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from src.data_access.postgresql.errors import DuplicationError

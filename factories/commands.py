@@ -36,7 +36,7 @@ class DataBasePopulation:
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
-        cls.populate_client_scopes()
+        # cls.populate_client_scopes()
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()

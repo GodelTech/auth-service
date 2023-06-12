@@ -79,9 +79,9 @@ class ResourcesRepository(BaseRepository):
         else:
             raise err.ResourceNotFoundError(f"Api Resource id {api_res_id} does not exist")
 
-    async def get_scope_claims(self, resource_name: str, scope_name: str):
+    async def get_scope_claims(self, resource_name: str, scope_name: str) -> list[str]:
         join_condition = res.ApiResource.name == resource_name and res.ApiResource.id == res.ApiScope.api_resources_id and res.ApiScope.name == scope_name
-        result = self.session.execute(
+        result = await self.session.execute(
             select(res.ApiScopeClaim.scope_claim_type).join(res.ApiResource).join(res.ApiScope).where(join_condition)
         )
         return [scope_claim_type[0].scope_claim_type for scope_claim_type in result]

@@ -166,3 +166,49 @@ class ApiScopeClaimType(BaseModel):
     )
     def __str__(self) -> str:  # pragma: no cover
         return f"Scope-Claim Type: {self.scope_claim_type}"
+
+
+class ClientScope(BaseModel):
+    __tablename__ = "client_scopes"
+
+    client_id = Column(
+        Integer, ForeignKey("clients.id", ondelete="CASCADE")
+    )
+    client = relationship(
+        "Client",
+        back_populates="scopes",
+        lazy = 'noload'
+    )
+
+    resource_id = Column(
+        Integer, ForeignKey("api_resources.id", ondelete="CASCADE")
+    )
+    resource = relationship(
+        "ApiResource",
+        lazy = 'immediate'
+    )
+
+    scope_id = Column(
+        Integer, ForeignKey("api_scopes.id", ondelete="CASCADE")
+    )
+    scope = relationship(
+        "ApiScope",
+        lazy = 'immediate'
+    )
+
+    claim_id = Column(
+        Integer,
+        ForeignKey("api_scope_claim_types.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    claim = relationship(
+        "ApiScopeClaimType",
+        lazy = 'immediate'
+    )
+
+    def __repr__(self) -> str:
+        self.__str__()
+    
+    def __str__(self) -> str:
+        return f'{self.resource.name}.{self.scope.name}.{self.claim.scope_claim_type}'
+    

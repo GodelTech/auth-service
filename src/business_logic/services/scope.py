@@ -71,10 +71,6 @@ class ScopeService:
                 "email and is it verified or not",
             }
 
-        result = 'Information:\n'
-        for info in response['userinfo']:
-            result += f'- Your {info}\n'
-        
         dict_of_descriptions = {}
         for scope_str in scope:
             if '.' in scope_str:
@@ -83,6 +79,14 @@ class ScopeService:
                     dict_of_descriptions[list(dict_answer.keys())[0]] += dict_answer.values[0]
                 else:
                     dict_of_descriptions |= dict_answer
+            else:
+                if scope_str not in response['userinfo']:
+                    response['userinfo'].append(scope_str)
+        
+        result = 'Information:\n'
+        for info in response['userinfo']:
+            result += f'- Your {info}\n'
+
         result += '\nAccess to resources:'
         for n, key in enumerate(dict_of_descriptions.keys()):
             result += f'\n{n+1}. {key}:\n- {dict_of_descriptions[key]}'
@@ -98,10 +102,10 @@ class ScopeService:
 
         if 'openid' in scope:
             aud_result.append("oidc.userinfo.openid")
-            scope.remove('email')
+            scope.remove('openid')
         if 'profile' in scope:
             aud_result.append("oidc.userinfo.profile")
-            scope.remove('email')
+            scope.remove('profile')
         if 'email' in scope:
             aud_result.append("oidc.userinfo.email")
             scope.remove('email')
