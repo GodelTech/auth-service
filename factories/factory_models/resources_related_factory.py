@@ -4,6 +4,7 @@ from factory.fuzzy import FuzzyChoice
 
 import factories.data.data_for_factories as data
 import factories.factory_session as sess
+import factories.factory_models.client_factory as client
 import src.data_access.postgresql.tables.resources_related as resource
 from factories.data.data_for_factories import (
     API_CLAIM_TYPE,
@@ -87,3 +88,13 @@ class ApiScopeClaimFactory(SQLAlchemyModelFactory):
 
     api_scopes_id = factory.SubFactory(ApiScopeFactory)
     scope_claim_type_id = factory.SubFactory(ApiScopeClaimTypeFactory)
+
+class ClientScopeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = resource.ClientScope
+        sqlalchemy_session = sess.session
+
+    client_id = factory.SubFactory(client.ClientFactory)
+    resource_id = factory.SubFactory(ApiResourceFactory)
+    scope_id = factory.SubFactory(ApiScopeFactory)
+    claim_id = factory.SubFactory(ApiClaimTypeFactory)

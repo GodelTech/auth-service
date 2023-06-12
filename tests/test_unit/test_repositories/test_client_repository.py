@@ -19,13 +19,13 @@ from src.data_access.postgresql.tables.client import (
     Client,
     ClientClaim,
     ClientRedirectUri,
-    ClientScope,
+    
     ClientSecret,
     ResponseType,
     clients_response_types,
     clients_grant_types,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
+from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 
 
 @pytest.mark.asyncio

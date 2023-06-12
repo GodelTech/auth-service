@@ -36,7 +36,7 @@ class DataBasePopulation:
         cls.populate_user_claims_table()
         cls.populate_client_post_logout_redirect_uri()
         cls.populate_client_secrets()
-        # cls.populate_client_scopes()
+        
         cls.populate_client_redirect_uri()
         cls.populate_roles()
         cls.populate_grants()
@@ -46,6 +46,8 @@ class DataBasePopulation:
         cls.populate_api_scope_claims()
         cls.populate_oidc_resource()
         cls.populate_code_challenge_methods()
+        cls.populate_client_scopes()
+
         sess.session.commit()
         sess.session.close()
 
@@ -170,8 +172,14 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_scopes(cls) -> None:
-        for client_id, scope in data.CLIENT_SCOPES.items():
-            cl_factory.ClientScopeFactory(client_id=client_id, scope=scope)
+        for client_id in data.CLIENT_SCOPES.keys():
+            for scope in  data.CLIENT_SCOPES[client_id]:
+                res_factory.ClientScopeFactory(
+                    client_id=client_id, 
+                    resource_id=scope['resource'],
+                    scope_id = scope['scope'],
+                    claim_id = scope['claim']
+                    )
 
     @classmethod
     def populate_client_redirect_uri(cls) -> None:

@@ -139,18 +139,41 @@ CLIENT_SECRETS = {
     9: "position",
     10: "themselves",
 }
+oidc_id = 2
+userinfo_id = 3
+openid_id = 8
+profile_id = 9
+
+base_scopes = [{
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': openid_id,
+    }, 
+    {
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': profile_id,
+    }, 
+]
+
+alarm_api_scope_time_read = {
+        'resource':1,
+        'scope':1,
+        'claim': 1,
+    }
+test_client_scope = base_scopes + [alarm_api_scope_time_read]
 
 CLIENT_SCOPES = {
-    1: "openid profile alarm-api-resource.time.read",
-    2: "openid email",
-    3: "openid profile",
-    4: "openid email",
-    5: "openid profile",
-    6: "openid profile",
-    7: "openid",
-    8: "openid profile",
-    9: "openid profile",
-    10: "openid email",
+    1: test_client_scope,
+    2: base_scopes,
+    3: base_scopes,
+    4: base_scopes,
+    5: base_scopes,
+    6: base_scopes,
+    7: base_scopes,
+    8: base_scopes,
+    9: base_scopes,
+    10: base_scopes,
 }
 
 ROLES = [

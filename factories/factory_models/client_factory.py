@@ -78,13 +78,7 @@ class ClientClaimFactory(SQLAlchemyModelFactory):
     client_id = factory.SubFactory(ClientFactory)
 
 
-# class ClientScopeFactory(SQLAlchemyModelFactory):
-#     class Meta:
-#         model = client.ClientScope
-#         sqlalchemy_session = sess.session
-
-#     scope = factory.Faker("sentence")
-#     client_id = factory.SubFactory(ClientFactory)
+  
 
 
 class ClientPostLogoutRedirectUriFactory(SQLAlchemyModelFactory):
