@@ -188,7 +188,7 @@ class TokenService:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
             decoded_token = await self.jwt_service.decode_token(
-                self.request_body.token, audience="revoke"
+                self.request_body.token, audience="revocation"
             )
             await self.blacklisted_repo.create(
                 token=self.request_body.token, expiration=decoded_token["exp"]

@@ -20,8 +20,8 @@ class LoadTestEndpoint(HttpUser):
         # TaskSetAuthorizationCodeFlow,    # +++; 3_tasks;
         # TaskSetInfoEndpoint,          # +++; 3_tasks;
         # TaskSetUserEndpoint,         #  +++; 4_tasks;
-        # TaskSetEndsessionEndpoint    # +++; 1_task
-        TaskSetIntrospectionEndpoint
+        TaskSetEndsessionEndpoint    # +++; 1_task
+        # TaskSetIntrospectionEndpoint   # +++; 1_task
     ]
 
 

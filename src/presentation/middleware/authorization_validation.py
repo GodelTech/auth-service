@@ -27,6 +27,8 @@ async def authorization_middleware(request: Request) -> Any:
     end_index = request.url.path.find("/", start_index + 1)
     aud = request.url.path[start_index + 1:end_index]
     try:
+        if aud == "revoke":
+            aud = "revocation"
         await jwt_service.decode_token(token=token, audience=[aud, 'admin'])
     except (InvalidAudienceError, MissingRequiredClaimError):
         raise IncorrectAuthTokenError(f"Authorization Token doesn't have {aud} permissions")
