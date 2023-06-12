@@ -13,3 +13,4 @@ from tests.performance.test_userinfo_endpoint import TaskSetInfoEndpoint
 from tests.performance.test_user import TaskSetUserEndpoint
 from tests.performance.test_endsession_endpoint import TaskSetEndsessionEndpoint
 # from tests.performance.test_revoke_endpoint import TaskSetRevokationEndpoint
+from tests.performance.test_introspection_endpoint import TaskSetIntrospectionEndpoint

@@ -7,19 +7,21 @@ from tests.performance import (
     TaskSetInfoEndpoint,
     TaskSetUserEndpoint,
     # TaskSetRevokationEndpoint,
-    TaskSetEndsessionEndpoint
+    TaskSetEndsessionEndpoint,
+    TaskSetIntrospectionEndpoint
 )
 
 class LoadTestEndpoint(HttpUser):
     wait_time = between(1, 5)
     tasks = [
-        TaskSetClientEndpoint,      # +++; 5_tasks
+        # TaskSetClientEndpoint,      # +++; 5_tasks
         # TaskSetDeviceFlow,      # +++; 8-tasks;
         # TaskSetDevicePostCancel,    # +++; 2_tasks;
         # TaskSetAuthorizationCodeFlow,    # +++; 3_tasks;
         # TaskSetInfoEndpoint,          # +++; 3_tasks;
         # TaskSetUserEndpoint,         #  +++; 4_tasks;
         # TaskSetEndsessionEndpoint    # +++; 1_task
+        TaskSetIntrospectionEndpoint
     ]
 
 
