@@ -3,6 +3,7 @@ from src.business_logic.get_tokens.service_impls import (
     AuthorizationCodeTokenService,
     RefreshTokenGrantService,
     ClientCredentialsTokenService,
+    DeviceCodeTokenService,
 )
 from src.business_logic.get_tokens.validators import (
     ValidatePersistentGrant, 
@@ -71,8 +72,19 @@ class TokenServiceFactory:
             )
         elif grant_type == 'client_credentials':
             return ClientCredentialsTokenService(
+                session=self._session,
                 client_credentials_validator=ValidateClientCredentials(client_repo=self._client_repo),
                 scope_validator=ScopeValidator(client_repo=self._client_repo),
+                jwt_manager=self._jwt_manager,
+                persistent_grant_repo=self._persistent_grant_repo
+            )
+        elif grant_type == 'urn:ietf:params:oauth:grant-type:device_code':
+            return DeviceCodeTokenService(
+                session=self._session,
+                device_code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
+                grant_exp_validator=ValidateGrantExpired(),
+                client_validator=ClientIdValidator(client_repo=self._client_repo),
+                redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
                 jwt_manager=self._jwt_manager,
                 persistent_grant_repo=self._persistent_grant_repo
             )

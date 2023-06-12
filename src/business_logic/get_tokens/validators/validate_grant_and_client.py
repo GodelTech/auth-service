@@ -15,6 +15,6 @@ class ValidateGrantByClient:
     ):
         self._persistent_grant_repo = persistent_grant_repo
     
-    async def __call__(self, authorization_code: str, client_id: str, grant_type: str) -> None:
-        if not await self._persistent_grant_repo.exists_grant_for_client(authorization_code, client_id, grant_type):
+    async def __call__(self, grant_data: str, client_id: str, grant_type: str) -> None:
+        if not await self._persistent_grant_repo.exists_grant_for_client(grant_data, client_id, grant_type):
             raise InvalidGrantError('Invalid data provided.')
