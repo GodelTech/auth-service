@@ -27,6 +27,7 @@ class EndSessionService:
             decoded_id_token_hint = await self._decode_id_token_hint(
                 id_token_hint=self.request_model.id_token_hint
             )
+
             await self._logout(
                 client_id=decoded_id_token_hint["client_id"],
                 user_id=decoded_id_token_hint["sub"],

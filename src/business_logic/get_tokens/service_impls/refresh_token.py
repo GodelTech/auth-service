@@ -59,7 +59,7 @@ class RefreshTokenGrantService:
             refresh_expires_in=1800
         )
 
-    async def _get_access_token(self, request_data: RequestTokenModel, user_id: str, unix_time: int) -> str:
+    async def _get_access_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
         payload = AccessTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
@@ -72,7 +72,7 @@ class RefreshTokenGrantService:
         )
         return self._jwt_manager.encode(payload=payload, algorithm='RS256')
 
-    async def _get_id_token(self, request_data: RequestTokenModel, user_id: str, unix_time: int) -> str:
+    async def _get_id_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
         payload = IdTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
