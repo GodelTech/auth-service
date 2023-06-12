@@ -12,7 +12,7 @@ from src.business_logic.get_tokens.validators import (
     ValidateClientCredentials,
 )
 from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
-from src.business_logic.common.validators import ClientValidator
+from src.business_logic.common.validators import ClientIdValidator, ScopeValidator
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class TokenServiceFactory:
                 session=self._session,
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
                 redirect_uri_validator=ValidateRedirectUri(client_repo=self._client_repo),
-                client_validator=ClientValidator(client_repo=self._client_repo),
+                client_validator=ClientIdValidator(client_repo=self._client_repo),
                 code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,
@@ -63,7 +63,7 @@ class TokenServiceFactory:
             return RefreshTokenGrantService(
                 session=self._session,
                 grant_validator=ValidatePersistentGrant(persistent_grant_repo=self._persistent_grant_repo),
-                client_validator=ClientValidator(client_repo=self._client_repo),
+                client_validator=ClientIdValidator(client_repo=self._client_repo),
                 refresh_token_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,
@@ -72,6 +72,7 @@ class TokenServiceFactory:
         elif grant_type == 'client_credentials':
             return ClientCredentialsTokenService(
                 client_credentials_validator=ValidateClientCredentials(client_repo=self._client_repo),
+                scope_validator=ScopeValidator(client_repo=self._client_repo),
                 jwt_manager=self._jwt_manager,
                 persistent_grant_repo=self._persistent_grant_repo
             )

@@ -16,18 +16,23 @@ class ClientCredentialsTokenService:
     def __init__(
             self,
             client_credentials_validator: ValidatorProtocol,
+            scope_validator: ValidatorProtocol,
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
     ) -> None:
         self._client_credentials_validator = client_credentials_validator
+        self._scope_validator = scope_validator
         self._jwt_manager = jwt_manager
         self._persistent_grant_repo = persistent_grant_repo
 
     async def get_tokens(self, data: RequestTokenModel) -> ResponseTokenModel:
-        await self._client_credentials_validator(
-            client_id=data.client_id, 
-            client_secret=data.client_secret
-        )
+        await self._client_credentials_validator(client_id=data.client_id, client_secret=data.client_secret)
+
+        if data.scope:
+            scopes = data.scope.split()
+            await self._scope_validator(client_id=data.client_id, scopes=scopes)
+        else:
+            data.scope = "openid"
 
         current_unix_time = int(time.time())
         access_token = await self._get_access_token(request_data=data, unix_time=current_unix_time)
