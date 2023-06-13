@@ -4,6 +4,7 @@ from typing import Union
 from httpx import AsyncClient
 from fastapi import APIRouter, Depends, status, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.business_logic.third_party_auth import (
@@ -20,7 +21,7 @@ from src.business_logic.third_party_auth.dto import (
     StateRequestModel,
     ThirdPartyAccessTokenRequestModel,
 )
-
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,8 @@ ThirdPartyAuthResponse = Union[RedirectResponse, JSONResponse]
 async def get_github_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
+session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),
@@ -54,6 +55,7 @@ async def get_github_authorize(
         auth_service_factory.get_service_impl("github")
     )
     result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
@@ -63,8 +65,8 @@ async def get_github_authorize(
 async def get_linkedin_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),
@@ -77,6 +79,7 @@ async def get_linkedin_authorize(
         auth_service_factory.get_service_impl("linkedin")
     )
     result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
@@ -88,8 +91,8 @@ async def get_linkedin_authorize(
 async def get_google_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),
@@ -102,6 +105,7 @@ async def get_google_authorize(
         auth_service_factory.get_service_impl("google")
     )
     result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
@@ -113,8 +117,8 @@ async def get_google_authorize(
 async def get_gitlab_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),
@@ -127,6 +131,7 @@ async def get_gitlab_authorize(
         auth_service_factory.get_service_impl("gitlab")
     )
     result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
@@ -138,8 +143,8 @@ async def get_gitlab_authorize(
 async def get_microsoft_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),
@@ -152,6 +157,7 @@ async def get_microsoft_authorize(
         auth_service_factory.get_service_impl("microsoft")
     )
     result = await auth_service.get_redirect_url(request_body)
+    await session.commit()
     return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
 
 
@@ -162,8 +168,8 @@ async def get_microsoft_authorize(
 async def post_create_state(
     request: Request,
     request_body: StateRequestModel = Depends(StateRequestModel.as_form),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> JSONResponse:
-    session = request.state.session
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),

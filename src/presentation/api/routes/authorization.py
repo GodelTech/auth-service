@@ -7,6 +7,7 @@ from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.templating import _TemplateResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
@@ -28,6 +29,7 @@ from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.scope import ScopeService
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
+from src.di.providers import provide_async_session_stub
 
 if TYPE_CHECKING:
     from src.business_logic.authorization import AuthServiceProtocol
@@ -51,8 +53,8 @@ auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizeGetEndpointResponse:
-    session = request.state.session
     auth_class = LoginFormService(
         session=session,
         client_repo=ClientRepository(session),
@@ -85,8 +87,8 @@ async def post_authorize(
     request: Request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     user_code: Optional[str] = Cookie(None),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> AuthorizePostEndpointResponse:
-    session = request.state.session
     auth_service_factory = AuthServiceFactory(
         session=session,
         client_repo=ClientRepository(session),

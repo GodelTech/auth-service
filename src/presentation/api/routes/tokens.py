@@ -3,6 +3,7 @@ from typing import Any, Dict, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
@@ -40,6 +41,7 @@ from src.presentation.api.routes.utils import (
     UnauthorizedClientResponse,
     UnsupportedGrantTypeResponse,
 )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +52,9 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 async def get_tokens(
     request: Request,
     request_body: BodyRequestTokenModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[JSONResponse, Dict[str, Any]]:
     try:
-        session = request.state.session
         token_class = TokenService(
             session=session,
             client_repo=ClientRepository(session),
@@ -67,6 +69,7 @@ async def get_tokens(
         token_class.request_model = request_body
         result = await token_class.get_tokens()
         headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
+        await session.commit()
         return JSONResponse(content=result, headers=headers)
 
     except (
