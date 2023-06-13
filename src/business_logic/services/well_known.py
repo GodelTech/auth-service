@@ -59,7 +59,7 @@ class WellKnownServices:
 
         # REQUIRED
         result: dict[str, Any] = {}
-        result["issuer"] = DOMAIN_NAME
+        result["issuer"] = "http://" + DOMAIN_NAME
 
         urls_dict = self.get_all_urls(result)
 

@@ -28,6 +28,7 @@ class JWTService:
     async def decode_token(self, token: str, audience:str =None ,**kwargs:Any) -> dict[str, Any]:
 
         token = token.replace("Bearer ", "")
+        breakpoint()
         if audience:
             decoded = jwt.decode(
                 token,
