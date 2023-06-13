@@ -158,7 +158,7 @@ class ClientService:
             for grant_type in self.request_model.grant_types:
                 await self.client_repo.add_grant_type(client_id_int=client.id, grant_type=grant_type)
         
-        if not hasattr(self.request_model, 'scope') or self.request_model.scope == '':
+        if not hasattr(self.request_model, 'scope') or self.request_model.scope == '' or self.request_model.scope is None:
             requested_scope = 'openid'
         else:
             requested_scope  = self.request_model.scope
@@ -175,7 +175,10 @@ class ClientService:
 
     async def get_all(self):
         clients:list[Client] = await self.client_repo.get_all()
-        return [self.client_to_dict(client) for client in  clients]
+        result = []
+        for client in clients:
+            result.append(self.client_to_dict(client))
+        return result
     
     def client_to_dict(self, client:Client):
         return{
@@ -187,7 +190,7 @@ class ClientService:
           #  "grant_types": [grant_type.type_of_grant for grant_type in client.grant_types],
             "response_types": [r_type.type for r_type in client.response_types], 
             "token_endpoint_auth_method": client.token_endpoint_auth_method, 
-            "scope" : client.scopes[0].scope if client.scopes else ""
+            "scope" : [str(scope) for scope in client.scopes]
         } 
     
     async def get_client_by_client_id(self, client_id):

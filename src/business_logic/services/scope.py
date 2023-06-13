@@ -5,6 +5,7 @@ from typing import Any, Union
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories.resources_related import ResourcesRepository
 from src.data_access.postgresql.tables.resources_related import ApiResource, ApiScope, ApiScopeClaim, ApiScopeClaim
+from src.data_access.postgresql.errors import ResourceNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -116,16 +117,22 @@ class ScopeService:
             aud_result.append("oidc.userinfo.email")
             scope.remove('email')
         
-        for recorde in scope:
-            if '.' in recorde:
-                aud_result.append(recorde)
-            else:
-                await self.resource_repo.get_scope_claims(resource_name='oidc', scope_name='userinfo')
-                aud_result.append(f"oidc.userinfo.{recorde}")
+        if len(scope)!=0:
+            claim_types_userinfo = await self.resource_repo.get_scope_claims(resource_name='oidc', scope_name='userinfo')
+            for recorde in scope:
+                if '.' in recorde:
+                    aud_result.append(recorde)
+                else:
+                    if recorde in claim_types_userinfo:
+                        aud_result.append(f"oidc.userinfo.{recorde}")
+                    else:
+                        raise ValueError("Invalid scope")
         
         return aud_result
 
     async def get_all_scopes_of_resource_by_name(self, name:str) -> dict[str:str]:
+        if not await self.resource_repo.exists_by_name(name):
+            raise ResourceNotFoundError
         resource = await self.resource_repo.get_by_name(name=name)
         result ={}
         for api_scope in resource.api_scope:

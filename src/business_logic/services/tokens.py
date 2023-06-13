@@ -516,7 +516,7 @@ class ClientCredentialsMaker(BaseMaker):
         except:
             raise ClientNotFoundError
 
-        requested_scope = self.request_model.scope
+        requested_scope = self.request_model.scope or "openid"
         client_scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )

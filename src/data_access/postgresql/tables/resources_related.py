@@ -172,7 +172,7 @@ class ApiScopeClaimType(BaseModel):
 
 
 class ClientScope(BaseModel):
-    __tablename__ = "client_scopes"
+    __tablename__ = "clients_scopes"
 
     client_id = Column(
         Integer, ForeignKey("clients.id", ondelete="CASCADE")

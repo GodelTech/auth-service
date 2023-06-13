@@ -71,7 +71,8 @@ async def get_all_clients(
             session=session, 
             )
     )
-    return{"all_clients": await client_service.get_all()}
+    result = {"all_clients": await client_service.get_all()}
+    return result
 
 @client_router.get("/{client_id}", response_model=dict)
 async def get_client(

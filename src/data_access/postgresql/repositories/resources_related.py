@@ -22,7 +22,13 @@ class ResourcesRepository(BaseRepository):
 
     async def delete(self,) -> None:
         pass
-
+    
+    async def exists_by_name(self, name: str) -> bool:
+        result = await self.session.execute(
+            select(exists().where(res.ApiResource.name == name))
+        )
+        result = result.first()
+        return result[0]
 
     async def exists(self, api_res_id: int) -> bool:
         result = await self.session.execute(
@@ -80,11 +86,19 @@ class ResourcesRepository(BaseRepository):
             raise err.ResourceNotFoundError(f"Api Resource id {api_res_id} does not exist")
 
     async def get_scope_claims(self, resource_name: str, scope_name: str) -> list[str]:
-        join_condition = res.ApiResource.name == resource_name and res.ApiResource.id == res.ApiScope.api_resources_id and res.ApiScope.name == scope_name
-        result = await self.session.execute(
-            select(res.ApiScopeClaim.scope_claim_type).join(res.ApiResource).join(res.ApiScope).where(join_condition)
+        resource = await self.session.execute(
+            select(res.ApiResource).where(res.ApiResource.name == resource_name)
         )
-        return [scope_claim_type[0].scope_claim_type for scope_claim_type in result]
-   
+        resource = resource.first()
+        if resource is None:
+            raise err.ResourceNotFoundError(resource_name)
+        resource: res.ApiResource = resource[0]
+        for scope in resource.api_scope:
+            if scope.name == scope_name:
+                result = []
+                for scope_claim in scope.api_scope_claims:
+                    result.append(scope_claim.scope_claim_type.scope_claim_type)
+                return result
+
     def __repr__(self) -> str:  # pragma: no cover
         return "Resorces Related repository"
