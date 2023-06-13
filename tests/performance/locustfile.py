@@ -8,7 +8,8 @@ from tests.performance import (
     TaskSetUserEndpoint,
     # TaskSetRevokationEndpoint,
     TaskSetEndsessionEndpoint,
-    TaskSetIntrospectionEndpoint
+    TaskSetIntrospectionEndpoint,
+    TaskSetThirdPartyProviders
 )
 
 class LoadTestEndpoint(HttpUser):
@@ -20,8 +21,9 @@ class LoadTestEndpoint(HttpUser):
         # TaskSetAuthorizationCodeFlow,    # +++; 3_tasks;
         # TaskSetInfoEndpoint,          # +++; 3_tasks;
         # TaskSetUserEndpoint,         #  +++; 4_tasks;
-        TaskSetEndsessionEndpoint    # +++; 1_task
+        # TaskSetEndsessionEndpoint    # +++; 1_task
         # TaskSetIntrospectionEndpoint   # +++; 1_task
+        TaskSetThirdPartyProviders
     ]
 
 
