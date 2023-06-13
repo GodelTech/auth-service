@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from jwt.exceptions import PyJWTError
-
+from src.business_logic.services.scope import ScopeService
 from src.data_access.postgresql.tables import Client
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
@@ -26,10 +26,12 @@ class ClientService:
     def __init__(
         self,
         client_repo: ClientRepository,
+        scope_service: ScopeService,
         session:AsyncSession
     ) -> None:
         self.client_repo = client_repo
         self.request_model:Union[ClientRequestModel, ClientUpdateRequestModel, None]
+        self.scope_service = scope_service
         self.session = session
 
     async def generate_credentials(self):
@@ -52,7 +54,14 @@ class ClientService:
         await self.client_repo.create(params)
         client_id_int = (await self.client_repo.get_client_by_client_id(client_id=client_id)).id
         await self.client_repo.add_secret(client_id_int=client_id_int, value=client_secret)
-        await self.client_repo.add_scope(client_id_int=client_id_int, scope=self.request_model.scope)
+        if not hasattr(self.request_model, 'scope') or self.request_model.scope == '':
+            requested_scope = 'openid'
+        else:
+            requested_scope  = self.request_model.scope
+        scope = await self.scope_service.get_full_names(scope=requested_scope)
+        scope_ids_list = await self.scope_service.get_ids(scope)
+        for scope_ids in scope_ids_list:
+            await self.client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids)
         await self.client_repo.add_redirect_uris(client_id_int=client_id_int, redirect_uris=self.request_model.redirect_uris)
         for grant_type in self.request_model.grant_types:
             await self.client_repo.add_grant_type(grant_type=grant_type, client_id_int=client_id_int)
@@ -148,10 +157,18 @@ class ClientService:
             await self.client_repo.delete_clients_grant_types(client_id_int=client.id) 
             for grant_type in self.request_model.grant_types:
                 await self.client_repo.add_grant_type(client_id_int=client.id, grant_type=grant_type)
+        
+        if not hasattr(self.request_model, 'scope') or self.request_model.scope == '':
+            requested_scope = 'openid'
+        else:
+            requested_scope  = self.request_model.scope
+        scope = await self.scope_service.get_full_names(scope=requested_scope)
+        scope_ids_list = await self.scope_service.get_ids(scope)
+        
+        await self.client_repo.delete_scope(client_id_int=client.id)
+        for scope_ids in scope_ids_list:
+            await self.client_repo.add_scope(client_id_int=client.id, scope_ids=scope_ids)
 
-        if self.request_model.scope is not None:
-            await self.client_repo.delete_scope(client_id_int=client.id)
-            await self.client_repo.add_scope(client_id_int=client.id, scope=self.request_model.scope)
         if self.request_model.redirect_uris is not None:
             await self.client_repo.delete_redirect_uris(client_id_int=client.id)
             await self.client_repo.add_redirect_uris(client_id_int=client.id, redirect_uris=self.request_model.redirect_uris)

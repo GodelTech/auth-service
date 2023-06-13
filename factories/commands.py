@@ -224,6 +224,7 @@ class DataBasePopulation:
                 description = res['description'],
                 display_name = res['display_name'],
                 name = res['name'],
+                enabled = True,
             )
     @classmethod
     def populate_api_secrets(cls)->None:   

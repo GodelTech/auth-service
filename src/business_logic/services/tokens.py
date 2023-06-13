@@ -19,7 +19,7 @@ from fastapi import Request
 from itsdangerous import base64_encode
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from .scope import ScopeService
 from src.business_logic.services.jwt_token import JWTService
 from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
@@ -39,6 +39,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
     CodeChallengeRepository,
+    ResourcesRepository,
 )
 from src.dyna_config import DOMAIN_NAME
 
@@ -212,6 +213,10 @@ class BaseMaker:
         self.jwt_service: JWTService = token_service.jwt_service
         self.blacklisted_repo: BlacklistedTokenRepository = (
             token_service.blacklisted_repo
+        )
+        self.scope_service = ScopeService(
+            session=self.user_repo.session,
+            resource_repo=ResourcesRepository(session=self.user_repo.session)
         )
 
     async def validation(self) -> None:
@@ -512,18 +517,18 @@ class ClientCredentialsMaker(BaseMaker):
             raise ClientNotFoundError
 
         requested_scope = self.request_model.scope
-        scopes = await self.client_repo.get_client_scopes(
+        client_scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )
+        requested_scope_list = await self.scope_service.get_full_names(scope=requested_scope)
 
-        
         if requested_scope:
-            for scope in requested_scope.split(' '):
-                if scope not in scopes.split(' '):
+            for scope in requested_scope_list:
+                if scope not in client_scopes:
                     raise ClientScopesError
 
-        if len(scopes) == 0:
-            scopes = ["No scope"]
+        if len(requested_scope) == 0:
+            requested_scope = ["oidc.userinfo.openid"]
 
         audience = ["admin", "introspection", "revoke"]
         access_token = await self.jwt_service.encode_jwt(
@@ -540,7 +545,7 @@ class ClientCredentialsMaker(BaseMaker):
                 "client_uri": client_from_db.client_uri,
                 # https://www.rfc-editor.org/rfc/rfc7519#section-4.1.2
                 "sub": str(client_from_db.id),
-                "scope": scopes,
+                "scope": requested_scope,
                 "typ": "Bearer",
                 "exp": time.time() + self.expiration_time,
                 "iat": time.time(),
@@ -554,5 +559,5 @@ class ClientCredentialsMaker(BaseMaker):
             "token_type": "Bearer",
             "refresh_expires_in": 0,
             "not_before_policy": 0,
-            "scope": scopes,
+            "scope": requested_scope,
         }

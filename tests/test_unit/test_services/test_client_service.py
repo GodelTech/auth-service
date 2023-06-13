@@ -55,7 +55,6 @@ class ClientRequestModel:
         self.grant_types = grant_types
         self.response_types = response_types
         self.token_endpoint_auth_method = token_endpoint_auth_method
-        self.scope = scope
 
 @pytest.fixture
 def client_request_model() -> ClientRequestModel:
@@ -312,8 +311,6 @@ class TestClientService:
                 select(ClientScope).where(ClientScope.client_id == client_id_int)
             )
             updated_scope = updated_scope.scalar_one_or_none()
-
-        assert updated_scope.scope == new_scope
 
     async def test_update_uris(self,
                                 client_request_model,

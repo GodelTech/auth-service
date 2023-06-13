@@ -26,7 +26,7 @@ from src.data_access.postgresql.tables.client import (
 from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 from typing import Optional, Any, Union
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
-from src.data_access.postgresql.errors import DuplicationError
+from src.data_access.postgresql.errors import DuplicationError, ClientScopesError
 import time
 
 class ClientRepository(BaseRepository):
@@ -130,10 +130,14 @@ class ClientRepository(BaseRepository):
             return True
 
     async def get_client_scopes(self, client_id: int) -> str:
-        scopes = await self.session.execute(
+        scopes = (await self.session.execute(
             select(ClientScope).where(ClientScope.client_id == client_id)
-        )
-        return scopes.first()[-1].scope
+        )).all()
+        #return scopes.first()[-1].scope
+        result = [f'{scope[0].resource.name}.{scope[0].scope.name}.{scope[0].claim}'for scope in scopes]
+        if len(result) == 0:
+             raise ClientScopesError
+        return result
 
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         uris = await self.session.execute(
@@ -229,17 +233,14 @@ class ClientRepository(BaseRepository):
     async def add_scope(
         self, 
         client_id_int:int,
-        scope:str,
+        scope_ids:str,
     ) -> None:
-        try:
-            
-            await self.session.execute(insert(ClientScope).values(
-                client_id = client_id_int,
-                scope = scope,
-                )
+        await self.session.execute(insert(ClientScope).values(
+            client_id = client_id_int,
+            **scope_ids,
             )
-        except:
-            raise DuplicationError
+        )
+        
 
     async def add_redirect_uris(
         self, 
@@ -302,10 +303,9 @@ class ClientRepository(BaseRepository):
         self, 
         client_id_int:int,
     ) -> None:
-        
-            await self.session.execute(
-                delete(ClientScope).where(ClientScope.client_id == client_id_int)
-            )
+        await self.session.execute(
+            delete(ClientScope).where(ClientScope.client_id == client_id_int)
+        )
 
     async def delete_redirect_uris(
         self, 

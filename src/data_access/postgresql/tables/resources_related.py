@@ -180,7 +180,7 @@ class ClientScope(BaseModel):
     client = relationship(
         "Client",
         back_populates="scopes",
-        lazy = 'immediate'
+        lazy = 'noload'
     )
 
     resource_id = Column(

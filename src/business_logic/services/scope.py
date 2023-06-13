@@ -42,7 +42,8 @@ class ScopeService:
                 "information from our server that does NOT include your personal data\n\tLink for details https://oidc.com/details/openid"
             ]
             if not scope:
-                return response
+                info = response['userinfo']
+                return f'- Your {info}\n'
 
         if 'profile' in scope:
             scope.remove('profile')
@@ -83,6 +84,7 @@ class ScopeService:
                 if scope_str not in response['userinfo']:
                     response['userinfo'].append(scope_str)
         
+
         result = 'Information:\n'
         for info in response['userinfo']:
             result += f'- Your {info}\n'
@@ -131,3 +133,19 @@ class ScopeService:
                         result[f'{resource.name}.{api_scope.name}.{scope_claim.scope_claim_type.scope_claim_type}'] = api_scope.description
         return result
     
+    async def get_ids(self, scopes:list[str]) -> dict[str:str]:
+        result = []
+        for scope in scopes:
+            scope_splited = scope.split(".")
+            resource = await self.resource_repo.get_by_name(name=scope_splited[0])
+            sub_result ={'resource_id':resource.id}
+
+            for api_scope in resource.api_scope:
+                    if api_scope.name == scope_splited[1]:
+                        sub_result['scope_id'] = api_scope.id
+                        for scope_claim in api_scope.api_scope_claims:
+                            if scope_claim.scope_claim_type.scope_claim_type == scope_splited[2]:
+                                sub_result['claim_id'] = scope_claim.scope_claim_type.id
+                                break
+            result.append(sub_result)
+        return result

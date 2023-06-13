@@ -24,7 +24,7 @@ async def get_user(
 
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -53,7 +53,7 @@ async def get_all_users(
 ) -> dict[str, Any]:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     return {
@@ -74,7 +74,7 @@ async def update_user(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     data_to_change = {}
@@ -105,7 +105,7 @@ async def delete_user(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     await user_class.delete_user(user_id=user_id)
@@ -121,7 +121,7 @@ async def create_user(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     data = request_body.dictionary()
@@ -141,7 +141,7 @@ async def add_groups(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -161,7 +161,7 @@ async def add_roles(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     await user_class.add_user_roles(
@@ -181,7 +181,7 @@ async def get_user_groups(
 )  -> dict[str, Any]:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -204,7 +204,7 @@ async def get_user_roles(
 ) -> dict[str, Any]:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -224,7 +224,7 @@ async def delete_roles(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -244,7 +244,7 @@ async def delete_groups(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -264,7 +264,7 @@ async def change_user_password(
 ) -> None:
     session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 

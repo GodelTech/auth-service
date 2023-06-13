@@ -20,7 +20,7 @@ from src.business_logic.services.authorization.authorization_service import (
 )
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
-from src.business_logic.services import DeviceService, WellKnownServices, ClientService
+from src.business_logic.services import DeviceService, WellKnownServices, ClientService, ScopeService
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -31,6 +31,7 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     BlacklistedTokenRepository,
     CodeChallengeRepository,
+    ResourcesRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
@@ -41,7 +42,7 @@ from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
     ThirdPartyGoogleService,
     ThirdPartyMicrosoftService,
-    ThirdPartyGitLabService,
+    ThirdPartyGitLabService
 )
 from src.data_access.postgresql.tables.base import Base
 from tests.overrides.override_test_container import CustomPostgresContainer
@@ -867,6 +868,10 @@ async def get_db(connection: AsyncSession) -> None:
 async def client_service(connection:AsyncSession) -> ClientService:
     client_service = ClientService(
         client_repo=ClientRepository(connection),
+        scope_service=ScopeService(
+            session=connection,
+            resource_repo=ResourcesRepository(connection)
+        ),
         session=connection
     )
     return client_service

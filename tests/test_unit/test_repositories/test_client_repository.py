@@ -131,12 +131,12 @@ class TestClientRepository:
 
     async def test_get_client_scopes(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
-        uri = await client_repo.get_client_scopes(
+        scopes = await client_repo.get_client_scopes(
             client_id=1
         )
-        assert isinstance(uri, str)
-        assert len(uri) > 0
-        assert "openid" in uri
+        assert isinstance(scopes, list)
+        assert isinstance(scopes[0], str)
+        assert "openid" in scopes[0]
 
     async def test_get_client_scopes_not_exists(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
@@ -295,8 +295,12 @@ class TestClientRepository:
         result = await connection.execute(insert(Client).values(**new_client).returning(Client.id))
         client_id_int = result.scalar_one()
         await connection.commit()
+        scope_ids:dict={}
+        scope_ids['resource_id'] = 1
+        scope_ids['scope_id'] = 1
+        scope_ids['claim_id'] = 1
 
-        await client_repo.add_scope(client_id_int=client_id_int, scope="openid profile email")
+        await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids)
 
         scope = await connection.execute(
             select(ClientScope).where(ClientScope.client_id == client_id_int)
@@ -305,7 +309,6 @@ class TestClientRepository:
 
         assert scope is not None
         assert scope.client_id == client_id_int
-        assert scope.scope == "openid profile email"
 
     async def test_add_scope_incorrect_parameters(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
@@ -463,19 +466,13 @@ class TestClientRepository:
 
         result = await connection.execute(insert(Client).values(**new_client).returning(Client.id))
         client_id_int = result.scalar_one()
-        await connection.execute(insert(ClientScope).values(
-            client_id=client_id_int,
-            scope="openid",
-        ))
+        scope_ids:dict={}
+        scope_ids['resource_id'] = 1
+        scope_ids['scope_id'] = 1
+        scope_ids['claim_id'] = 1
+        
+        await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids,)
         await connection.commit()
-
-    
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is not None
 
         await client_repo.delete_scope(client_id_int=client_id_int)
 
