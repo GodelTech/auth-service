@@ -50,7 +50,7 @@ class TestAccessTokenMiddleware:
 
             request.headers["access-token"] = test_token
 
-            middleware = await access_token_middleware(request=request)
+            middleware = await access_token_middleware(request=request, session=connection)
             assert middleware is None
     
     # async def test_without_token(self, connection: AsyncSession) -> None:

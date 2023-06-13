@@ -2,6 +2,7 @@ import logging
 from typing import Union
 
 from fastapi import APIRouter, Depends, Header, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services.tokens import TokenService
@@ -17,6 +18,7 @@ from src.presentation.api.models.revoke import BodyRequestRevokeModel
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +39,8 @@ async def post_revoke_token(
         default=None, description="Authorization"
     ),  # crutch for swagger
     request_body: BodyRequestRevokeModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     token_class = TokenService(
         session=session,
         client_repo=ClientRepository(session),
@@ -54,4 +56,6 @@ async def post_revoke_token(
     token = request.headers.get("authorization") or auth_swagger
     token_class.authorization = token
     logger.info(f"Revoking for token {request_body.token} started")
-    return await token_class.revoke_token()
+    revoke_token = await token_class.revoke_token()
+    await session.commit()
+    return revoke_token

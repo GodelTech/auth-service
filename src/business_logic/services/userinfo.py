@@ -78,8 +78,8 @@ class UserInfoServices:
             }
         if 'email' in decoded_token['scope'] :
             response = response | {
-                "email": claims_dict.get("name", None),
-                "email_verified": claims_dict.get("name", None),
+                "email": claims_dict.get("email", None),
+                "email_verified": claims_dict.get("email_verified", None),
             }
         
         return response

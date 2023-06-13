@@ -4,6 +4,8 @@ import json
 from authlib.integrations.starlette_client import OAuth
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+import jwt
+import requests
 from starlette.config import Config
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -17,7 +19,7 @@ oauth = OAuth(config)
 oauth.register(
     name="oidc_provider",
     server_metadata_url="http://localhost:8000/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid profile"},
+    client_kwargs={"scope": "openid profile email"},
     # the below line is here because our auth server
     # doesn't accept client_id and client_secret in the Authorization header
     access_token_params={"client_id": "spider_man"},
@@ -46,6 +48,14 @@ def read_file_content(file_path: str) -> str:
     return content
 
 
+def decode_id_token(id_token: str) -> dict:
+    """
+    Decodes the id token using the provided key and returns its payload as a dictionary.
+    """
+    decoded = jwt.decode(id_token, options={"verify_signature": False})
+    return decoded
+
+
 async def get_user(request: Request):
     """
     Returns the user stored in the request session.
@@ -69,7 +79,7 @@ async def get_user(request: Request):
 async def homepage(request: Request, user=Depends(get_user)):
     if user:
         str_expiration = datetime.fromtimestamp(user["exp"]).strftime(
-            "%d %m %Y %H:%M:%S"
+            "%d.%m.%Y %H:%M:%S"
         )
         content = read_file_content("html/authorized-page.html")
         content = content.replace(
@@ -81,28 +91,85 @@ async def homepage(request: Request, user=Depends(get_user)):
         return HTMLResponse(content=content)
 
 
+@app.get("/userinfo")
+async def userinfo(request: Request):
+    server_metadata = await oauth.oidc_provider.load_server_metadata()
+    userinfo_endpoint = server_metadata.get("userinfo_endpoint")
+
+    auth_data = pseudo_db.get("auth_data")
+    if not auth_data:
+        pseudo_db.delete("auth_data")
+        request.session.clear()
+        return RedirectResponse(url="/")
+    access_token = auth_data["access_token"]
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    response = requests.get(userinfo_endpoint, headers=headers)
+    content = read_file_content("html/userinfo-page.html").replace(
+        "{{{user_info_variable}}}", json.dumps(response.json(), indent=4)
+    )
+    return HTMLResponse(content=content)
+
+
 @app.get("/login")
 async def login(request: Request):
     redirect_uri = str(request.url_for("auth"))
     return await oauth.oidc_provider.authorize_redirect(request, redirect_uri)
 
 
+@app.get("/refresh")
+async def refresh(request: Request):
+    auth_data = pseudo_db.get("auth_data")
+
+    if not auth_data:
+        return RedirectResponse(url="/")
+
+    refresh_token = auth_data["refresh_token"]
+
+    new_auth_data = await oauth.oidc_provider.fetch_access_token(
+        grant_type="refresh_token",
+        refresh_token=refresh_token,
+    )
+
+    id_token = new_auth_data["id_token"]
+    userinfo = decode_id_token(id_token)
+
+    auth_data = {**new_auth_data, "userinfo": userinfo}
+
+    pseudo_db.set_or_overwrite("auth_data", auth_data)
+
+    request.session["user"] = userinfo
+
+    return RedirectResponse(url="/")
+
+
 @app.get("/logout")
 async def logout(request: Request):
     server_metadata = await oauth.oidc_provider.load_server_metadata()
     end_session_endpoint = server_metadata.get("end_session_endpoint")
-    breakpoint()
-    id_token_hint = pseudo_db.get("auth_data")["id_token"]
+
+    active_auth_data = pseudo_db.get("auth_data")
+
+    if not active_auth_data:
+        request.session.clear()
+        return RedirectResponse(url="/")
+
+    id_token_hint = active_auth_data["id_token"]
+    post_logout_redirect_uri = str(request.url_for("endsession"))
+
     return RedirectResponse(
         url=end_session_endpoint
         + "?id_token_hint="
         + id_token_hint
-        + "&post_logout_redirect_uri=http://localhost:8080/endsession"
+        + "&post_logout_redirect_uri="
+        + post_logout_redirect_uri
     )
 
 
 @app.get("/endsession")
 async def endsession(request: Request):
+    pseudo_db.delete("auth_data")
     request.session.clear()
     return RedirectResponse(url="/")
 

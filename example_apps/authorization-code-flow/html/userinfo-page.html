@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Authorized User</title>
+    <title>Userinfo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -56,19 +56,10 @@
 <body>
     <div class="container">
         <h1>Hello authorized user!</h1>
-        <p>Your current auth data expiration datetime is: {{{str_expiration_variable}}}</p>
-        <div class="container">
-            <p>If you see that your auth data is already expired, click the button below to refresh it</p>
-            <form action="/refresh">
-                <input type="submit" value="Refresh auth data">
-            </form>
-        </div>
+        <p>Here is your info which was just received by app's server from auth server</p>
         <p>Here is your info: {{{user_info_variable}}}</p>
-        <form action="/logout">
-            <input type="submit" value="Sign out">
-        </form>
-        <form action="/userinfo">
-            <input type="submit" value="Request userinfo">
+        <form action="/">
+            <input type="submit" value="Get back to main">
         </form>
     </div>
 </body>
