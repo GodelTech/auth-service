@@ -21,6 +21,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
 )
+
 if TYPE_CHECKING:
     from src.business_logic.services import JWTService, PasswordHash
 

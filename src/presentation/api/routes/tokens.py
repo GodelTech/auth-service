@@ -27,6 +27,7 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     DeviceRepository,
     BlacklistedTokenRepository,
+    CodeChallengeRepository,
 )
 from src.presentation.api.models.tokens import (
     BodyRequestTokenModel,
@@ -61,6 +62,7 @@ async def get_tokens(
             user_repo=UserRepository(session),
             device_repo=DeviceRepository(session),
             blacklisted_repo=BlacklistedTokenRepository(session),
+            code_challenge_repo=CodeChallengeRepository(session),
             jwt_service=JWTService(),
         )
         token_class.request = request

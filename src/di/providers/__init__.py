@@ -19,7 +19,7 @@ from .repositories import (
     provide_blacklisted_repo_stub,
     provide_async_session,
     provide_async_session_stub,
-    ProviderSession
+    ProviderSession,
 )
 from .services import (
     provide_wellknown_service,
@@ -68,4 +68,6 @@ from .services import (
 from .services_factory import (
     provide_auth_service_factory,
     provide_auth_service_factory_stub,
+    provide_third_party_auth_service_factory_stub,
+    provide_third_party_auth_service_factory,
 )
