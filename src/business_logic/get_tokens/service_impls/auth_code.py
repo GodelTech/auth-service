@@ -6,11 +6,15 @@ from src.business_logic.jwt_manager.dto import AccessTokenPayload, RefreshTokenP
 from src.dyna_config import DOMAIN_NAME
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from src.business_logic.common.interfaces import ValidatorProtocol
     from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
-    from src.data_access.postgresql.repositories import PersistentGrantRepository
+    from src.data_access.postgresql.repositories import (
+        PersistentGrantRepository,
+        CodeChallengeRepository
+    )
 
 
 class AuthorizationCodeTokenService:
@@ -28,7 +32,8 @@ class AuthorizationCodeTokenService:
             code_validator: ValidatorProtocol,
             grant_exp_validator: ValidatorProtocol,
             jwt_manager: JWTManagerProtocol,
-            persistent_grant_repo: PersistentGrantRepository
+            persistent_grant_repo: PersistentGrantRepository,
+            code_challenge_repo: CodeChallengeRepository
     ) -> None:
         self._session = session
         self._grant_validator = grant_validator
@@ -38,6 +43,7 @@ class AuthorizationCodeTokenService:
         self._grant_expiration_validator = grant_exp_validator
         self._jwt_manager = jwt_manager
         self._persistent_grant_repo = persistent_grant_repo
+        self._code_challenge_repo = code_challenge_repo
 
     async def get_tokens(self, request_data: RequestTokenModel) -> ResponseTokenModel:
         await self._client_validator(request_data.client_id)
@@ -45,16 +51,27 @@ class AuthorizationCodeTokenService:
         await self._grant_validator(request_data.code, request_data.grant_type)
         await self._redirect_uri_validator(request_data.redirect_uri, request_data.client_id)
 
-        grant = await self._persistent_grant_repo.get_grant(grant_type=request_data.grant_type, grant_data=request_data.code)
+        grant = await self._persistent_grant_repo.get_grant(
+            grant_type=request_data.grant_type, 
+            grant_data=request_data.code
+        )
 
         await self._grant_expiration_validator(grant.expiration)
 
         user_id = grant.user_id
         current_unix_time = int(time.time())
 
-        access_token = await self._get_access_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
+        access_token = await self._get_access_token(
+            request_data=request_data,
+            user_id=user_id,
+            unix_time=current_unix_time
+        )
         refresh_token = await self._get_refresh_token(request_data=request_data)
-        id_token = await self._get_id_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
+        id_token = await self._get_id_token(
+            request_data=request_data,
+            user_id=user_id,
+            unix_time=current_unix_time
+        )
 
         await self._persistent_grant_repo.delete_grant(grant=grant)
         await self._persistent_grant_repo.create_grant(

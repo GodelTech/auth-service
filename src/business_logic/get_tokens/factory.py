@@ -25,6 +25,7 @@ if TYPE_CHECKING:
         DeviceRepository,
         PersistentGrantRepository,
         UserRepository,
+        CodeChallengeRepository
     )
     from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
 
@@ -39,6 +40,7 @@ class TokenServiceFactory:
             device_repo: DeviceRepository,
             jwt_manager: JWTManagerProtocol,
             blacklisted_repo: BlacklistedTokenRepository,
+            code_challenge_repo: CodeChallengeRepository
     ) -> None:
         self._session = session
         self._client_repo = client_repo
@@ -47,6 +49,7 @@ class TokenServiceFactory:
         self._device_repo = device_repo
         self._jwt_manager = jwt_manager
         self._blacklisted_repo = blacklisted_repo
+        self._code_challenge_repo = code_challenge_repo
 
     def get_service_impl(self, grant_type: str) -> TokenServiceProtocol:
         if grant_type == 'authorization_code':
@@ -58,7 +61,8 @@ class TokenServiceFactory:
                 code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
                 jwt_manager=self._jwt_manager,
-                persistent_grant_repo=self._persistent_grant_repo
+                persistent_grant_repo=self._persistent_grant_repo,
+                code_challenge_repo=self._code_challenge_repo
             )
         elif grant_type == 'refresh_token':
             return RefreshTokenGrantService(
