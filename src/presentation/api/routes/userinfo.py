@@ -4,6 +4,7 @@ from typing import Any, Union
 from fastapi import APIRouter, Header, Request, Depends
 from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.userinfo import UserInfoServices
 from src.config.settings.cache_time import CacheTimeSettings
@@ -16,6 +17,7 @@ from src.presentation.api.models.userinfo import ResponseUserInfoModel
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +35,12 @@ userinfo_router = APIRouter(
     # key_builder=builder_with_parametr,
 )
 async def get_userinfo(
-        request: Request,
-        auth_swagger: Union[str, None] = Header(
-            default=None, description="Authorization"
-        ),  # crutch for swagger
+    request: Request,
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),  # crutch for swagger
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),
@@ -60,12 +62,12 @@ async def get_userinfo(
 #    # key_builder=builder_with_parametr,
 # )
 async def post_userinfo(
-        request: Request,
-        auth_swagger: Union[str, None] = Header(
-            default=None, description="Authorization"
-        ),  # crutch for swagger
+    request: Request,
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),  # crutch for swagger
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),
@@ -86,12 +88,12 @@ async def post_userinfo(
     # key_builder=builder_with_parametr,
 )
 async def get_userinfo_jwt(
-        request: Request,
-        auth_swagger: Union[str, None] = Header(
-            default=None, description="Authorization"
-        ),
+    request: Request,
+    auth_swagger: Union[str, None] = Header(
+        default=None, description="Authorization"
+    ),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> str:
-    session = request.state.session
     userinfo_class = UserInfoServices(
         session=session,
         user_repo=UserRepository(session),

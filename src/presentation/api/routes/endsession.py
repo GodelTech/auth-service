@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.endsession import EndSessionService
 from src.data_access.postgresql.repositories import (
@@ -10,6 +11,7 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
 )
 from src.presentation.api.models.endsession import RequestEndSessionModel
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,8 @@ endsession_router = APIRouter(prefix="/endsession", tags=["End Session"])
 async def end_session(
     request: Request,
     request_model: RequestEndSessionModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Union[int, RedirectResponse, JSONResponse]:
-    session = request.state.session
     service_class = EndSessionService(
         session=session,
         client_repo=ClientRepository(session),
@@ -37,4 +39,5 @@ async def end_session(
     response = RedirectResponse(
         logout_redirect_uri, status_code=status.HTTP_302_FOUND
     )
+    await session.commit()
     return response

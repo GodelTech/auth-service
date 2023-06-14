@@ -61,7 +61,7 @@ class TestAuthorizationMiddleware:
                 request.method = request_with_auth["method"]
                 request.url.path = request_with_auth["path"]
                 request.headers["authorization"] = test_token
-                await authorization_middleware(request=request)
+                await authorization_middleware(request=request, session=connection)
 
     
     async def test_successful_auth_with_swagger(self, connection: AsyncSession) -> None:
@@ -77,7 +77,7 @@ class TestAuthorizationMiddleware:
                 request.url.path = request_with_auth["path"]
                 request.headers["auth-swagger"] = test_token
 
-                middleware = await authorization_middleware(request=request)
+                middleware = await authorization_middleware(request=request, session=connection)
 
     # async def test_without_token(self,connection: AsyncSession) -> None:
     #     request = RequestTest(connection)
