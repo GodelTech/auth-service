@@ -29,7 +29,8 @@ from src.business_logic.get_tokens.errors import (
     InvalidGrantError, 
     InvalidRedirectUriError, 
     UnsupportedGrantTypeError,
-    InvalidClientCredentialsError
+    InvalidClientCredentialsError,
+    InvalidPkceCodeError
 )
 from src.business_logic.common.errors import (
     InvalidClientIdError,
@@ -80,6 +81,7 @@ from .http400_invalid_client import http400_invalid_client_handler
 from .http400_invalid_grant import http400_invalid_grant_handler
 from .http400_unsupported_grant_type import http400_unsupported_grant_type_handler
 from .http400_invalid_scope import http400_invalid_scope_handler
+from .http400_invalid_pkce import http400_invalid_pkce_handler
 
 
 exception_handler_mapping = {
@@ -111,5 +113,6 @@ exception_handler_mapping = {
     InvalidRedirectUriError: http400_invalid_grant_handler,
     UnsupportedGrantTypeError: http400_unsupported_grant_type_handler,
     InvalidClientCredentialsError: http400_invalid_client_handler,
-    InvalidClientScopeError: http400_invalid_scope_handler
+    InvalidClientScopeError: http400_invalid_scope_handler,
+    InvalidPkceCodeError: http400_invalid_pkce_handler
 }

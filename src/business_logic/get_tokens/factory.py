@@ -1,4 +1,6 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from src.business_logic.get_tokens.service_impls import (
     AuthorizationCodeTokenService,
     RefreshTokenGrantService,
@@ -11,11 +13,11 @@ from src.business_logic.get_tokens.validators import (
     ValidateGrantByClient,
     ValidateGrantExpired,
     ValidateClientCredentials,
+    ValidatePKCECode
 )
 from src.business_logic.get_tokens.errors import UnsupportedGrantTypeError
 from src.business_logic.common.validators import ClientIdValidator, ScopeValidator
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from .interfaces import TokenServiceProtocol
@@ -60,9 +62,9 @@ class TokenServiceFactory:
                 client_validator=ClientIdValidator(client_repo=self._client_repo),
                 code_validator=ValidateGrantByClient(persistent_grant_repo=self._persistent_grant_repo),
                 grant_exp_validator=ValidateGrantExpired(),
+                pkce_code_validator=ValidatePKCECode(code_challenge_repo=self._code_challenge_repo),
                 jwt_manager=self._jwt_manager,
-                persistent_grant_repo=self._persistent_grant_repo,
-                code_challenge_repo=self._code_challenge_repo
+                persistent_grant_repo=self._persistent_grant_repo
             )
         elif grant_type == 'refresh_token':
             return RefreshTokenGrantService(

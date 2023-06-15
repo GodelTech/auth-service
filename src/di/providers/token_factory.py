@@ -6,7 +6,8 @@ from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
     UserRepository,
     DeviceRepository,
-    BlacklistedTokenRepository
+    BlacklistedTokenRepository,
+    CodeChallengeRepository
 )
 
 from typing import TYPE_CHECKING
@@ -21,6 +22,7 @@ def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFacto
         persistent_grant_repo=PersistentGrantRepository(session=db_session),
         user_repo=UserRepository(session=db_session),
         device_repo=DeviceRepository(session=db_session),
+        code_challenge_repo=CodeChallengeRepository(session=db_session),
         jwt_manager=JWTManager(),
         blacklisted_repo=BlacklistedTokenRepository(session=db_session)
     )

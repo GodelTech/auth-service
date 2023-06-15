@@ -23,7 +23,7 @@ class RefreshTokenGrantService:
             grant_exp_validator: ValidatorProtocol,
             jwt_manager: JWTManagerProtocol,
             persistent_grant_repo: PersistentGrantRepository
-    ):
+    ) -> None:
         self._session = session
         self._grant_validator = grant_validator
         self._client_validator = client_validator
@@ -34,7 +34,11 @@ class RefreshTokenGrantService:
 
     async def get_tokens(self, request_data: RequestTokenModel) -> ResponseTokenModel:
         await self._client_validator(request_data.client_id)
-        await self._refresh_token_validator(request_data.refresh_token, request_data.client_id, request_data.grant_type)
+        await self._refresh_token_validator(
+            request_data.refresh_token,
+            request_data.client_id,
+            request_data.grant_type
+        )
         await self._grant_validator(request_data.refresh_token, request_data.grant_type)
 
         grant = await self._persistent_grant_repo.get_grant(
@@ -47,7 +51,10 @@ class RefreshTokenGrantService:
         user_id = grant.user_id
         current_unix_time = int(time.time())
 
-        access_token = await self._get_access_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
+        access_token = await self._get_access_token(
+            request_data=request_data, user_id=user_id,
+            unix_time=current_unix_time
+        )
         id_token = await self._get_id_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
         
         return ResponseTokenModel(
