@@ -41,7 +41,7 @@ ThirdPartyAuthResponse = Union[RedirectResponse, JSONResponse]
 async def get_github_authorize(
     request: Request,
     request_body: ThirdPartyAccessTokenRequestModel = Depends(),
-session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> ThirdPartyAuthResponse:
     auth_service_factory = ThirdPartyAuthServiceFactory(
         session=session,

@@ -51,6 +51,7 @@ def get_application(test: bool = False) -> NewFastApi:
     )
     application = setup_exception_handlers(application)
 
+    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
@@ -160,6 +161,7 @@ def setup_exception_handlers(app: FastAPI) -> FastAPI:
 
 
 app = get_application()
+
 
 # expose the default Python metrics to the /metrics endpoint
 Instrumentator().instrument(app).expose(app)
