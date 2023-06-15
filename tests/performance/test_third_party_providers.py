@@ -14,5 +14,4 @@ class TaskSetThirdPartyProviders(SequentialTaskSet):
             "POST", "/authorize/oidc/state",
             data=self.post_params,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            name="/authorize/oidc/state"
         )

@@ -62,9 +62,7 @@ class TaskSetClientEndpoint(SequentialTaskSet):
             "POST",
             "/clients/register",
             data=self.request_body_post,
-            headers={"Content-Type": self.content_type},
-            name="1/clients/register"
-        )
+            headers={"Content-Type": self.content_type})
         try:
             self.client_id = self.response.json()["client_id"]
         except Exception as e:
@@ -72,19 +70,17 @@ class TaskSetClientEndpoint(SequentialTaskSet):
 
     @task
     def test_successful_client_get(self) -> None:
-        self.client.request("GET", "/clients/test_client", name="2/clients/test_client")
+        self.client.request("GET", "/clients/test_client")
 
 
     @task
     def test_successful_client_update(self) -> None:
         self.client.request("PUT", "/clients/test_client",
-                            data=self.request_body_put,
-                            name="3/clients/test_client")
+                            data=self.request_body_put)
 
     @task
     def test_successful_client_deletion(self) -> None:
-        self.client.request("DELETE", f"/clients/{self.client_id}",
-                            name="4/clients/{self.client_id}")
+        self.client.request("DELETE", f"/clients/{self.client_id}", name="/clients/")
 
     @task
     def test_successful_get_all_clients(self) -> None:
@@ -93,7 +89,7 @@ class TaskSetClientEndpoint(SequentialTaskSet):
             headers={
                 "access-token": self.access_token,
                 "Content-Type": "application/x-www-form-urlencoded",
-            },
-            name="5/clients")
+            }
+        )
 
 

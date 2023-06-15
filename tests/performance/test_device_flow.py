@@ -11,8 +11,7 @@ class TaskSetDeviceFlow(SequentialTaskSet):
         self.request_params = {"client_id": "test_client",
                           "scope": "openid"}
         self.response = self.client.request("POST", "/device/", data=self.request_params,
-                                        headers={"Content-Type": self.content_type},
-                                        name="1/device/")
+                                        headers={"Content-Type": self.content_type})
         self.response_data = self.response.json()
         self.device_code = self.response_data.get("device_code")
         self.user_code = self.response_data.get("user_code")
@@ -21,32 +20,31 @@ class TaskSetDeviceFlow(SequentialTaskSet):
         # Stage 2: User navigates to the device login form and checks the user_code
     @task
     def test_successful_device_auth_GET(self):
-        self.response = self.client.request("GET", "/device/auth", name="2/device/auth")
+        self.response = self.client.request("GET", "/device/auth")
 
     @task
     def test_successful_device_auth_POST(self):
-        self.response = self.client.request("POST", "/device/auth", data={"user_code": self.user_code},
-                                        headers={"Content-Type": self.content_type},
-                                        name="3/device/auth")
+        self.response = self.client.request("POST", "/device/auth",
+                                        data={"user_code": self.user_code},
+                                        headers={"Content-Type": self.content_type})
 
     @task
     def test_get_device_login_confirm(self) -> None:
-        self.client.request("GET", "/device/auth/success",
-                     name="4/device/auth/success")
+        self.client.request("GET", "/device/auth/success")
 
     @task
     def test_get_device_cancel(self) -> None:
-        self.client.request("GET", "/device/auth/cancel",
-                            name="5/device/auth/cancel")
+        self.client.request("GET", "/device/auth/cancel")
 
     @task
     def test_user_authorization_form(self):
         # Stage 3: Client requests user authorization (usually done by redirecting the user to an authorization form)
         self.auth_params = {"client_id": "test_client", "response_type": "urn:ietf:params:oauth:grant-type:device_code",
                        "redirect_uri": "https://www.google.com/"}
-        self.response = self.client.request("GET", "/authorize/", params=self.auth_params,
-                                            name="6/authorize/ device_code flow")
-        # assert self.response.status_code == status.HTTP_200_OK
+        self.response = self.client.request("GET", "/authorize/",
+                                            params=self.auth_params,
+                                            name="/authorize/"
+                                            )
 
     @task
     def test_user_authorization(self):
@@ -64,8 +62,7 @@ class TaskSetDeviceFlow(SequentialTaskSet):
         self.response = self.client.request("POST", "/authorize/",
                                         data=self.auth_params,
                                         headers={"Content-Type": self.content_type},
-                                        cookies={"user_code": self.user_code},
-                                        name="7/authorize/ device_code flow")
+                                        cookies={"user_code": self.user_code})
 
     @task
     def test_obtain_access_token(self):
@@ -73,8 +70,7 @@ class TaskSetDeviceFlow(SequentialTaskSet):
         self.token_params = {"client_id": "test_client", "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                         "device_code": self.device_code, "redirect_uri": "https://www.google.com/"}
         self.response = self.client.request("POST", "/token/", data=self.token_params,
-                                        headers={"Content-Type": self.content_type},
-                                            name="8/token/  device_code flow")
+                                        headers={"Content-Type": self.content_type})
 
         # Verify that the client received an access token
         self.access_token = self.response.json().get("access_token")
@@ -87,8 +83,7 @@ class TaskSetDevicePostCancel(SequentialTaskSet):
         self.request_params = {"client_id": "test_client",
                           "scope": "openid"}
         self.response = self.client.request("POST", "/device/", data=self.request_params,
-                                        headers={"Content-Type": self.content_type},
-                                            name="1/device/")
+                                        headers={"Content-Type": self.content_type})
         self.response_data = self.response.json()
         self.device_code = self.response_data.get("device_code")
         self.user_code = self.response_data.get("user_code")
@@ -102,7 +97,5 @@ class TaskSetDevicePostCancel(SequentialTaskSet):
         }
         self.response = self.client.request(
             "DELETE", "/device/auth/cancel", data=self.param_next,
-            headers={'Content-Type': self.content_type, "Cookie": self.param_next["scope"]},
-            name="2/device/auth/cancel"
-        )
+            headers={'Content-Type': self.content_type, "Cookie": self.param_next["scope"]})
 

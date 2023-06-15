@@ -43,14 +43,12 @@ class TaskSetInfoEndpoint(TaskSet):
     def test_userinfo_get(self):
         self.user_info_response = self.client.request(
             "GET", "/userinfo/", headers={"authorization": self.access_token},
-            name="1/userinfo/"
         )
 
     @task
     def test_userinfo_post(self):
         self.user_info_response = self.client.request(
             "POST", "/userinfo/", headers={"authorization": self.access_token},
-            name="2/userinfo/"
         )
 
     @task
@@ -61,7 +59,6 @@ class TaskSetInfoEndpoint(TaskSet):
                 "authorization": self.access_token,
                 "accept": "application/json"
             },
-            name="3/userinfo/jwt"
         )
 
     def _get_code(self, url):

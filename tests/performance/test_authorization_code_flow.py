@@ -19,7 +19,7 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
         # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
         self.authorization_response = self.client.request("GET", "/authorize/",
                                                           params=self.authorization_params,
-                                                          name="1/authorize/  secret_code flow")
+                                                          name="/authorize/")
 
     @task
     def test_successful_authorization_POST(self):
@@ -27,9 +27,7 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
             "POST",
             "/authorize/",
             data={**self.authorization_params, **self.user_credentials},
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            name="2/authorize/  secret_code flow"
-        )
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
 
     @task
     def test_obtain_access_token(self):
@@ -44,9 +42,7 @@ class TaskSetAuthorizationCodeFlow(SequentialTaskSet):
             "POST",
             "/token/",
             data=self.token_params,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            name="3/token/ secret_code flow"
-        )
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
         self.response_data = self.token_response.json()
         self.access_token = self.response_data.get("access_token")
         self.id_token = self.response_data.get("id_token")

@@ -22,7 +22,7 @@ class TaskSetEndsessionEndpoint(SequentialTaskSet):
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             data=self.data_new_user,
-            name="2/user/register"
+            name="/user/register"
         )
 
         # authorizing new user
@@ -78,7 +78,7 @@ class TaskSetEndsessionEndpoint(SequentialTaskSet):
         }
         self.end_session_response = self.client.request("GET", "/endsession/",
                                                         params=self.logout_params,
-                                                        name="7/endsession/")
+                                                        name="/endsession/")
 
     def _get_code(self, url):
         self.parsed_url = parse.urlparse(url)

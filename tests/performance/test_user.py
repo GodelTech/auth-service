@@ -31,7 +31,6 @@ class TaskSetUserEndpoint(SequentialTaskSet):
     def test_successful_get_HTML_register_profile(self) -> None:
         self.client.request(
             "GET", "/user/register/profile", headers=self.headers,
-            name="1/user/register/scope"
         )
 
     @task
@@ -47,24 +46,23 @@ class TaskSetUserEndpoint(SequentialTaskSet):
         }
         self.client.request(
             "POST", "/user/register", headers=self.headers_a, data=self.data_a,
-            name="2/user/register"
         )
 
 
     @task
     def test_successful_add_info_get(self) -> None:
         self.client.request(
-            "GET", "/user/add_info/polnareff?scope=profile",
+            "GET", f"/user/add_info/{self.unique_username}?scope=profile",
             headers=self.headers,
             data=self.data_first,
-            name="3/user/add_info/polnareff?scope=profile"
+            name="/user/add_info/unique_username?scope=profile"
         )
 
     @task
     def test_successful_add_info_post(self) -> None:
         self.client.request(
-            "POST", "/user/add_info/polnareff",
+            "POST", f"/user/add_info/{self.unique_username}",
             headers=self.headers,
             data=self.data_second,
-            name="4/user/add_info/polnareff"
+            name="/user/add_info/unique_username"
         )
