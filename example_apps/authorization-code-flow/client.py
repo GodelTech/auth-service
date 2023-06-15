@@ -59,7 +59,7 @@ def decode_id_token(id_token: str) -> dict:
 async def get_user(request: Request):
     """
     Returns the user stored in the request session.
-    Example of returned value:
+    Example of returned value (real example):
     {
         "iss": "http://127.0.0.1:8000",
         "client_id": "spider_man",
@@ -177,24 +177,24 @@ async def endsession(request: Request):
 @app.get("/auth")
 async def auth(request: Request):
     auth_data = await oauth.oidc_provider.authorize_access_token(request)
-    # Auth data is like:
+    # Auth data is like (real example):
     # {
-    #     "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAiLCJjbGllbnRfaWQiOiJzcGlkZXJfbWFuIiwiaWF0IjoxNjg2NTgzNzAyLCJleHAiOjE2ODY1ODczMDIsInN1YiI6OCwic2NvcGUiOm51bGwsImF1ZCI6WyJpbnRyb3NwZWN0aW9uIiwicmV2b2NhdGlvbiIsInVzZXJpbmZvIl19.VvD0oSQVXbVmT1dz8qLAyK7dGcXcfW6D_TZ26FQ5m5vvufgySF7ZgEv5MiwC-H-aOaTdD0zmypNRjait1cFzthAJ8XsjPpiJwJPGt-L1O9-XErDVLqfewjoi3rWQy4wYo8mM39De0l5FlOMJMnicvN-6jp10PB27ICVY3t13C8VyTsUbuXhWgKuF7K3wb17NOZhiff-zZLnVUtR90JW1g1IFJ_r14TK4gKWOidhL4pp--LsFjjt8JIAlLrfLlSvaVsEg6Wb7TZh6NLXmiN2BhjoDMIOJe-KydHqGpzu0hyJEayCDC-DRWJGky9rfHuLGEXTDkc2l0kjdl7yU3_NRPg",
-    #     "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAiLCJjbGllbnRfaWQiOiJzcGlkZXJfbWFuIiwiaWF0IjoxNjg2NTgzNzAyLCJleHAiOjE2ODY1ODczMDIsInN1YiI6OCwic2NvcGUiOm51bGwsImF1ZCI6WyJzcGlkZXJfbWFuIl19.GhaKbtk3PJuL8dlTYCFp0UGf7pFv-a05OzZTddp9WqjiufQ0DA41T7nq5nyw4O9i5tny7JrLWEjFXsMD2EtR_7czlrPCUwk9J2e4glzREpgUzj0FnAL-bybUJZ1ED5S8py0vxQd4qlGwVbevCQjoqP_zqMurpHAsG5WWQ8f4Z_-nHVssWlrQwn8K88QeNLhn87I0PhlZApbn-bw3VWOYeP09hlV6BcWRwgQxzl8ifmedhcktMEqRLAsrSUAYc-2oRDG71G7Wh0j-ioGbga6HiUzQPRBD0ByFsODQ_OfYoeVXG82Qlb4N9DkKk6AME4q2s2qfeTmdeyYWYMB-O7w5vw",
-    #     "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAiLCJjbGllbnRfaWQiOiJzcGlkZXJfbWFuIiwiaWF0IjoxNjg2NTgzNzAyLCJleHAiOjE2ODY1ODQzMDIsInN1YiI6OCwiYXVkIjpbInNwaWRlcl9tYW4iXX0.MSbIPqMNepZIZnh_Njx2uAkXP-A1prEBwqnwtr81YBCj-fcVc9hr7QlYSjVryJMep9zfypVzLVMy-qWNTQAocp8nL0HKMjRDJYtUWl4p8D7tFGpMv2Y9TBFpaT9GReaZa3JGMJ0uW2Yev6EE8aUajbzOqPkwQC-lohh_AbpxZBMyJG80jnI8aFyv3DHgRgndEaxqIYTUFJxsxPiwacLUAs3IMw1vS0P33UeExeg3BLJGixp0NTCmc8dEULt7gu0Kvm8h5ArDf7b5AQYl9ZiAC8ml15yf5YC_oFPHZtbbWn78S7_kN2PZ2StOndgLdtdl4P_S692t2gpt-PlqI6qZrw",
+    #     "access_token": "ACCESS_TOKEN",
+    #     "refresh_token": "REFRESH_TOKEN",
+    #     "id_token": "ID_TOKEN",
     #     "expires_in": 600,
     #     "token_type": "Bearer",
     #     "expires_at": 1686584302,
     #     "userinfo": {
-    #         "iss": "http://127.0.0.1:8000",
-    #         "client_id": "spider_man",
+    #         "iss": "ISSUER",
+    #         "client_id": "CLIENT_ID",
     #         "iat": 1686583702,
     #         "exp": 1686584302,
     #         "sub": 8,
     #         "aud": [
-    #             "spider_man"
+    #             "CLIENT_ID"
     #         ],
-    #         "nonce": "pPMg5fxJyeqHY3IxHeWA"
+    #         "nonce": "NONCE"
     #     }
     # }
     pseudo_db.set_or_overwrite("auth_data", auth_data)

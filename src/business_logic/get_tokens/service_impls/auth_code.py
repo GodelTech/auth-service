@@ -116,11 +116,12 @@ class AuthorizationCodeTokenService:
     async def _get_id_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
         payload = IdTokenPayload(
             sub=user_id,
-            iss=DOMAIN_NAME,
+            iss="http://"+DOMAIN_NAME,
             client_id=request_data.client_id,
             iat=unix_time,
             exp=unix_time + 600,
             jti=str(uuid.uuid4()),
             acr=0,
+            aud=[request_data.client_id]
         )
         return self._jwt_manager.encode(payload=payload, algorithm='RS256')
