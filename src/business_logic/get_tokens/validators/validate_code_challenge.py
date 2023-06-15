@@ -42,7 +42,7 @@ class ValidatePKCECode:
                 ).decode()
                 actual_code_challenge = base64.urlsafe_b64encode(
                     hashlib.sha256(code_verifier.encode("utf-8")).digest()
-                ).decode()
+                ).decode().rstrip("=")
                 if expected_code_challenge != actual_code_challenge:
                     raise InvalidPkceCodeError
             
