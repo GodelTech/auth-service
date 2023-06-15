@@ -8,6 +8,7 @@ from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables import User, UserClaim
 from src.data_access.postgresql.tables.device import Device
 
+
 TOKEN_HINT_DATA = {
     "sub": None,
     "client_id": "test_client",

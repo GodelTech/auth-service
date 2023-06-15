@@ -29,7 +29,7 @@ class TestAuthorizationCodeFlow:
     ) -> None:
         # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
         authorization_params = {
-            "client_id": "spider_man",
+            "client_id": "test_client",
             "response_type": "code",
             "scope": "openid profile",
             "redirect_uri": "http://127.0.0.1:8888/callback/",
@@ -37,7 +37,7 @@ class TestAuthorizationCodeFlow:
         authorization_response = await client.request("GET", "/authorize/", params=authorization_params)
         assert authorization_response.status_code == status.HTTP_200_OK
 
-        user_credentials = {"username": "PeterParker", "password": "the_beginner"}
+        user_credentials = {"username": "TestClient", "password": "test_password"}
         response = await client.request(
             "POST",
             "/authorize/",
@@ -51,7 +51,7 @@ class TestAuthorizationCodeFlow:
         secret_code = secret_code.split('=')[1]
 
         token_params = {
-            "client_id": "spider_man",
+            "client_id": "test_client",
             "grant_type": "authorization_code",
             "code": secret_code,
             "redirect_uri": "http://127.0.0.1:8888/callback/",
@@ -64,10 +64,11 @@ class TestAuthorizationCodeFlow:
         )
         response_data = token_response.json()
         access_token = response_data.get("access_token")
+        id_token = response_data.get('id_token')
         assert token_response.status_code == status.HTTP_200_OK
 
         # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
-        user_id_query = select(User.id).where(User.username == "PeterParker")
+        user_id_query = select(User.id).where(User.username == "TestClient")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
         user_claim_insertion = insert(UserClaim).values(user_id=user_id, claim_type_id=1, claim_value="Peter")
@@ -80,19 +81,11 @@ class TestAuthorizationCodeFlow:
         assert user_info_response.status_code == status.HTTP_200_OK
 
         # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
-        jwt_service = JWTService()
-
-        TOKEN_HINT_DATA["sub"] = user_id
-
-        id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
-
         logout_params = {
-            "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "http://www.sparks.net/",
-            "state": "test_state",
+            "id_token_hint": id_token
         }
         end_session_response = await client.request("GET", "/endsession/", params=logout_params)
-        assert end_session_response.status_code == status.HTTP_302_FOUND
+        assert end_session_response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.asyncio

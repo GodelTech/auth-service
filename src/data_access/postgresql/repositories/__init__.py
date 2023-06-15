@@ -1,3 +1,4 @@
+from .base import BaseRepository
 from .client import ClientRepository
 from .device import DeviceRepository
 from .groups import GroupRepository

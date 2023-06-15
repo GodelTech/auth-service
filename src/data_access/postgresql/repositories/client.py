@@ -370,7 +370,13 @@ class ClientRepository(BaseRepository):
         
             sql = f"DELETE FROM clients_grant_types WHERE client_id = {client_id_int}"
             await self.session.execute(text(sql))
-        
+    
+    async def exists_client_with_provided_client_secret(self, client_id: str, client_secret: str) -> bool:
+        query = (select(Client).join(ClientSecret, Client.id == ClientSecret.client_id)
+                .where(Client.client_id == client_id, ClientSecret.value == client_secret)
+                .exists().select())
+        result = await self.session.execute(query)
+        return result.scalar()
 
     def __repr__(self) -> str:
         return "Client Repository"
