@@ -27,7 +27,9 @@ class AppSettings(BaseAppSettings):
 
     allowed_hosts: List[str] = ["*"]
 
+
     keys: RSAKeypair = CreateRSAKeypair().execute()
+    # print(f"app.py; keys: {keys}")
 
     class Config:
         validate_assignment = True
