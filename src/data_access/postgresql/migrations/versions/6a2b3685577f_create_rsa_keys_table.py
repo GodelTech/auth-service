@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column("public_key", sa.LargeBinary),
         sa.Column('n', sa.Integer),
         sa.Column('e', sa.Integer),
+        sa.Column('expiration_encode', sa.Integer),
+        sa.Column('expiration_decode', sa.Integer),
     )
 
 def downgrade() -> None:

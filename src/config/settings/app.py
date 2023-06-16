@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import PostgresDsn, SecretStr
 
-from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
+from src.business_logic.services.rsa_keys import RSAKeysService
+from src.config.rsa_keys import RSAKeypair, CreateRSAKeypair
 from src.config.settings.base import BaseAppSettings
 
 
@@ -27,9 +28,9 @@ class AppSettings(BaseAppSettings):
 
     allowed_hosts: List[str] = ["*"]
 
-
-    keys: RSAKeypair = CreateRSAKeypair().execute()
-    # print(f"app.py; keys: {keys}")
+    # keys: RSAKeypair = CreateRSAKeypair().execute()
+    keys: RSAKeypair = RSAKeysService().get_rsa_keys()
+    print(f"app.py; keys: {keys}")
 
     class Config:
         validate_assignment = True

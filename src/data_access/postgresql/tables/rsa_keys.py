@@ -13,3 +13,5 @@ class RSA_keys(BaseModel):
     public_key = Column(LargeBinary)
     n = Column(Integer)
     e = Column(Integer)
+    expiration_encode = Column(Integer, default=0)
+    expiration_decode = Column(Integer, default=0)
