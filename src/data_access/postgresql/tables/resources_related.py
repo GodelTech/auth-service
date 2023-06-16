@@ -213,5 +213,5 @@ class ClientScope(BaseModel):
         self.__str__()
     
     def __str__(self) -> str:
-        return f'{self.resource.name}.{self.scope.name}.{self.claim.scope_claim_type}'
+        return f'{self.resource.name}:{self.scope.name}:{self.claim.scope_claim_type}'
     

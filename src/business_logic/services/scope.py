@@ -108,13 +108,13 @@ class ScopeService:
         aud_result = []
 
         if 'openid' in scope:
-            aud_result.append("oidc.userinfo.openid")
+            aud_result.append("openid")
             scope.remove('openid')
         if 'profile' in scope:
-            aud_result.append("oidc.userinfo.profile")
+            aud_result.append("profile")
             scope.remove('profile')
         if 'email' in scope:
-            aud_result.append("oidc.userinfo.email")
+            aud_result.append("email")
             scope.remove('email')
         
         if len(scope)!=0:
@@ -136,10 +136,22 @@ class ScopeService:
         resource = await self.resource_repo.get_by_name(name=name)
         result ={}
         for api_scope in resource.api_scope:
-                for scope_claim in api_scope.api_scope_claims:
-                        result[f'{resource.name}.{api_scope.name}.{scope_claim.scope_claim_type.scope_claim_type}'] = api_scope.description
+            for scope_claim in api_scope.api_scope_claims:
+                result[f'{resource.name}:{api_scope.name}:{scope_claim.scope_claim_type.scope_claim_type}'] = api_scope.description
         return result
     
+    async def get_revoke_introspection_aud(self, name:str) -> dict[str:str]:
+        if not await self.resource_repo.exists_by_name(name):
+            raise ResourceNotFoundError
+        resource = await self.resource_repo.get_by_name(name=name)
+        result = []
+        for api_scope in resource.api_scope:
+            if api_scope.name == 'revoke':
+                result.append(f'{resource.name}:{api_scope.name}:{str(api_scope.api_scope_claims[0].scope_claim_type)}')
+            if api_scope.name == 'introspection':
+                result.append(f'{resource.name}:{api_scope.name}:{str(api_scope.api_scope_claims[0].scope_claim_type)}')
+        return result
+
     async def get_ids(self, scopes:list[str]) -> dict[str:str]:
         result = []
         for scope in scopes:

@@ -134,7 +134,7 @@ class ClientRepository(BaseRepository):
             select(ClientScope).where(ClientScope.client_id == client_id)
         )).all()
         #return scopes.first()[-1].scope
-        result = [f'{scope[0].resource.name}.{scope[0].scope.name}.{scope[0].claim}'for scope in scopes]
+        result = [f'{scope[0].resource.name}:{scope[0].scope.name}:{scope[0].claim}'for scope in scopes]
         if len(result) == 0:
              raise ClientScopesError
         return result
@@ -174,7 +174,13 @@ class ClientRepository(BaseRepository):
 
     async def list_all_scopes_by_client(self, client_id: str) -> List[str]:
         client = await self.get_client_by_client_id(client_id)
-        return [f'{scope.resource.name}.{scope.scope.name}.{scope.claim}'for scope in client.scopes]
+        result = []
+        for scope in client.scopes:
+            if scope.scope.name == 'userinfo':
+                result.append(str(scope.claim))
+            else:
+                result.append(f'{scope.resource.name}:{scope.scope.name}:{scope.claim}')
+        return result
 
     async def exists(self, client_id: str) -> bool:
         result = await self.session.execute(

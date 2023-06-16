@@ -32,7 +32,7 @@ class UserInfoServices:
     ) -> dict[str, Any]:
 
         token = self.authorization
-        decoded_token = await self.jwt.decode_token(token=token, audience="userinfo")
+        decoded_token = await self.jwt.decode_token_no_aud_iss_check(token=token)
         try:
             sub = int(decoded_token["sub"])
         except KeyError:
@@ -77,8 +77,8 @@ class UserInfoServices:
             }
         if 'email' in decoded_token['scope'] :
             response = response | {
-                "email": claims_dict.get("name", None),
-                "email_verified": claims_dict.get("name", None),
+                "email": claims_dict.get("email", None),
+                "email_verified": claims_dict.get("email_verified", None),
             }
         
         return response

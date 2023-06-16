@@ -352,7 +352,7 @@ API_SCOPES_OIDC =[
     },
     {
         "api_resource_id": 2,
-        "name": "intorospect",
+        "name": "introspection",
         "description" : "Gives posibility to check token",
         "display_name": "Intorospection",
         "required": True,

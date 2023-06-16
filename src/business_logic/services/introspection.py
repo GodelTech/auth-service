@@ -42,9 +42,8 @@ class IntrospectionServies:
         decoded_token = {}
         response: dict[str, Any] = {}
         try:
-            decoded_token = await self.jwt.decode_token(
+            decoded_token = await self.jwt.decode_token_no_aud_iss_check(
                 token=self.request_body.token, 
-                audience = "introspection"
             )
         except ExpiredSignatureError:
             return {"active": False}

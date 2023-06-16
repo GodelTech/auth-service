@@ -29,7 +29,6 @@ class PersistentGrantRepository(BaseRepository):
         scope: Optional[str] = None,
         grant_type: str = "authorization_code",
         expiration_time: int = 600,
-        
     ) -> None:
         grant_type_id = await self.get_type_id(grant_type)
         client_id_int = await self.get_client_id_int(client_id=client_id)
@@ -199,6 +198,7 @@ class PersistentGrantRepository(BaseRepository):
             user_id: int,
             grant_type_id: int,
             expiration_time: int,
+            scope:str,
     ) -> None:
         await self.session.execute(
             insert(PersistentGrant).values(
@@ -207,7 +207,8 @@ class PersistentGrantRepository(BaseRepository):
                 grant_data=grant_data,
                 expiration=expiration_time,
                 user_id=user_id,
-                persistent_grant_type_id=grant_type_id
+                persistent_grant_type_id=grant_type_id,
+                scope=scope
             )
         )
 
