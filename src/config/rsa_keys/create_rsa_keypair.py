@@ -9,7 +9,6 @@ logger.setLevel(logging.INFO)
 
 
 class CreateRSAKeypair:
-
     def execute(self) -> RSAKeypair:
         key = RSA.generate(2048)
         private_key = key.export_key("PEM")

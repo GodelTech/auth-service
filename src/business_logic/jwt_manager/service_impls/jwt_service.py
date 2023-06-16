@@ -1,6 +1,10 @@
 from __future__ import annotations
 import logging
 import jwt
+from typing import Any, Optional, Union
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
 from src.business_logic.jwt_manager.dto import (
@@ -8,7 +12,10 @@ from src.business_logic.jwt_manager.dto import (
     RefreshTokenPayload,
     IdTokenPayload,
 )
-from typing import Any, Optional, Union
+from src.di.providers import provide_async_session_stub
+from src.data_access.postgresql.repositories import RSAKeysRepository
+from data_access.postgresql.tables.rsa_keys import RSA_keys
+
 
 
 logger = logging.getLogger(__name__)
@@ -16,9 +23,30 @@ logger = logging.getLogger(__name__)
 
 Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
 
+class RSAKeysService:
+
+    def __init__(
+            self,
+            keys: RSAKeypair = Container().config().keys,
+            session: AsyncSession = Depends(provide_async_session_stub),
+    ) -> None:
+        self.keys = keys
+        self.rsa_keys_repository = RSAKeysRepository(session)
+
+    async def get_rsa_keys(self):
+        if self.rsa_keys_repository.validate_keys_exists():
+            self.rsa_keys = self.rsa_keys_repository.get_keys_from_repository()
+        else:
+            self.rsa_keys = self.rsa_keys_repository.generate_new_keys()
+        return self.rsa_keys
+
 
 class JWTManager:
-    def __init__(self, keys: RSAKeypair = Container().config().keys) -> None:
+    def __init__(
+            self,
+            # keys: RSAKeypair = Container().config().keys,
+            keys: RSA_keys = RSAKeysService().get_rsa_keys()
+    ) -> None:
         self.keys = keys
 
     def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
@@ -41,4 +69,4 @@ class JWTManager:
             decoded_info = jwt.decode(token, key=self.keys.public_key, algorithms=self.algorithms,
                                       **kwargs,)
 
-        return decoded_info    
+        return decoded_info

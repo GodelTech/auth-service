@@ -1,7 +1,7 @@
 from Crypto.PublicKey import RSA
 from sqlalchemy import exists, select, insert, update, delete, text
 
-# from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
+from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
 # from src.config.rsa_keys import RSAKeypair
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.rsa_keys import RSA_keys
@@ -17,22 +17,12 @@ class RSAKeysRepository(BaseRepository):
         return rsa_keys if rsa_keys else None
 
     async def generate_new_keys(self) -> RSA_keys:
-        # rsa_keys: RSAKeypair = CreateRSAKeypair().execute()
-        # await self.session.execute(insert(RSA_keys).values(
-        #     private_key=rsa_keys.private_key,
-        #     public_key=rsa_keys.public_key,
-        #     n=rsa_keys.n,
-        #     e=rsa_keys.e
-        # )
-        # )
-        key = RSA.generate(2048)
-        private_key = key.export_key("PEM")
-        public_key = key.public_key().export_key("PEM")
+        rsa_keys: RSAKeypair = CreateRSAKeypair().execute()
         await self.session.execute(insert(RSA_keys).values(
-            private_key=private_key,
-            public_key=public_key,
-            n=key.n,
-            e=key.e
+            private_key=rsa_keys.private_key,
+            public_key=rsa_keys.public_key,
+            n=rsa_keys.n,
+            e=rsa_keys.e
         )
         )
         rsa_keys = self.get_keys_from_repository()
