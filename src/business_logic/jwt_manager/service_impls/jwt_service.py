@@ -4,6 +4,7 @@ import jwt
 from typing import Any, Optional, Union
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
 
 from src.config.rsa_keys import RSAKeypair
 from src.di import Container
@@ -34,20 +35,30 @@ class RSAKeysService:
         self.rsa_keys_repository = RSAKeysRepository(session)
 
     async def get_rsa_keys(self):
-        if self.rsa_keys_repository.validate_keys_exists():
-            self.rsa_keys = self.rsa_keys_repository.get_keys_from_repository()
+        if await self.rsa_keys_repository.validate_keys_exists():
+            self.rsa_keys = await self.rsa_keys_repository.get_keys_from_repository()
         else:
-            self.rsa_keys = self.rsa_keys_repository.generate_new_keys()
+            self.rsa_keys = self.keys
         return self.rsa_keys
+
+# async def get_rsa_keys() -> RSA_keys:
+#     return await RSAKeysService().get_rsa_keys()
+
+# def get_rsa_keys() -> RSA_keys:
+#     return asyncio.run(RSAKeysService().get_rsa_keys())
+
+# KEYS = asyncio.run(RSAKeysService().get_rsa_keys())
+# KEYS = await get_rsa_keys()
 
 
 class JWTManager:
     def __init__(
             self,
             # keys: RSAKeypair = Container().config().keys,
-            keys: RSA_keys = RSAKeysService().get_rsa_keys()
+            keys = RSAKeysService().get_rsa_keys()
     ) -> None:
         self.keys = keys
+        print(f"jwt_service.py; keys: {self.keys}")
 
     def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
         if secret:
