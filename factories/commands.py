@@ -1,5 +1,5 @@
 import factory
-from sqlalchemy import text
+from sqlalchemy import text, insert
 
 import factories.data.data_for_factories as data
 import factories.factory_models.client_factory as cl_factory
@@ -47,6 +47,7 @@ class DataBasePopulation:
         cls.populate_oidc_resource()
         cls.populate_code_challenge_methods()
         cls.populate_client_scopes()
+        cls.populate_clients_scopes()
 
         sess.session.commit()
         sess.session.close()
@@ -172,15 +173,26 @@ class DataBasePopulation:
 
     @classmethod
     def populate_client_scopes(cls) -> None:
-        for client_id in data.CLIENT_SCOPES.keys():
-            for scope in  data.CLIENT_SCOPES[client_id]:
-                res_factory.ClientScopeFactory(
-                    client_id=client_id, 
-                    resource_id=scope['resource'],
-                    scope_id = scope['scope'],
-                    claim_id = scope['claim']
-                    )
-
+        for scope in data.CLIENT_SCOPES:
+            res_factory.ClientScopeFactory(
+                # client_id=client_id, 
+                resource_id=scope['resource'],
+                scope_id = scope['scope'],
+                claim_id = scope['claim']
+                )
+    
+    @classmethod
+    def populate_clients_scopes(cls) -> None:
+        sess.session.flush()
+        sess.session.execute(insert(res_factory.resource.clients_scopes).values( 
+            [{"scope_id" : scope_id, 'client_id': 1} for scope_id in range(1, 5)]
+            )
+        )
+        sess.session.execute(insert(res_factory.resource.clients_scopes).values( 
+            [{"scope_id" : 1, 'client_id': client_id} for client_id in range(2, 11)]
+            )
+        )
+            
     @classmethod
     def populate_client_redirect_uri(cls) -> None:
         for client_id, client_name in data.CLIENT_IDS.items():

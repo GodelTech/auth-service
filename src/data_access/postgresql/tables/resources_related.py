@@ -10,7 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
-
+from .client import clients_scopes
 
 class ApiResource(BaseModel):
     __tablename__ = "api_resources"
@@ -173,13 +173,10 @@ class ApiScopeClaimType(BaseModel):
 
 class ClientScope(BaseModel):
     __tablename__ = "client_scopes"
-
-    client_id = Column(
-        Integer, ForeignKey("clients.id", ondelete="CASCADE")
-    )
     client = relationship(
         "Client",
-        back_populates="scopes",
+        secondary=clients_scopes,
+        back_populates="scope",
         lazy = 'noload'
     )
 

@@ -94,7 +94,7 @@ class ClientScopeFactory(SQLAlchemyModelFactory):
         model = resource.ClientScope
         sqlalchemy_session = sess.session
 
-    client_id = factory.SubFactory(client.ClientFactory)
+    # client_id = factory.SubFactory(client.ClientFactory)
     resource_id = factory.SubFactory(ApiResourceFactory)
     scope_id = factory.SubFactory(ApiScopeFactory)
     claim_id = factory.SubFactory(ApiClaimTypeFactory)

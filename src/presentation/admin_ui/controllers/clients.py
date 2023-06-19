@@ -49,7 +49,7 @@ class ClientAdminController(ModelView, model=Client):
         Client.post_logout_redirect_uris,
         Client.grant_types,
         Client.claims,
-        Client.scopes,
+        Client.scope,
         Client.cors_origins,
         Client.id_restrictions,
     ]

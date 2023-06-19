@@ -143,6 +143,7 @@ oidc_id = 2
 userinfo_id = 3
 openid_id = 8
 profile_id = 9
+email_id = 10
 
 base_scopes = [{
         'resource':oidc_id,
@@ -154,27 +155,24 @@ base_scopes = [{
         'scope':userinfo_id,
         'claim': profile_id,
     }, 
+    {
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': email_id,
+    }, 
 ]
 
-alarm_api_scope_time_read = {
+alarm_api_scopes = [
+    {
         'resource':1,
         'scope':1,
         'claim': 1,
     }
-test_client_scope = base_scopes + [alarm_api_scope_time_read]
+]
 
-CLIENT_SCOPES = {
-    1: test_client_scope,
-    2: base_scopes,
-    3: base_scopes,
-    4: base_scopes,
-    5: base_scopes,
-    6: base_scopes,
-    7: base_scopes,
-    8: base_scopes,
-    9: base_scopes,
-    10: base_scopes,
-}
+# test_client_scope = base_scopes + [alarm_api_scope_time_read]
+
+CLIENT_SCOPES:list = base_scopes + alarm_api_scopes
 
 ROLES = [
     "Programmer, applications",
