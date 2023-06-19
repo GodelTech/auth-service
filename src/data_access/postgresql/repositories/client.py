@@ -22,6 +22,7 @@ from src.data_access.postgresql.tables.client import (
     ResponseType,
     clients_response_types,
     clients_grant_types,
+    clients_scopes,
 )
 from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 from typing import Optional, Any, Union
@@ -129,14 +130,14 @@ class ClientRepository(BaseRepository):
         else:
             return True
 
-    async def get_client_scopes(self, client_id: int) -> str:
-        scopes = (await self.session.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id)
-        )).all()
-        #return scopes.first()[-1].scope
-        result = [f'{scope[0].resource.name}:{scope[0].scope.name}:{scope[0].claim}'for scope in scopes]
+    async def get_client_scopes(self, client_id: int) -> list[str]:
+        client = (await self.session.execute(
+            select(Client).where(Client.id == client_id)
+        )).first()
+        scopes = client[0].scope
+        result = [f'{scope.resource.name}:{scope.scope.name}:{scope.claim}'for scope in scopes]
         if len(result) == 0:
-             raise ClientScopesError
+            raise ClientScopesError
         return result
 
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
@@ -241,9 +242,20 @@ class ClientRepository(BaseRepository):
         client_id_int:int,
         scope_ids:str,
     ) -> None:
-        await self.session.execute(insert(ClientScope).values(
+        scope_id = (await self.session.execute(
+            select(ClientScope).where(
+                ClientScope.resource_id == scope_ids['resource_id'], 
+                ClientScope.scope_id == scope_ids['scope_id'],
+                ClientScope.claim_id == scope_ids['claim_id']
+            )
+        )).first()
+        if scope_id is None:
+            raise ClientScopesError
+
+        scope_id = scope_id[0].id
+        await self.session.execute(insert(clients_scopes).values(
             client_id = client_id_int,
-            **scope_ids,
+            scope_id = scope_id,
             )
         )
         
@@ -309,19 +321,17 @@ class ClientRepository(BaseRepository):
         self, 
         client_id_int:int,
     ) -> None:
-        await self.session.execute(
-            delete(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-
+        sql = f'DELETE FROM clients_scopes WHERE client_id={client_id_int}'
+        await self.session.execute(text(sql))
+    
     async def delete_redirect_uris(
         self, 
         client_id_int:int,
     ) -> None:
+        await self.session.execute(
+            delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
+        )
         
-            await self.session.execute(
-                delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
-            )
-
     async def delete_client_by_client_id(
         self, 
         client_id:str,

@@ -152,7 +152,7 @@ class Client(BaseModel):
         "ClientScope", 
         secondary=clients_scopes,
         back_populates="client",
-        lazy = 'immediate'
+        lazy = 'subquery'
         )
     
     cors_origins = relationship(

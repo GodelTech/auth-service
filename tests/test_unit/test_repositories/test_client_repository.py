@@ -14,16 +14,17 @@ from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,
     ClientRedirectUriError,
+    ClientScopesError
 )
 from src.data_access.postgresql.tables.client import (
     Client,
     ClientClaim,
     ClientRedirectUri,
-    
     ClientSecret,
     ResponseType,
     clients_response_types,
     clients_grant_types,
+    clients_scopes,
 )
 from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 
@@ -302,13 +303,8 @@ class TestClientRepository:
 
         await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids)
 
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is not None
-        assert scope.client_id == client_id_int
+        scope = await client_repo.get_client_scopes(client_id_int)
+        assert len(scope) == 1 
 
     async def test_add_scope_incorrect_parameters(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
@@ -473,15 +469,14 @@ class TestClientRepository:
         
         await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids,)
         await connection.commit()
-
+    
         await client_repo.delete_scope(client_id_int=client_id_int)
+        await client_repo.session.commit()
+        with pytest.raises(ClientScopesError):
+            await client_repo.get_client_scopes(client_id_int)
+        client =(await client_repo.session.execute(select(Client).where(Client.id == client_id_int))).first()[0]
+        assert client.scope == []
 
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is None
 
     async def test_delete_redirect_uris(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
