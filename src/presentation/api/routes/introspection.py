@@ -2,6 +2,7 @@ import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, Header, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.introspection import IntrospectionService
 from src.data_access.postgresql.repositories import (
@@ -16,6 +17,7 @@ from src.presentation.api.models.introspection import (
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )
+from src.di.providers import provide_async_session_stub
 from src.presentation.middleware.authorization_validation import (
     authorization_middleware,
 )

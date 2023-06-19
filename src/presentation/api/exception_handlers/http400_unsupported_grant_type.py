@@ -5,10 +5,13 @@ from starlette.status import HTTP_400_BAD_REQUEST
 
 
 async def http400_unsupported_grant_type_handler(
-    _: Request, exc: UnsupportedGrantTypeError
+        _: Request,
+        exc: UnsupportedGrantTypeError
 ) -> JSONResponse:
     headers = {"Cache-Control": "no-store", "Pragma": "no-cache"}
     content = {"error": "unsupported_grant_type"}
     return JSONResponse(
-        content=content, headers=headers, status_code=HTTP_400_BAD_REQUEST
+        content=content,
+        headers=headers,
+        status_code=HTTP_400_BAD_REQUEST
     )

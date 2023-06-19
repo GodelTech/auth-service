@@ -3,7 +3,6 @@ from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
 )
-from src.business_logic.dependencies.database import get_repository_no_depends
 from src.business_logic.services.jwt_token import JWTService
 from typing import Union, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +27,7 @@ class EndSessionService:
             decoded_id_token_hint = await self._decode_id_token_hint(
                 id_token_hint=self.request_model.id_token_hint
             )
+
             await self._logout(
                 client_id=decoded_id_token_hint["client_id"],
                 user_id=decoded_id_token_hint["sub"],
