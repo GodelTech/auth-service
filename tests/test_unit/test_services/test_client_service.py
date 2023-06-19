@@ -55,7 +55,8 @@ class ClientRequestModel:
         self.grant_types = grant_types
         self.response_types = response_types
         self.token_endpoint_auth_method = token_endpoint_auth_method
-
+        self.scope = scope
+        
 @pytest.fixture
 def client_request_model() -> ClientRequestModel:
     return ClientRequestModel(
@@ -307,10 +308,12 @@ class TestClientService:
         await client_service.update(client_id=unique_client_id)
         await client_service.session.commit()
         async with session_factory() as session:
-            updated_scope = await session.execute(
-                select(ClientScope).where(ClientScope.client_id == client_id_int)
-            )
-            updated_scope = updated_scope.scalar_one_or_none()
+            client = (await session.execute(
+                select(Client).where(Client.id == client_id_int)
+            )).first()[0]
+            scope = [str(cl_scope) for cl_scope in client.scope]
+            for sc in new_scope.split(' '):
+                assert sc in ' '.join(scope)
 
     async def test_update_uris(self,
                                 client_request_model,

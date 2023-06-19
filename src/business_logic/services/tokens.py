@@ -518,7 +518,7 @@ class ClientCredentialsMaker(BaseMaker):
         client_scopes = await self.client_repo.get_client_scopes(
             client_id=client_from_db.id
         )
-        requested_scope_list = await self.scope_service.get_full_names(scope=requested_scope)
+        requested_scope_list = await self.scope_service.get_full_names(scope=requested_scope, userinfo_full_names=True)
 
         if requested_scope:
             for scope in requested_scope_list:

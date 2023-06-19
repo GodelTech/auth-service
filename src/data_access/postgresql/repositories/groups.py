@@ -33,6 +33,8 @@ class GroupRepository(BaseRepository):
         elif await self.exists(group_id=group_id):
             group_to_delete = await self.get_by_id(group_id=group_id)
             await self.session.delete(group_to_delete)
+        else:
+            raise ValueError
 
     async def exists(self, group_id: int) -> bool:
 

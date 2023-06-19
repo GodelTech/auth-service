@@ -103,18 +103,20 @@ class ScopeService:
             "oidc.revoke.post",
         ]
 
-    async def get_full_names(self, scope:str = "openid") -> list[str]:
+    async def get_full_names(self, scope:str = "openid", userinfo_full_names:bool=False) -> list[str]:
         scope:list = scope.split(' ')
         aud_result = []
-
+        prefix = ''
+        if userinfo_full_names:
+            prefix = 'oidc:userinfo:'
         if 'openid' in scope:
-            aud_result.append("openid")
+            aud_result.append(prefix + "openid")
             scope.remove('openid')
         if 'profile' in scope:
-            aud_result.append("profile")
+            aud_result.append(prefix + "profile")
             scope.remove('profile')
         if 'email' in scope:
-            aud_result.append("email")
+            aud_result.append(prefix + "email")
             scope.remove('email')
         
         if len(scope)!=0:
@@ -155,16 +157,27 @@ class ScopeService:
     async def get_ids(self, scopes:list[str]) -> dict[str:str]:
         result = []
         for scope in scopes:
-            scope_splited = scope.split(".")
-            resource = await self.resource_repo.get_by_name(name=scope_splited[0])
-            sub_result ={'resource_id':resource.id}
-
-            for api_scope in resource.api_scope:
-                    if api_scope.name == scope_splited[1]:
+            if ':' not in scope:
+                resource = await self.resource_repo.get_by_name(name='oidc')
+                sub_result ={'resource_id':resource.id}
+                for api_scope in resource.api_scope:
+                    api_scope:ApiScope
+                    if api_scope.name == 'userinfo':
                         sub_result['scope_id'] = api_scope.id
                         for scope_claim in api_scope.api_scope_claims:
-                            if scope_claim.scope_claim_type.scope_claim_type == scope_splited[2]:
+                            if scope_claim.scope_claim_type.scope_claim_type == scope:
                                 sub_result['claim_id'] = scope_claim.scope_claim_type.id
-                                break
+            else:
+                scope_splited = scope.split(".")
+                resource = await self.resource_repo.get_by_name(name=scope_splited[0])
+                sub_result ={'resource_id':resource.id}
+
+                for api_scope in resource.api_scope:
+                        if api_scope.name == scope_splited[1]:
+                            sub_result['scope_id'] = api_scope.id
+                            for scope_claim in api_scope.api_scope_claims:
+                                if scope_claim.scope_claim_type.scope_claim_type == scope_splited[2]:
+                                    sub_result['claim_id'] = scope_claim.scope_claim_type.id
+                                    break
             result.append(sub_result)
         return result
