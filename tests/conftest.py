@@ -34,6 +34,7 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
     WellKnownRepository,
     BlacklistedTokenRepository,
+    CodeChallengeRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
@@ -213,6 +214,7 @@ async def token_service(connection: AsyncSession) -> TokenService:
         persistent_grant_repo=PersistentGrantRepository(session=connection),
         user_repo=UserRepository(session=connection),
         device_repo=DeviceRepository(session=connection),
+        code_challenge_repo=CodeChallengeRepository(session=connection),
         jwt_service=JWTService(),
         blacklisted_repo=BlacklistedTokenRepository(session=connection),
     )
@@ -225,6 +227,7 @@ async def login_form_service(connection: AsyncSession) -> LoginFormService:
         session=connection,
         client_repo=ClientRepository(session=connection),
         oidc_repo=ThirdPartyOIDCRepository(session=connection),
+        code_challenge_repo=CodeChallengeRepository(session=connection),
     )
     return login_service
 

@@ -267,3 +267,5 @@ POST_LOGOUT_REDIRECT_URL = {
     9: "https://www.villarreal.com/",
     10: "https://meyer-berry.com/",
 }
+
+CODE_CHALLENGE_METHODS = ["plain", "S256"]
