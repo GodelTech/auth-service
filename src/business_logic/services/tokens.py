@@ -11,7 +11,6 @@ import time
 # import uuid
 from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
-from cryptography.fernet import Fernet
 import uuid
 from typing import Any, Dict, Optional, Union
 from cryptography.fernet import Fernet
@@ -41,14 +40,13 @@ from src.data_access.postgresql.repositories import (
     CodeChallengeRepository,
 )
 from src.dyna_config import DOMAIN_NAME
-
-
 if TYPE_CHECKING:
     from src.business_logic.services.jwt_token import JWTService
     from src.presentation.api.models import (
         BodyRequestRevokeModel,
-        BodyRequestTokenModel,
+        BodyRequestTokenModel
     )
+
 
 logger = logging.getLogger(__name__)
 from jwt.exceptions import ExpiredSignatureError
@@ -200,7 +198,7 @@ class TokenService:
 class BaseMaker:
     def __init__(self, token_service: TokenService) -> None:
         self.expiration_time = 600
-        self.request_model: BodyRequestTokenModel = token_service.request_model  # type: ignore
+        self.request_model: RequestTokenModel = token_service.request_model  # type: ignore
         self.client_repo: ClientRepository = token_service.client_repo
         self.persistent_grant_repo: PersistentGrantRepository = (
             token_service.persistent_grant_repo

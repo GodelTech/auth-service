@@ -13,4 +13,7 @@ from .third_party_oidc_authorization import (
     ThirdPartyMicrosoftRequestModel,
     ThirdPartyOIDCRequestModel,
 )
-from .tokens import BodyRequestTokenModel, ResponseTokenModel
+from .tokens import (
+    BodyRequestTokenModel,
+    ResponseTokenModel
+)

@@ -4,8 +4,11 @@ from typing import Any
 from fastapi import (
     APIRouter,
     Request,
+    status,
+    Depends
 )
 from fastapi_cache.decorator import cache
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.services.well_known import WellKnownService
 from src.config.settings.cache_time import CacheTimeSettings
@@ -14,7 +17,9 @@ from src.presentation.api.models.well_known import (
     ResponseJWKS,
     ResponseOpenIdConfiguration,
 )
+
 from fastapi.responses import JSONResponse
+from src.di.providers import provide_async_session_stub
 
 well_known_router = APIRouter(prefix="/.well-known", tags=["Well Known"])
 
@@ -26,10 +31,10 @@ logger = logging.getLogger(__name__)
 )
 @cache(expire=CacheTimeSettings.WELL_KNOWN_OPENID_CONFIG)
 async def get_openid_configuration(
-    request: Request,
+  request: Request,
+  session: AsyncSession = Depends(provide_async_session_stub),
 ) -> JSONResponse:
     try:
-        session = request.state.session
         logger.debug("Collecting Data for OpenID Configuration.")
         well_known_info_class = WellKnownService(
             session=session, wlk_repo=WellKnownRepository(session)
