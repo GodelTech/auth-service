@@ -192,6 +192,10 @@ class DataBasePopulation:
             [{"scope_id" : 1, 'client_id': client_id} for client_id in range(2, 11)]
             )
         )
+        sess.session.execute(insert(res_factory.resource.clients_scopes).values( 
+            [{"scope_id" : 2, 'client_id': client_id} for client_id in range(2, 11)]
+            )
+        )
             
     @classmethod
     def populate_client_redirect_uri(cls) -> None:

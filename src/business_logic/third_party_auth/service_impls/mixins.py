@@ -112,6 +112,7 @@ class ThirdPartyAuthMixin:
             user_id=await self._user_repo.get_user_id_by_username(username),
             grant_type="authorization_code",
             expiration_time=auth_code_lifetime + int(time.time()),
+            scope = request_data.scope,
         )
 
     async def _update_redirect_url(

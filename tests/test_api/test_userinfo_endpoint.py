@@ -37,7 +37,7 @@ class TestUserInfoEndpoint:
         self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         jwt = JWTService()
-        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["profile"]})
         headers = {
             "authorization": token,
         }
@@ -51,7 +51,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_jwt_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["profile"]})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
         response = await client.request(
@@ -70,7 +70,7 @@ class TestUserInfoEndpoint:
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
-            payload={"blablabla": "blablabla", "aud":["userinfo"]}
+            payload={"blablabla": "blablabla", "aud":["profile"]}
         )
         for url in ("/userinfo/", "/userinfo/jwt"):
             headers = {
@@ -85,7 +85,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["profile"]})
         for url in ("/userinfo/", "/userinfo/jwt"):
             headers = {
                 "authorization": token,
@@ -102,7 +102,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_post_request(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["profile"]})
         headers = {
             "authorization": token,
         }
@@ -120,7 +120,7 @@ class TestUserInfoEndpoint:
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode_jwt(
-            payload={"blablabla": "blablabla", "aud":["userinfo"]}
+            payload={"blablabla": "blablabla", "aud":["profile"]}
         )
         headers = {"authorization": token}
         response = await client.request("POST", "/userinfo/", headers=headers)
@@ -132,7 +132,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_post_request_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["profile"]})
         headers = {
             "authorization": token,
         }

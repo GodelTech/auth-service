@@ -70,7 +70,7 @@ class TestThirdPartyGithubFlow:
             "client_id": "spider_man",
             "grant_type": "authorization_code",
             "code": secret_code,
-            "scope": "test",
+            "scope": "openid",
             "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         token_response = await client.request(

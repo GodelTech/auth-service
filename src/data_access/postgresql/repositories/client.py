@@ -176,7 +176,7 @@ class ClientRepository(BaseRepository):
     async def list_all_scopes_by_client(self, client_id: str) -> List[str]:
         client = await self.get_client_by_client_id(client_id)
         result = []
-        for scope in client.scopes:
+        for scope in client.scope:
             if scope.scope.name == 'userinfo':
                 result.append(str(scope.claim))
             else:
