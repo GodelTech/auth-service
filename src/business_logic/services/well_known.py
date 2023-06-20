@@ -22,7 +22,6 @@ class WellKnownService:
     More detalis about the functionality can be found in the
     [official documentation](https://www.rfc-editor.org/rfc/rfc8414)
     [openid connect discover 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
-
     """
 
     def __init__(
