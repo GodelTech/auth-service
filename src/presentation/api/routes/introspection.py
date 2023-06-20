@@ -38,8 +38,9 @@ async def post_introspection(
         default=None, description="Authorization"
     ),  # crutch for swagger
     request_body: BodyRequestIntrospectionModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> dict[str, Any]:
-    session = request.state.session
+    # session = request.state.session
     introspection_class = IntrospectionService(
         session=session,
         user_repo=UserRepository(session),
