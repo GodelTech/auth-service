@@ -7,6 +7,7 @@ from src.data_access.postgresql.tables import IdentityProviderMapped
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestThirdPartyRepository:
     async def test_get_row_providers_data(self, connection: AsyncSession):

@@ -16,6 +16,7 @@ from typing import Any
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!https://www.google.com/"
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestThirdPartyGitLabFlow:
     async def test_successful_gitlab_code_flow(
@@ -85,9 +86,7 @@ class TestThirdPartyGitLabFlow:
 
         # Stage 4: UserInfo endpoint retrieves user data from UserClaims table
         user_id_query = select(User.id).where(User.username == "NewUserNew")
-        user_id = (
-            await connection.execute(user_id_query)
-        ).scalar_one_or_none()
+        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
         user_claim_insertion = insert(UserClaim).values(
             user_id=user_id, claim_type_id=1, claim_value="Peter"
         )

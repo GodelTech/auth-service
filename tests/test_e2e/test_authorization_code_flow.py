@@ -21,11 +21,11 @@ scope = (
 TOKEN_HINT_DATA = {"sub": None, "client_id": "spider_man", "type": "code"}
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlow:
-
     async def test_successful_authorization_code_flow(
-            self, client: AsyncClient, connection: AsyncSession
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
         authorization_params = {
@@ -34,10 +34,15 @@ class TestAuthorizationCodeFlow:
             "scope": "openid profile",
             "redirect_uri": "https://www.google.com/",
         }
-        authorization_response = await client.request("GET", "/authorize/", params=authorization_params)
+        authorization_response = await client.request(
+            "GET", "/authorize/", params=authorization_params
+        )
         assert authorization_response.status_code == status.HTTP_200_OK
 
-        user_credentials = {"username": "PeterParker", "password": "the_beginner"}
+        user_credentials = {
+            "username": "PeterParker",
+            "password": "the_beginner",
+        }
         response = await client.request(
             "POST",
             "/authorize/",
@@ -69,7 +74,9 @@ class TestAuthorizationCodeFlow:
         user_id_query = select(User.id).where(User.username == "PeterParker")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
-        user_claim_insertion = insert(UserClaim).values(user_id=user_id, claim_type_id=1, claim_value="Peter")
+        user_claim_insertion = insert(UserClaim).values(
+            user_id=user_id, claim_type_id=1, claim_value="Peter"
+        )
         await connection.execute(user_claim_insertion)
         await connection.commit()
 
@@ -90,15 +97,20 @@ class TestAuthorizationCodeFlow:
             "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
-        end_session_response = await client.request("GET", "/endsession/", params=logout_params)
+        end_session_response = await client.request(
+            "GET", "/endsession/", params=logout_params
+        )
         assert end_session_response.status_code == status.HTTP_302_FOUND
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlowWithPKCE:
     # https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-proof-key-for-code-exchange-pkce
     async def test_successful_s256(
-            self, client: AsyncClient, connection: AsyncSession,
+        self,
+        client: AsyncClient,
+        connection: AsyncSession,
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
@@ -132,7 +144,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -188,7 +200,7 @@ class TestAuthorizationCodeFlowWithPKCE:
         assert data == {"sub": str(user_id)}
 
     async def test_successful_plain(
-            self, client: AsyncClient, connection: AsyncSession
+        self, client: AsyncClient, connection: AsyncSession
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
@@ -220,7 +232,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -275,9 +287,7 @@ class TestAuthorizationCodeFlowWithPKCE:
         data = response.json()
         assert data == {"sub": str(user_id)}
 
-    async def test_unsuccessful_s256(
-            self, client: AsyncClient
-    ):
+    async def test_unsuccessful_s256(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def base64_urlencode(data):
@@ -309,7 +319,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -340,9 +350,7 @@ class TestAuthorizationCodeFlowWithPKCE:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    async def test_unsuccessful_plain(
-            self, client: AsyncClient
-    ):
+    async def test_unsuccessful_plain(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def base64_urlencode(data):
@@ -372,7 +380,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 

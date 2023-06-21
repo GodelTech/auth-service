@@ -18,6 +18,7 @@ scope = (
 
 TOKEN_HINT_DATA = {"sub": 8, "client_id": "spider_man", "type": "code"}
 
+# @pytest.mark.usefixtures("engine", "pre_test_setup")
 
 # @pytest.mark.asyncio
 # class TestAuthorizationTokenFlow:

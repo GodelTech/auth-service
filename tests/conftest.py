@@ -20,7 +20,11 @@ from src.business_logic.services.authorization.authorization_service import (
 )
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
-from src.business_logic.services import DeviceService, WellKnownServices, ClientService
+from src.business_logic.services import (
+    DeviceService,
+    WellKnownServices,
+    ClientService,
+)
 
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -65,7 +69,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-   # ClientGrantType,
+    # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -97,7 +101,8 @@ async def container() -> AsyncIterator[CustomPostgresContainer]:
         yield postgres
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session")
+# @pytest_asyncio.fixture(scope="session", autouse=True)
 async def engine(container: CustomPostgresContainer) -> AsyncEngine:
     db_url = container.get_connection_url()
     db_url = db_url.replace("psycopg2", "asyncpg")
@@ -113,7 +118,8 @@ async def engine(container: CustomPostgresContainer) -> AsyncEngine:
     yield engine
 
 
-@pytest_asyncio.fixture(autouse=True)
+@pytest_asyncio.fixture
+# @pytest_asyncio.fixture(autouse=True)
 async def pre_test_setup() -> None:
     DataBasePopulation.clean_and_populate()
 
@@ -792,7 +798,7 @@ async def get_db(connection: AsyncSession) -> None:
         "type_of_grant": name,
     }
     await connection.execute(insert(PersistentGrantType).values(data))
-    
+
     data = {
         "id": pk,
         "key": name,
@@ -863,10 +869,10 @@ async def get_db(connection: AsyncSession) -> None:
 
     await connection.commit()
 
+
 @pytest_asyncio.fixture
-async def client_service(connection:AsyncSession) -> ClientService:
+async def client_service(connection: AsyncSession) -> ClientService:
     client_service = ClientService(
-        client_repo=ClientRepository(connection),
-        session=connection
+        client_repo=ClientRepository(connection), session=connection
     )
     return client_service
