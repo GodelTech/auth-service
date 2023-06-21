@@ -24,7 +24,7 @@ class TestAdminGroupEndpoint:
         self.access_token = await JWTService().encode_jwt(
             payload={
                 "stand": "CrazyDiamond",
-                "aud":["admin"]
+                "aud":["oidc:admin:read", "oidc:admin:write"]
             }
         )
         self.group_repo = GroupRepository(connection)

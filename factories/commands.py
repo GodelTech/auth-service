@@ -9,7 +9,7 @@ import factories.factory_models.resources_related_factory as res_factory
 import factories.factory_models.user_factory as user_factory
 import factories.factory_models.code_challenge_factory as code_challenge_factory
 import factories.factory_session as sess
-
+from src.data_access.postgresql.tables import Group, users_groups
 factory.random.reseed_random(0)
 
 
@@ -48,14 +48,13 @@ class DataBasePopulation:
         cls.populate_code_challenge_methods()
         cls.populate_client_scopes()
         cls.populate_clients_scopes()
+        cls.populate_admin_group()
 
         sess.session.commit()
         sess.session.close()
 
     @classmethod
     def populate_user_password_table(cls) -> None:
-        # from src.business_logic.services.password import PasswordHash
-
         for i in range(len(data.CLIENT_HASH_PASSWORDS)):
             user_factory.UserPasswordFactory()
 
@@ -319,8 +318,17 @@ class DataBasePopulation:
             )
         res_factory.ApiScopeClaimFactory(
                 api_scopes_id = 6,
-                scope_claim_type_id = 5
+                scope_claim_type_id = 1
             )
+        res_factory.ApiScopeClaimFactory(
+                api_scopes_id = 6,
+                scope_claim_type_id = 2
+            )
+    @classmethod
+    def populate_admin_group(cls) -> None:
+        sess.session.execute(insert(Group).values({'name' : 'administration'}))
+        # for user_id in range(1, 4):
+        sess.session.execute(insert(users_groups).values([{'group_id' : 1, 'user_id':user_id} for user_id in range(1, 4)]))
 
 if __name__ == "__main__":
     DataBasePopulation.clean_and_populate()

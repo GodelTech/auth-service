@@ -25,6 +25,7 @@ from .users import (
     UserClaimType, 
     UserLogin,
     UserPassword,
+    users_groups
 )
 from .resources_related import (
     ApiClaim, 

@@ -36,7 +36,7 @@ class ClientCredentialsTokenService:
             scopes = data.scope.split()
             await self._scope_validator(client_id=data.client_id, scopes=scopes)
         else:
-            data.scope = "openid"
+            data.scope = ''
         current_unix_time = int(time.time())
         aud = data.scope.split(' ') + await self._scope_service.get_revoke_introspection_aud(name='oidc')
         access_token = await self._get_access_token(request_data=data, unix_time=current_unix_time, aud=aud)

@@ -100,7 +100,10 @@ class User(BaseModel):
         "Role", secondary="users_roles", back_populates="users"
     )
     groups = relationship(
-        "Group", secondary="users_groups", back_populates="users"
+        "Group", 
+        secondary="users_groups", 
+        back_populates="users",
+        lazy = "immediate"
     )
     claims = relationship(
         "UserClaim", 
