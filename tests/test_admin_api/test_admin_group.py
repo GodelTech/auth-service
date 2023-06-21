@@ -28,7 +28,7 @@ class TestAdminGroupEndpoint:
             }
         )
         self.group_repo = GroupRepository(connection)
-        self.group_repo.delete()
+        await self.group_repo.delete()
         self.role_repo = RoleRepository(connection)
 
         self.user_repo = UserRepository(connection)
@@ -62,6 +62,7 @@ class TestAdminGroupEndpoint:
         
     async def setup_groups_roles(self, connection:AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+        await group_repo.delete()
         groups:list[dict[str, Any]] = [
             {"name": "Polnareff", "parent_group": None},
             {"name": "Giorno", "parent_group": None},
