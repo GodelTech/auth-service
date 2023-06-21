@@ -28,6 +28,7 @@ class TestAdminGroupEndpoint:
             }
         )
         self.group_repo = GroupRepository(connection)
+        self.group_repo.delete()
         self.role_repo = RoleRepository(connection)
 
         self.user_repo = UserRepository(connection)
