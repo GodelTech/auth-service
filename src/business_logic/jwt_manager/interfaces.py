@@ -10,8 +10,8 @@ Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
 
 
 class JWTManagerProtocol(Protocol):
-    def encode(self, payload: Payload, algorithm: str) -> str:
+    async def encode(self, payload: Payload, algorithm: str) -> str:
         raise NotImplementedError
     
-    def decode(self, token: str, audience: str,**kwargs: Any) -> dict[str, Any]:
+    async def decode(self, token: str, audience: str,**kwargs: Any) -> dict[str, Any]:
         raise NotImplementedError

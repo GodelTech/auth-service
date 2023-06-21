@@ -8,12 +8,12 @@ def provide_rsa_keys_stub() -> None:
     ...
 
 
-def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
-    rsa_keys = RSAKeysService(
-        session=session,
-        rsa_keys_repo=RSAKeysRepository(session=session)
-    ).get_rsa_keys()
-    return rsa_keys
+# def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
+#     rsa_keys = RSAKeysService(
+#         session=session,
+#         rsa_keys_repo=RSAKeysRepository(session=session)
+#     ).get_rsa_keys()
+#     return rsa_keys
 
 class ProvideRSAKeys:
     def __init__(self, session: AsyncSession) -> None:

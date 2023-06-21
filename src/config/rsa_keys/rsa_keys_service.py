@@ -18,8 +18,8 @@ class RSAKeysService:
         if await self.rsa_keys_repo.validate_keys_exists():
             self.rsa_keys = await self.rsa_keys_repo.get_keys_from_repository()
         else:
-            self.rsa_keys = self.create_rsa_keys()
-            self.rsa_keys = self.rsa_keys_repo.put_keys_to_repository(self.rsa_keys)
+            self.rsa_keys = await self.create_rsa_keys()
+            self.rsa_keys = await self.rsa_keys_repo.put_keys_to_repository(self.rsa_keys)
         return self.rsa_keys
 
     async def create_rsa_keys(self) -> RSAKeypair:    # or -> RSA_keys

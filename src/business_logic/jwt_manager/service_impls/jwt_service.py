@@ -25,7 +25,7 @@ class JWTManager:
     def __init__(
             self,
             # keys: RSAKeypair = Container().config().keys,
-            keys: RSAKeypair = Depends(provide_rsa_keys_stub)
+            keys: RSAKeypair
             # keys = RSAKeysService().get_rsa_keys()
     ) -> None:
         self.keys = keys

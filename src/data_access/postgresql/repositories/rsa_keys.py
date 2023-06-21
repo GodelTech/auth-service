@@ -11,7 +11,7 @@ class RSAKeysRepository(BaseRepository):
     async def get_keys_from_repository(self) -> RSA_keys:
         result = await self.session.execute(select(RSA_keys))
         rsa_keys_list = result.scalars().all()
-        return rsa_keys_list[1] if len(rsa_keys_list) > 1 else None
+        return rsa_keys_list[-1] if len(rsa_keys_list) > 0 else None
 
     async def put_keys_to_repository(self, rsa_keys) -> None:
         await self.session.execute(insert(RSA_keys).values(
@@ -25,6 +25,7 @@ class RSAKeysRepository(BaseRepository):
 
     async def validate_keys_exists(self) -> bool:
         result = await self.session.execute(
-            select(RSA_keys).exists().select()
+            select([1]).where(exists().where(RSA_keys.id != None))
         )
-        return result
+        return result.scalars().first() is not None
+

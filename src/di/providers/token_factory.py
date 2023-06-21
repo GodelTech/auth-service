@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from di.providers import provide_jwt_manager
+from di.providers.rsa_keys import ProvideRSAKeys
 from src.business_logic.get_tokens.factory import TokenServiceFactory
 from src.business_logic.jwt_manager import JWTManager
 from src.data_access.postgresql.repositories import (
@@ -16,6 +19,7 @@ if TYPE_CHECKING:
 
 
 def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFactory:
+    keys = ProvideRSAKeys(session=db_session)()   # coroutine object - how to use in
     return TokenServiceFactory(
         session=db_session,
         client_repo=ClientRepository(session=db_session),
@@ -23,6 +27,6 @@ def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFacto
         user_repo=UserRepository(session=db_session),
         device_repo=DeviceRepository(session=db_session),
         code_challenge_repo=CodeChallengeRepository(session=db_session),
-        jwt_manager=JWTManager(),
+        jwt_manager=provide_jwt_manager(keys=keys),
         blacklisted_repo=BlacklistedTokenRepository(session=db_session)
     )
