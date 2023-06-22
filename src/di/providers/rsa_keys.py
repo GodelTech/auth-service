@@ -15,14 +15,21 @@ def provide_rsa_keys_stub() -> None:
 #     ).get_rsa_keys()
 #     return rsa_keys
 
-class ProvideRSAKeys:
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+async def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
+    rsa_keys = await RSAKeysService(
+        session=session,
+        rsa_keys_repo=RSAKeysRepository(session=session)
+    ).get_rsa_keys()
+    return rsa_keys
 
-    async def __call__(self) -> RSA_keys:
-        rsa_keys = await RSAKeysService(
-            session=self._session,
-            rsa_keys_repo=RSAKeysRepository(session=self._session)
-        ).get_rsa_keys()
-
-        return rsa_keys
+# class ProvideRSAKeys:
+#     def __init__(self, session: AsyncSession) -> None:
+#         self._session = session
+#
+#     async def __call__(self) -> RSA_keys:
+#         rsa_keys = await RSAKeysService(
+#             session=self._session,
+#             rsa_keys_repo=RSAKeysRepository(session=self._session)
+#         ).get_rsa_keys()
+#
+#         return rsa_keys

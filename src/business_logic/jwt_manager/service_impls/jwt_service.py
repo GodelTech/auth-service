@@ -2,10 +2,8 @@ from __future__ import annotations
 import logging
 import jwt
 from typing import Any, Optional, Union
-from fastapi import Depends
 
 from src.config.rsa_keys import RSAKeypair
-from src.di import Container
 from src.business_logic.jwt_manager.dto import (
     AccessTokenPayload,
     RefreshTokenPayload,
@@ -24,9 +22,7 @@ Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
 class JWTManager:
     def __init__(
             self,
-            # keys: RSAKeypair = Container().config().keys,
             keys: RSAKeypair
-            # keys = RSAKeysService().get_rsa_keys()
     ) -> None:
         self.keys = keys
         print(f"jwt_service.py; keys: {self.keys}")
