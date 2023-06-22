@@ -124,7 +124,10 @@ async def connection(engine: AsyncEngine) -> AsyncSession:
         engine, class_=AsyncSession, expire_on_commit=False
     )
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        except:
+            await session.close()
 
 
 @pytest_asyncio.fixture
