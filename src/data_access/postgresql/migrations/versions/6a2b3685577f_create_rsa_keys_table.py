@@ -24,7 +24,7 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
         sa.Column("private_key", sa.LargeBinary),
         sa.Column("public_key", sa.LargeBinary),
-        sa.Column('n', sa.Integer),
+        sa.Column('n', sa.Numeric),
         sa.Column('e', sa.Integer),
         sa.Column('expiration_encode', sa.Integer),
         sa.Column('expiration_decode', sa.Integer),

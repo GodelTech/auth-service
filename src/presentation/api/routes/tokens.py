@@ -26,7 +26,7 @@ async def get_tokens(
         request_body: RequestTokenModel = Depends(RequestTokenModel.as_form),
         session: AsyncSession = Depends(provide_async_session_stub)
 ) -> JSONResponse:
-    token_service_factory: TokenServiceFactory = provide_token_service_factory(db_session=session)
+    token_service_factory: TokenServiceFactory = await provide_token_service_factory(db_session=session)
     token_service: TokenServiceProtocol = token_service_factory.get_service_impl(request_body.grant_type)
     result: ResponseTokenModel = await token_service.get_tokens(request_body)
 

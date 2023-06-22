@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from di.providers import provide_jwt_manager
-from di.providers.rsa_keys import ProvideRSAKeys
+from src.di.providers import provide_jwt_manager
+from src.di.providers.rsa_keys import ProvideRSAKeys
 from src.business_logic.get_tokens.factory import TokenServiceFactory
 from src.business_logic.jwt_manager import JWTManager
 from src.data_access.postgresql.repositories import (
@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFactory:
-    keys = ProvideRSAKeys(session=db_session)()   # coroutine object - how to use in
+async def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFactory:
+    keys = await ProvideRSAKeys(session=db_session)()   # coroutine object - how to use in
     return TokenServiceFactory(
         session=db_session,
         client_repo=ClientRepository(session=db_session),

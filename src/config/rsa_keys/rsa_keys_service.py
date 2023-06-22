@@ -2,7 +2,7 @@ from Crypto.PublicKey import RSA
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.repositories import RSAKeysRepository
-from data_access.postgresql.tables.rsa_keys import RSA_keys
+from src.data_access.postgresql.tables.rsa_keys import RSA_keys
 from .dto import RSAKeypair
 
 class RSAKeysService:

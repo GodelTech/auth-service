@@ -36,6 +36,7 @@ class JWTManager:
             key = secret
         else:
             key = self.keys.private_key
+            print(f"jwt_service.py; keys: {self.keys.private_key}")
 
         token = jwt.encode(
             payload=payload.dict(exclude_none=True), key=key, algorithm=algorithm

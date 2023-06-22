@@ -1,3 +1,5 @@
+from asyncio import get_event_loop
+
 import pytest
 
 from src.data_access.postgresql.tables.rsa_keys import RSA_keys
@@ -11,6 +13,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio
 class TestRSAKeysRepository:
+    # @pytest.fixture(autouse=True)
+    # async def clean_db(connection):
+    #     yield  # this is where the test function runs
+    #     # This cleanup runs after every test function.
+    #     await connection.execute("TRUNCATE TABLE RSA_keys;")
+    #     await connection.commit()
+
     async def test_get_keys_from_repository(
             self, engine: AsyncEngine, connection: AsyncSession) -> None:
         rsa_keys_repo = RSAKeysRepository(connection)
