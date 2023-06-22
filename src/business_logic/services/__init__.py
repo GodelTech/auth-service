@@ -3,7 +3,7 @@ from .admin_api import AdminGroupService, AdminRoleService, AdminUserService
 from .admin_auth import AdminAuthService
 from .device_auth import DeviceService
 from .endsession import EndSessionService
-from .introspection import IntrospectionServies
+from .introspection import IntrospectionService
 from .jwt_token import JWTService
 from .login_form_service import LoginFormService
 from .password import PasswordHash
