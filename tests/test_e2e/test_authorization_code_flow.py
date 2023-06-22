@@ -9,6 +9,7 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 import json
 from src.business_logic.services.jwt_token import JWTService
+
 from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
@@ -96,15 +97,14 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data)
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
+            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
+            challenge = base64.urlsafe_b64encode(challenge).decode('utf-8').rstrip('=')
+            return verifier, challenge
 
-        code_verifier = os.urandom(32)
-        code_verifier = base64_urlencode(code_verifier)
-        code_challenge = base64_urlencode(
-            hashlib.sha256(code_verifier.encode("utf-8")).digest()
-        )
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -187,13 +187,13 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data)
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
+            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            challenge = verifier
+            return verifier, challenge
 
-        code_verifier = os.urandom(32)
-        code_verifier = base64_urlencode(code_verifier)
-        code_challenge = code_verifier
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -275,14 +275,14 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data).rstrip(b"=")
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
+            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
+            challenge = base64.urlsafe_b64encode(challenge).decode('utf-8').rstrip('=')
+            return verifier, challenge
 
-        code_verifier = base64_urlencode(os.urandom(32))
-        code_challenge = base64_urlencode(
-            hashlib.sha256(code_verifier.encode("utf-8")).digest()
-        )
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -340,12 +340,13 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data).rstrip(b"=")
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
+            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            challenge = verifier
+            return verifier, challenge
 
-        code_verifier = base64_urlencode(os.urandom(32))
-        code_challenge = code_verifier
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
