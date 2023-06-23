@@ -181,3 +181,16 @@ class ScopeService:
                                     break
             result.append(sub_result)
         return result
+    
+    async def get_all_scopes(self):
+        resources = await self.resource_repo.get_all()
+        result = []
+        for res in resources:
+            for scope in res.api_scope:
+                scope:ApiScope
+                for claim in scope.api_scope_claims:
+                    if scope.name != 'userinfo':
+                        result.append(f"{res.name}:{scope.name}:{str(claim)}")
+                    else:
+                        result.append(str(claim))
+        return result

@@ -5,9 +5,10 @@ import logging
 from src.dyna_config import DOMAIN_NAME
 from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
-from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.scope import ScopeService
+from src.business_logic.services import JWTService 
 from typing import Any, Union
-from src.data_access.postgresql.repositories import WellKnownRepository
+from src.data_access.postgresql.repositories.wellknown import WellKnownRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -17,10 +18,12 @@ class WellKnownServices:
     def __init__(
             self,
             session:AsyncSession, 
+            scope_service: ScopeService,
             wlk_repo: WellKnownRepository
         ) -> None:
         self.request: Union[Request, Any] = None
         self.wlk_repo = wlk_repo
+        self.scope_service = scope_service
         self.session = session
 
     def get_list_of_types(
@@ -83,7 +86,9 @@ class WellKnownServices:
 
         # RECOMMENDED
         result["claims_supported"] = await self.get_claims()
-        result["scopes_supported"] = ["openid", "email", "profile"]
+        result["scopes_supported"] = await self.scope_service.get_all_scopes()
+        
+        #["openid", "email", "profile"]
         result["registration_endpoint"] = urls_dict["false"]
         result["userinfo_endpoint"] = urls_dict["get_userinfo"]
 

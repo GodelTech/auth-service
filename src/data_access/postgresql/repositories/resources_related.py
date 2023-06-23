@@ -68,9 +68,9 @@ class ResourcesRepository(BaseRepository):
         return resource
 
 
-    async def get_all(self) -> list[res.ApiResource]:
+    async def get_all(self, with_disabled:bool = False) -> list[res.ApiResource]:
         resources = await self.session.execute(select(res.ApiResource))
-        result = [resource[0] for resource in resources]
+        result = [resource[0] for resource in resources if resource[0].enabled or with_disabled]
         return result
 
 
