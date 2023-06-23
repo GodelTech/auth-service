@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 
 
 async def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFactory:
-    keys = await provide_rsa_keys(session=db_session)   # coroutine object - how to use in
+    # keys = await provide_rsa_keys(session=db_session)   # coroutine object - how to use in
+    jwt_manager = await provide_jwt_manager(session=db_session)
     return TokenServiceFactory(
         session=db_session,
         client_repo=ClientRepository(session=db_session),
@@ -28,6 +29,7 @@ async def provide_token_service_factory(db_session: AsyncSession) -> TokenServic
         device_repo=DeviceRepository(session=db_session),
         code_challenge_repo=CodeChallengeRepository(session=db_session),
         # jwt_manager=provide_jwt_manager(session=db_session),
-        jwt_manager=provide_jwt_manager(keys=keys),
+        # jwt_manager=provide_jwt_manager(keys=keys),
+        jwt_manager=jwt_manager,
         blacklisted_repo=BlacklistedTokenRepository(session=db_session)
     )

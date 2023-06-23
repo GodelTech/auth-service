@@ -2,22 +2,26 @@ import logging
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError, InvalidKeyError, MissingRequiredClaimError
 from fastapi import Request, Depends
 from typing import Any
+
+from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories.blacklisted_token import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.errors.auth_token import (
     IncorrectAuthTokenError
     )
-from src.di.providers import provide_async_session_stub
+from src.di.providers import provide_async_session_stub, provide_jwt_manager
 
 logger = logging.getLogger(__name__)
 
 
 async def access_token_middleware(
         request: Request,
-        session: AsyncSession = Depends(provide_async_session_stub)
+        session: AsyncSession = Depends(provide_async_session_stub),
+        jwt_manager: JWTManagerProtocol = Depends(provide_jwt_manager),
 ) -> Any:
-    jwt_service = JWTService()
+    # jwt_service = JWTService()
+    jwt_service = jwt_manager
     token = request.headers.get("access-token")
     blacklisted_repo = BlacklistedTokenRepository(session)
     
@@ -26,7 +30,7 @@ async def access_token_middleware(
     if await blacklisted_repo.exists(token=token):
         raise IncorrectAuthTokenError("Access Token revoked")
     try:
-        await jwt_service.decode_token(token, audience='admin')
+        await jwt_service.decode(token, audience='admin')
     except (InvalidAudienceError, MissingRequiredClaimError):
         raise IncorrectAuthTokenError("Access Token doesn't have admin permissions")
     except ExpiredSignatureError:

@@ -24,6 +24,7 @@ from src.dyna_config import (
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
 # from src.di.providers.rsa_keys import provide_rsa_keys, provide_rsa_keys_stub  # removed from `prov` due to circular import
+from src.di.providers import provide_jwt_manager_stub, provide_jwt_manager
 import logging
 from src.log import LOGGING_CONFIG
 from src.data_access.postgresql.repositories import UserRepository
@@ -84,6 +85,13 @@ def setup_di(app: FastAPI) -> None:
     ] = session
 
     app.add_middleware(middleware_class=HttpsGlobalMiddleware)
+
+    jwt_manager = prov.provide_jwt_manager(session=session)
+
+    app.dependency_overrides[
+        prov.provide_jwt_manager_stub
+    ] = jwt_manager
+
 
     # rsa_keys = provide_rsa_keys(session)
     # rsa_keys = ProvideRSAKeys(session)
