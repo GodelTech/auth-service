@@ -304,6 +304,10 @@ async def wlk_services(connection: AsyncSession) -> WellKnownServices:
     wlk_services = WellKnownServices(
         session=connection,
         wlk_repo=WellKnownRepository(session=connection),
+        scope_service=ScopeService(
+            session=connection,
+            resource_repo=ResourcesRepository(connection)
+            )
     )
     return wlk_services
 

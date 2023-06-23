@@ -57,7 +57,7 @@ async def get_jwks(
     try:
         session = "no_session"
         well_known_info_class = WellKnownServices(
-            session=session, wlk_repo=WellKnownRepository(session)
+            session=session, wlk_repo=WellKnownRepository(session),
         )
         well_known_info_class.request = request
         return {

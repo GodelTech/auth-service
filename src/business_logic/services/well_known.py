@@ -7,7 +7,7 @@ from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
 from src.business_logic.services.scope import ScopeService
 from src.business_logic.services import JWTService 
-from typing import Any, Union
+from typing import Any, Union, Optional
 from src.data_access.postgresql.repositories.wellknown import WellKnownRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,8 +18,8 @@ class WellKnownServices:
     def __init__(
             self,
             session:AsyncSession, 
-            scope_service: ScopeService,
-            wlk_repo: WellKnownRepository
+            wlk_repo: WellKnownRepository,
+            scope_service: Optional[ScopeService] = None,
         ) -> None:
         self.request: Union[Request, Any] = None
         self.wlk_repo = wlk_repo
