@@ -44,7 +44,7 @@ class CodeAuthService(UpdateRedirectUrlMixin):
         await self._scope_validator(request_data.scope, request_data.client_id)
         await self._user_credentials_validator(
             request_data.username, request_data.password
-        )  # TODO create mixin for validation with methods which are common for each service?
+        )
 
     async def _create_grant(self, request_data: AuthRequestModel):
         auth_code_lifetime = (
@@ -56,9 +56,11 @@ class CodeAuthService(UpdateRedirectUrlMixin):
             client_id=request_data.client_id,
             grant_type="authorization_code",
             grant_data=self._secret_code,
-            user_id=(await self._user_repo.get_user_by_username(
-                request_data.username
-            )).id,
+            user_id=(
+                await self._user_repo.get_user_by_username(
+                    request_data.username
+                )
+            ).id,
             expiration_time=auth_code_lifetime + int(time.time()),
         )
 

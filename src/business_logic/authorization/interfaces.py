@@ -15,12 +15,8 @@ class AuthServiceProtocol(Protocol):
         ...
 
 
-class HasPersistentGrantAndUserRepoProtocol(Protocol):
-    """Protocol for type hinting mixin methods, which use persistent grant and user repos."""
-
-    @property
-    def _persistent_grant_repo(self) -> PersistentGrantRepository:
-        ...
+class HasUserRepoProtocol(Protocol):
+    """Protocol for type hinting mixin methods, user repos."""
 
     @property
     def _user_repo(self) -> UserRepository:
