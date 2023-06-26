@@ -11,6 +11,8 @@ import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.engine import Engine, create_engine
+from sqlalchemy.orm import Session
 
 import pytest
 import asyncio
@@ -116,6 +118,13 @@ async def engine(container: CustomPostgresContainer) -> AsyncEngine:
 
     yield engine
 
+@pytest_asyncio.fixture(scope="session", autouse=True)
+def sync_engine(container: CustomPostgresContainer) -> Engine:
+    db_url = container.get_connection_url()
+    engine = create_engine(db_url, echo=False)
+
+    yield engine
+
 
 @pytest_asyncio.fixture(autouse=True)
 async def pre_test_setup() -> None:
@@ -132,6 +141,18 @@ async def connection(engine: AsyncEngine) -> AsyncSession:
             yield session
         except:
             await session.close()
+
+
+@pytest.fixture
+def sync_session(sync_engine: Engine) -> AsyncSession:
+    sync_session = sessionmaker(
+        sync_engine, class_=Session, expire_on_commit=False
+    )
+    with sync_session() as session:
+        try:
+            yield session
+        except:
+            session.close()
 
 
 @pytest_asyncio.fixture

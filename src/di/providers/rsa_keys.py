@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from src.data_access.postgresql.repositories import RSAKeysRepository
 from src.config.rsa_keys.rsa_keys_service import RSAKeysService, RSA_keys
@@ -8,19 +8,19 @@ def provide_rsa_keys_stub() -> None:
     ...
 
 
-# def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
-#     rsa_keys = RSAKeysService(
+def provide_rsa_keys(sync_session: Session) -> RSA_keys:
+    rsa_keys = RSAKeysService(
+        sync_session=sync_session,
+        rsa_keys_repo=RSAKeysRepository()
+    ).get_rsa_keys()
+    return rsa_keys
+
+# async def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
+#     rsa_keys = await RSAKeysService(
 #         session=session,
 #         rsa_keys_repo=RSAKeysRepository(session=session)
 #     ).get_rsa_keys()
 #     return rsa_keys
-
-async def provide_rsa_keys(session: AsyncSession) -> RSA_keys:
-    rsa_keys = await RSAKeysService(
-        session=session,
-        rsa_keys_repo=RSAKeysRepository(session=session)
-    ).get_rsa_keys()
-    return rsa_keys
 
 # class ProvideRSAKeys:
 #     def __init__(self, session: AsyncSession) -> None:
