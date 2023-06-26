@@ -8,7 +8,6 @@ from httpx import AsyncClient
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
@@ -29,9 +28,9 @@ class TestAuthorizationCodeFlow:
     ) -> None:
         # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
         authorization_params = {
-            "client_id": "spider_man",
+            "client_id": "test_client",
             "response_type": "code",
-            "scope": "openid profile",
+            "scope": "openid",
             "redirect_uri": "https://www.google.com/",
         }
         authorization_response = await client.request(
@@ -40,8 +39,8 @@ class TestAuthorizationCodeFlow:
         assert authorization_response.status_code == status.HTTP_200_OK
 
         user_credentials = {
-            "username": "PeterParker",
-            "password": "the_beginner",
+            "username": "TestClient",
+            "password": "test_password",
         }
         response = await client.request(
             "POST",
@@ -55,7 +54,7 @@ class TestAuthorizationCodeFlow:
         secret_code = response.headers["location"].split("=")[1]
 
         token_params = {
-            "client_id": "spider_man",
+            "client_id": "test_client",
             "grant_type": "authorization_code",
             "code": secret_code,
             "redirect_uri": "https://www.google.com/",
@@ -68,10 +67,11 @@ class TestAuthorizationCodeFlow:
         )
         response_data = token_response.json()
         access_token = response_data.get("access_token")
+        id_token = response_data.get("id_token")
         assert token_response.status_code == status.HTTP_200_OK
 
         # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
-        user_id_query = select(User.id).where(User.username == "PeterParker")
+        user_id_query = select(User.id).where(User.username == "TestClient")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
         user_claim_insertion = insert(UserClaim).values(
@@ -86,21 +86,11 @@ class TestAuthorizationCodeFlow:
         assert user_info_response.status_code == status.HTTP_200_OK
 
         # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
-        jwt_service = JWTService()
-
-        TOKEN_HINT_DATA["sub"] = user_id
-
-        id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
-
-        logout_params = {
-            "id_token_hint": id_token_hint,
-            "post_logout_redirect_uri": "http://www.sparks.net/",
-            "state": "test_state",
-        }
+        logout_params = {"id_token_hint": id_token}
         end_session_response = await client.request(
             "GET", "/endsession/", params=logout_params
         )
-        assert end_session_response.status_code == status.HTTP_302_FOUND
+        assert end_session_response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.usefixtures("engine", "pre_test_setup")
@@ -114,15 +104,22 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data)
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode("utf-8")).digest()
+            challenge = (
+                base64.urlsafe_b64encode(challenge).decode("utf-8").rstrip("=")
+            )
+            return verifier, challenge
 
-        code_verifier = os.urandom(32)
-        code_verifier = base64_urlencode(code_verifier)
-        code_challenge = base64_urlencode(
-            hashlib.sha256(code_verifier.encode("utf-8")).digest()
-        )
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -204,13 +201,19 @@ class TestAuthorizationCodeFlowWithPKCE:
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data)
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = verifier
+            return verifier, challenge
 
-        code_verifier = os.urandom(32)
-        code_verifier = base64_urlencode(code_verifier)
-        code_challenge = code_verifier
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -290,14 +293,22 @@ class TestAuthorizationCodeFlowWithPKCE:
     async def test_unsuccessful_s256(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data).rstrip(b"=")
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode("utf-8")).digest()
+            challenge = (
+                base64.urlsafe_b64encode(challenge).decode("utf-8").rstrip("=")
+            )
+            return verifier, challenge
 
-        code_verifier = base64_urlencode(os.urandom(32))
-        code_challenge = base64_urlencode(
-            hashlib.sha256(code_verifier.encode("utf-8")).digest()
-        )
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.
@@ -353,12 +364,19 @@ class TestAuthorizationCodeFlowWithPKCE:
     async def test_unsuccessful_plain(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
-        def base64_urlencode(data):
-            data = base64.urlsafe_b64encode(data).rstrip(b"=")
-            return data.decode("utf-8")
+        def get_verifier_and_challenge() -> tuple[str, str]:
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = verifier
+            return verifier, challenge
 
-        code_verifier = base64_urlencode(os.urandom(32))
-        code_challenge = code_verifier
+        code_verifier, code_challenge = get_verifier_and_challenge()
 
         # 3. Auth0's SDK redirects the user to the Auth0 Authorization Server (`/authorize` endpoint)
         # along with the `code_challenge`.

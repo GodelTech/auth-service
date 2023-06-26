@@ -10,7 +10,6 @@ from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.presentation.api.exception_handlers import exception_handler_mapping
-from src.presentation.middleware.session_manager import SessionManager
 from src.presentation.middleware.https_global_middleware import (
     HttpsGlobalMiddleware,
 )
@@ -52,6 +51,7 @@ def get_application(test: bool = False) -> NewFastApi:
     )
     application = setup_exception_handlers(application)
 
+    application = setup_exception_handlers(application)
     setup_di(application)
     container = Container()
     container.db()
@@ -76,14 +76,15 @@ def setup_di(app: FastAPI) -> None:
     db = prov.provide_db_only(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
-    session = prov.ProviderSession(db.session_factory).get_session
+    session = prov.ProviderSession(db.session_factory)
 
-    app.dependency_overrides[prov.provide_async_session_stub] = session
+    app.dependency_overrides[
+        prov.provide_async_session_stub
+    ] = session
 
-    app.add_middleware(middleware_class=SessionManager, session=session)
     app.add_middleware(middleware_class=HttpsGlobalMiddleware)
-
-    # Register admin-ui controllers on application start-up.
+    
+    #Register admin-ui controllers on application start-up.
     admin = ui.CustomAdmin(
         app,
         db_engine,
@@ -105,7 +106,7 @@ def setup_di(app: FastAPI) -> None:
     admin.add_view(ui.IdentityClaimAdminController)
     admin.add_base_view(ui.SeparationLine)
 
-    # Client
+    # Client 
     admin.add_view(ui.ClientAdminController)
     admin.add_view(ui.ResponseTypeAdminController)
     admin.add_view(ui.ClientScopeController)
@@ -161,6 +162,7 @@ def setup_exception_handlers(app: FastAPI) -> FastAPI:
 
 app = get_application()
 
+
 # expose the default Python metrics to the /metrics endpoint
 Instrumentator().instrument(app).expose(app)
 
@@ -169,8 +171,6 @@ Instrumentator().instrument(app).expose(app)
 @app.on_event("startup")
 async def startup() -> None:
     logger.info("Creating Redis connection with DataBase.")
-    redis = aioredis.from_url(
-        REDIS_URL, encoding="utf8", decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Created Redis connection with DataBase.")

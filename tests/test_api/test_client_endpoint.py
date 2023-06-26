@@ -161,7 +161,7 @@ class TestClientEndpointGET:
 class TestClientEndpointDELETE:
     @pytest.mark.asyncio
     async def test_successful_client_deletion(self, client: AsyncClient,
-                                              engine: AsyncEngine) -> None:
+                                              connection: AsyncSession) -> None:
 
         unique_client_id = f"test_client_{uuid.uuid4()}"
         new_client = {
@@ -178,18 +178,13 @@ class TestClientEndpointDELETE:
             "protocol_type_id": 1,
         }
 
-        session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
-        )
-        async with session_factory() as session:
-            await session.execute(insert(Client).values(**new_client))
-            await session.commit()
+        await connection.execute(insert(Client).values(**new_client))
+        await connection.commit()
 
-        async with session_factory() as session:
-            new_client = await session.execute(
-                select(Client).where(Client.client_id == unique_client_id)
-            )
-            new_client = new_client.scalar_one_or_none()
+        new_client = await connection.execute(
+            select(Client).where(Client.client_id == unique_client_id)
+        )
+        new_client = new_client.scalar_one_or_none()
 
         assert new_client is not None
 

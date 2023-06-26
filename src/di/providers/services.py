@@ -10,7 +10,7 @@ from src.business_logic.services import (
     AuthThirdPartyOIDCService,
     DeviceService,
     EndSessionService,
-    IntrospectionServies,
+    IntrospectionService,
     JWTService,
     LoginFormService,
     PasswordHash,
@@ -105,9 +105,8 @@ def provide_introspection_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> IntrospectionServies:
-    return IntrospectionServies(
-        session=session,
+) -> IntrospectionService:
+    return IntrospectionService(
         jwt=jwt,
         user_repo=user_repo,
         client_repo=client_repo,

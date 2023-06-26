@@ -38,7 +38,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.introspection import IntrospectionServies
+from src.business_logic.services.introspection import IntrospectionService
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
@@ -185,8 +185,8 @@ async def end_session_service(connection: AsyncSession) -> EndSessionService:
 @pytest_asyncio.fixture
 async def introspection_service(
     connection: AsyncSession,
-) -> IntrospectionServies:
-    intro_service = IntrospectionServies(
+) -> IntrospectionService:
+    intro_service = IntrospectionService(
         session=connection,
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
