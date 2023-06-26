@@ -17,6 +17,7 @@ from src.data_access.postgresql.tables import (
 )
 from sqlalchemy.engine.result import ChunkedIteratorResult
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -175,5 +176,46 @@ class PersistentGrantRepository(BaseRepository):
         types = await self.session.execute(
             select(PersistentGrantType.type_of_grant)
         )
-
         return types.all()
+    
+    async def exists_grant_for_client(self, authorization_code: str, client_id: str, grant_type: str) -> bool:
+        query = (select(PersistentGrant)
+                 .join(Client, PersistentGrant.client_id == Client.id)
+                 .join(PersistentGrantType, PersistentGrant.persistent_grant_type_id == PersistentGrantType.id)
+                 .where(PersistentGrant.grant_data == authorization_code,
+                        Client.client_id == client_id,
+                        PersistentGrantType.type_of_grant == grant_type)
+                .exists().select()
+                )
+        result = await self.session.execute(query)
+        return result.scalar()
+
+    async def create_grant(
+            self,
+            client_id: int,
+            grant_data: str,
+            user_id: int,
+            grant_type_id: int,
+            expiration_time: int,
+    ) -> None:
+        await self.session.execute(
+            insert(PersistentGrant).values(
+                key=str(uuid.uuid4()),
+                client_id=client_id,
+                grant_data=grant_data,
+                expiration=expiration_time,
+                user_id=user_id,
+                persistent_grant_type_id=grant_type_id
+            )
+        )
+
+    async def delete_grant(self, grant: PersistentGrant) -> None:
+        await self.session.delete(grant)
+
+    async def get_grant(self, grant_data: str, grant_type: str) -> PersistentGrant:
+        result = await self.session.execute(
+            select(PersistentGrant)
+            .join(PersistentGrantType, PersistentGrant.persistent_grant_type_id == PersistentGrantType.id)
+            .where(PersistentGrant.grant_data == grant_data, PersistentGrantType.type_of_grant == grant_type)
+        )
+        return result.scalar()

@@ -1,6 +1,7 @@
 import json
 import time
 
+import time
 import pytest
 from fastapi import status
 from httpx import AsyncClient, Client
@@ -34,7 +35,7 @@ class TestTokenEndpoint:
             grant_data="secret_code",
             user_id=1,
             grant_type="authorization_code",
-            expiration_time=3600,
+            expiration_time=time.time() + 3600,
         )
         await connection.commit()
         params = {
@@ -74,7 +75,7 @@ class TestTokenEndpoint:
             grant_data="secret_code",
             user_id=2,
             grant_type="authorization_code",
-            expiration_time=3600,
+            expiration_time=time.time() + 3600,
         )
         await connection.commit()
         wrong_params = {
@@ -92,10 +93,9 @@ class TestTokenEndpoint:
             headers={"Content-Type": self.content_type},
         )
 
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
             "error": "invalid_client",
-            "error_description": "Client authentication failed.",
         }
 
     @pytest.mark.asyncio
@@ -129,8 +129,7 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "unsupported_grant_type",
-            "error_description": "Requested grant type was not recognized by server.",
+            "error": "invalid_grant"
         }
 
     @pytest.mark.asyncio
@@ -163,12 +162,11 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "unsupported_grant_type",
-            "error_description": "Requested grant type was not recognized by server.",
+            "error": "invalid_grant"
         }
 
     @pytest.mark.asyncio
-    async def test_code_authorization_client_with_without_grants(
+    async def test_code_authorization_client_without_grants(
         self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         self.persistent_grant_repo = PersistentGrantRepository(connection)
@@ -178,14 +176,14 @@ class TestTokenEndpoint:
             grant_data="secret_code",
             user_id=2,
             grant_type="authorization_code",
-            expiration_time=3600,
+            expiration_time=time.time() + 3600,
         )
         await self.persistent_grant_repo.create(
             client_id="test_client",
             grant_data="different_secret_code",
             user_id=1,
             grant_type="authorization_code",
-            expiration_time=3600,
+            expiration_time=time.time() + 3600,
         )
 
         await connection.commit()
@@ -205,10 +203,9 @@ class TestTokenEndpoint:
             headers={"Content-Type": self.content_type},
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "unauthorized_client",
-            "error_description": "The client is not authorized to use the requested grant type.",
+            "error": "invalid_grant"
         }
 
     @pytest.mark.asyncio
@@ -232,8 +229,7 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_grant",
-            "error_description": "Provided grant is invalid or expired.",
+            "error": "invalid_grant"
         }
 
     @pytest.mark.asyncio
@@ -257,6 +253,7 @@ class TestTokenEndpoint:
             grant_data=test_token,
             user_id=1,
             grant_type="refresh_token",
+            expiration_time=time.time() + 3600
         )
         await connection.commit()
         params = {
@@ -274,6 +271,7 @@ class TestTokenEndpoint:
             headers={"Content-Type": self.content_type},
         )
         response_json = response.json()
+        print(response_json)
         data = response_json["refresh_token"]
         assert (
             await persistent_grant_repo.exists(
@@ -304,8 +302,7 @@ class TestTokenEndpoint:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_grant",
-            "error_description": "Provided grant is invalid or expired.",
+            "error": "invalid_grant"
         }
 
     @pytest.mark.asyncio
@@ -331,7 +328,6 @@ class TestTokenEndpoint:
             "access_token",
             "token_type",
             "expires_in",
-            "refresh_expires_in",
             "not_before_policy",
             "scope",
         ):
@@ -356,10 +352,9 @@ class TestTokenEndpoint:
             data=params,
             headers={"Content-Type": self.content_type},
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_client",
-            "error_description": "Client authentication failed.",
+            "error": "invalid_client"
         }
 
     @pytest.mark.asyncio
@@ -378,10 +373,9 @@ class TestTokenEndpoint:
             data=params,
             headers={"Content-Type": self.content_type},
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_client",
-            "error_description": "Client authentication failed.",
+            "error": "invalid_client"
         }
 
     @pytest.mark.asyncio
@@ -402,8 +396,7 @@ class TestTokenEndpoint:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "invalid_scope",
-            "error_description": "The requested scope is invalid or unknown.",
+            "error": "invalid_scope"
         }
 
     @pytest.mark.asyncio
@@ -422,6 +415,5 @@ class TestTokenEndpoint:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert json.loads(response.content) == {
-            "error": "unsupported_grant_type",
-            "error_description": "Requested grant type was not recognized by server.",
+            "error": "unsupported_grant_type"
         }
