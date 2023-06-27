@@ -4,6 +4,8 @@ from typing import Optional
 from sqlalchemy import exists, select, insert
 # from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
+
+from src.config.rsa_keys import RSAKeypair
 # from src.config.rsa_keys import CreateRSAKeypair, RSAKeypair
 # from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables.rsa_keys import RSA_keys
@@ -19,7 +21,7 @@ class RSAKeysRepository:
         rsa_keys = rsa_keys_list[-1] if len(rsa_keys_list) > 0 else None
         return rsa_keys
 
-    def put_keys_to_repository(self, rsa_keys: RSA_keys, session: Session) -> None:
+    def put_keys_to_repository(self, rsa_keys: RSAKeypair, session: Session) -> None:
         session.execute(insert(RSA_keys).values(
             private_key=rsa_keys.private_key,
             public_key=rsa_keys.public_key,

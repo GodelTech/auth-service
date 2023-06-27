@@ -75,9 +75,9 @@ def setup_di(app: FastAPI) -> None:
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
     )
 
-    sync_db_engine = prov.provide_db_sync_engine(
-        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
-    )
+    # sync_db_engine = prov.provide_db_sync_engine(
+    #     database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+    # )
 
     db = prov.provide_db_only(
         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
@@ -88,11 +88,11 @@ def setup_di(app: FastAPI) -> None:
         prov.provide_async_session_stub
     ] = session
 
-    sync_session = prov.provide_sync_session(sync_db_engine)
+    # sync_session = prov.provide_sync_session(sync_db_engine)
 
-    app.dependency_overrides[
-        prov.provide_sync_session_stub
-    ] = sync_session
+    # app.dependency_overrides[
+    #     prov.provide_sync_session_stub
+    # ] = sync_session
 
     app.add_middleware(middleware_class=HttpsGlobalMiddleware)
 

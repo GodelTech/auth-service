@@ -3,12 +3,11 @@ import logging
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
 
 from src.di.providers import (
     provide_token_service_factory,
     provide_async_session_stub,
-    provide_sync_session_stub,
 )
 from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenModel
 
@@ -16,7 +15,7 @@ from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenMo
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-    from sqlalchemy.orm import Session
+    # from sqlalchemy.orm import Session
     from src.business_logic.get_tokens.interfaces import TokenServiceProtocol
     from src.business_logic.get_tokens import TokenServiceFactory
 
@@ -31,12 +30,8 @@ async def get_tokens(
         request: Request,
         request_body: RequestTokenModel = Depends(RequestTokenModel.as_form),
         session: AsyncSession = Depends(provide_async_session_stub),
-        sync_session: Session = Depends(provide_sync_session_stub)
 ) -> JSONResponse:
-    token_service_factory: TokenServiceFactory = provide_token_service_factory(
-        db_session=session,
-        sync_session=sync_session
-    )
+    token_service_factory: TokenServiceFactory = provide_token_service_factory(db_session=session)
     token_service: TokenServiceProtocol = token_service_factory.get_service_impl(request_body.grant_type)
     result: ResponseTokenModel = await token_service.get_tokens(request_body)
 

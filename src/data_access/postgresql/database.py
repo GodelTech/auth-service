@@ -18,11 +18,6 @@ class Database:
         self.__session_factory = sessionmaker(
             self.__engine, expire_on_commit=False, class_=AsyncSession
         )
-        self.__sync_engine = self._create_sync_connection_pool(database_url)
-        # self.__sync_session_factory = sessionmaker(
-        #     self.__sync_engine, expire_on_commit=False, class_= Session
-        # )
-
 
     @property
     def session_factory(self) -> AsyncSession:
@@ -36,10 +31,6 @@ class Database:
     def sync_engine(self) -> Engine:
         return self.__sync_engine
 
-    # @property
-    # def sync_session_factory(self) -> Session:
-    #     return self.__sync_session_factory
-
     def _create_connection_pool(self, db_url: str, max_connection_count: int) -> AsyncEngine:
         logger.info("Creating PostgreSQL connection pool.")
 
@@ -49,17 +40,31 @@ class Database:
 
         return connection_pool
 
+    async def get_connection(self) -> AsyncSession:
+        async with self.__session_factory() as session:
+            yield session
+
+
+class DatabaseSync:
+    def __init__(self, database_url: str):
+        self.__sync_engine = self._create_sync_connection_pool(database_url)
+        self.__sync_session_factory = sessionmaker(
+            self.__sync_engine
+        )
+
+    @property
+    def sync_engine(self) -> Engine:
+        return self.__sync_engine
+
+    @property
+    def sync_session_factory(self) -> sessionmaker:
+        return self.__sync_session_factory
+
     def _create_sync_connection_pool(self, db_url:str) -> Engine:
         logger.info("Creating PostgreSQL sync engine.")
-        # print(db_url)
         db_url = db_url.replace("asyncpg", "psycopg2")
-        # print(db_url)
         sync_engine = create_engine(db_url)
 
         logger.info("Sync engine created.")
 
         return sync_engine
-
-    async def get_connection(self) -> AsyncSession:
-        async with self.__session_factory() as session:
-            yield session

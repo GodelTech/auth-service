@@ -1,5 +1,5 @@
 from .config import provide_config
-from .db import provide_db, provide_db_only, provide_db_sync_engine
+from .db import provide_db, provide_db_only
 from .repositories import (
     provide_wellknown_repo,
     provide_wellknown_repo_stub,
@@ -77,4 +77,4 @@ from .jwt_manager import (
 )
 from .token_factory import provide_token_service_factory
 # from .rsa_keys import provide_rsa_keys    # provide_rsa_keys_stub, - removed due to circular import
-from .session import provide_sync_session, provide_sync_session_stub
+# from .session import provide_sync_session, provide_sync_session_stub

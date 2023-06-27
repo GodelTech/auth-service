@@ -3,15 +3,16 @@ import logging
 import jwt
 from typing import Any, Optional, Union
 
-from fastapi import Depends
+# from fastapi import Depends
 
-from src.config.rsa_keys import RSAKeypair
+from src.data_access.postgresql.tables.rsa_keys import RSA_keys
+# from src.config.rsa_keys import RSAKeypair
 from src.business_logic.jwt_manager.dto import (
     AccessTokenPayload,
     RefreshTokenPayload,
     IdTokenPayload,
 )
-from src.di.providers.rsa_keys import provide_rsa_keys
+# from src.di.providers.rsa_keys import provide_rsa_keys
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +21,10 @@ Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
 class JWTManager:
     def __init__(
             self,
-            keys: RSAKeypair
+            keys: RSA_keys
     ) -> None:
         self.keys = keys
-        print(f"jwt_service.py; keys: {self.keys}")
+        print(f"print:!!!jwt_service.py;!!! self.keys: {self.keys}")
 
     def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
         if secret:

@@ -1,4 +1,4 @@
-from .database import Database
+from .database import Database, DatabaseSync
 from .tables import (
     Base,
     Client,
