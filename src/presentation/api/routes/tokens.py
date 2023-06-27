@@ -3,7 +3,6 @@ import logging
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy.orm import Session
 
 from src.di.providers import (
     provide_token_service_factory,
@@ -15,7 +14,6 @@ from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenMo
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-    # from sqlalchemy.orm import Session
     from src.business_logic.get_tokens.interfaces import TokenServiceProtocol
     from src.business_logic.get_tokens import TokenServiceFactory
 

@@ -1,9 +1,7 @@
-from sqlalchemy.orm import Session, sessionmaker
-
 from src.data_access.postgresql import DatabaseSync
 from src.data_access.postgresql.repositories import RSAKeysRepository
 from src.config.rsa_keys.rsa_keys_service import RSAKeysService, RSA_keys
-from dyna_config import DB_URL, DB_MAX_CONNECTION_COUNT
+from dyna_config import DB_URL
 
 def provide_rsa_keys_stub() -> None:
     ...

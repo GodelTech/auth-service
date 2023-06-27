@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from src.di.providers import provide_jwt_manager
-# from src.di.providers.rsa_keys import provide_rsa_keys
 from src.business_logic.get_tokens.factory import TokenServiceFactory
-# from src.business_logic.jwt_manager import JWTManager
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
@@ -16,7 +14,6 @@ from src.data_access.postgresql.repositories import (
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-    # from sqlalchemy.orm import Session
 
 
 def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFactory:
