@@ -39,8 +39,6 @@ from .services import (
 )
 from .services_factory import (
     provide_auth_service_factory,
-    provide_auth_service_factory_stub,
-    provide_third_party_auth_service_factory_stub,
     provide_third_party_auth_service_factory,
 )
 from .jwt_manager import provide_jwt_manager, provide_jwt_manager_stub
