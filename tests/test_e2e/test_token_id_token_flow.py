@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy import insert, delete
 
 from src.data_access.postgresql.tables.users import UserClaim
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 

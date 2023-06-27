@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import (
@@ -90,7 +90,7 @@ async def post_authorize(
         persistent_grant_repo=PersistentGrantRepository(session),
         device_repo=DeviceRepository(session),
         password_service=PasswordHash(),
-        jwt_service=JWTService(),
+        jwt_service=provide_jwt_manager(),
     )
     setattr(request_body, "user_code", user_code)
     auth_service: AuthServiceProtocol = auth_service_factory.get_service_impl(

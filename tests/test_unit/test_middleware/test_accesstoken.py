@@ -1,6 +1,6 @@
 import pytest
 import mock
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.presentation.middleware.access_token_validation import access_token_middleware
 from starlette.types import ASGIApp
 from fastapi import status
@@ -44,7 +44,7 @@ class TestAccessTokenMiddleware:
     async def test_successful_auth(self, connection: AsyncSession) -> None:
         test_token = "Bearer AccessToken"
         with mock.patch.object(
-            JWTService, "decode_token", new=new_decode_token
+            JWTManager, "decode_token", new=new_decode_token
         ):
             request = NewRequest(connection)
 

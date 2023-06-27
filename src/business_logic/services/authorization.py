@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from src.config.settings.app import AppSettings
 
 from src.dyna_config import DOMAIN_NAME
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.tokens import get_single_token
 from src.data_access.postgresql.repositories import (
@@ -32,7 +32,7 @@ class AuthorizationService:
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
         password_service: PasswordHash = PasswordHash(),
-        jwt_service: JWTService = JWTService(),
+        jwt_service: JWTManager = provide_jwt_manager(),
     ) -> None:
         self._request_model: Optional[DataRequestModel] = None
         self.client_repo = client_repo

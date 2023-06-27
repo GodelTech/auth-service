@@ -4,7 +4,7 @@ from fastapi import Request, Depends
 from typing import Any
 
 from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories.blacklisted_token import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.errors.auth_token import (

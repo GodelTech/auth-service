@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy import select, insert
 from sqlalchemy.orm import sessionmaker
 
-from src.business_logic.services import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories import ClientRepository
 from src.data_access.postgresql.tables.client import Client
 
@@ -102,7 +102,7 @@ class TestClientEndpointPUT:
 class TestClientAllEndpointGET:
     @pytest.mark.asyncio
     async def test_successful_get_all_clients(self, client: AsyncClient) -> None:
-        self.access_token = await JWTService().encode_jwt(
+        self.access_token = await provide_jwt_manager().encode(
             payload={
                 "stand": "CrazyDiamond",
                 "aud": ["admin"]

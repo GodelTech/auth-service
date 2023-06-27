@@ -8,7 +8,7 @@ from src.data_access.postgresql.tables.identity_resource import (
     IdentityProviderMapped,
 )
 from src.data_access.postgresql.tables.users import UserClaim, User
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 
@@ -99,14 +99,14 @@ class TestThirdPartyMicrosoftFlow:
         assert response.status_code == status.HTTP_200_OK
 
         # Stage 5: EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
-        jwt_service = JWTService()
+        jwt_service = provide_jwt_manager()
         token_hint_data = {
             "sub": user_id,
             "client_id": "spider_man",
             "type": "code",
         }
 
-        id_token_hint = await jwt_service.encode_jwt(payload=token_hint_data)
+        id_token_hint = await jwt_service.encode(payload=token_hint_data)
 
         logout_params = {
             "id_token_hint": id_token_hint,

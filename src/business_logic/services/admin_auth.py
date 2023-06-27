@@ -3,7 +3,7 @@ from typing import Optional, Union
 import time 
 from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services.password import PasswordHash
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories import UserRepository, PersistentGrantRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
@@ -17,7 +17,7 @@ class AdminAuthService:
         self,
         user_repo: UserRepository,
         password_service = PasswordHash(),
-        jwt_service = JWTService(),
+        jwt_service = provide_jwt_manager(),
     ) -> None:
         self.user_repo = user_repo
         self.password_service = password_service
@@ -33,7 +33,7 @@ class AdminAuthService:
             credentials.password, 
             user_hash_password
         )
-        return await self.jwt_service.encode_jwt(
+        return await self.jwt_service.encode(
             payload={
                 "sub":user_id,
                 "exp": exp_time + int(time.time()),

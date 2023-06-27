@@ -6,7 +6,7 @@ from sqlalchemy import insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 class TestAdminRoleEndpoint:
     async def setup_base(self, connection:AsyncSession, user_id: int = 1000) -> None:
-        self.access_token = await JWTService().encode_jwt(
+        self.access_token = await provide_jwt_manager().encode(
             payload={
                 "stand": "CrazyDiamond",
                 "aud":["admin"]

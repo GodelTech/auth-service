@@ -5,7 +5,9 @@ import pytest
 from fastapi import status
 from starlette.types import ASGIApp
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
-from src.business_logic.services.jwt_token import JWTService
+
+from src.business_logic.jwt_manager import JWTManager
+from src.di.providers import provide_jwt_manager
 from src.presentation.api import router
 from typing import Any, Callable, MutableMapping
 from fastapi import Request
@@ -54,7 +56,7 @@ class TestAuthorizationMiddleware:
         request = RequestTest(connection)
 
         with mock.patch.object(
-            JWTService, "decode_token", new=new_decode_token
+            JWTManager, "decode_token", new=new_decode_token
         ):
             for request_with_auth in self.REQUESTS_WITH_AUTH:
                 request = RequestTest(connection)
@@ -69,7 +71,7 @@ class TestAuthorizationMiddleware:
         request = RequestTest(connection)
 
         with mock.patch.object(
-            JWTService, "decode_token", new=new_decode_token
+            JWTManager, "decode_token", new=new_decode_token
         ):
             for request_with_auth in self.REQUESTS_WITH_AUTH:
                 request = RequestTest(connection)

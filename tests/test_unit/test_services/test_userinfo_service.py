@@ -22,7 +22,7 @@ class TestUserInfoService:
                 "aud":["userinfo"]
             }
 
-        token = await service.jwt.encode_jwt(payload=data_to_code)
+        token = await service.jwt.encode(payload=data_to_code)
         service.authorization = token
 
         expected_part_one = {"sub": "1", }

@@ -3,7 +3,7 @@ import jwt
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from jwkest import base64_to_long
 from Crypto.PublicKey.RSA import construct
 
@@ -44,9 +44,9 @@ class TestWellKnown:
         assert type(response_content["keys"]) == list
         assert type(response_content["keys"][0]) == dict
             
-        jwt_service = JWTService()
+        jwt_service = provide_jwt_manager()
         response_content = response_content["keys"][0]
-        test_token = await jwt_service.encode_jwt(payload={"sub":1})
+        test_token = await jwt_service.encode(payload={"sub":1})
             
         if response_content["alg"] == "RS256":
             n = base64_to_long(response_content["n"])

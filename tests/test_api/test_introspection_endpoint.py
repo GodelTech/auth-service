@@ -5,7 +5,7 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 from typing import Any
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories import (
     UserRepository,
     PersistentGrantRepository,
@@ -24,7 +24,7 @@ class TestIntrospectionEndpoint:
     async def test_successful_introspection_request(
         self, connection: AsyncSession, client: AsyncClient
     ) -> None:
-        jwt = JWTService()
+        jwt = provide_jwt_manager()
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
@@ -33,8 +33,8 @@ class TestIntrospectionEndpoint:
             "client_id": "test_client",
             "aud": ["introspection"],
         }
-        introspection_token = await jwt.encode_jwt(payload=payload)
-        access_token = await jwt.encode_jwt(
+        introspection_token = await jwt.encode(payload=payload)
+        access_token = await jwt.encode(
             payload={
                 "sub": "1",
                 "client_id": "test_client",
@@ -88,11 +88,11 @@ class TestIntrospectionEndpoint:
     async def test_successful_introspection_request_spoiled_token(
         self, connection: AsyncSession, client: AsyncClient
     ) -> None:
-        jwt = JWTService()
+        jwt = provide_jwt_manager()
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {"sub": 1, "exp": time.time(), "aud": ["introspection"]}
-        introspection_token = await jwt.encode_jwt(payload=payload)
+        introspection_token = await jwt.encode(payload=payload)
 
         await persistent_grant_repo.create(
             grant_type=grant_type,
@@ -102,7 +102,7 @@ class TestIntrospectionEndpoint:
             expiration_time=1,
         )
         headers = {
-            "authorization": await jwt.encode_jwt(
+            "authorization": await jwt.encode(
                 payload={"sub": "1", "aud": ["introspection"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",
@@ -122,7 +122,7 @@ class TestIntrospectionEndpoint:
     async def test_unsuccessful_introspection_request_incorrect_token(
         self, connection: AsyncSession, client: AsyncClient
     ) -> None:
-        jwt = JWTService()
+        jwt = provide_jwt_manager()
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
@@ -131,8 +131,8 @@ class TestIntrospectionEndpoint:
             "client_id": "test_client",
             "aud": ["introspection"],
         }
-        introspection_token = await jwt.encode_jwt(payload=payload)
-        access_token = await jwt.encode_jwt(
+        introspection_token = await jwt.encode(payload=payload)
+        access_token = await jwt.encode(
             payload={
                 "sub": "1",
                 "client_id": "test_client",

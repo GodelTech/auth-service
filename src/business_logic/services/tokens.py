@@ -19,7 +19,7 @@ from itsdangerous import base64_encode
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+# from src.di.providers import provide_jwt_manager
 from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
@@ -41,7 +41,7 @@ from src.data_access.postgresql.repositories import (
 )
 from src.dyna_config import DOMAIN_NAME
 if TYPE_CHECKING:
-    from src.business_logic.services.jwt_token import JWTService
+    from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
     from src.presentation.api.models import (
         BodyRequestRevokeModel,
         BodyRequestTokenModel
@@ -83,7 +83,7 @@ def get_base_payload(
 
 async def get_single_token(
     client_id: str,
-    jwt_service: JWTService,
+    jwt_service: JWTManager,
     expiration_time: int,
     scope: Optional[str] = None,
     **kwargs: Any,
@@ -100,7 +100,7 @@ async def get_single_token(
         **kwargs,
     )
     full_payload = {**base_payload}
-    access_token = await jwt_service.encode_jwt(payload=full_payload)
+    access_token = await jwt_service.encode(payload=full_payload)
     return access_token
 
 
@@ -114,7 +114,7 @@ class TokenService:
         device_repo: DeviceRepository,
         blacklisted_repo: BlacklistedTokenRepository,
         code_challenge_repo: CodeChallengeRepository,
-        jwt_service: JWTService,
+        jwt_service: JWTManager,
     ) -> None:
         self.session = session
         self.request: Optional[Request] = None
@@ -207,7 +207,7 @@ class BaseMaker:
             token_service.code_challenge_repo
         )
         self.user_repo: UserRepository = token_service.user_repo
-        self.jwt_service: JWTService = token_service.jwt_service
+        self.jwt_service: JWTManager = token_service.jwt_service
         self.blacklisted_repo: BlacklistedTokenRepository = (
             token_service.blacklisted_repo
         )
@@ -521,7 +521,7 @@ class ClientCredentialsMaker(BaseMaker):
             scopes = ["No scope"]
 
         audience = ["admin", "introspection", "revoke"]
-        access_token = await self.jwt_service.encode_jwt(
+        access_token = await self.jwt_service.encode(
             {
                 # "arc" : client_from_db.arc,
                 # # ACR value is a set of arbitrary values that the client and idp agreed upon to communicate the level of authentication that happened. This is to give the client a level of confidence on the qualify of the authentication that took place.

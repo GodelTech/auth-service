@@ -3,7 +3,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert, exists, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 import logging
 from typing import Any

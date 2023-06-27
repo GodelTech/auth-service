@@ -1,10 +1,10 @@
 import logging
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from src.business_logic.services.authorization.response_type_handlers.factory import (
     ResponseTypeHandlerFactory,
 )
-from src.business_logic.services.jwt_token import JWTService
+# from src.di.providers import provide_jwt_manager
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.errors import ClientScopesError
 from src.data_access.postgresql.repositories import (
@@ -14,6 +14,8 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import DataRequestModel
+# if TYPE_CHECKING:
+from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ class AuthorizationService:
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
         password_service: PasswordHash,
-        jwt_service: JWTService,
+        jwt_service: JWTManager,
     ) -> None:
         self._request_model: Optional[DataRequestModel] = None
         self.client_repo = client_repo

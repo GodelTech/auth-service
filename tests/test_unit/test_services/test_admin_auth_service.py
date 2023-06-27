@@ -1,9 +1,12 @@
 import mock
 import pytest
 from sqlalchemy import delete
+
+# from src.business_logic.jwt_manager import JWTManager
+
 from src.business_logic.services.admin_auth import AdminAuthService
 from src.business_logic.dto.admin_credentials import AdminCredentialsDTO
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.errors.user import UserNotFoundError
 from src.data_access.postgresql.errors import WrongPasswordError
 from time import time, sleep
@@ -44,7 +47,7 @@ class TestAdminAuthService:
             ],
             "exp": int(time()) + 1000,
         }
-        token = await JWTService().encode_jwt(payload)
+        token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
         assert result is None
 
@@ -54,7 +57,7 @@ class TestAdminAuthService:
             ],
             "exp": int(time()) + 1000,
         }
-        token = await JWTService().encode_jwt(payload)
+        token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
         assert result is not None
 
@@ -64,7 +67,7 @@ class TestAdminAuthService:
             ],
             "exp": 0,
         }
-        token = await JWTService().encode_jwt(payload)
+        token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
         assert result is not None
 

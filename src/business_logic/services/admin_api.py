@@ -1,17 +1,19 @@
 # https://docs.google.com/spreadsheets/d/1zJAcCxaGz2CV9zKlqeBhRE8xfiqyJMy5-XPRH1I8HPg/edit#gid=0
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 from src.data_access.postgresql.repositories import RoleRepository, UserRepository, PersistentGrantRepository, GroupRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
-from src.business_logic.services.jwt_token import JWTService
+# from src.di.providers import provide_jwt_manager
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.tables import Group, Role, User
+# if TYPE_CHECKING:
+from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 
 class AdminService():
     def __init__(
         self,
-        jwt_service: JWTService,
+        jwt_service: JWTManager,
     ) -> None:
         self.jwt_service = jwt_service
 

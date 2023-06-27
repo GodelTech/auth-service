@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy import delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services import UserInfoServices
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 
@@ -36,8 +36,8 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_get_request(
         self, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        jwt = JWTService()
-        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        jwt = provide_jwt_manager()
+        token = await jwt.encode(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -51,7 +51,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_jwt_get_request(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
         response = await client.request(
@@ -69,7 +69,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_and_userinfo_jwt_get_requests_with_incorrect_token(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(
+        token = await user_info_service.jwt.encode(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
         )
         for url in ("/userinfo/", "/userinfo/jwt"):
@@ -85,7 +85,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode(payload={"sub": "2", "aud":["userinfo"]})
         for url in ("/userinfo/", "/userinfo/jwt"):
             headers = {
                 "authorization": token,
@@ -102,7 +102,7 @@ class TestUserInfoEndpoint:
     async def test_successful_userinfo_post_request(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }
@@ -119,7 +119,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_post_request_with_incorrect_token(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(
+        token = await user_info_service.jwt.encode(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
         )
         headers = {"authorization": token}
@@ -132,7 +132,7 @@ class TestUserInfoEndpoint:
     async def test_userinfo_post_request_with_user_without_claims(
         self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": "2", "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode(payload={"sub": "2", "aud":["userinfo"]})
         headers = {
             "authorization": token,
         }

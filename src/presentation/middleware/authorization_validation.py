@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
 from src.data_access.postgresql.errors.auth_token import IncorrectAuthTokenError
 from typing import Any
-# from src.business_logic.services.jwt_token import JWTService
+# from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from src.di.providers import provide_async_session_stub, provide_jwt_manager
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError, InvalidKeyError, MissingRequiredClaimError

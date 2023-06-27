@@ -1,11 +1,11 @@
 from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from jwkest import long_to_base64, base64_to_long
 import logging
 from src.dyna_config import DOMAIN_NAME
 from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from typing import Any, Union
 from src.data_access.postgresql.repositories import WellKnownRepository
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,7 +37,7 @@ class WellKnownServices:
         } | {"false": "/ Not ready yet"}
 
     def get_algorithms(self):
-        return JWTService().algorithms
+        return provide_jwt_manager().algorithms
 
     async def get_claims(self):
         result = await self.wlk_repo.get_user_claim_types()
@@ -99,7 +99,7 @@ class WellKnownServices:
         return result
 
     async def get_jwks(self) -> dict[str, Any]:
-        jwt_service = JWTService()
+        jwt_service = provide_jwt_manager()
         kty = ""
         if "RS" in jwt_service.algorithm:
             kty = "RSA"

@@ -5,7 +5,7 @@ from Crypto.PublicKey.RSA import construct
 from jwkest import base64_to_long
 
 from src.dyna_config import DOMAIN_NAME
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.well_known import WellKnownServices
 from typing import Any, no_type_check
 
@@ -124,9 +124,9 @@ class TestWellKnownServices:
 
     async def test_jwks_RSA(self, wlk_services: WellKnownServices,) -> None:
         wks = wlk_services
-        jwt_service = JWTService()
+        jwt_service = provide_jwt_manager()
         result = await wks.get_jwks()
-        test_token = await jwt_service.encode_jwt(payload={"sub": 1})
+        test_token = await jwt_service.encode(payload={"sub": 1})
 
         if result["alg"] == "RS256":
             n = base64_to_long(result["n"])

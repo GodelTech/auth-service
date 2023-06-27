@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy import exists, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.tables import User, UserClaim
 from src.data_access.postgresql.tables.device import Device
 
@@ -86,9 +86,9 @@ class TestDeviceFlow:
         assert response.status_code == status.HTTP_200_OK
 
         # Stage 7: User ends the session
-        jwt_service = JWTService()
+        jwt_service = provide_jwt_manager()
         TOKEN_HINT_DATA["sub"] = user_id
-        id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
+        id_token_hint = await jwt_service.encode(payload=TOKEN_HINT_DATA)
         end_session_params = {"id_token_hint": id_token_hint, "post_logout_redirect_uri": "http://thompson-chung.com/",
                               "state": "test_state"}
         response = await client.request("GET", "/endsession/", params=end_session_params)

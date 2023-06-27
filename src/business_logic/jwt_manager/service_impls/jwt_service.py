@@ -47,3 +47,19 @@ class JWTManager:
                                       **kwargs,)
 
         return decoded_info
+
+    async def verify_token(self, token: str, aud: str = None) -> bool:
+        try:
+            if aud:
+                await self.decode(token=token, audience=aud)
+            else:
+                await self.decode(token)
+            return True
+        except:
+            return False
+
+    async def get_module(self) -> int:
+        return self.keys.n
+
+    async def get_pub_key_expanent(self) -> int:
+        return self.keys.e
