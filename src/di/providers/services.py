@@ -294,10 +294,6 @@ def provide_third_party_gitlab_service(
     )
 
 
-def provide_third_party_microsoft_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_third_party_microsoft_service(
     session: AsyncSession,
     client_repo: ClientRepository,
