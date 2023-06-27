@@ -19,10 +19,12 @@ class JWTManager:
             self,
             keys: RSA_keys
     ) -> None:
+        self.algorithm = "RS256"
+        self.algorithms = ["RS256"]
         self.keys = keys
         print(f"print:!!!jwt_service.py;!!! self.keys: {self.keys}")
 
-    def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
+    async def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
         if secret:
             key = secret
         else:
@@ -34,11 +36,12 @@ class JWTManager:
         )
         return token
 
-    def decode(self, token: str, audience: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
+    async def decode(self, token: str, audience: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         token = token.replace("Bearer ", "")
         if audience:
             decoded_info = jwt.decode(token, key=self.keys.public_key, algorithms=self.algorithms,
                                       audience=audience, **kwargs,)
+            print(f"!!!!!!!!decoded_info: {decoded_info}")
         else:
             decoded_info = jwt.decode(token, key=self.keys.public_key, algorithms=self.algorithms,
                                       **kwargs,)
