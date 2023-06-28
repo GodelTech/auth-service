@@ -2,7 +2,6 @@ import logging
 from fastapi import APIRouter, Depends, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession  
 from src.business_logic.services import ClientService, ScopeService
-from src.di.providers.services import provide_client_service_stub
 from src.data_access.postgresql.errors import ClientNotFoundError
 from typing import Any, Callable
 from pydantic import ValidationError
