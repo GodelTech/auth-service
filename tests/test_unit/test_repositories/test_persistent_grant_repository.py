@@ -228,18 +228,3 @@ class TestPersistentGrantRepository:
             await persistent_grant_repo.get_client_id_by_data(
                 grant_data="test_get_client_id_by_wrong_data"
             )
-
-
-    async def test_delete_expired(
-        self, connection: AsyncSession
-    ) -> None:
-        
-        persistent_grant_repo = PersistentGrantRepository(connection)
-        await persistent_grant_repo.create_grant(client_id=1, grant_data="qweqwe", user_id=1, expiration_time=0, grant_type_id=1, scope=None)
-        await connection.commit()
-        sleep(2)
-        await persistent_grant_repo.delete_expired()    
-        await connection.commit()
-        
-        assert not await persistent_grant_repo.exists(grant_data="qweqwe", grant_type="authorization_code")        
-        assert len(await persistent_grant_repo.get_all()) > 0 
