@@ -20,7 +20,7 @@ class JWTManager:
             keys: RSA_keys
     ) -> None:
         self.keys = keys
-        print(f"print:!!!jwt_service.py;!!! self.keys: {self.keys}")
+        # print(f"print:!!!jwt_service.py;!!! self.keys: {self.keys}")
 
     def encode(self, payload: Payload, algorithm: str, secret: Optional[str] = None) -> str:
         if secret:
