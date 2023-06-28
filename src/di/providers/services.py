@@ -26,8 +26,8 @@ from src.business_logic.services.third_party_oidc_service import (
     ThirdPartyMicrosoftService,
 )
 from src.business_logic.services.tokens import TokenService
-from src.business_logic.services.userinfo import UserInfoServices
-from src.business_logic.services.well_known import WellKnownServices
+from src.business_logic.services.userinfo import UserInfoService
+from src.business_logic.services.well_known import WellKnownService
 from src.business_logic.services.client import ClientService
 
 
@@ -162,8 +162,8 @@ def provide_userinfo_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> UserInfoServices:
-    return UserInfoServices(
+) -> UserInfoService:
+    return UserInfoService(
         session=session,
         jwt=jwt,
         user_repo=user_repo,
