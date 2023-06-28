@@ -2,13 +2,14 @@ import logging
 import uuid
 
 from fastapi import status
-from sqlalchemy import delete, exists, insert, select, text
+from sqlalchemy import delete, exists, insert, select, extract, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
+from datetime import datetime, timedelta
 from src.data_access.postgresql.repositories.base import BaseRepository
 from src.data_access.postgresql.tables import (
     PersistentGrant,
@@ -16,7 +17,6 @@ from src.data_access.postgresql.tables import (
     Client,
 )
 from sqlalchemy.engine.result import ChunkedIteratorResult
-
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,13 @@ class PersistentGrantRepository(BaseRepository):
             )
         )
         result = result.first()[0]
+        return result
+
+    async def get_all(self) -> list[PersistentGrant]:
+        grants = await self.session.execute(
+            select(PersistentGrant)
+        )
+        result = [grant[0] for grant in grants.all()]
         return result
 
     async def delete(self, grant_type: str, grant_data: str) -> int:
@@ -218,4 +225,31 @@ class PersistentGrantRepository(BaseRepository):
             .join(PersistentGrantType, PersistentGrant.persistent_grant_type_id == PersistentGrantType.id)
             .where(PersistentGrant.grant_data == grant_data, PersistentGrantType.type_of_grant == grant_type)
         )
+        return result.scalar()
+ 
+    async def delete_expired(self) -> None:
+        grants_to_delete = await self.session.execute(
+            select(PersistentGrant)
+            .where(func.trunc(extract('epoch', datetime.utcnow()) - extract('epoch', PersistentGrant.created_at) )  >= PersistentGrant.expiration)
+            )
+        
+        grants_to_delete_list = grants_to_delete.all()
+        logger.info(f"Deleted {len(grants_to_delete_list)} expired tokens")
+        for grant in grants_to_delete_list:
+            await self.session.delete(grant[0])
+
+    async def get_next_cleaning_time(self) -> float:
+        if self.check_not_empty():
+            query = select(func.min(extract('epoch', PersistentGrant.created_at) ) + PersistentGrant.expiration)
+            result = await self.session.execute(query)
+            min_value = result.scalar()
+            return min_value - datetime.utcnow().timestamp()
+        else:
+            result = await self.session.execute(select(func.min(Client.absolute_refresh_token_lifetime)))
+            min_value = result.scalar()
+            return min_value
+    
+    async def check_not_empty(self):
+        query = select(exists().where(PersistentGrant))
+        result = await self.session.execute(query)
         return result.scalar()
