@@ -22,6 +22,16 @@ if TYPE_CHECKING:
 
 
 class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
+    """
+    Service for handling ID token and access token generation in an authentication system.
+
+    Inherits:
+        UpdateRedirectUrlMixin, which provides functionality for updating the redirect URL
+        with additional parameters if necessary.
+
+    Reference: https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth
+    """
+
     def __init__(
         self,
         client_validator: ValidatorProtocol,
@@ -31,6 +41,17 @@ class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
         user_repo: UserRepository,
         jwt_manager: JWTManagerProtocol,
     ) -> None:
+        """
+        Initialize the IdTokenTokenAuthService.
+
+        Args:
+            client_validator: A validator for client identification.
+            redirect_uri_validator: A validator for redirect URIs.
+            scope_validator: A validator for scope values.
+            user_credentials_validator: A validator for user credentials.
+            user_repo: A repository for managing users.
+            jwt_manager: A manager for JWT encoding and decoding.
+        """
         self._client_validator = client_validator
         self._redirect_uri_validator = redirect_uri_validator
         self._scope_validator = scope_validator
@@ -40,6 +61,15 @@ class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
         self.expiration_time = 600
 
     async def _validate_request_data(self, request_data: AuthRequestModel):
+        """
+        Validate the request data for ID token and access token generation.
+
+        Args:
+            request_data: An instance of AuthRequestModel containing the request data.
+
+        Raises:
+            Various validation errors based on the request data.
+        """
         await self._client_validator(request_data.client_id)
         await self._redirect_uri_validator(
             request_data.redirect_uri, request_data.client_id
@@ -52,6 +82,17 @@ class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
     async def _get_access_token(
         self, request_data: AuthRequestModel, user_id: int, unix_time: int
     ) -> str:
+        """
+        Generate an access token.
+
+        Args:
+            request_data: An instance of AuthRequestModel containing the request data.
+            user_id: The ID of the authenticated user.
+            unix_time: The current Unix time.
+
+        Returns:
+            The generated access token as a string.
+        """
         payload = AccessTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
@@ -67,6 +108,17 @@ class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
     async def _get_id_token(
         self, request_data: AuthRequestModel, user_id: int, unix_time: int
     ) -> str:
+        """
+        Generate an ID token.
+
+        Args:
+            request_data: An instance of AuthRequestModel containing the request data.
+            user_id: The ID of the authenticated user.
+            unix_time: The current Unix time.
+
+        Returns:
+            The generated ID token as a string.
+        """
         payload = IdTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
@@ -79,6 +131,18 @@ class IdTokenTokenAuthService(UpdateRedirectUrlMixin):
         return self._jwt_manager.encode(payload=payload, algorithm="RS256")
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:
+        """
+        Get the redirect URL with the ID token and access token.
+
+        Args:
+            request_data: An instance of AuthRequestModel containing the request data.
+
+        Returns:
+            The redirect URL containing the ID token and access token.
+
+        Raises:
+            Various validation errors based on the request data.
+        """
         await self._validate_request_data(request_data)
 
         current_unix_time = int(time.time())
