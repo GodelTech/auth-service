@@ -4,18 +4,15 @@ from datetime import datetime
 from src.data_access.postgresql.tables import PersistentGrant, BlacklistedToken
 from src.celery_logic.celery_main import celery, Session, logger
 
-# @shared_task
-# def sync_clear_database():
-#     clear_database.apply_async(expires=3600)
 
 @celery.task
-def clear_database():
+def clear_database() -> str:
     session = Session()
     result = delete_expired_tokens(session) + delete_expired_blacklisted_tokens(session)
     session.close()
     return f'Total deleted: {result}'
 
-def delete_expired_tokens(session) -> None:
+def delete_expired_tokens(session) -> int:
     delete_query = (
         delete(PersistentGrant)
         .where(
@@ -33,7 +30,7 @@ def delete_expired_tokens(session) -> None:
     return n
 
 
-def delete_expired_blacklisted_tokens(session) -> None:
+def delete_expired_blacklisted_tokens(session) -> int:
     delete_query = (
         delete(BlacklistedToken)
         .where(
