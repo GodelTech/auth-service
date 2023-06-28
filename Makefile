@@ -71,3 +71,13 @@ mark-minor:
 
 mark-major:
 	bump2version --allow-dirty major
+
+## Celery
+celery:
+	celery -A src.celery_logic.celery_main worker --loglevel=info & celery -A src.celery_logic.celery_main beat --loglevel=info
+
+celery-worker:
+	celery -A src.celery_logic.celery_main worker --loglevel=info
+
+celery-beat:
+	celery -A src.celery_logic.celery_main beat --loglevel=info
