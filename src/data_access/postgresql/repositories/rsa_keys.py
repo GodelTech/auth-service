@@ -23,9 +23,20 @@ class RSAKeysRepository:
         ))
         session.commit()
 
+    # def validate_keys_exists(self, session: Session) -> bool:
+    #     result = session.execute(
+    #         select([1]).where(exists().where(RSA_keys.id.isnot(None)).select_from(RSA_keys))
+    #     )
+    #     return result.scalars().first() is not None
+
+    # def validate_keys_exists(self, session: Session) -> bool:
+    #     stmt = exists().where(RSA_keys.id.isnot(None))
+    #     result = session.execute(select(stmt))
+    #     return result.scalar() is not None
+
     def validate_keys_exists(self, session: Session) -> bool:
-        result = session.execute(
-            select([1]).where(exists().where(RSA_keys.id.isnot(None)).select_from(RSA_keys))
-        )
-        return result.scalars().first() is not None
+        res = session.execute((
+            select(RSA_keys.id)
+        ))
+        return res.scalar() is not None
 
