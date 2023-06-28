@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel, ClientResponseModel  
 from src.business_logic.services.client import ClientService
-from src.di.providers.services import provide_client_service_stub
+# from src.di.providers.services import provide_client_service_stub
 from src.data_access.postgresql.errors import ClientNotFoundError
 from typing import Any, Callable
 from pydantic import ValidationError
@@ -55,7 +55,7 @@ async def update_client(
 async def get_all_clients(
     request: Request,
     access_token: str = Header(description="Access token"),
-    client_service: ClientService = Depends(provide_client_service_stub),
+    # client_service: ClientService = Depends(provide_client_service_stub),
     auth:None = Depends(access_token_middleware),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str,list[dict[str, Any]]]:
@@ -69,7 +69,7 @@ async def get_all_clients(
 async def get_client(
     client_id:str,
     request: Request,
-    client_service: ClientService = Depends(provide_client_service_stub),
+    # client_service: ClientService = Depends(provide_client_service_stub),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str, Any]:
     client_service = ClientService(
@@ -83,7 +83,7 @@ async def get_client(
 async def delete_client(
     client_id:str,
     request: Request,
-    client_service: ClientService = Depends(provide_client_service_stub),
+    # client_service: ClientService = Depends(provide_client_service_stub),
     session: AsyncSession = Depends(provide_async_session_stub)
     )->dict[str, Any]:
     client_service = ClientService(
