@@ -21,7 +21,7 @@ from src.business_logic.services import (
     ThirdPartyMicrosoftService,
     TokenService,
     UserInfoServices,
-    WellKnownServices,
+    WellKnownService,
     ClientService,
 )
 
@@ -183,8 +183,8 @@ def provide_wellknown_service_stub() -> None:
 def provide_wellknown_service(
     session: AsyncSession,
     wlk_repo: WellKnownRepository,
-) -> WellKnownServices:
-    return WellKnownServices(
+) -> WellKnownService:
+    return WellKnownService(
         session=session,
         wlk_repo=wlk_repo,
     )

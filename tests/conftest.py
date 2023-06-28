@@ -23,7 +23,7 @@ from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services import DeviceService, WellKnownServices, ClientService, ScopeService
 from src.business_logic.services import (
     DeviceService,
-    WellKnownServices,
+    WellKnownService,
     ClientService,
 )
 from src.data_access.postgresql.repositories import (
@@ -300,8 +300,8 @@ async def microsoft_third_party_service(
 
 
 @pytest_asyncio.fixture
-async def wlk_services(connection: AsyncSession) -> WellKnownServices:
-    wlk_services = WellKnownServices(
+async def wlk_services(connection: AsyncSession) -> WellKnownService:
+    wlk_services = WellKnownService(
         session=connection,
         wlk_repo=WellKnownRepository(session=connection),
         scope_service=ScopeService(
