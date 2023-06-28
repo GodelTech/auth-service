@@ -29,27 +29,3 @@ celery.conf.beat_schedule = {
         'schedule': CELERY_CLEANER_CRONE,
     },
 }
-
-
-
-
-# def get_next_cleaning_time(session) -> float:
-#     # min_value = session.query(func.min(func.extract('epoch', PersistentGrant.created_at)) + PersistentGrant.expiration).scalar()
-#     # print(min_value)
-#     # if check_not_empty(session):
-#         # query = select(func.min(extract('epoch', PersistentGrant.created_at) ) + PersistentGrant.expiration)
-#         # result = session.execute(query)
-#     min_value = session.query(
-#         func.coalesce(func.min(func.extract('epoch', PersistentGrant.created_at) + PersistentGrant.expiration), 0)
-#     ).scalar()
-#     min_value_token = float(min_value) - datetime.utcnow().timestamp()
-
-#     result = session.execute(select(func.min(Client.absolute_refresh_token_lifetime)))
-#     min_value = result.scalar()
-#     return min_value
-
-# def check_not_empty(session):
-#     query = select(exists().where(PersistentGrant.id!=None))
-#     result = session.execute(query)
-#     print(result)
-#     return result.scalar()

@@ -1,5 +1,4 @@
-from celery import shared_task
-from sqlalchemy import delete, exists, insert, select, extract, func
+from sqlalchemy import delete, func
 from datetime import datetime
 from src.data_access.postgresql.tables import PersistentGrant, BlacklistedToken
 from src.celery_logic.celery_main import celery, Session, logger
@@ -17,7 +16,7 @@ def delete_expired_tokens(session) -> int:
         delete(PersistentGrant)
         .where(
             func.trunc(
-                func.extract('epoch', datetime.utcnow())# - func.extract('epoch', PersistentGrant.created_at)
+                func.extract('epoch', datetime.utcnow())
             ) >= PersistentGrant.expiration
         )
         .execution_options(synchronize_session=False)
@@ -35,7 +34,7 @@ def delete_expired_blacklisted_tokens(session) -> int:
         delete(BlacklistedToken)
         .where(
             func.trunc(
-                func.extract('epoch', datetime.utcnow())# - func.extract('epoch', BlacklistedToken.created_at)
+                func.extract('epoch', datetime.utcnow())
             ) >= BlacklistedToken.expiration
         )
         .execution_options(synchronize_session=False)
