@@ -75,7 +75,6 @@ class TokenAuthService(UpdateRedirectUrlMixin):
             user_id=user_id,
             unix_time=current_unix_time,
         )
-        # TODO create grant?
         query_params = f"access_token={access_token}&token_type=Bearer&expires_in={self.expiration_time}"
         redirect_url = f"{request_data.redirect_uri}?{query_params}"
 

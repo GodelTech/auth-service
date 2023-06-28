@@ -40,4 +40,6 @@ def _create_id_token_token_auth_service(
             user_repo=user_repo,
             password_service=password_service,
         ),
+        user_repo=user_repo,
+        jwt_manager=jwt_manager,
     )
