@@ -5,3 +5,6 @@ dynaconf_merge = true
 echo = true
 url = "postgresql+asyncpg://test:test@172.18.0.1:5465/test"
 max_connection_count = 10
+
+[pipeline.celery]
+db_cleaner_crone = '{"minute": "0", "hour": "2"}'

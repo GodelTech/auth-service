@@ -27,7 +27,7 @@ import logging
 from src.log import LOGGING_CONFIG
 from src.data_access.postgresql.repositories import UserRepository
 from src.business_logic.services.admin_auth import AdminAuthService
-from src.celery.tasks import celery, sync_clear_database
+
 
 
 logger = logging.getLogger(__name__)
@@ -184,17 +184,17 @@ async def startup() -> None:
 #     logger.info("Cleanup task has been scheduled.")
 
 
-@app.on_event("startup")
-# @repeat_every(seconds=10)
-def start_up_expired_tokens() -> None:
-        # from src.data_access.postgresql.repositories import PersistentGrantRepository
-        db_engine = prov.provide_db(
-        database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
-        )
+# @app.on_event("startup")
+# # @repeat_every(seconds=10)
+# def start_up_expired_tokens() -> None:
+#         # from src.data_access.postgresql.repositories import PersistentGrantRepository
+#         db_engine = prov.provide_db(
+#         database_url=DB_URL, max_connection_count=DB_MAX_CONNECTION_COUNT
+#         )
         
-        # token_repo = PersistentGrantRepository(prov.provide_async_session_stub())
-        try:
-            sync_clear_database.apply_async()
-        except Exception as e:
-            logger.error("Removing of expired tokens doesn't work:")
-            logger.error(e)
+#         # token_repo = PersistentGrantRepository(prov.provide_async_session_stub())
+#         try:
+#             sync_clear_database.apply_async()
+#         except Exception as e:
+#             logger.error("Removing of expired tokens doesn't work:")
+#             logger.error(e)
