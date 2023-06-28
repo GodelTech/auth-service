@@ -20,7 +20,7 @@ def delete_expired_tokens(session) -> None:
         delete(PersistentGrant)
         .where(
             func.trunc(
-                func.extract('epoch', datetime.utcnow()) - func.extract('epoch', PersistentGrant.created_at)
+                func.extract('epoch', datetime.utcnow())# - func.extract('epoch', PersistentGrant.created_at)
             ) >= PersistentGrant.expiration
         )
         .execution_options(synchronize_session=False)
@@ -38,7 +38,7 @@ def delete_expired_blacklisted_tokens(session) -> None:
         delete(BlacklistedToken)
         .where(
             func.trunc(
-                func.extract('epoch', datetime.utcnow()) - func.extract('epoch', BlacklistedToken.created_at)
+                func.extract('epoch', datetime.utcnow())# - func.extract('epoch', BlacklistedToken.created_at)
             ) >= BlacklistedToken.expiration
         )
         .execution_options(synchronize_session=False)
