@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.business_logic.authorization import AuthServiceFactory
 from src.data_access.postgresql.repositories import (
@@ -11,8 +13,8 @@ from httpx import AsyncClient
 from src.business_logic.third_party_auth.factory import (
     ThirdPartyAuthServiceFactory,
 )
-
 from src.business_logic.services import JWTService, PasswordHash
+
 
 
 def provide_auth_service_factory(

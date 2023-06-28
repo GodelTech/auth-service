@@ -19,7 +19,7 @@ from itsdangerous import base64_encode
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+# from src.business_logic.services.jwt_token import JWTService
 from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
