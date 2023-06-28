@@ -19,7 +19,7 @@ from src.business_logic.services.authorization.authorization_service import (
     AuthorizationService,
 )
 from src.business_logic.services.endsession import EndSessionService
-from src.business_logic.services.userinfo import UserInfoServices
+from src.business_logic.services.userinfo import UserInfoService
 from src.business_logic.services import DeviceService, WellKnownService, ClientService, ScopeService
 
 from src.business_logic.services import (
