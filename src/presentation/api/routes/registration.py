@@ -1,32 +1,34 @@
 import logging
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel, ClientResponseModel  
+from src.presentation.api.models.registration import (
+    ClientRequestModel,
+    ClientUpdateRequestModel,
+    ClientResponseModel,
+)
 from src.business_logic.services.client import ClientService
-# from src.di.providers.services import provide_client_service_stub
 from src.data_access.postgresql.errors import ClientNotFoundError
-from typing import Any, Callable
-from pydantic import ValidationError
+from typing import Any
 from src.data_access.postgresql.repositories import ClientRepository
-from functools import wraps
-from src.presentation.middleware.access_token_validation import access_token_middleware
+
+from src.presentation.middleware.access_token_validation import (
+    access_token_middleware,
+)
 from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
-client_router = APIRouter(
-    prefix="/clients", tags=["Client"]
-)
+client_router = APIRouter(prefix="/clients", tags=["Client"])
 
-@client_router.post("/register", response_model = ClientResponseModel)
+
+@client_router.post("/register", response_model=ClientResponseModel)
 async def register_client(
     request: Request,
     request_body: ClientRequestModel = Depends(),
-    session: AsyncSession = Depends(provide_async_session_stub)
-    ) -> dict[str, str]:
+    session: AsyncSession = Depends(provide_async_session_stub),
+) -> dict[str, str]:
     client_service = ClientService(
-        session=session, 
-        client_repo=ClientRepository(session)
+        session=session, client_repo=ClientRepository(session)
     )
     client_service.request_model = request_body
     response = await client_service.registration()
@@ -36,14 +38,13 @@ async def register_client(
 
 @client_router.put("/{client_id}", response_model=dict)
 async def update_client(
-    client_id: str, 
+    client_id: str,
     request: Request,
     request_body: ClientUpdateRequestModel = Depends(),
-    session: AsyncSession = Depends(provide_async_session_stub)
-    ) -> dict[str, str]:
+    session: AsyncSession = Depends(provide_async_session_stub),
+) -> dict[str, str]:
     client_service = ClientService(
-        session=session, 
-        client_repo=ClientRepository(session)
+        session=session, client_repo=ClientRepository(session)
     )
     client_service.request_model = request_body
     await client_service.update(client_id=client_id)
@@ -55,43 +56,42 @@ async def update_client(
 async def get_all_clients(
     request: Request,
     access_token: str = Header(description="Access token"),
-    # client_service: ClientService = Depends(provide_client_service_stub),
-    auth:None = Depends(access_token_middleware),
-    session: AsyncSession = Depends(provide_async_session_stub)
-    )->dict[str,list[dict[str, Any]]]:
+    auth: None = Depends(access_token_middleware),
+    session: AsyncSession = Depends(provide_async_session_stub),
+) -> dict[str, list[dict[str, Any]]]:
     client_service = ClientService(
-        session=session, 
-        client_repo=ClientRepository(session)
+        session=session, client_repo=ClientRepository(session)
     )
-    return{"all_clients": await client_service.get_all()}
+    return {"all_clients": await client_service.get_all()}
+
 
 @client_router.get("/{client_id}", response_model=dict)
 async def get_client(
-    client_id:str,
+    client_id: str,
     request: Request,
-    # client_service: ClientService = Depends(provide_client_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
-    )->dict[str, Any]:
+    session: AsyncSession = Depends(provide_async_session_stub),
+) -> dict[str, Any]:
     client_service = ClientService(
-        session=session, 
-        client_repo=ClientRepository(session)
+        session=session, client_repo=ClientRepository(session)
     )
     return await client_service.get_client_by_client_id(client_id=client_id)
 
 
 @client_router.delete("/{client_id}", status_code=status.HTTP_200_OK)
 async def delete_client(
-    client_id:str,
+    client_id: str,
     request: Request,
-    # client_service: ClientService = Depends(provide_client_service_stub),
-    session: AsyncSession = Depends(provide_async_session_stub)
-    )->dict[str, Any]:
+    session: AsyncSession = Depends(provide_async_session_stub),
+) -> dict[str, Any]:
     client_service = ClientService(
-        session=session, 
-        client_repo=ClientRepository(session)
+        session=session, client_repo=ClientRepository(session)
     )
-    if not await client_service.client_repo.validate_client_by_client_id(client_id=client_id):
+    if not await client_service.client_repo.validate_client_by_client_id(
+        client_id=client_id
+    ):
         raise ClientNotFoundError
-    await client_service.client_repo.delete_client_by_client_id(client_id=client_id)
+    await client_service.client_repo.delete_client_by_client_id(
+        client_id=client_id
+    )
     await session.commit()
     return {"message": "Client deleted successfully"}
