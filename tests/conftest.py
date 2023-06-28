@@ -21,6 +21,7 @@ from src.business_logic.services.authorization.authorization_service import (
 from src.business_logic.services.endsession import EndSessionService
 from src.business_logic.services.userinfo import UserInfoServices
 from src.business_logic.services import DeviceService, WellKnownService, ClientService, ScopeService
+
 from src.business_logic.services import (
     DeviceService,
     WellKnownService,
@@ -196,8 +197,8 @@ async def introspection_service(
 
 
 @pytest_asyncio.fixture
-async def user_info_service(connection: AsyncSession) -> UserInfoServices:
-    user_info = UserInfoServices(
+async def user_info_service(connection: AsyncSession) -> UserInfoService:
+    user_info = UserInfoService(
         session=connection,
         jwt=JWTService(),
         client_repo=ClientRepository(session=connection),
