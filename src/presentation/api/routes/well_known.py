@@ -58,7 +58,7 @@ async def get_jwks(
 ) -> dict[str, Any]:
     try:
         session = "no_session"
-        well_known_info_class = WellKnownServices(
+        well_known_info_class = WellKnownService(
             session=session, wlk_repo=WellKnownRepository(session),
         )
         well_known_info_class.request = request
