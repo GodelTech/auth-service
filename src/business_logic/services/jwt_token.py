@@ -5,13 +5,11 @@ from typing import Any, no_type_check, Optional
 
 from src.di.providers.rsa_keys import provide_rsa_keys
 from src.config.rsa_keys import RSAKeypair
-# from src.di import Container
 
 logger = logging.getLogger(__name__)
 
 
 class JWTService:
-    # def __init__(self, keys: RSAKeypair = Container().config().keys) -> None:
     def __init__(self, keys: RSAKeypair = provide_rsa_keys) -> None:
         self.algorithm = "RS256"
         self.algorithms = ["RS256"]
