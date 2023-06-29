@@ -26,7 +26,6 @@ from src.data_access.postgresql.tables.client import (
 )
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
 from typing import Optional, Any, Union
-from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from src.data_access.postgresql.errors import DuplicationError
 import time
 
