@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.business_logic.authorization import AuthServiceFactory
 from src.business_logic.authorization.dto import AuthRequestModel
-from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.jwt_manager import JWTManager
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.repositories import (
@@ -19,8 +19,15 @@ from src.data_access.postgresql.repositories import (
     ThirdPartyOIDCRepository,
     UserRepository,
     PersistentGrantRepository,
-    DeviceRepository, CodeChallengeRepository,
+    DeviceRepository,
+    ResourcesRepository,
+    CodeChallengeRepository,
 )
+from src.business_logic.authorization import AuthServiceFactory
+from src.business_logic.authorization.dto import AuthRequestModel
+from src.business_logic.services.login_form_service import LoginFormService
+from src.business_logic.services.scope import ScopeService
+from src.business_logic.services.jwt_token import JWTService
 from src.dyna_config import DOMAIN_NAME
 from src.presentation.api.models import RequestModel
 from src.di.providers import provide_async_session_stub
@@ -47,7 +54,7 @@ auth_router = APIRouter(prefix="/authorize", tags=["Authorization"])
 async def get_authorize(
     request: Request,
     request_model: RequestModel = Depends(),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> AuthorizeGetEndpointResponse:
     auth_class = LoginFormService(
         session=session,
@@ -81,7 +88,7 @@ async def post_authorize(
     request: Request,
     request_body: AuthRequestModel = Depends(AuthRequestModel.as_form),
     user_code: Optional[str] = Cookie(None),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> AuthorizePostEndpointResponse:
     auth_service_factory = AuthServiceFactory(
         session=session,
@@ -91,11 +98,21 @@ async def post_authorize(
         device_repo=DeviceRepository(session),
         password_service=PasswordHash(),
         jwt_service=JWTService(),
+        scope_service=ScopeService(
+            resource_repo=ResourcesRepository(session),
+            session=session
+        )
     )
+    scope_service = ScopeService(
+        session=session,
+        resource_repo=ResourcesRepository(session)
+        )
     setattr(request_body, "user_code", user_code)
     auth_service: AuthServiceProtocol = auth_service_factory.get_service_impl(
         request_body.response_type
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    return RedirectResponse(result, status_code=status.HTTP_302_FOUND)
+    confirm_text = await scope_service.get_scope_description(scope=request_body.scope)
+    header_text = 'The service want to get access to:'
+    return JSONResponse({"redirect_url":result, "confirm_text":confirm_text, "header_text":header_text})

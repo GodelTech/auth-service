@@ -105,7 +105,7 @@ class TestClientAllEndpointGET:
         self.access_token = await JWTService().encode_jwt(
             payload={
                 "stand": "CrazyDiamond",
-                "aud": ["admin"]
+                "aud": ["oidc:admin:read"]
             }
         )
         response = await client.request("GET", "clients", headers={

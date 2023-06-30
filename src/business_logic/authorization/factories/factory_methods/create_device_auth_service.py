@@ -31,12 +31,34 @@ def _create_device_auth_service(
     persistent_grant_repo: PersistentGrantRepository,
     device_repo: DeviceRepository,
     password_service: PasswordHash,
+    scope_service,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
+    """
+    Factory method for creating an instance of DeviceAuthService, which is used for
+    a device authorization flow.
+
+    Reference: https://www.rfc-editor.org/rfc/rfc8628.
+
+    Args:
+        client_repo: The repository for accessing client-related data.
+        user_repo: The repository for accessing user-related data.
+        persistent_grant_repo: The repository for accessing persistent grant-related data.
+        device_repo: The repository for accessing device-related data.
+        password_service: The service for password hashing and verification.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        An instance of DeviceAuthService.
+
+    """
     return DeviceAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
-        scope_validator=ScopeValidator(client_repo),
+        scope_validator=ScopeValidator(
+            client_repo=client_repo,
+            scope_service=scope_service
+        ),
         user_credentials_validator=UserCredentialsValidator(
             user_repo=user_repo,
             password_service=password_service,

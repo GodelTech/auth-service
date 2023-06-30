@@ -19,9 +19,14 @@ from src.business_logic.services.authorization.authorization_service import (
     AuthorizationService,
 )
 from src.business_logic.services.endsession import EndSessionService
-from src.business_logic.services.userinfo import UserInfoServices
-from src.business_logic.services import DeviceService, WellKnownServices, ClientService
+from src.business_logic.services.userinfo import UserInfoService
+from src.business_logic.services import DeviceService, WellKnownService, ClientService, ScopeService
 
+from src.business_logic.services import (
+    DeviceService,
+    WellKnownService,
+    ClientService,
+)
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     UserRepository,
@@ -31,17 +36,18 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     BlacklistedTokenRepository,
     CodeChallengeRepository,
+    ResourcesRepository,
 )
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
-from src.business_logic.services.introspection import IntrospectionServies
+from src.business_logic.services.introspection import IntrospectionService
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
 from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
     ThirdPartyGoogleService,
     ThirdPartyMicrosoftService,
-    ThirdPartyGitLabService,
+    ThirdPartyGitLabService
 )
 from src.data_access.postgresql.tables.base import Base
 from tests.overrides.override_test_container import CustomPostgresContainer
@@ -65,7 +71,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-   # ClientGrantType,
+    # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -179,8 +185,8 @@ async def end_session_service(connection: AsyncSession) -> EndSessionService:
 @pytest_asyncio.fixture
 async def introspection_service(
     connection: AsyncSession,
-) -> IntrospectionServies:
-    intro_service = IntrospectionServies(
+) -> IntrospectionService:
+    intro_service = IntrospectionService(
         session=connection,
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
@@ -191,8 +197,8 @@ async def introspection_service(
 
 
 @pytest_asyncio.fixture
-async def user_info_service(connection: AsyncSession) -> UserInfoServices:
-    user_info = UserInfoServices(
+async def user_info_service(connection: AsyncSession) -> UserInfoService:
+    user_info = UserInfoService(
         session=connection,
         jwt=JWTService(),
         client_repo=ClientRepository(session=connection),
@@ -295,10 +301,14 @@ async def microsoft_third_party_service(
 
 
 @pytest_asyncio.fixture
-async def wlk_services(connection: AsyncSession) -> WellKnownServices:
-    wlk_services = WellKnownServices(
+async def wlk_services(connection: AsyncSession) -> WellKnownService:
+    wlk_services = WellKnownService(
         session=connection,
         wlk_repo=WellKnownRepository(session=connection),
+        scope_service=ScopeService(
+            session=connection,
+            resource_repo=ResourcesRepository(connection)
+            )
     )
     return wlk_services
 
@@ -792,7 +802,7 @@ async def get_db(connection: AsyncSession) -> None:
         "type_of_grant": name,
     }
     await connection.execute(insert(PersistentGrantType).values(data))
-    
+
     data = {
         "id": pk,
         "key": name,
@@ -863,10 +873,16 @@ async def get_db(connection: AsyncSession) -> None:
 
     await connection.commit()
 
+
 @pytest_asyncio.fixture
-async def client_service(connection:AsyncSession) -> ClientService:
+async def client_service(connection: AsyncSession) -> ClientService:
     client_service = ClientService(
         client_repo=ClientRepository(connection),
+        scope_service=ScopeService(
+            session=connection,
+            resource_repo=ResourcesRepository(connection)
+        ),
         session=connection
+
     )
     return client_service

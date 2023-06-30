@@ -14,18 +14,19 @@ from src.data_access.postgresql.errors.client import (
     ClientNotFoundError,
     ClientPostLogoutRedirectUriError,
     ClientRedirectUriError,
+    ClientScopesError
 )
 from src.data_access.postgresql.tables.client import (
     Client,
     ClientClaim,
     ClientRedirectUri,
-    ClientScope,
     ClientSecret,
     ResponseType,
     clients_response_types,
     clients_grant_types,
+    clients_scopes,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
+from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 
 
 @pytest.mark.asyncio
@@ -113,7 +114,7 @@ class TestClientRepository:
                             mock_get_client_by_client_id)
         client_repo = ClientRepository(connection)
         uri = await client_repo.validate_client_redirect_uri(
-            client_id="test_client", redirect_uri="https://www.google.com/"
+            client_id="test_client", redirect_uri="http://127.0.0.1:8888/callback/"
         )
         assert uri is True
 
@@ -131,12 +132,12 @@ class TestClientRepository:
 
     async def test_get_client_scopes(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
-        uri = await client_repo.get_client_scopes(
+        scopes = await client_repo.get_client_scopes(
             client_id=1
         )
-        assert isinstance(uri, str)
-        assert len(uri) > 0
-        assert uri == "openid"
+        assert isinstance(scopes, list)
+        assert isinstance(scopes[0], str)
+        assert "openid" in scopes[0]
 
     async def test_get_client_scopes_not_exists(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
@@ -295,17 +296,15 @@ class TestClientRepository:
         result = await connection.execute(insert(Client).values(**new_client).returning(Client.id))
         client_id_int = result.scalar_one()
         await connection.commit()
+        scope_ids:dict={}
+        scope_ids['resource_id'] = 1
+        scope_ids['scope_id'] = 1
+        scope_ids['claim_id'] = 1
 
-        await client_repo.add_scope(client_id_int=client_id_int, scope="openid profile email")
+        await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids)
 
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is not None
-        assert scope.client_id == client_id_int
-        assert scope.scope == "openid profile email"
+        scope = await client_repo.get_client_scopes(client_id_int)
+        assert len(scope) == 1 
 
     async def test_add_scope_incorrect_parameters(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)
@@ -463,28 +462,21 @@ class TestClientRepository:
 
         result = await connection.execute(insert(Client).values(**new_client).returning(Client.id))
         client_id_int = result.scalar_one()
-        await connection.execute(insert(ClientScope).values(
-            client_id=client_id_int,
-            scope="openid",
-        ))
+        scope_ids:dict={}
+        scope_ids['resource_id'] = 1
+        scope_ids['scope_id'] = 1
+        scope_ids['claim_id'] = 1
+        
+        await client_repo.add_scope(client_id_int=client_id_int, scope_ids=scope_ids,)
         await connection.commit()
-
     
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is not None
-
         await client_repo.delete_scope(client_id_int=client_id_int)
+        await client_repo.session.commit()
+        with pytest.raises(ClientScopesError):
+            await client_repo.get_client_scopes(client_id_int)
+        client =(await client_repo.session.execute(select(Client).where(Client.id == client_id_int))).first()[0]
+        assert client.scope == []
 
-        scope = await connection.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id_int)
-        )
-        scope = scope.scalar_one_or_none()
-
-        assert scope is None
 
     async def test_delete_redirect_uris(self, connection: AsyncSession) -> None:
         client_repo = ClientRepository(connection)

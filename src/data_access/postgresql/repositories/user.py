@@ -433,3 +433,7 @@ class UserRepository(BaseRepository):
 
     def __repr__(self) -> str:
         return "User repository"
+
+    async def check_user_group(self, username:str, groupname: str) -> bool:
+        user:User = await self.get_user_by_username(username) 
+        return groupname in [group.name for group in user.groups]

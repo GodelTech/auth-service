@@ -36,6 +36,7 @@ class TestTokenEndpoint:
             user_id=1,
             grant_type="authorization_code",
             expiration_time=time.time() + 3600,
+            scope='openid'
         )
         await connection.commit()
         params = {
@@ -43,7 +44,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(
@@ -83,7 +84,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
-            "redirect_uri": "https://www.arnold-mann.net/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(
@@ -193,7 +194,7 @@ class TestTokenEndpoint:
             "grant_type": "authorization_code",
             "code": "secret_code",
             "scope": "test",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
 
         response = await client.request(
@@ -253,14 +254,15 @@ class TestTokenEndpoint:
             grant_data=test_token,
             user_id=1,
             grant_type="refresh_token",
-            expiration_time=time.time() + 3600
+            expiration_time=time.time() + 3600,
+            scope='openid'
         )
         await connection.commit()
         params = {
             "client_id": "test_client",
             "grant_type": "refresh_token",
             "refresh_token": test_token,
-            "scope": "test",
+            "scope": "openid",
             "redirect_uri": "https://www.arnold-mann.net/",
         }
 
