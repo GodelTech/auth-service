@@ -5,6 +5,7 @@ from Crypto.PublicKey import RSA
 from .dto import RSAKeypair
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class CreateRSAKeypair:

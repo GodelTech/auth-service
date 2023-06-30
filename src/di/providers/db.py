@@ -1,3 +1,4 @@
+from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.data_access.postgresql import Database

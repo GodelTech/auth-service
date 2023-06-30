@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.di.providers import provide_token_service_factory, provide_async_session_stub
+from src.di.providers import (
+    provide_token_service_factory,
+    provide_async_session_stub,
+)
 from src.business_logic.get_tokens.dto import ResponseTokenModel, RequestTokenModel
 
 
@@ -24,7 +27,7 @@ token_router = APIRouter(prefix="/token", tags=["Token"])
 async def get_tokens(
         request: Request,
         request_body: RequestTokenModel = Depends(RequestTokenModel.as_form),
-        session: AsyncSession = Depends(provide_async_session_stub)
+        session: AsyncSession = Depends(provide_async_session_stub),
 ) -> JSONResponse:
     token_service_factory: TokenServiceFactory = provide_token_service_factory(db_session=session)
     token_service: TokenServiceProtocol = token_service_factory.get_service_impl(request_body.grant_type)

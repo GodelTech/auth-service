@@ -153,7 +153,7 @@ class TestWellKnownService:
             test_key = construct((n, e))
 
             assert (
-                jwt_service.keys.public_key
+                jwt_service.keys().public_key
                 == test_key.public_key().export_key("PEM")
             )
             assert result["kty"] == "RSA"

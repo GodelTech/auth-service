@@ -191,7 +191,7 @@ class WellKnownService:
             "alg": jwt_service.algorithm,
             "use": "sig",
             # "kid" : ... ,
-            "n": long_to_base64(await jwt_service.get_module()),
+            "n": long_to_base64(int(await jwt_service.get_module())),
             "e": long_to_base64(await jwt_service.get_pub_key_expanent()),
         }
         logger.info(

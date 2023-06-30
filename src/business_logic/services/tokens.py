@@ -19,7 +19,7 @@ from itsdangerous import base64_encode
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+# from src.business_logic.services.jwt_token import JWTService
 from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,
@@ -186,7 +186,7 @@ class TokenService:
                 raise GrantNotFoundError
         elif token_type_hint == "access_token":
             decoded_token = await self.jwt_service.decode_token(
-                self.request_body.token, audience="revoke"
+                self.request_body.token, audience="revocation"
             )
             await self.blacklisted_repo.create(
                 token=self.request_body.token, expiration=decoded_token["exp"]

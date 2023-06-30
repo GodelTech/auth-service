@@ -14,32 +14,32 @@ from .repositories import (
     provide_async_session_stub,
     ProviderSession,
 )
-from .services import (
-    provide_wellknown_service,
-    provide_admin_auth_service,
-    provide_admin_group_service,
-    provide_admin_role_service,
-    provide_admin_user_service,
-    provide_auth_service,
-    provide_auth_third_party_linkedin_service,
-    provide_auth_third_party_oidc_service,
-    provide_third_party_google_service,
-    provide_third_party_facebook_service,
-    provide_third_party_gitlab_service,
-    provide_third_party_microsoft_service,
-    provide_device_service,
-    provide_endsession_service,
-    provide_introspection_service,
-    provide_jwt_service,
-    provide_login_form_service,
-    provide_password_service,
-    provide_token_service,
-    provide_userinfo_service,
-    provide_client_service,
-)
-from .services_factory import (
-    provide_auth_service_factory,
-    provide_third_party_auth_service_factory,
-)
+# from .services import (
+#     provide_wellknown_service,
+#     provide_admin_auth_service,
+#     provide_admin_group_service,
+#     provide_admin_role_service,
+#     provide_admin_user_service,
+#     provide_auth_service,
+#     provide_auth_third_party_linkedin_service,
+#     provide_auth_third_party_oidc_service,
+#     provide_third_party_google_service,
+#     provide_third_party_facebook_service,
+#     provide_third_party_gitlab_service,
+#     provide_third_party_microsoft_service,
+#     provide_device_service,
+#     provide_endsession_service,
+#     provide_introspection_service,
+#     provide_jwt_service,
+#     provide_login_form_service,
+#     provide_password_service,
+#     provide_token_service,
+#     provide_userinfo_service,
+#     provide_client_service,
+# )
+# from .services_factory import (
+#     provide_auth_service_factory,
+#     # provide_third_party_auth_service_factory,
+# )
 from .jwt_manager import provide_jwt_manager, provide_jwt_manager_stub
 from .token_factory import provide_token_service_factory

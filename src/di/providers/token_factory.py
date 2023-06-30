@@ -1,6 +1,7 @@
 from __future__ import annotations
+
+from src.di.providers import provide_jwt_manager
 from src.business_logic.get_tokens.factory import TokenServiceFactory
-from src.business_logic.jwt_manager import JWTManager
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     PersistentGrantRepository,
@@ -23,6 +24,6 @@ def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFacto
         user_repo=UserRepository(session=db_session),
         device_repo=DeviceRepository(session=db_session),
         code_challenge_repo=CodeChallengeRepository(session=db_session),
-        jwt_manager=JWTManager(),
+        jwt_manager=provide_jwt_manager(),
         blacklisted_repo=BlacklistedTokenRepository(session=db_session)
     )
