@@ -5,6 +5,30 @@ from pydantic import BaseModel, SecretStr
 
 
 class RequestModel(BaseModel):
+    """
+    Represents a GET method request model for authentication.
+
+    Attributes:
+        client_id (str): The client identifier.
+        response_type (str): The type of the response requested.
+        scope (str): The scope of the access request (default: "openid").
+        redirect_uri (str): The URI to redirect to after completing the request.
+        state (Optional[str]): An optional opaque value used to maintain state between the request and the callback.
+        response_mode (Optional[str]): An optional value indicating the response mode to be used.
+        nonce (Optional[str]): An optional value used to associate a user agent session with an ID Token.
+        display (Optional[str]): An optional value indicating how the authorization server displays the authentication and consent pages.
+        prompt (Optional[str]): An optional value specifying whether the authorization server prompts the user for reauthentication and consent.
+        max_age (Optional[int]): An optional value indicating the maximum elapsed time in seconds since the last time the user was actively authenticated.
+        ui_locales (Optional[str]): An optional value specifying the end-user's preferred languages and scripts.
+        id_token_hint (Optional[str]): An optional value used to pass an ID Token for pre-authentication.
+        login_hint (Optional[str]): An optional value indicating the user's email address or other login identifier.
+        acr_values (Optional[str]): An optional value specifying the requested Authentication Context Class Reference values.
+        user_code (Optional[str]): An optional value representing a user code.
+
+
+    Reference: https://openid.net/specs/openid-connect-core-1_0.html
+    """
+
     client_id: str
     response_type: str
     scope: str = "openid"
@@ -29,6 +53,32 @@ class RequestModel(BaseModel):
 
 
 class AuthRequestModel(BaseModel):
+    """
+    Represents a POST method request model for authentication.
+
+     Attributes:
+        client_id (str): The client identifier.
+        response_type (str): The type of the response requested.
+        scope (str): The scope of the access request.
+        redirect_uri (str): The URI to redirect to after completing the request.
+        username (str): The username for authentication.
+        password (SecretStr): The password for authentication.
+        user_code (Optional[str]): An optional value representing a user code.
+        state (Optional[str]): An optional opaque value used to maintain state between the request and the callback.
+        response_mode (Optional[str]): An optional value indicating the response mode to be used.
+        nonce (Optional[str]): An optional value used to associate a user agent session with an ID Token.
+        display (Optional[str]): An optional value indicating how the authorization server displays the authentication and consent pages.
+        prompt (Optional[str]): An optional value specifying whether the authorization server prompts the user for reauthentication and consent.
+        max_age (Optional[int]): An optional value indicating the maximum elapsed time in seconds since the last time the user was actively authenticated.
+        ui_locales (Optional[str]): An optional value specifying the end-user's preferred languages and scripts.
+        id_token_hint (Optional[str]): An optional value used to pass an ID Token for pre-authentication.
+        login_hint (Optional[str]): An optional value indicating the user's email address or other login identifier.
+        acr_values (Optional[str]): An optional value specifying the requested Authentication Context Class Reference values.
+
+
+    Reference: https://openid.net/specs/openid-connect-core-1_0.html
+    """
+
     client_id: str
     response_type: str
     scope: str
