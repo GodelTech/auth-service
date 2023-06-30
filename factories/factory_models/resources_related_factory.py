@@ -4,6 +4,7 @@ from factory.fuzzy import FuzzyChoice
 
 import factories.data.data_for_factories as data
 import factories.factory_session as sess
+import factories.factory_models.client_factory as client
 import src.data_access.postgresql.tables.resources_related as resource
 from factories.data.data_for_factories import (
     API_CLAIM_TYPE,
@@ -39,10 +40,10 @@ class ApiResourceFactory(SQLAlchemyModelFactory):
         model = resource.ApiResource
         sqlalchemy_session = sess.session
 
-    description = factory.Faker("sentence")
-    display_name = factory.Faker("word")
+    description = FuzzyChoice(data.API_RESOURCES[0])
+    display_name = FuzzyChoice(data.API_RESOURCES[0])
     enabled = factory.Faker("pybool")
-    name = factory.Faker("word")
+    name = FuzzyChoice(data.API_RESOURCES[0])
 
 
 class ApiSecretFactory(SQLAlchemyModelFactory):
@@ -50,12 +51,12 @@ class ApiSecretFactory(SQLAlchemyModelFactory):
         model = resource.ApiSecret
         sqlalchemy_session = sess.session
 
+    description = FuzzyChoice(data.API_SECRET[0])
+    expiration = FuzzyChoice(data.API_SECRET[0])
+    value = FuzzyChoice(data.API_SECRET[0])
+    secret_type_id = FuzzyChoice(data.API_SECRET[0])
     api_resources_id = factory.SubFactory(ApiResourceFactory)
-    description = factory.Faker("sentence")
-    expiration = factory.Faker("date_time")
-    type = FuzzyChoice(API_SECRET_TYPE)
-    value = factory.Faker("word")
-
+    secret_type_id = factory.SubFactory(ApiSecretsTypeFactory)
 
 class ApiClaimFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -86,4 +87,14 @@ class ApiScopeClaimFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
 
     api_scopes_id = factory.SubFactory(ApiScopeFactory)
-    type = FuzzyChoice(API_SCOPE_CLAIM_TYPE)
+    scope_claim_type_id = factory.SubFactory(ApiScopeClaimTypeFactory)
+
+class ClientScopeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = resource.ClientScope
+        sqlalchemy_session = sess.session
+
+    # client_id = factory.SubFactory(client.ClientFactory)
+    resource_id = factory.SubFactory(ApiResourceFactory)
+    scope_id = factory.SubFactory(ApiScopeFactory)
+    claim_id = factory.SubFactory(ApiClaimTypeFactory)

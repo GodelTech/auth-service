@@ -5,6 +5,7 @@ from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services.password import PasswordHash
 from src.business_logic.services.jwt_token import JWTService
 from src.data_access.postgresql.repositories import UserRepository, PersistentGrantRepository
+from src.data_access.postgresql.errors import UserNotInGroupError
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 from src.dyna_config import DOMAIN_NAME
@@ -33,11 +34,13 @@ class AdminAuthService:
             credentials.password, 
             user_hash_password
         )
+        if not await self.user_repo.check_user_group(username=credentials.username, groupname='administration'):
+            raise UserNotInGroupError('administration')
         return await self.jwt_service.encode_jwt(
             payload={
                 "sub":user_id,
                 "exp": exp_time + int(time.time()),
-                "aud":["admin","introspection", "revoke"]
+                "aud":["admin"]
             }
         )
     

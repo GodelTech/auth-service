@@ -64,9 +64,11 @@ async function redirect(data) {
             if (!response.ok) {
                 throw new Error('Wrong credentials');
             } else {
-                let new_location = response.url;
-                window.location = new_location;
+                return response.json();
             }
+        })
+        .then((data) => {
+            showConfirmationModal(text = data.confirm_text, header_text = data.header_text, redirect_url = data.redirect_url);
         })
         .catch((err) => {
             if (
@@ -153,6 +155,43 @@ function handleDeviceButton(butt) {
     let device_link = butt.name;
     window.location.href = device_link;
 }
+
+function showConfirmationModal(text, header_text, redirect_url) {
+    let confirmationText = document.querySelector('#modal_window .form_auth_block_head_text');
+    let modalOverlay = document.querySelector('#overlay_modal');
+    let modalWindow = document.querySelector('#modal_window');
+    let submitButton = document.querySelector('#yes_butt');
+    let declineButton = document.querySelector('#no_butt');
+  
+    let modalTitle = document.createElement("p");
+    modalTitle.classList.add("modal_title");
+    modalTitle.textContent = header_text;
+    modalTitle.style.fontFamily = "Arial, sans-serif";
+    modalTitle.style.textAlign = "left";
+    modalTitle.style.fontWeight = "bold";
+    confirmationText.parentNode.insertBefore(modalTitle, confirmationText);
+
+    confirmationText.innerText = text;
+    confirmationText.style.textAlign = "left";
+  
+    modalOverlay.classList.add('active');
+    modalWindow.classList.add('active');
+    
+    submitButton.addEventListener('click', async () => {
+      modalOverlay.classList.remove('active');
+      modalWindow.classList.remove('active');
+      console.log(redirect_url);
+      console.log(text);
+      window.location.href = redirect_url;
+    });
+    
+    declineButton.addEventListener('click', async () => {
+      modalOverlay.classList.remove('active');
+      modalWindow.classList.remove('active');
+      let updated_url = redirect_url.replace(/\?code=.*$/, "access-denied");
+      window.location.href = updated_url;
+    });
+  }
 
 // EventListeners
 

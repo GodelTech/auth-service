@@ -83,27 +83,26 @@ TYPES_OF_GRANTS = [
 ]
 
 API_SECRET_TYPE = [
-    "sha256",
-    "sha512",
+    "Shared",
+    "Encrypt",
 ]
 
 API_CLAIM_TYPE = [
-    "string",
+    "mobile app",
+    "products",
+    "documents",
+    "analytics",
+    "payments",
+    "shipping",
+    "services",
 ]
 
 API_SCOPE_CLAIM_TYPE = [
-    "name",
-    "family_name",
-    "middle_name",
-    "nickname",
-    "preferred_username",
-    "profile_picture",
-    "website",
-    "gender",
-    "birthdate",
-    "zone_info",
-    "locale",
-    "updated_at",
+    "read",
+    "write",
+    "delete",
+    "process",
+    "manage",
 ]
 
 DEFAULT_USER_CLAIMS = {
@@ -140,19 +139,40 @@ CLIENT_SECRETS = {
     9: "position",
     10: "themselves",
 }
+oidc_id = 2
+userinfo_id = 3
+openid_id = 8
+profile_id = 9
+email_id = 10
 
-CLIENT_SCOPES = {
-    1: "openid",
-    2: "openid email",
-    3: "openid profile",
-    4: "openid email",
-    5: "openid profile",
-    6: "openid profile",
-    7: "openid",
-    8: "openid profile",
-    9: "openid profile",
-    10: "openid email",
-}
+base_scopes = [{
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': openid_id,
+    }, 
+    {
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': profile_id,
+    }, 
+    {
+        'resource':oidc_id,
+        'scope':userinfo_id,
+        'claim': email_id,
+    }, 
+]
+
+alarm_api_scopes = [
+    {
+        'resource':1,
+        'scope':1,
+        'claim': 1,
+    }
+]
+
+# test_client_scope = base_scopes + [alarm_api_scope_time_read]
+
+CLIENT_SCOPES:list = base_scopes + alarm_api_scopes
 
 ROLES = [
     "Programmer, applications",
@@ -269,3 +289,106 @@ POST_LOGOUT_REDIRECT_URL = {
 }
 
 CODE_CHALLENGE_METHODS = ["plain", "S256"]
+
+API_RESOURCES = [
+    {
+        "description":"API Resource for Alarm App",
+        "display_name":"Alarm API",
+        "name":"alarm-api-resource",
+    },
+    {
+        "description":"Our OIDC",
+        "display_name":"OIDC auth-service",
+        "name":"oidc",
+    }
+]
+
+API_CLAIMS =[
+    {
+        "api_resource_id": 1,
+        "type":1
+    }
+]
+
+API_SECRET =[
+    {
+       # "api_resource_id": 1,
+        # "type":1,
+        "description":"Secret for Alarm API Resource",
+        "value" : "0123456789abcdef",
+        "expiration": '1234-01-01 00:00:00',
+    }
+]
+
+API_SCOPES =[
+    {
+        "api_resource_id": 1,
+        "name": "time",
+        "description" : "Gives posibility to manage alarm's time",
+        "display_name": "Manage Time",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+        "api_resource_id": 1,
+        "name": "music",
+        "description" : "Gives posibility to manage alarm's music",
+        "display_name": "Manage Music",
+        "required": True,
+        "emphasize": False,
+    }
+]
+
+API_SCOPES_OIDC =[
+    {
+        "api_resource_id": 2,
+        "name": "userinfo",
+        "description" : "Gives posibility to get user information",
+        "display_name": "UserInfo",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+        "api_resource_id": 2,
+        "name": "introspection",
+        "description" : "Gives posibility to check token",
+        "display_name": "Intorospection",
+        "required": True,
+        "emphasize": False,
+    },
+    {
+        "api_resource_id": 2,
+        "name": "revoke",
+        "description" : "Gives posibility to revoke token",
+        "display_name": "Revocation",
+        "required": True,
+        "emphasize": False,
+    }
+]
+
+API_SCOPE_CLAIM_TYPE_INTOSPECT_REVOKE =[
+        'get', 'post'
+]
+
+API_SCOPE_CLAIM_TYPE_USERINFO = [
+    "openid",
+    "profile",
+    "email",
+    "name",
+    "given_name",
+    "family_name",
+    "middle_name",
+    "nickname",
+    "preferred_username",
+    "picture",
+    "website",
+    "email_verified",
+    "gender",
+    "birthdate",
+    "zoneinfo",
+    "locale",
+    "phone_number",
+    "phone_number_verified",
+    "address",
+    "updated_at",
+]

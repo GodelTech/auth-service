@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncEngine
 from typing import Generator
-
 from src.data_access.postgresql.repositories import (
     ClientRepository,
     DeviceRepository,
@@ -11,6 +10,8 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     WellKnownRepository,
     BlacklistedTokenRepository,
+    ResourcesRepository
+
 )
 from src.data_access.postgresql.repositories.base import BaseRepository
 from sqlalchemy.ext.asyncio import AsyncSession
