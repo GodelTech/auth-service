@@ -14,7 +14,9 @@ from src.business_logic.common.validators import (
 
 if TYPE_CHECKING:
     from src.business_logic.authorization.interfaces import AuthServiceProtocol
-    from src.business_logic.services import JWTService, PasswordHash
+    from src.business_logic.services import PasswordHash
+    from src.business_logic.jwt_manager.interfaces import JWTManagerProtocol
+
     from src.data_access.postgresql.repositories import (
         ClientRepository,
         UserRepository,
@@ -57,4 +59,6 @@ def _create_id_token_auth_service(
             user_repo=user_repo,
             password_service=password_service,
         ),
+        user_repo=user_repo,
+        jwt_manager=jwt_manager,
     )

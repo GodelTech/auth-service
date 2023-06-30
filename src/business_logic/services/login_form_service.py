@@ -43,11 +43,14 @@ class LoginFormService:
                     if self.request_model.response_type in [
                         "code",
                         "token",
+                        "id_token",
                         "id_token token",
                         "urn:ietf:params:oauth:grant-type:device_code",
                     ]:
                         if self.request_model.response_type == "code" and (
-                                self.request_model.code_challenge and self.request_model.code_challenge_method):
+                            self.request_model.code_challenge
+                            and self.request_model.code_challenge_method
+                        ):
                             await self._save_code_challenge()
                         return True
                     else:
@@ -119,13 +122,13 @@ class LoginFormService:
 
         if self.request_model.code_challenge_method == "S256":
             fernet = Fernet(AppSettings().secret_key.get_secret_value())
-            code_challenge = fernet.encrypt(
-                code_challenge.encode()
-            ).decode()
+            code_challenge = fernet.encrypt(code_challenge.encode()).decode()
 
-        await self.code_challenge_repo.create(client_id=self.request_model.client_id,
-                                              code_challenge_method=self.request_model.code_challenge_method,
-                                              code_challenge=code_challenge)
+        await self.code_challenge_repo.create(
+            client_id=self.request_model.client_id,
+            code_challenge_method=self.request_model.code_challenge_method,
+            code_challenge=code_challenge,
+        )
 
     @property
     def request_model(self) -> Optional[RequestModel]:
