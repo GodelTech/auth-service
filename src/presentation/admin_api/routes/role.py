@@ -9,6 +9,7 @@ from src.data_access.postgresql.repositories import RoleRepository
 from src.business_logic.services.admin_api import AdminRoleService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.presentation.admin_api.models.role import *
+from src.di.providers import provide_async_session_stub
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,8 @@ async def get_role(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-        session = request.state.session
         role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -38,8 +39,8 @@ async def get_role(
 async def get_all_roles(
     request: Request,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 )-> dict[str, Any]:
-    session = request.state.session
     role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -54,13 +55,14 @@ async def create_role(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestNewRoleModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
         )
     await role_class.create_role(name=request_model.name)
+    await session.commit()
 
 
 @admin_role_router.put(
@@ -71,8 +73,8 @@ async def update_role(
     role_id:int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateRoleModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-        session = request.state.session
         role_class = AdminRoleService(
             session=session,
             role_repo=RoleRepository(session)
@@ -80,6 +82,7 @@ async def update_role(
         await role_class.update_role(
             role_id=role_id, name=request_model.name
         )
+        await session.commit()
 
 @admin_role_router.delete(
     "/{role_id}", status_code=status.HTTP_200_OK, tags=["Administration Role"], description="Delete the Role"
@@ -88,10 +91,11 @@ async def delete_group(
     request: Request,
     role_id:int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     role_class = AdminRoleService(
         session=session,
         role_repo=RoleRepository(session=session)
     )
     await role_class.delete_role(role_id=role_id)
+    await session.commit()

@@ -3,10 +3,12 @@ from functools import wraps
 from typing import Union, TypeVar
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.data_access.postgresql.repositories import UserRepository
 from src.business_logic.services.admin_api import AdminUserService
 from src.data_access.postgresql.errors.user import DuplicationError
 from src.presentation.admin_api.models.user import *
+from src.di.providers import provide_async_session_stub
 from typing import Callable
 logger = logging.getLogger(__name__)
 
@@ -20,11 +22,10 @@ async def get_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -49,11 +50,11 @@ async def get_all_users(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_model: RequestAllUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
     
 ) -> dict[str, Any]:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     return {
@@ -71,10 +72,10 @@ async def update_user(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUpdateUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     data_to_change = {}
@@ -94,6 +95,7 @@ async def update_user(
     await user_class.update_user(
         user_id=user_id, kwargs=data_to_change
     )
+    await session.commit()
 
 @admin_user_router.delete(
     "/{user_id}", status_code=200, tags=["Administration User"], description= "Delete User by ID"
@@ -102,13 +104,14 @@ async def delete_user(
     request: Request,
     user_id: int,
     access_token: str = Header(description="Access token"),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     await user_class.delete_user(user_id=user_id)
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -118,16 +121,17 @@ async def create_user(
     request: Request,
     access_token: str = Header(description="Access token"),
     request_body: RequestCreateUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     data = request_body.dictionary()
     data["access_failed_count"] = 0
 
     await user_class.create_user(kwargs=data)
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -138,16 +142,17 @@ async def add_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_body: RequestGroupsUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
     await user_class.add_user_groups(
         user_id=user_id, group_ids=request_body.group_ids
     )
+    await session.commit()
 
 
 @admin_user_router.post(
@@ -158,15 +163,16 @@ async def add_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
     await user_class.add_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
     )
+    await session.commit()
     return
 
 
@@ -178,10 +184,10 @@ async def get_user_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 )  -> dict[str, Any]:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -200,11 +206,10 @@ async def get_user_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestUserModel = Depends(),
-    
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> dict[str, Any]:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
@@ -221,16 +226,17 @@ async def delete_roles(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestRolesUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
     await user_class.remove_user_roles(
         user_id=user_id, role_ids=request_model.role_ids
     )
+    await session.commit()
 
 
 @admin_user_router.delete(
@@ -241,16 +247,17 @@ async def delete_groups(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestGroupsUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
     await user_class.remove_user_groups(
         user_id=user_id, group_ids=request_model.group_ids
     )
+    await session.commit()
 
 
 @admin_user_router.put(
@@ -261,13 +268,14 @@ async def change_user_password(
     user_id: int,
     access_token: str = Header(description="Access token"),
     request_model: RequestPasswordUserModel = Depends(),
+    session: AsyncSession = Depends(provide_async_session_stub)
 ) -> None:
-    session = request.state.session
     user_class = AdminUserService(
-        session = session,
+        session=session,
         user_repo=UserRepository(session)
         )
 
     await user_class.change_password(
         user_id=user_id, new_password=request_model.new_password
     )
+    await session.commit()

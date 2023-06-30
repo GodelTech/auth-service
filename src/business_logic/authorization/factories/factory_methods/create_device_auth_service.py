@@ -31,6 +31,7 @@ def _create_device_auth_service(
     persistent_grant_repo: PersistentGrantRepository,
     device_repo: DeviceRepository,
     password_service: PasswordHash,
+    scope_service,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
     """
@@ -54,7 +55,10 @@ def _create_device_auth_service(
     return DeviceAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
-        scope_validator=ScopeValidator(client_repo),
+        scope_validator=ScopeValidator(
+            client_repo=client_repo,
+            scope_service=scope_service
+        ),
         user_credentials_validator=UserCredentialsValidator(
             user_repo=user_repo,
             password_service=password_service,

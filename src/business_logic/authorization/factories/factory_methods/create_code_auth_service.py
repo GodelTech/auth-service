@@ -28,6 +28,7 @@ def _create_code_auth_service(
     user_repo: UserRepository,
     persistent_grant_repo: PersistentGrantRepository,
     password_service: PasswordHash,
+    scope_service,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
     """
@@ -49,7 +50,10 @@ def _create_code_auth_service(
     return CodeAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
-        scope_validator=ScopeValidator(client_repo),
+        scope_validator=ScopeValidator(
+            client_repo=client_repo,
+            scope_service=scope_service
+        ),
         user_credentials_validator=UserCredentialsValidator(
             user_repo=user_repo,
             password_service=password_service,

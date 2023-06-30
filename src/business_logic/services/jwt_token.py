@@ -25,7 +25,7 @@ class JWTService:
         return token
 
     @no_type_check
-    async def decode_token(self, token: str, audience:str =None ,**kwargs:Any) -> dict[str, Any]:
+    async def decode_token(self, token: str, audience: str =None ,**kwargs: Any) -> dict[str, Any]:
 
         token = token.replace("Bearer ", "")
         if audience:
@@ -60,3 +60,16 @@ class JWTService:
 
     async def get_pub_key_expanent(self) -> int:
         return self.keys.e
+
+    @no_type_check
+    async def decode_token_no_aud_iss_check(self, token: str, **kwargs: Any) -> dict[str, Any]:
+
+        token = token.replace("Bearer ", "")
+        decoded = jwt.decode(
+            token,
+            key=self.keys.public_key,
+            algorithms=self.algorithms,
+            options={"verify_aud":False, 'verify_iss':False},
+            **kwargs,
+        )
+        return decoded

@@ -57,6 +57,7 @@ class ApiScopeClaimAdminController(ModelView, model=ApiScopeClaim):
     
 class ApiScopeClaimTypeAdminController(ModelView, model=ApiScopeClaimType):
     icon = "fa-solid fa-network-wired"
-    column_list = [ApiScopeClaimType.id, 
+    column_list = [ApiScopeClaimType.id,
+                   ApiScopeClaimType.scope_claim, 
                    ApiScopeClaimType.scope_claim_type,
                    ]

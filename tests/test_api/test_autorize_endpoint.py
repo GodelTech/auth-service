@@ -15,7 +15,7 @@ class TestAuthorizeEndpointGET:
             "client_id": "test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -26,7 +26,7 @@ class TestAuthorizeEndpointGET:
         params = {
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -38,7 +38,7 @@ class TestAuthorizeEndpointGET:
             "client_id": "wrong_test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         expected_content = '{"message":"Client not found"}'
         response = await client.request("GET", "/authorize/", params=params)
@@ -68,7 +68,7 @@ class TestAuthorizeEndpointGET:
             "client_id": "test_client",
             "response_type": "some_type",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         expected_content = '{"message":"Bad response type"}'
         response = await client.request("GET", "/authorize/", params=params)
@@ -88,7 +88,7 @@ class TestAuthorizeEndpointPOST:
             "client_id": "test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
             "username": "TestClient",
             "password": "test_password",
         }
@@ -98,7 +98,7 @@ class TestAuthorizeEndpointPOST:
             data=params,
             headers={"Content-Type": self.content_type},
         )
-        assert response.status_code == status.HTTP_302_FOUND
+        assert response.status_code == status.HTTP_200_OK
 
     async def test_unsuccessful_authorize_request_not_full_data(
         self, client: AsyncClient, engine: AsyncEngine,
@@ -106,7 +106,7 @@ class TestAuthorizeEndpointPOST:
         params = {
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request(
             "POST",
@@ -123,7 +123,7 @@ class TestAuthorizeEndpointPOST:
             "client_id": "wrong_test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
             "username": "TestClient",
             "password": "test_password",
         }
@@ -145,7 +145,7 @@ class TestAuthorizeEndpointPOST:
             "client_id": "test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
             "username": "TestClient",
             "password": "Wrong",
         }
@@ -167,7 +167,7 @@ class TestAuthorizeEndpointPOST:
             "client_id": "test_client",
             "response_type": "code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
             "username": "WrongUsername",
             "password": "password",
         }

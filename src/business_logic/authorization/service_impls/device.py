@@ -106,6 +106,7 @@ class DeviceAuthService:
                 )
             ).id,
             expiration_time=int(time.time()) + grant_duration,
+            scope=request_data.scope
         )
 
     async def get_redirect_url(self, request_data: AuthRequestModel) -> str:

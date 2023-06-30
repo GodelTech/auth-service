@@ -14,6 +14,16 @@ from sqlalchemy.orm import relationship
 
 from .base import Base, BaseModel
 
+clients_scopes = Table(
+    "clients_scopes",
+    BaseModel.metadata,
+    Column(
+        "client_id", ForeignKey("clients.id", ondelete="CASCADE"),  primary_key=True,
+    ),
+    Column(
+        "scope_id", ForeignKey("client_scopes.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
 
 clients_response_types = Table(
     "clients_response_types",
@@ -137,8 +147,10 @@ class Client(BaseModel):
         back_populates="client",
         lazy = 'subquery'
     )
-    scopes = relationship(
+    ##############################################
+    scope = relationship(
         "ClientScope", 
+        secondary=clients_scopes,
         back_populates="client",
         lazy = 'subquery'
         )
@@ -263,21 +275,21 @@ class ClientClaim(BaseModel):
         return f"{self.type}"
 
 
-class ClientScope(BaseModel):
-    __tablename__ = "client_scopes"
+# class ClientScope(BaseModel):
+#     __tablename__ = "client_scopes"
 
-    scope = Column(String, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), unique=True)
-    client = relationship(
-        "Client",
-        back_populates="scopes",
-    )
+#     scope = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), unique=True)
+#     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), unique=True)
+#     client = relationship(
+#         "Client",
+#         back_populates="scopes",
+#     )
 
-    def __str__(self) -> str:  # pragma: no cover
-        return f"{self.scope}"
+#     def __str__(self) -> str:  # pragma: no cover
+#         return f"{self.scope}"
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"{self.scope}"
+#     def __repr__(self) -> str:  # pragma: no cover
+#         return f"{self.scope}"
 
 
 class ClientPostLogoutRedirectUri(BaseModel):

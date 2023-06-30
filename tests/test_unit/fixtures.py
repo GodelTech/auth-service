@@ -102,7 +102,7 @@ def authorization_get_request_model() -> RequestModel:
         client_id="test_client",
         response_type="code",
         scope="openid",
-        redirect_uri="https://www.google.com/",
+        redirect_uri="http://127.0.0.1:8888/callback/",
         state="state",
         response_mode="mode",
         nonce="test_data",

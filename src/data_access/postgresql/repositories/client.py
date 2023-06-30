@@ -15,7 +15,6 @@ from src.data_access.postgresql.tables.client import (
     ClientClaim,
     ClientPostLogoutRedirectUri,
     ClientRedirectUri,
-    ClientScope,
     ClientSecret,
     AccessTokenType,
     RefreshTokenExpirationType,
@@ -23,11 +22,12 @@ from src.data_access.postgresql.tables.client import (
     ResponseType,
     clients_response_types,
     clients_grant_types,
+    clients_scopes,
 )
-from src.data_access.postgresql.tables.persistent_grant import PersistentGrantType
+from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 from typing import Optional, Any, Union
 from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
-from src.data_access.postgresql.errors import DuplicationError
+from src.data_access.postgresql.errors import DuplicationError, ClientScopesError
 import time
 
 class ClientRepository(BaseRepository):
@@ -130,11 +130,15 @@ class ClientRepository(BaseRepository):
         else:
             return True
 
-    async def get_client_scopes(self, client_id: int) -> str:
-        scopes = await self.session.execute(
-            select(ClientScope).where(ClientScope.client_id == client_id)
-        )
-        return scopes.first()[-1].scope
+    async def get_client_scopes(self, client_id: int) -> list[str]:
+        client = (await self.session.execute(
+            select(Client).where(Client.id == client_id)
+        )).first()
+        scopes = client[0].scope
+        result = [f'{scope.resource.name}:{scope.scope.name}:{scope.claim}'for scope in scopes]
+        if len(result) == 0:
+            raise ClientScopesError
+        return result
 
     async def get_client_redirect_uris(self, client_id: int) -> list[str]:
         uris = await self.session.execute(
@@ -170,12 +174,14 @@ class ClientRepository(BaseRepository):
         return result.all()
 
     async def list_all_scopes_by_client(self, client_id: str) -> List[str]:
-        scopes = await self.session.scalars(
-            select(ClientScope.scope)
-            .join(Client, ClientScope.client_id == Client.id)
-            .where(Client.client_id == client_id)
-        )
-        return scopes.all()
+        client = await self.get_client_by_client_id(client_id)
+        result = []
+        for scope in client.scope:
+            if scope.scope.name == 'userinfo':
+                result.append(str(scope.claim))
+            else:
+                result.append(f'{scope.resource.name}:{scope.scope.name}:{scope.claim}')
+        return result
 
     async def exists(self, client_id: str) -> bool:
         result = await self.session.execute(
@@ -234,17 +240,25 @@ class ClientRepository(BaseRepository):
     async def add_scope(
         self, 
         client_id_int:int,
-        scope:str,
+        scope_ids:str,
     ) -> None:
-        try:
-            
-            await self.session.execute(insert(ClientScope).values(
-                client_id = client_id_int,
-                scope = scope,
-                )
+        scope_id = (await self.session.execute(
+            select(ClientScope).where(
+                ClientScope.resource_id == scope_ids['resource_id'], 
+                ClientScope.scope_id == scope_ids['scope_id'],
+                ClientScope.claim_id == scope_ids['claim_id']
             )
-        except:
-            raise DuplicationError
+        )).first()
+        if scope_id is None:
+            raise ClientScopesError
+
+        scope_id = scope_id[0].id
+        await self.session.execute(insert(clients_scopes).values(
+            client_id = client_id_int,
+            scope_id = scope_id,
+            )
+        )
+        
 
     async def add_redirect_uris(
         self, 
@@ -307,20 +321,17 @@ class ClientRepository(BaseRepository):
         self, 
         client_id_int:int,
     ) -> None:
-        
-            await self.session.execute(
-                delete(ClientScope).where(ClientScope.client_id == client_id_int)
-            )
-
+        sql = f'DELETE FROM clients_scopes WHERE client_id={client_id_int}'
+        await self.session.execute(text(sql))
+    
     async def delete_redirect_uris(
         self, 
         client_id_int:int,
     ) -> None:
+        await self.session.execute(
+            delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
+        )
         
-            await self.session.execute(
-                delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
-            )
-
     async def delete_client_by_client_id(
         self, 
         client_id:str,
@@ -375,7 +386,13 @@ class ClientRepository(BaseRepository):
         
             sql = f"DELETE FROM clients_grant_types WHERE client_id = {client_id_int}"
             await self.session.execute(text(sql))
-        
+    
+    async def exists_client_with_provided_client_secret(self, client_id: str, client_secret: str) -> bool:
+        query = (select(Client).join(ClientSecret, Client.id == ClientSecret.client_id)
+                .where(Client.client_id == client_id, ClientSecret.value == client_secret)
+                .exists().select())
+        result = await self.session.execute(query)
+        return result.scalar()
 
     def __repr__(self) -> str:
         return "Client Repository"

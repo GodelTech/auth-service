@@ -16,7 +16,7 @@ class ThirdPartyAccessTokenRequestModel(BaseModel):
     code: str
     state: str
     grant_type: str = "authorization_code"
-
+    scope: str = "openid"
     class Config:
         orm_mode = True
 

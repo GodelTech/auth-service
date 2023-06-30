@@ -15,6 +15,7 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
     WrongResponseTypeError,
     IncorrectAuthTokenError,
+    UserNotInGroupError
 )
 from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
@@ -25,6 +26,17 @@ from src.business_logic.third_party_auth.errors import (
     ThirdPartyAuthProviderInvalidRequestDataError,
 )
 from src.data_access.postgresql.errors.third_party_oidc import ParsingError
+from src.business_logic.get_tokens.errors import (
+    InvalidGrantError, 
+    InvalidRedirectUriError, 
+    UnsupportedGrantTypeError,
+    InvalidClientCredentialsError,
+    InvalidPkceCodeError
+)
+from src.business_logic.common.errors import (
+    InvalidClientIdError,
+    InvalidClientScopeError
+)
 from .auth_token_errors_handler import incorrect_token_auth_error_handler
 from .base_error_handler import (
     base_bad_request_error_handler,
@@ -66,6 +78,12 @@ from .invalid_state_error_handler import invalid_state_error_handler
 from .third_party_auth_provider_invalid_request_data_error_handler import (
     invalid_request_data_error_handler,
 )
+from .http400_invalid_client import http400_invalid_client_handler
+from .http400_invalid_grant import http400_invalid_grant_handler
+from .http400_unsupported_grant_type import http400_unsupported_grant_type_handler
+from .http400_invalid_scope import http400_invalid_scope_handler
+from .http400_invalid_pkce import http400_invalid_pkce_handler
+from .user_groups_and_roles_handler import user_not_in_group_error_handler
 
 exception_handler_mapping = {
     ClientNotFoundError: client_not_found_error_handler,
@@ -91,4 +109,12 @@ exception_handler_mapping = {
     UnsupportedThirdPartyAuthProviderError: unsupported_third_party_auth_provider_error_handler,
     ThirdPartyAuthInvalidStateError: invalid_state_error_handler,
     ThirdPartyAuthProviderInvalidRequestDataError: invalid_request_data_error_handler,
+    InvalidClientIdError: http400_invalid_client_handler,
+    InvalidGrantError: http400_invalid_grant_handler,
+    InvalidRedirectUriError: http400_invalid_grant_handler,
+    UnsupportedGrantTypeError: http400_unsupported_grant_type_handler,
+    InvalidClientCredentialsError: http400_invalid_client_handler,
+    InvalidClientScopeError: http400_invalid_scope_handler,
+    InvalidPkceCodeError: http400_invalid_pkce_handler,
+    UserNotInGroupError: user_not_in_group_error_handler,
 }

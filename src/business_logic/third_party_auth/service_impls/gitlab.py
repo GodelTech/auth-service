@@ -85,7 +85,7 @@ class GitlabAuthService(ThirdPartyAuthMixin):
         await self._create_grant(
             request_data,
             username_type="nickname",
-            provider_name=AuthProviderName.GITLAB.value,
+            provider_name=AuthProviderName.GITLAB.value
         )
         redirect_url = f"{request_data.state.split('!_!')[StateData.REDIRECT_URL.value]}?code={self._secret_code}"
         return await self._update_redirect_url(request_data, redirect_url)
