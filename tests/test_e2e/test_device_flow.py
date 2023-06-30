@@ -42,7 +42,7 @@ class TestDeviceFlow:
 
         # Stage 3: Client requests user authorization (usually done by redirecting the user to an authorization form)
         auth_params = {"client_id": "test_client", "response_type": "urn:ietf:params:oauth:grant-type:device_code",
-                       "redirect_uri": "https://www.google.com/"}
+                       "redirect_uri": "http://127.0.0.1:8888/callback/"}
         response = await client.request("GET", "/authorize/", params=auth_params)
         assert response.status_code == status.HTTP_200_OK
 
@@ -53,7 +53,7 @@ class TestDeviceFlow:
             "client_id": "test_client",
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
             "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
             "username": "TestClient",
             "password": "test_password",
         }
@@ -61,11 +61,11 @@ class TestDeviceFlow:
                                         data=auth_params,
                                         headers={"Content-Type": self.content_type},
                                         cookies={"user_code": user_code})
-        assert response.status_code == status.HTTP_302_FOUND
+        assert response.status_code == status.HTTP_200_OK
 
         # Stage 5: Client exchanges the device code for an access token
         token_params = {"client_id": "test_client", "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-                        "device_code": device_code, "redirect_uri": "https://www.google.com/"}
+                        "device_code": device_code, "redirect_uri": "http://127.0.0.1:8888/callback/"}
         response = await client.request("POST", "/token/", data=token_params,
                                         headers={"Content-Type": self.content_type})
         assert response.status_code == status.HTTP_200_OK
@@ -145,7 +145,7 @@ class TestDeviceFlow:
         params_4th = {
             "client_id": "test_client",
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request(
             "GET", "/authorize/", params=params_4th

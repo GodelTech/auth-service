@@ -4,11 +4,15 @@ from sqlalchemy import delete
 from src.business_logic.services.admin_auth import AdminAuthService
 from src.business_logic.dto.admin_credentials import AdminCredentialsDTO
 from src.business_logic.services.jwt_token import JWTService
-from src.data_access.postgresql.errors.user import UserNotFoundError
+from src.data_access.postgresql.errors.user import UserNotFoundError, UserNotInGroupError
 from src.data_access.postgresql.errors import WrongPasswordError
 from time import time, sleep
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError
 from pydantic import SecretStr
+from src.data_access.postgresql.repositories import UserRepository
+
+async def new_check_user_group(*args, **kwargs):
+    return True
 
 @pytest.mark.asyncio
 class TestAdminAuthService:
@@ -19,8 +23,14 @@ class TestAdminAuthService:
         credentials = AdminCredentialsDTO(
             username="TestClient", password=SecretStr("test_password")
         )
-        result = await service.authorize(credentials=credentials)
-        assert result
+        with mock.patch.object(
+            UserRepository, "check_user_group", new=new_check_user_group
+        ):
+            result = await service.authorize(credentials=credentials)
+            assert result
+
+        with pytest.raises(UserNotInGroupError):
+            await service.authorize(credentials=credentials)
 
         credentials = AdminCredentialsDTO(
             username="Vi", password=SecretStr("test_password")

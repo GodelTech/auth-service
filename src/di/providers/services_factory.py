@@ -15,10 +15,6 @@ from src.business_logic.third_party_auth.factory import (
 from src.business_logic.services import JWTService, PasswordHash
 
 
-def provide_auth_service_factory_stub() -> None:
-    ...
-
-
 def provide_auth_service_factory(
     session: AsyncSession,
     client_repo: ClientRepository,
@@ -37,12 +33,6 @@ def provide_auth_service_factory(
         jwt_service=jwt_service,
         password_service=password_service,
     )
-
-
-def provide_third_party_auth_service_factory_stub() -> (
-    None
-):  # pragma: no cover
-    ...
 
 
 def provide_third_party_auth_service_factory(

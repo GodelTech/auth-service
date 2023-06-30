@@ -17,6 +17,12 @@ async def access_token_middleware(
         request: Request,
         session: AsyncSession = Depends(provide_async_session_stub)
 ) -> Any:
+    aud = ''
+    if request.method == 'GET':
+        aud = "oidc:admin:read"
+    else:
+        aud = "oidc:admin:write"
+
     jwt_service = JWTService()
     token = request.headers.get("access-token")
     blacklisted_repo = BlacklistedTokenRepository(session)
@@ -26,7 +32,7 @@ async def access_token_middleware(
     if await blacklisted_repo.exists(token=token):
         raise IncorrectAuthTokenError("Access Token revoked")
     try:
-        await jwt_service.decode_token(token, audience='admin')
+        await jwt_service.decode_token(token, audience=aud)
     except (InvalidAudienceError, MissingRequiredClaimError):
         raise IncorrectAuthTokenError("Access Token doesn't have admin permissions")
     except ExpiredSignatureError:

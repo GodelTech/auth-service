@@ -53,7 +53,8 @@ class RefreshTokenGrantService:
 
         access_token = await self._get_access_token(
             request_data=request_data, user_id=user_id,
-            unix_time=current_unix_time
+            unix_time=current_unix_time,
+            aud=grant.scope.split(' ')
         )
         id_token = await self._get_id_token(request_data=request_data, user_id=user_id, unix_time=current_unix_time)
         
@@ -66,14 +67,14 @@ class RefreshTokenGrantService:
             refresh_expires_in=1800
         )
 
-    async def _get_access_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
+    async def _get_access_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int, aud = list[str]) -> str:
         payload = AccessTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
             client_id=request_data.client_id,
             iat=unix_time,
             exp=unix_time + 600,
-            aud=request_data.client_id,
+            aud=aud,
             jti=str(uuid.uuid4()),
             acr=0,
         )

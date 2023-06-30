@@ -58,6 +58,18 @@ class IntrospectionService:
         persistent_grant_repo: PersistentGrantRepository,
         jwt: JWTService = JWTService(),
     ) -> None:
+        """Initialize the IntrospectionServices class.
+
+        Args:
+            session (AsyncSession): The async session object.
+            user_repo (UserRepository): The user repository object.
+            client_repo (ClientRepository): The client repository object.
+            persistent_grant_repo (PersistentGrantRepository): The persistent grant repository object.
+            jwt (JWTService): The JWT service object. Defaults to JWTService()
+
+        Returns:
+            None
+        """
         self.jwt = jwt
         self.request: Optional[Request] = None
         self.authorization: Optional[str] = None
@@ -102,13 +114,22 @@ class IntrospectionService:
         response: dict[str, Any] = {}
 
         try:
-            decoded_token = await self.jwt.decode_token(
-                token=self.request_body.token, audience="introspection"
+            decoded_token = await self.jwt.decode_token_no_aud_iss_check(
+                token=self.request_body.token,
             )
         except ExpiredSignatureError:
             return {"active": False}
         except PyJWTError:
             raise TokenIncorrectError
+        else:
+            if self.request_body.token_type_hint in (
+                "access-token",
+                "access_token",
+                "access",
+                "authorization_code",
+                "authorization-code",
+            ):
+                response["active"] = True
 
         if self.request_body.token_type_hint in (
             "access-token",
@@ -167,23 +188,39 @@ class IntrospectionService:
 
         return response
 
-    def get_token_type(self) -> str:
-        """A helper method that returns the type of the token.
+    async def get_client_id(self) -> str:
+        """Get the client ID of the inspected token.
+
+        Raises:
+            TokenIncorrectError: If the request body is None.
 
         Returns:
-            str: a token type.
+            str: the client ID.
+        """
+        if self.request_body is None:
+            raise TokenIncorrectError
+        grant = await self.persistent_grant_repo.get(
+            grant_data=self.request_body.token,
+            grant_type=self.request_body.token_type_hint,
+        )
+        return grant.client_id
+
+    def get_token_type(self) -> str:
+        """Get the token type of inspected token.
+
+        Returns:
+            str: The token type.
         """
         return "Bearer"
 
     def slice_url(self) -> str:
-        """A helper method that retrieves the issuer from the url.
-
-        Returns:
-            str: a string containing the issuer.
+        """Slice the URL to get the required part.
 
         Raises:
-            TokenIncorrectError: If the token is incorrect or missing.
+            TokenIncorrectError: If the request is None.
 
+        Returns:
+            str: The sliced URL part.
         """
         if self.request is None:
             raise TokenIncorrectError

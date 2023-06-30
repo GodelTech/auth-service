@@ -1,9 +1,5 @@
-from datetime import datetime, timedelta
-
 from sqlalchemy import (
-    CheckConstraint,
     Column,
-    DateTime,
     ForeignKey,
     Integer,
     String,
@@ -51,6 +47,7 @@ class PersistentGrant(BaseModel):
         backref="grants",
         lazy = 'joined'
     )
+    scope = Column(String, default = "openid", nullable=True)
 
     def __str__(self) -> str:  # pragma: no cover
         return f":{self.expiration}"
