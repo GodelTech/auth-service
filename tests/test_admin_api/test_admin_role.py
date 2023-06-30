@@ -27,7 +27,10 @@ class TestAdminRoleEndpoint:
         self, connection: AsyncSession, user_id: int = 1000
     ) -> None:
         self.access_token = await JWTService().encode_jwt(
-            payload={"stand": "CrazyDiamond", "aud": ["admin"]}
+            payload={
+                "stand": "CrazyDiamond",
+                "aud":["oidc:admin:read", "oidc:admin:write"]
+            }
         )
         self.group_repo = GroupRepository(connection)
         self.role_repo = RoleRepository(connection)

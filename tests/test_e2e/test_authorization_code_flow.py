@@ -7,6 +7,8 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+import json
+from src.business_logic.services.jwt_token import JWTService
 
 from src.data_access.postgresql.tables.users import User, UserClaim
 
@@ -30,8 +32,8 @@ class TestAuthorizationCodeFlow:
         authorization_params = {
             "client_id": "test_client",
             "response_type": "code",
-            "scope": "openid",
-            "redirect_uri": "https://www.google.com/",
+            "scope": "openid profile",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         authorization_response = await client.request(
             "GET", "/authorize/", params=authorization_params
@@ -48,16 +50,17 @@ class TestAuthorizationCodeFlow:
             data={**authorization_params, **user_credentials},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        assert response.status_code == status.HTTP_302_FOUND
+        assert response.status_code == status.HTTP_200_OK
 
         # Stage 2: Token endpoint changes the secret code in the Persistent Grant table to a token
-        secret_code = response.headers["location"].split("=")[1]
+        secret_code = json.load(response)['redirect_url']
+        secret_code = secret_code.split('=')[1]
 
         token_params = {
             "client_id": "test_client",
             "grant_type": "authorization_code",
             "code": secret_code,
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         token_response = await client.request(
             "POST",
@@ -129,7 +132,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "scope": "openid profile",
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -149,8 +152,9 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_302_FOUND
-        url = response.headers["location"]
+        assert response.status_code == status.HTTP_200_OK
+
+        url = json.load(response)['redirect_url']
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -165,7 +169,7 @@ class TestAuthorizationCodeFlowWithPKCE:
                 "grant_type": "authorization_code",
                 "code": code,
                 "code_verifier": code_verifier,
-                "redirect_uri": "https://www.google.com/",
+                "redirect_uri": "http://127.0.0.1:8888/callback/",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -223,7 +227,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "scope": "openid profile",
             "code_challenge": code_challenge,
             "code_challenge_method": "plain",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -243,8 +247,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_302_FOUND
-        url = response.headers["location"]
+        assert response.status_code == status.HTTP_200_OK
+        url = json.load(response)['redirect_url']
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -259,7 +263,7 @@ class TestAuthorizationCodeFlowWithPKCE:
                 "grant_type": "authorization_code",
                 "code": code,
                 "code_verifier": code_verifier,
-                "redirect_uri": "https://www.google.com/",
+                "redirect_uri": "http://127.0.0.1:8888/callback/",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -318,7 +322,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "scope": "openid profile",
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -338,8 +342,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_302_FOUND
-        url = response.headers["location"]
+        assert response.status_code == status.HTTP_200_OK
+        url = json.load(response)['redirect_url']
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -354,7 +358,7 @@ class TestAuthorizationCodeFlowWithPKCE:
                 "grant_type": "authorization_code",
                 "code": code,
                 "code_verifier": "INVALID_CODE_VERIFIER",
-                "redirect_uri": "https://www.google.com/",
+                "redirect_uri": "http://127.0.0.1:8888/callback/",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -386,7 +390,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "scope": "openid profile",
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
-            "redirect_uri": "https://www.google.com/",
+            "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
         response = await client.request("GET", "/authorize/", params=params)
         assert response.status_code == status.HTTP_200_OK
@@ -406,8 +410,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_302_FOUND
-        url = response.headers["location"]
+        assert response.status_code == status.HTTP_200_OK
+        url = json.load(response)['redirect_url']
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -422,7 +426,7 @@ class TestAuthorizationCodeFlowWithPKCE:
                 "grant_type": "authorization_code",
                 "code": code,
                 "code_verifier": "INVALID_CODE_VERIFIER",
-                "redirect_uri": "https://www.google.com/",
+                "redirect_uri": "http://127.0.0.1:8888/callback/",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )

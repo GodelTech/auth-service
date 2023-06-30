@@ -15,6 +15,7 @@ from src.data_access.postgresql.errors import (
     WrongPasswordError,
     WrongResponseTypeError,
     IncorrectAuthTokenError,
+    UserNotInGroupError
 )
 from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
@@ -82,7 +83,7 @@ from .http400_invalid_grant import http400_invalid_grant_handler
 from .http400_unsupported_grant_type import http400_unsupported_grant_type_handler
 from .http400_invalid_scope import http400_invalid_scope_handler
 from .http400_invalid_pkce import http400_invalid_pkce_handler
-
+from .user_groups_and_roles_handler import user_not_in_group_error_handler
 
 exception_handler_mapping = {
     ClientNotFoundError: client_not_found_error_handler,
@@ -114,5 +115,6 @@ exception_handler_mapping = {
     UnsupportedGrantTypeError: http400_unsupported_grant_type_handler,
     InvalidClientCredentialsError: http400_invalid_client_handler,
     InvalidClientScopeError: http400_invalid_scope_handler,
-    InvalidPkceCodeError: http400_invalid_pkce_handler
+    InvalidPkceCodeError: http400_invalid_pkce_handler,
+    UserNotInGroupError: user_not_in_group_error_handler,
 }
