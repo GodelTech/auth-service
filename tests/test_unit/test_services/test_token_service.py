@@ -46,7 +46,7 @@ class TestTokenServices:
         self.client_id = "test_client"
         self.scope = "openid"
         self.grant_type = "authorization_code"
-        self.redirect_uri = "https://www.google.com/"
+        self.redirect_uri = "http://127.0.0.1:8888/callback/"
         self.client_secret = "past"
         self.user_id = 1
         self.encodedattr = await self.jwt.encode_jwt(

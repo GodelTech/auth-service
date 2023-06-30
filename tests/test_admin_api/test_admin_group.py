@@ -24,10 +24,11 @@ class TestAdminGroupEndpoint:
         self.access_token = await JWTService().encode_jwt(
             payload={
                 "stand": "CrazyDiamond",
-                "aud":["admin"]
+                "aud":["oidc:admin:read", "oidc:admin:write"]
             }
         )
         self.group_repo = GroupRepository(connection)
+        await self.group_repo.delete()
         self.role_repo = RoleRepository(connection)
 
         self.user_repo = UserRepository(connection)
@@ -61,6 +62,7 @@ class TestAdminGroupEndpoint:
         
     async def setup_groups_roles(self, connection:AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+        await group_repo.delete()
         groups:list[dict[str, Any]] = [
             {"name": "Polnareff", "parent_group": None},
             {"name": "Giorno", "parent_group": None},

@@ -6,8 +6,8 @@ from .client import (
     ClientIdRestriction,
     ClientPostLogoutRedirectUri,
     ClientRedirectUri,
-    ClientScope,
     ClientSecret,
+    clients_response_types,
     
     AccessTokenType,
     ProtocolType,
@@ -25,6 +25,7 @@ from .users import (
     UserClaimType, 
     UserLogin,
     UserPassword,
+    users_groups
 )
 from .resources_related import (
     ApiClaim, 
@@ -35,6 +36,7 @@ from .resources_related import (
     ApiScopeClaimType, 
     ApiSecret, 
     ApiSecretType,  
+    ClientScope,
 )
 from .identity_resource import IdentityClaim, IdentityResource, IdentityProviderMapped, IdentityProvider
 from .group import Group, Permission

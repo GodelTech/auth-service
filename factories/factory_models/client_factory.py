@@ -5,6 +5,7 @@ from factory.fuzzy import FuzzyChoice
 import factories.data.data_for_factories as data
 import factories.factory_session as sess
 import src.data_access.postgresql.tables.client as client
+import src.data_access.postgresql.tables.resources_related as res
 
 
 class ClientFactory(SQLAlchemyModelFactory):
@@ -78,13 +79,7 @@ class ClientClaimFactory(SQLAlchemyModelFactory):
     client_id = factory.SubFactory(ClientFactory)
 
 
-class ClientScopeFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = client.ClientScope
-        sqlalchemy_session = sess.session
-
-    scope = factory.Faker("sentence")
-    client_id = factory.SubFactory(ClientFactory)
+  
 
 
 class ClientPostLogoutRedirectUriFactory(SQLAlchemyModelFactory):
@@ -161,3 +156,13 @@ class RefreshTokenUsageTypeFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = sess.session
 
     type = factory.Iterator(["one_time_only", "reuse"])
+
+class ClientsScopeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = client.clients_scopes
+        sqlalchemy_session = sess.session
+
+    # client_id = factory.SubFactory(client.ClientFactory)
+    client_id = factory.SubFactory(client.Client)
+    scope_id = factory.SubFactory(res.ClientScope)
+    

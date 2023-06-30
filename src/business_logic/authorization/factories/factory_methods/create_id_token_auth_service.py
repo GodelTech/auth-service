@@ -27,12 +27,16 @@ def _create_id_token_auth_service(
     user_repo: UserRepository,
     password_service: PasswordHash,
     jwt_service: JWTService,
+    scope_service,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
     return IdTokenAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
-        scope_validator=ScopeValidator(client_repo),
+        scope_validator=ScopeValidator(
+            client_repo=client_repo,
+            scope_service=scope_service
+        ),
         user_credentials_validator=UserCredentialsValidator(
             user_repo=user_repo,
             password_service=password_service,

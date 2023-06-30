@@ -2,7 +2,7 @@ import time
 from typing import Any, Optional
 
 from fastapi import APIRouter
-
+from src.presentation.middleware.authorization_validation import OIDC_RESOURCE_NAME
 from src.business_logic.services.jwt_token import JWTService
 
 debug_router = APIRouter(
@@ -19,11 +19,11 @@ async def get_default_token(
     scope: str = "profile",
 ) -> str:
     jwt = JWTService()
-    payload: dict[str, Any] = {"sub": "1", "scope": scope}
+    payload: dict[str, Any] = {"sub": "1"}
     if with_iss_me:
         payload["iss"] = "me"
     if with_aud:
-        payload["aud"] = ["admin", "userinfo", "introspection", "revoke"]
+        payload["aud"] = ["admin", f"{OIDC_RESOURCE_NAME}:introspection:read", f"{OIDC_RESOURCE_NAME}:revoke:post"] + scope.split(" ")
     if exp:
         payload["exp"] = exp
     return await jwt.encode_jwt(payload)
