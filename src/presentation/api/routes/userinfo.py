@@ -6,7 +6,7 @@ from fastapi_cache.coder import JsonCoder
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.userinfo import UserInfoServices
+from src.business_logic.services.userinfo import UserInfoService
 from src.config.settings.cache_time import CacheTimeSettings
 from src.data_access.postgresql.repositories import (
     ClientRepository,
@@ -39,9 +39,9 @@ async def get_userinfo(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
-    session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> dict[str, Any]:
-    userinfo_class = UserInfoServices(
+    userinfo_class = UserInfoService(
         session=session,
         user_repo=UserRepository(session),
         client_repo=ClientRepository(session),
@@ -66,9 +66,9 @@ async def post_userinfo(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),  # crutch for swagger
-    session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> dict[str, Any]:
-    userinfo_class = UserInfoServices(
+    userinfo_class = UserInfoService(
         session=session,
         user_repo=UserRepository(session),
         client_repo=ClientRepository(session),
@@ -92,9 +92,9 @@ async def get_userinfo_jwt(
     auth_swagger: Union[str, None] = Header(
         default=None, description="Authorization"
     ),
-    session: AsyncSession = Depends(provide_async_session_stub)
+    session: AsyncSession = Depends(provide_async_session_stub),
 ) -> str:
-    userinfo_class = UserInfoServices(
+    userinfo_class = UserInfoService(
         session=session,
         user_repo=UserRepository(session),
         client_repo=ClientRepository(session),

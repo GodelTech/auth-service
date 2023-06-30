@@ -16,6 +16,6 @@ from .third_party_oidc_service import (
     ThirdPartyMicrosoftService,
 )
 from .tokens import TokenService
-from .userinfo import UserInfoServices
-from .well_known import WellKnownServices
+from .userinfo import UserInfoService
+from .well_known import WellKnownService
 from .client import ClientService

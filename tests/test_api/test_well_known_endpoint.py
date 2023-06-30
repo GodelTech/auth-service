@@ -54,7 +54,7 @@ class TestWellKnown:
 
             test_key = construct((n, e))
 
-            assert jwt_service.keys.public_key == test_key.public_key().export_key('PEM')
+            assert jwt_service.keys().public_key == test_key.public_key().export_key('PEM')
             assert response_content["kty"] == "RSA"
             assert bool(await jwt_service.decode_token(
                 token = test_token,

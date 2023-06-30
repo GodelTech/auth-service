@@ -18,8 +18,6 @@ from fastapi import Request
 from itsdangerous import base64_encode
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# from src.di.providers import provide_jwt_manager
 from src.config.settings.app import AppSettings
 from src.data_access.postgresql.errors import (
     ClaimsNotFoundError,

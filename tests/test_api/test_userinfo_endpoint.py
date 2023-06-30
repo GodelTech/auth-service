@@ -9,32 +9,39 @@ from sqlalchemy.orm import sessionmaker
 from src.di.providers import provide_jwt_manager
 from src.business_logic.services import UserInfoServices
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
+# from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services import UserInfoService
+from src.data_access.postgresql.repositories.persistent_grant import (
+    PersistentGrantRepository,
+)
 
 ANSWER_USER_INFO = {
-                    'name': 'Daniil',
-                    'given_name': 'Ibragim',
-                    'family_name': 'Krats',
-                    'middle_name': '-el-',
-                    'nickname': 'Nagibator2000',
-                    'preferred_username': 'Graf',
-                    'profile': 'werni_stenu',
-                    'picture': 'https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg',
-                    'website': 'https://www.instagram.com/daniilkrats/',
-                    'gender': 'Attack Helicopter',
-                    'birthdate': '02/01/2000',
-                    'zoneinfo': 'GMT+1',
-                    'locale': 'Warsaw',
-                    'phone_number': '+48510143314',
-                    'phone_number_verified': "false",
-                    'address': '5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania',
-                    'updated_at': "1234567890",
-                    }
+    "name": "Daniil",
+    "given_name": "Ibragim",
+    "family_name": "Krats",
+    "middle_name": "-el-",
+    "nickname": "Nagibator2000",
+    "preferred_username": "Graf",
+    "profile": "werni_stenu",
+    "picture": "https://i1.sndcdn.com/artworks-000094489636-qzznk3-t500x500.jpg",
+    "website": "https://www.instagram.com/daniilkrats/",
+    "gender": "Attack Helicopter",
+    "birthdate": "02/01/2000",
+    "zoneinfo": "GMT+1",
+    "locale": "Warsaw",
+    "phone_number": "+48510143314",
+    "phone_number_verified": "false",
+    "address": "5 Snowdon View, Ffordd Caergybi, Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch LL61 5SX, Wielka Brytania",
+    "updated_at": "1234567890",
+}
 
 
 class TestUserInfoEndpoint:
     @pytest.mark.asyncio
     async def test_successful_userinfo_get_request(
-        self, client: AsyncClient, engine: AsyncEngine,
+        self,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         jwt = provide_jwt_manager()
         token = await jwt.encode(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
@@ -49,14 +56,15 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_jwt_get_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode(payload={"sub": 1, 'scope': 'profile', "aud":["userinfo"]})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
-        response = await client.request(
-            "GET", "/userinfo/jwt", headers=headers
-        )
+        response = await client.request("GET", "/userinfo/jwt", headers=headers)
         response_content = json.loads(response.content.decode("utf-8"))
         response_content = await user_info_service.jwt.decode_token(
             token=response_content
@@ -67,7 +75,10 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_incorrect_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
@@ -83,7 +94,10 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_and_userinfo_jwt_get_requests_with_user_without_claims(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode(payload={"sub": "2", "aud":["userinfo"]})
         for url in ("/userinfo/", "/userinfo/jwt"):
@@ -100,9 +114,14 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_successful_userinfo_post_request(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode(payload={"sub": 1,  'scope': 'profile', "aud":["userinfo"]})
+        token = await user_info_service.jwt.encode_jwt(
+            payload={"sub": 1, "scope": "profile", "aud": ["userinfo"]}
+        )
         headers = {
             "authorization": token,
         }
@@ -117,7 +136,10 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_incorrect_token(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode(
             payload={"blablabla": "blablabla", "aud":["userinfo"]}
@@ -130,7 +152,10 @@ class TestUserInfoEndpoint:
 
     @pytest.mark.asyncio
     async def test_userinfo_post_request_with_user_without_claims(
-        self, user_info_service: UserInfoServices, client: AsyncClient, engine: AsyncEngine,
+        self,
+        user_info_service: UserInfoService,
+        client: AsyncClient,
+        engine: AsyncEngine,
     ) -> None:
         token = await user_info_service.jwt.encode(payload={"sub": "2", "aud":["userinfo"]})
         headers = {
