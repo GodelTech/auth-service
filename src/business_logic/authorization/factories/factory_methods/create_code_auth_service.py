@@ -31,6 +31,22 @@ def _create_code_auth_service(
     scope_service,
     **kwargs: Any,
 ) -> AuthServiceProtocol:
+    """
+    Factory method for creating an instance of CodeAuthService, which is used for
+    an authorization code flow.
+
+    Reference: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.
+
+    Args:
+        client_repo: The repository for accessing client-related data.
+        user_repo: The repository for accessing user-related data.
+        persistent_grant_repo: The repository for accessing persistent grant-related data.
+        password_service: The service for password hashing and verification.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        An instance of CodeAuthService.
+    """
     return CodeAuthService(
         client_validator=ClientValidator(client_repo),
         redirect_uri_validator=RedirectUriValidator(client_repo),
