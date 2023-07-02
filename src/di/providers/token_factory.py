@@ -7,9 +7,10 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
     DeviceRepository,
     BlacklistedTokenRepository,
-    CodeChallengeRepository
+    CodeChallengeRepository,
 )
-
+from src.business_logic.services.scope import ScopeService
+from src.data_access.postgresql.repositories.resources_related import ResourcesRepository
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,5 +25,9 @@ def provide_token_service_factory(db_session: AsyncSession) -> TokenServiceFacto
         device_repo=DeviceRepository(session=db_session),
         code_challenge_repo=CodeChallengeRepository(session=db_session),
         jwt_manager=JWTManager(),
-        blacklisted_repo=BlacklistedTokenRepository(session=db_session)
-    )
+        blacklisted_repo=BlacklistedTokenRepository(session=db_session),
+        scope_service=ScopeService(
+            resource_repo=ResourcesRepository,
+            session=db_session
+            )
+        )

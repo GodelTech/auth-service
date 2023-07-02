@@ -1,10 +1,6 @@
-import base64
-import json
 import logging
 import secrets
 from typing import Any, Dict, Optional
-from cryptography.fernet import Fernet
-from src.config.settings.app import AppSettings
 
 from src.dyna_config import DOMAIN_NAME
 from src.business_logic.services.jwt_token import JWTService
@@ -105,6 +101,7 @@ class AuthorizationService:
             client_id=self.request_model.client_id,
             grant_data=secret_code,
             user_id=user_id,
+            scope=self.request_model.scope,
         )
         return await self._update_redirect_url_with_params(
             secret_code=secret_code

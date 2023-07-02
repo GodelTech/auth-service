@@ -14,11 +14,29 @@ from src.business_logic.third_party_auth.interfaces import (
 
 
 class ThirdPartyAuthMixin:
+    """
+    Mixin class providing common methods for third-party authentication.
+
+    This class includes methods for forming parameter data, retrieving access tokens,
+    obtaining usernames, creating users if they do not exist, creating grants,
+    and updating redirect URLs.
+    """
+
     async def _form_parameters_data(
         self: ThirdPartyAuthMixinProtocol,
         request_data: ThirdPartyAccessTokenRequestModel,
         provider_name: str,
     ) -> dict[str, str]:
+        """
+        Form the parameter data for making HTTP requests to obtain access tokens.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the necessary information.
+            provider_name (str): The name of the third-party provider.
+
+        Returns:
+            dict[str, str]: The formed parameter data.
+        """
         (
             provider_client_id,
             provider_client_secret,
@@ -40,6 +58,20 @@ class ThirdPartyAuthMixin:
         token_url: str,
         provider_name: str,
     ) -> str:
+        """
+        Retrieve the access token from the third-party provider.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the necessary information.
+            token_url (str): The URL for obtaining the access token.
+            provider_name (str): The name of the third-party provider.
+
+        Returns:
+            str: The access token.
+
+        Raises:
+            ThirdPartyAuthProviderInvalidRequestDataError: If the request to the third-party provider returns an error response.
+        """
         params = await self._form_parameters_data(request_data, provider_name)
         response = await self._async_http_client.request(
             "POST",
@@ -59,6 +91,17 @@ class ThirdPartyAuthMixin:
         username_type: str,
         provider_name: str,
     ) -> str:
+        """
+        Retrieve the username from the third-party provider.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the necessary information.
+            username_type (str): The type of username to retrieve based on third party provider docs (e.g., email).
+            provider_name (str): The name of the third-party provider.
+
+        Returns:
+            str: The retrieved username.
+        """
         (
             token_url,
             user_info_url,
@@ -82,6 +125,13 @@ class ThirdPartyAuthMixin:
         username: str,
         provider_name: str,
     ) -> None:
+        """
+        Create a user if it does not already exist.
+
+        Args:
+            username (str): The username of the user.
+            provider_name (str): The name of the third-party provider.
+        """
         if not await self._user_repo.exists_user(username):
             provider_id = await self._oidc_repo.get_id_by_provider_name(
                 provider_name
@@ -96,6 +146,15 @@ class ThirdPartyAuthMixin:
         username_type: str,
         provider_name: str,
     ) -> None:
+        """
+        Create a persistent grant for the user. We need this grant to get an access
+        token later on in an authorization process of our auth server.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the necessary information.
+            username_type (str): The type of username to retrieve (e.g., email).
+            provider_name (str): The name of the third-party provider.
+        """
         username = await self._get_username(
             request_data=request_data,
             username_type=username_type,
@@ -112,6 +171,7 @@ class ThirdPartyAuthMixin:
             user_id=await self._user_repo.get_user_id_by_username(username),
             grant_type="authorization_code",
             expiration_time=auth_code_lifetime + int(time.time()),
+            scope = request_data.scope,
         )
 
     async def _update_redirect_url(
@@ -119,6 +179,16 @@ class ThirdPartyAuthMixin:
         request_data: ThirdPartyAccessTokenRequestModel,
         redirect_url: str,
     ) -> str:
+        """
+        Update the redirect URL with additional parameters.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the necessary information.
+            redirect_url (str): The original redirect URL.
+
+        Returns:
+            str: The updated redirect URL.
+        """
         if request_data.state:
             redirect_url += f"&state={request_data.state}"
         return redirect_url

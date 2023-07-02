@@ -16,3 +16,6 @@ class DuplicationError(Exception):
 class NotCompleteScopeError(Exception):
     """Use this class when the database don't contain all required claims for user"""
 
+class UserNotInGroupError(Exception):
+    """Use Not In Group Required"""
+    

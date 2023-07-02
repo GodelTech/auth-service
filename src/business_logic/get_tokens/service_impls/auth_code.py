@@ -45,6 +45,7 @@ class AuthorizationCodeTokenService:
         self._pkce_code_validator = pkce_code_validator
         self._jwt_manager = jwt_manager
         self._persistent_grant_repo = persistent_grant_repo
+        
 
     async def get_tokens(self, request_data: RequestTokenModel) -> ResponseTokenModel:
         await self._client_validator(request_data.client_id)
@@ -62,11 +63,12 @@ class AuthorizationCodeTokenService:
 
         user_id = grant.user_id
         current_unix_time = int(time.time())
-
+        aud = grant.scope.split(' ') + [request_data.client_id]
         access_token = await self._get_access_token(
             request_data=request_data,
             user_id=user_id,
-            unix_time=current_unix_time
+            unix_time=current_unix_time,
+            aud=aud
         )
         refresh_token = await self._get_refresh_token(request_data=request_data)
         id_token = await self._get_id_token(
@@ -74,14 +76,15 @@ class AuthorizationCodeTokenService:
             user_id=user_id,
             unix_time=current_unix_time
         )
-
+        scope = ' '.join(aud)
         await self._persistent_grant_repo.delete_grant(grant=grant)
         await self._persistent_grant_repo.create_grant(
             client_id=grant.client_id, 
             grant_data=refresh_token,
             user_id=user_id,
             grant_type_id=2,
-            expiration_time=current_unix_time + 84700
+            expiration_time=current_unix_time + 84700,
+            scope=scope
         )
         await self._session.commit()
 
@@ -94,14 +97,14 @@ class AuthorizationCodeTokenService:
             refresh_expires_in=1800
         )
 
-    async def _get_access_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
+    async def _get_access_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int, aud: list[str]) -> str:
         payload = AccessTokenPayload(
             sub=user_id,
             iss=DOMAIN_NAME,
             client_id=request_data.client_id,
             iat=unix_time,
             exp=unix_time + 600,
-            aud=[request_data.client_id, 'userinfo'],
+            aud=aud, 
             jti=str(uuid.uuid4()),
             acr=0,
         )

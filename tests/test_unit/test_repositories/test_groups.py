@@ -13,6 +13,7 @@ class TestGroupRepository:
 
     async def test_create_delete_exist_not_exist(self, connection: AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+        await group_repo.delete()
         group_ids = await connection.execute(
             select(Group.id)
         )
@@ -35,6 +36,7 @@ class TestGroupRepository:
 
     async def test_create_existing(self, connection: AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+        await group_repo.delete()
         group_ids = await connection.execute(
             select(Group.id)
         )
@@ -58,12 +60,12 @@ class TestGroupRepository:
 
     async def test_delete_not_existing(self, connection: AsyncSession) -> None:
         group_repo = GroupRepository(connection)
+        await group_repo.delete()
         with pytest.raises(ValueError):
             await group_repo.delete(group_id=55555)
 
     async def test_delete_all(self, connection: AsyncSession) -> None:
         group_repo = GroupRepository(connection)
-
         await group_repo.delete()
         groups = await connection.execute(
             select(Group)
@@ -79,7 +81,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="strange_name", parent_group=None)
@@ -101,7 +103,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="strange_name", parent_group=None)
@@ -123,7 +125,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="first_new_name", parent_group=None)
@@ -146,7 +148,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="grand_parent", parent_group=None)
@@ -176,7 +178,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="first_new_name", parent_group=None)
@@ -199,7 +201,7 @@ class TestGroupRepository:
         group_ids = [x[0] for x in group_ids.all()]
         group_ids.sort()
         if len(group_ids) <= 1:
-            group_id = 1
+            group_id = 2
         else:
             group_id = group_ids[-1] + 1
         await group_repo.create(id=group_id, name="first_new_name", parent_group=None)

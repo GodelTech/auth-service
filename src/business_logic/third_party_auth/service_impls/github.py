@@ -27,6 +27,16 @@ if TYPE_CHECKING:
 
 
 class GithubAuthService(ThirdPartyAuthMixin):
+    """
+    Service class for handling authentication with GitHub as a third-party provider.
+
+    Inherits:
+        ThirdPartyAuthMixin: A mixin class providing common methods for third-party authentication.
+
+    This class implements the necessary methods and functionality to authenticate users
+    using GitHub's OAuth 2.0 flow.
+    """
+
     def __init__(
         self,
         state_validator: ValidatorProtocol,
@@ -36,6 +46,17 @@ class GithubAuthService(ThirdPartyAuthMixin):
         oidc_repo: ThirdPartyOIDCRepository,
         async_http_client: AsyncClient,
     ) -> None:
+        """
+        Initializes a new instance of the GithubAuthService.
+
+        Args:
+            state_validator (ValidatorProtocol): The validator for the state parameter.
+            client_repo (ClientRepository): The repository for client-related operations.
+            user_repo (UserRepository): The repository for user-related operations.
+            persistent_grant_repo (PersistentGrantRepository): The repository for persistent grant-related operations.
+            oidc_repo (ThirdPartyOIDCRepository): The repository for OpenID Connect-related operations.
+            async_http_client (AsyncClient): The asynchronous HTTP client for making HTTP requests.
+        """
         self._state_validator = state_validator
         self._client_repo = client_repo
         self._user_repo = user_repo
@@ -47,6 +68,22 @@ class GithubAuthService(ThirdPartyAuthMixin):
     async def get_redirect_url(
         self, request_data: ThirdPartyAccessTokenRequestModel
     ) -> str:
+        """
+        Retrieves the redirect URL for the GitHub authentication flow.
+
+        This method performs the necessary validation, grant creation, and redirect URL generation
+        for the GitHub authentication flow.
+
+        Args:
+            request_data (ThirdPartyAccessTokenRequestModel): The request data containing the access token request details.
+
+        Returns:
+            str: The redirect URL for the GitHub authentication flow.
+
+        Raises:
+            ThirdPartyAuthInvalidStateError: If the requested scope is invalid.
+            ThirdPartyAuthProviderInvalidRequestDataError: If the request to Github returns an error response.
+        """
         await self._state_validator(request_data.state)
         await self._create_grant(
             request_data,

@@ -31,8 +31,8 @@ class GroupRepository(BaseRepository):
         if group_id is None:
             await self.session.execute(text("DELETE FROM groups"))
         elif await self.exists(group_id=group_id):
-            client_to_delete = await self.get_by_id(group_id=group_id)
-            await self.session.delete(client_to_delete)
+            group_to_delete = await self.get_by_id(group_id=group_id)
+            await self.session.delete(group_to_delete)
         else:
             raise ValueError
 

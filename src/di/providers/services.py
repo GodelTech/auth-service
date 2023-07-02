@@ -1,29 +1,35 @@
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.business_logic.services import (
-    AdminAuthService,
+from src.business_logic.services.admin_auth import AdminAuthService
+from src.business_logic.services.admin_api import (
     AdminGroupService,
     AdminRoleService,
     AdminUserService,
+)
+from src.business_logic.services.authorization.authorization_service import (
     AuthorizationService,
+)
+from src.business_logic.services.third_party_oidc_service import (
     AuthThirdPartyOIDCService,
-    DeviceService,
-    EndSessionService,
-    IntrospectionServies,
-    JWTService,
-    LoginFormService,
-    PasswordHash,
+)
+from src.business_logic.services.device_auth import DeviceService
+from src.business_logic.services.endsession import EndSessionService
+from src.business_logic.services.introspection import IntrospectionService
+from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.services.login_form_service import LoginFormService
+from src.business_logic.services.password import PasswordHash
+from src.business_logic.services.third_party_oidc_service import (
     ThirdPartyFacebookService,
     ThirdPartyGitLabService,
     ThirdPartyGoogleService,
     ThirdPartyLinkedinService,
     ThirdPartyMicrosoftService,
-    TokenService,
-    UserInfoServices,
-    WellKnownServices,
-    ClientService,
 )
+from src.business_logic.services.tokens import TokenService
+from src.business_logic.services.userinfo import UserInfoService
+from src.business_logic.services.well_known import WellKnownService
+from src.business_logic.services.client import ClientService
+
 
 from src.data_access.postgresql.repositories import (
     BlacklistedTokenRepository,
@@ -37,10 +43,6 @@ from src.data_access.postgresql.repositories import (
     WellKnownRepository,
     CodeChallengeRepository,
 )
-
-
-def provide_auth_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_auth_service(
@@ -61,16 +63,8 @@ def provide_auth_service(
     )
 
 
-def provide_password_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_password_service() -> PasswordHash:
     return PasswordHash()
-
-
-def provide_endsession_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_endsession_service(
@@ -87,16 +81,8 @@ def provide_endsession_service(
     )
 
 
-def provide_jwt_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_jwt_service() -> JWTService:
     return JWTService()
-
-
-def provide_introspection_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_introspection_service(
@@ -105,18 +91,13 @@ def provide_introspection_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> IntrospectionServies:
-    return IntrospectionServies(
-        session=session,
+) -> IntrospectionService:
+    return IntrospectionService(
         jwt=jwt,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
     )
-
-
-def provide_token_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_token_service(
@@ -141,10 +122,6 @@ def provide_token_service(
     )
 
 
-def provide_admin_user_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_admin_user_service(
     user_repo: UserRepository, role_repo: RoleRepository, session: AsyncSession
 ) -> AdminUserService:
@@ -153,18 +130,10 @@ def provide_admin_user_service(
     )
 
 
-def provide_admin_group_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_admin_group_service(
     session: AsyncSession, group_repo: GroupRepository
 ) -> AdminGroupService:
     return AdminGroupService(session=session, group_repo=group_repo)
-
-
-def provide_admin_role_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_admin_role_service(
@@ -177,22 +146,14 @@ def provide_admin_role_service(
     )
 
 
-def provide_wellknown_service_stub() -> None:
-    ...
-
-
 def provide_wellknown_service(
     session: AsyncSession,
     wlk_repo: WellKnownRepository,
-) -> WellKnownServices:
-    return WellKnownServices(
+) -> WellKnownService:
+    return WellKnownService(
         session=session,
         wlk_repo=wlk_repo,
     )
-
-
-def provide_userinfo_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_userinfo_service(
@@ -201,18 +162,14 @@ def provide_userinfo_service(
     user_repo: UserRepository,
     client_repo: ClientRepository,
     persistent_grant_repo: PersistentGrantRepository,
-) -> UserInfoServices:
-    return UserInfoServices(
+) -> UserInfoService:
+    return UserInfoService(
         session=session,
         jwt=jwt,
         user_repo=user_repo,
         client_repo=client_repo,
         persistent_grant_repo=persistent_grant_repo,
     )
-
-
-def provide_login_form_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_login_form_service(
@@ -223,10 +180,6 @@ def provide_login_form_service(
     return LoginFormService(
         client_repo=client_repo, oidc_repo=oidc_repo, session=session
     )
-
-
-def provide_admin_auth_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_admin_auth_service(
@@ -241,10 +194,6 @@ def provide_admin_auth_service(
     )
 
 
-def provide_device_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_device_service(
     client_repo: ClientRepository,
     device_repo: DeviceRepository,
@@ -253,10 +202,6 @@ def provide_device_service(
     return DeviceService(
         session=session, client_repo=client_repo, device_repo=device_repo
     )
-
-
-def provide_auth_third_party_oidc_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_auth_third_party_oidc_service(
@@ -277,12 +222,6 @@ def provide_auth_third_party_oidc_service(
     )
 
 
-def provide_auth_third_party_linkedin_service_stub() -> (
-    None
-):  # pragma: no cover
-    ...
-
-
 def provide_auth_third_party_linkedin_service(
     session: AsyncSession,
     client_repo: ClientRepository,
@@ -299,10 +238,6 @@ def provide_auth_third_party_linkedin_service(
         oidc_repo=oidc_repo,
         http_client=http_client,
     )
-
-
-def provide_third_party_google_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_third_party_google_service(
@@ -323,10 +258,6 @@ def provide_third_party_google_service(
     )
 
 
-def provide_third_party_facebook_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_third_party_facebook_service(
     session: AsyncSession,
     client_repo: ClientRepository,
@@ -343,10 +274,6 @@ def provide_third_party_facebook_service(
         oidc_repo=oidc_repo,
         http_client=http_client,
     )
-
-
-def provide_third_party_gitlab_service_stub() -> None:  # pragma: no cover
-    ...
 
 
 def provide_third_party_gitlab_service(
@@ -367,10 +294,6 @@ def provide_third_party_gitlab_service(
     )
 
 
-def provide_third_party_microsoft_service_stub() -> None:  # pragma: no cover
-    ...
-
-
 def provide_third_party_microsoft_service(
     session: AsyncSession,
     client_repo: ClientRepository,
@@ -387,10 +310,6 @@ def provide_third_party_microsoft_service(
         oidc_repo=oidc_repo,
         http_client=http_client,
     )
-
-
-def provide_client_service_stub() -> None:
-    ...
 
 
 def provide_client_service(

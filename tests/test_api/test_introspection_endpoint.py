@@ -31,14 +31,14 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
-            "aud": ["introspection"],
+            "aud": ["oidc:introspection:get"],
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
         access_token = await jwt.encode_jwt(
             payload={
                 "sub": "1",
                 "client_id": "test_client",
-                "aud": ["introspection"],
+                "aud": ["oidc:introspection:get"],
             }
         )
         await persistent_grant_repo.create(
@@ -67,7 +67,7 @@ class TestIntrospectionEndpoint:
             "sub": "1",
             "iss": "http://testserver",
             "jti": None,
-            "aud": ["introspection"],
+            "aud": ["oidc:introspection:get"],
         }
         response = await client.request(
             method="POST", url="/introspection/", data=params, headers=headers
@@ -103,7 +103,7 @@ class TestIntrospectionEndpoint:
         )
         headers = {
             "authorization": await jwt.encode_jwt(
-                payload={"sub": "1", "aud": ["introspection"]}
+                payload={"sub": "1", "aud": ["oidc:introspection:get"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -129,14 +129,14 @@ class TestIntrospectionEndpoint:
             "sub": 1,
             "exp": time.time() + 3600,
             "client_id": "test_client",
-            "aud": ["introspection"],
+            "aud": ["oidc:introspection:get"],
         }
         introspection_token = await jwt.encode_jwt(payload=payload)
         access_token = await jwt.encode_jwt(
             payload={
                 "sub": "1",
                 "client_id": "test_client",
-                "aud": ["introspection"],
+                "aud": ["oidc:introspection:get"],
             }
         )
         await persistent_grant_repo.create(
