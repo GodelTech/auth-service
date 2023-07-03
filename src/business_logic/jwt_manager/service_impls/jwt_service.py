@@ -41,4 +41,15 @@ class JWTManager:
             decoded_info = jwt.decode(token, key=self.keys.public_key, algorithms=self.algorithms,
                                       **kwargs,)
 
-        return decoded_info    
+        return decoded_info
+    
+    async def decode_token_no_aud_iss_check(self, token: str, **kwargs: Any) -> dict[str, Any]:
+        token = token.replace("Bearer ", "")
+        decoded = jwt.decode(
+            token,
+            key=self.keys.public_key,
+            algorithms=["RS256"],
+            options={"verify_aud":False, 'verify_iss':False},
+            **kwargs,
+        )
+        return decoded
