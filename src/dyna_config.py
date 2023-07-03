@@ -1,6 +1,7 @@
 import os
-
 from dynaconf import Dynaconf
+from celery.schedules import crontab
+import json
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,6 +29,12 @@ REDIS_SCHEME = settings.redis.get("scheme")
 REDIS_HOST = settings.redis.get("host")
 REDIS_PORT = settings.redis.get("port")
 REDIS_URL = f"{REDIS_SCHEME}{REDIS_HOST}:{REDIS_PORT}"
+
+CELERY_CLEANER_CRONE = crontab(
+        **json.loads(
+            settings.celery.get("db_cleaner_crone")
+        )
+    )
 
 IS_DEVELOPMENT = settings.env_for_dynaconf == "development"
 
