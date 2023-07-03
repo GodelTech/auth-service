@@ -11,7 +11,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import no_type_check
-
+from time import sleep
 
 @pytest.mark.asyncio
 class TestPersistentGrantRepository:

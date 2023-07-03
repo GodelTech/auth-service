@@ -95,6 +95,13 @@ Example (add your versions to *.vscode/settings.json*):
 - change:
   "alembic revision --autogenerate -m "[_**Your comment**_]" "
 
+##### Run Celery:
+
+- worker:
+  "celery -A src.celery_logic.celery_main worker --loglevel=info"
+- beat:
+  "celery -A src.celery_logic.celery_main beat --loglevel=info"
+
 ##### Links:
 
 * Server:

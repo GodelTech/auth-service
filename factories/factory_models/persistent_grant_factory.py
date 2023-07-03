@@ -8,7 +8,8 @@ import src.data_access.postgresql.tables.persistent_grant as grant
 from factories.data.data_for_factories import TYPES_OF_GRANTS
 from factories.factory_models.client_factory import ClientFactory
 from factories.factory_models.user_factory import UserFactory
-
+from datetime import datetime
+import time
 
 class PersistentGrantFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -23,7 +24,7 @@ class PersistentGrantFactory(SQLAlchemyModelFactory):
     key = factory.Faker("md5", raw_output=False)
     client_id = factory.SelfAttribute("client.id")
     grant_data = factory.Faker("md5", raw_output=False)
-    expiration = factory.Faker("pyint", min_value=600, max_value=90000)
+    expiration = factory.Faker("pyint", min_value=600 + int(datetime.utcnow().timestamp()), max_value=90000+ int(datetime.utcnow().timestamp()))
     user_id = factory.SelfAttribute("user.id")
     persistent_grant_type_id = factory.Faker("pyint", min_value=1, max_value=2)
 
