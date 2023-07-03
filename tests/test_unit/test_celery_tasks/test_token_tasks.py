@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.celery_logic.token_tasks import clear_database
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestTokenTasks:
     async def test_clear_database(self, connection: AsyncSession) -> None:

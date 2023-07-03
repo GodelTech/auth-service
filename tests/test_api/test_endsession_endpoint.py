@@ -22,6 +22,7 @@ from tests.test_unit.fixtures import (
 )
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestEndSessionEndpoint:
     async def test_successful_authorize_request(
@@ -51,9 +52,7 @@ class TestEndSessionEndpoint:
             "post_logout_redirect_uri": "https://www.cole.com/",
             "state": "test_state",
         }
-        response = await client.request(
-            "GET", "/endsession/", params=params
-        )
+        response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_302_FOUND
 
     async def test_successful_authorize_request_without_uri(

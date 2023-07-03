@@ -17,6 +17,7 @@ from src.data_access.postgresql.tables.users import User, UserClaim
 STUB_STATE = "2y0M9hbzcCv5FZ28ZxRu2upCBI6LkS9conRvkVQPuTg!_!spider_man!_!http://127.0.0.1:8888/callback/"
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestThirdPartyGoogleFlow:
     async def test_successful_google_code_flow(
@@ -86,9 +87,7 @@ class TestThirdPartyGoogleFlow:
 
         # Stage 4: UserInfo endpoint retrieves user data from UserClaims table
         user_id_query = select(User.id).where(User.username == "NewUserNew")
-        user_id = (
-            await connection.execute(user_id_query)
-        ).scalar_one_or_none()
+        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
         user_claim_insertion = insert(UserClaim).values(
             user_id=user_id, claim_type_id=1, claim_value="Peter"
         )

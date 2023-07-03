@@ -16,15 +16,22 @@ TOKEN_HINT_DATA = {
 }
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestDeviceFlow:
     content_type = "application/x-www-form-urlencoded"
 
-    async def test_successful_device_flow(self, client: AsyncClient, connection: AsyncSession) -> None:
+    async def test_successful_device_flow(
+        self, client: AsyncClient, connection: AsyncSession
+    ) -> None:
         # Stage 1: Client requests a device code
         request_params = {"client_id": "test_client", "scope": "openid"}
-        response = await client.request("POST", "/device/", data=request_params,
-                                        headers={"Content-Type": self.content_type})
+        response = await client.request(
+            "POST",
+            "/device/",
+            data=request_params,
+            headers={"Content-Type": self.content_type},
+        )
         response_data = response.json()
         device_code = response_data.get("device_code")
         user_code = response_data.get("user_code")
@@ -36,8 +43,12 @@ class TestDeviceFlow:
         response = await client.request("GET", "/device/auth")
         assert response.status_code == status.HTTP_200_OK
 
-        response = await client.request("POST", "/device/auth", data={"user_code": user_code},
-                                        headers={"Content-Type": self.content_type})
+        response = await client.request(
+            "POST",
+            "/device/auth",
+            data={"user_code": user_code},
+            headers={"Content-Type": self.content_type},
+        )
         assert response.status_code == status.HTTP_302_FOUND
 
         # Stage 3: Client requests user authorization (usually done by redirecting the user to an authorization form)
@@ -78,20 +89,29 @@ class TestDeviceFlow:
         user_id_query = select(User.id).where(User.username == "TestClient")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
-        user_claim_insertion = insert(UserClaim).values(user_id=user_id, claim_type_id=1, claim_value="TEST_CLAIM")
+        user_claim_insertion = insert(UserClaim).values(
+            user_id=user_id, claim_type_id=1, claim_value="TEST_CLAIM"
+        )
         await connection.execute(user_claim_insertion)
         await connection.commit()
 
-        response = await client.request("GET", "/userinfo/", headers={"authorization": access_token})
+        response = await client.request(
+            "GET", "/userinfo/", headers={"authorization": access_token}
+        )
         assert response.status_code == status.HTTP_200_OK
 
         # Stage 7: User ends the session
         jwt_service = JWTService()
         TOKEN_HINT_DATA["sub"] = user_id
         id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
-        end_session_params = {"id_token_hint": id_token_hint, "post_logout_redirect_uri": "http://thompson-chung.com/",
-                              "state": "test_state"}
-        response = await client.request("GET", "/endsession/", params=end_session_params)
+        end_session_params = {
+            "id_token_hint": id_token_hint,
+            "post_logout_redirect_uri": "http://thompson-chung.com/",
+            "state": "test_state",
+        }
+        response = await client.request(
+            "GET", "/endsession/", params=end_session_params
+        )
         assert response.status_code == status.HTTP_302_FOUND
 
         # Verify that the session has ended
@@ -99,7 +119,7 @@ class TestDeviceFlow:
         assert response.status_code == status.HTTP_200_OK
 
     async def test_unsuccessful_device_flow(
-            self, client: AsyncClient, connection: AsyncSession
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         # 1st stage Create a device instance the database for the relevant client
         params = {
@@ -147,9 +167,7 @@ class TestDeviceFlow:
             "response_type": "urn:ietf:params:oauth:grant-type:device_code",
             "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
-        response = await client.request(
-            "GET", "/authorize/", params=params_4th
-        )
+        response = await client.request("GET", "/authorize/", params=params_4th)
         assert response.status_code == status.HTTP_200_OK
 
         # 5th stage: suppose we press cancel, then uoe code cleans the device table
