@@ -15,3 +15,6 @@ class JWTManagerProtocol(Protocol):
     
     def decode(self, token: str, audience: str,**kwargs: Any) -> dict[str, Any]:
         raise NotImplementedError
+    
+    def decode_token_no_aud_iss_check(self, token: str, **kwargs: Any) -> dict[str, Any]:
+        raise NotImplementedError
