@@ -12,9 +12,12 @@ from pydantic import SecretStr
 from src.data_access.postgresql.repositories import UserRepository
 from factories.commands import DataBasePopulation
 
+
 async def new_check_user_group(*args, **kwargs):
     return True
 
+
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAdminAuthService:
     async def test_authorize(
