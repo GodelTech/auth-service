@@ -24,7 +24,7 @@ from src.data_access.postgresql.tables import (
     RefreshTokenExpirationType,
     ProtocolType,
     AccessTokenType,
-   # ClientGrantType,
+    # ClientGrantType,
     UserClaim,
     UserClaimType,
     UserPassword,
@@ -54,6 +54,7 @@ async def fake_authenticate(*args, **kwargs):
     return None
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAdminUIRead:
     tables_identity = [
@@ -75,7 +76,7 @@ class TestAdminUIRead:
         RefreshTokenExpirationType,
         ProtocolType,
         AccessTokenType,
-       # ClientGrantType,
+        # ClientGrantType,
     ]
     tables_user = [
         UserClaim,
@@ -131,7 +132,9 @@ class TestAdminUIRead:
                     f"/admin/{part_of_link}/list",
                     cookies={"session": "1"},
                 )
-                assert response.status_code == status.HTTP_200_OK, f"---->{part_of_link}"
+                assert (
+                    response.status_code == status.HTTP_200_OK
+                ), f"---->{part_of_link}"
 
     async def test_get_list_unsuccessful(
         self, get_db, client: AsyncClient

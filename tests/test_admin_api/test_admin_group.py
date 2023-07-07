@@ -18,9 +18,12 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAdminGroupEndpoint:
-    async def setup_base(self, connection:AsyncSession, user_id: int = 1000) -> None:
+    async def setup_base(
+        self, connection: AsyncSession, user_id: int = 1000
+    ) -> None:
         self.access_token = await JWTService().encode_jwt(
             payload={
                 "stand": "CrazyDiamond",
@@ -46,21 +49,21 @@ class TestAdminGroupEndpoint:
         except:
             pass
 
-        await self.user_repo.create( 
+        await self.user_repo.create(
             id=user_id,
             username="DioBrando",
-            email = "theworld@timestop.com",
-            email_confirmed = True,
-            phone_number ="+20-123-123-123",
-            phone_number_confirmed = False,
-            two_factors_enabled = False,
+            email="theworld@timestop.com",
+            email_confirmed=True,
+            phone_number="+20-123-123-123",
+            phone_number_confirmed=False,
+            two_factors_enabled=False,
         )
         await self.user_repo.change_password(
             user_id=user_id, password="WalkLikeAnEgiptian"
         )
         await connection.commit()
-        
-    async def setup_groups_roles(self, connection:AsyncSession) -> None:
+
+    async def setup_groups_roles(self, connection: AsyncSession) -> None:
         group_repo = GroupRepository(connection)
         await group_repo.delete()
         groups:list[dict[str, Any]] = [
@@ -71,11 +74,13 @@ class TestAdminGroupEndpoint:
             try:
                 name = group["name"]
                 parent_group = group["parent_group"]
-                if type(name) is str and (parent_group is None or type(parent_group) is int):
+                if type(name) is str and (
+                    parent_group is None or type(parent_group) is int
+                ):
                     await group_repo.create(
-                            name=name,
-                            parent_group=parent_group,
-                        )
+                        name=name,
+                        parent_group=parent_group,
+                    )
             except exc.IntegrityError:
                 if group["name"]:
                     logger.info(group["name"] + " group already exists")
@@ -142,17 +147,19 @@ class TestAdminGroupEndpoint:
 
         await connection.commit()
 
-    async def test_get_group(self, connection: AsyncSession, client: AsyncClient) -> None:
+    async def test_get_group(
+        self, connection: AsyncSession, client: AsyncClient
+    ) -> None:
         await self.setup_base(connection)
         await self.setup_groups_roles(connection)
-        
+
         headers = {
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-       
-        group_id=(await self.group_repo.get_group_by_name("Polnareff")).id
-        
+
+        group_id = (await self.group_repo.get_group_by_name("Polnareff")).id
+
         response = await client.request(
             "GET",
             f"/administration/groups/{group_id}",
@@ -163,7 +170,9 @@ class TestAdminGroupEndpoint:
         logger.info(response_content)
         assert response_content["name"] == "Polnareff"
 
-    async def test_get_all_group(self, connection: AsyncSession, client: AsyncClient) -> None:
+    async def test_get_all_group(
+        self, connection: AsyncSession, client: AsyncClient
+    ) -> None:
         await self.setup_base(connection)
         await self.setup_groups_roles(connection)
 
@@ -180,7 +189,9 @@ class TestAdminGroupEndpoint:
         logger.info(response_content)
         assert len(response_content["all_groups"]) >= 6
 
-    async def test_get_subgroups(self, connection: AsyncSession, client: AsyncClient) -> None:
+    async def test_get_subgroups(
+        self, connection: AsyncSession, client: AsyncClient
+    ) -> None:
         await self.setup_base(
             connection,
         )
@@ -190,7 +201,7 @@ class TestAdminGroupEndpoint:
             "access-token": self.access_token,
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        
+
         group_id = (await self.group_repo.get_group_by_name(name="Giorno")).id
 
         response = await client.request(
@@ -207,7 +218,9 @@ class TestAdminGroupEndpoint:
         else:
             raise AssertionError
 
-    async def test_delete_group(self, connection: AsyncSession, client: AsyncClient) -> None:
+    async def test_delete_group(
+        self, connection: AsyncSession, client: AsyncClient
+    ) -> None:
         await self.setup_base(
             connection,
         )
@@ -227,13 +240,13 @@ class TestAdminGroupEndpoint:
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
         response = await client.request(
-            "GET",
-            f"/administration/groups/{group_id}",
-            headers=headers
+            "GET", f"/administration/groups/{group_id}", headers=headers
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    async def test_create_update_group(self, connection: AsyncSession, client: AsyncClient) -> None:
+    async def test_create_update_group(
+        self, connection: AsyncSession, client: AsyncClient
+    ) -> None:
         await self.setup_base(
             connection,
         )

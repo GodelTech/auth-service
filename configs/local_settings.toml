@@ -17,3 +17,6 @@ url = "redis://127.0.0.1:6379"
 base_url_host = "127.0.0.1"
 base_url_port = "8000"
 domain_name = "rnd-identityserver-dev.godeltech.com"
+
+[local.celery]
+db_cleaner_crone = '{"minute": "*"}'

@@ -103,7 +103,8 @@ async def container() -> AsyncIterator[CustomPostgresContainer]:
         yield postgres
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session")
+# @pytest_asyncio.fixture(scope="session", autouse=True)
 async def engine(container: CustomPostgresContainer) -> AsyncEngine:
     db_url = container.get_connection_url()
     db_url = db_url.replace("psycopg2", "asyncpg")
@@ -119,7 +120,8 @@ async def engine(container: CustomPostgresContainer) -> AsyncEngine:
     yield engine
 
 
-@pytest_asyncio.fixture(autouse=True)
+@pytest_asyncio.fixture
+# @pytest_asyncio.fixture(autouse=True)
 async def pre_test_setup() -> None:
     DataBasePopulation.clean_and_populate()
 

@@ -22,11 +22,11 @@ scope = (
 TOKEN_HINT_DATA = {"sub": None, "client_id": "spider_man", "type": "code"}
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlow:
-
     async def test_successful_authorization_code_flow(
-            self, client: AsyncClient, connection: AsyncSession
+        self, client: AsyncClient, connection: AsyncSession
     ) -> None:
         # Stage 1: Authorization endpoint creates a record with a secret code in the Persistent Grant table
         authorization_params = {
@@ -35,10 +35,15 @@ class TestAuthorizationCodeFlow:
             "scope": "openid profile",
             "redirect_uri": "http://127.0.0.1:8888/callback/",
         }
-        authorization_response = await client.request("GET", "/authorize/", params=authorization_params)
+        authorization_response = await client.request(
+            "GET", "/authorize/", params=authorization_params
+        )
         assert authorization_response.status_code == status.HTTP_200_OK
 
-        user_credentials = {"username": "TestClient", "password": "test_password"}
+        user_credentials = {
+            "username": "TestClient",
+            "password": "test_password",
+        }
         response = await client.request(
             "POST",
             "/authorize/",
@@ -65,14 +70,16 @@ class TestAuthorizationCodeFlow:
         )
         response_data = token_response.json()
         access_token = response_data.get("access_token")
-        id_token = response_data.get('id_token')
+        id_token = response_data.get("id_token")
         assert token_response.status_code == status.HTTP_200_OK
 
         # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
         user_id_query = select(User.id).where(User.username == "TestClient")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
-        user_claim_insertion = insert(UserClaim).values(user_id=user_id, claim_type_id=1, claim_value="Peter")
+        user_claim_insertion = insert(UserClaim).values(
+            user_id=user_id, claim_type_id=1, claim_value="Peter"
+        )
         await connection.execute(user_claim_insertion)
         await connection.commit()
 
@@ -82,26 +89,37 @@ class TestAuthorizationCodeFlow:
         assert user_info_response.status_code == status.HTTP_200_OK
 
         # Stage 4: EndSession endpoint deletes all records in the Persistent Grant table for the corresponding user
-        logout_params = {
-            "id_token_hint": id_token
-        }
-        end_session_response = await client.request("GET", "/endsession/", params=logout_params)
+        logout_params = {"id_token_hint": id_token}
+        end_session_response = await client.request(
+            "GET", "/endsession/", params=logout_params
+        )
         assert end_session_response.status_code == status.HTTP_204_NO_CONTENT
 
 
+@pytest.mark.usefixtures("engine", "pre_test_setup")
 @pytest.mark.asyncio
 class TestAuthorizationCodeFlowWithPKCE:
     # https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-proof-key-for-code-exchange-pkce
     async def test_successful_s256(
-            self, client: AsyncClient, connection: AsyncSession,
+        self,
+        client: AsyncClient,
+        connection: AsyncSession,
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def get_verifier_and_challenge() -> tuple[str, str]:
-            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
-            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
-            challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
-            challenge = base64.urlsafe_b64encode(challenge).decode('utf-8').rstrip('=')
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode("utf-8")).digest()
+            challenge = (
+                base64.urlsafe_b64encode(challenge).decode("utf-8").rstrip("=")
+            )
             return verifier, challenge
 
         code_verifier, code_challenge = get_verifier_and_challenge()
@@ -126,7 +144,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -183,13 +201,19 @@ class TestAuthorizationCodeFlowWithPKCE:
         assert data == {"sub": str(user_id)}
 
     async def test_successful_plain(
-            self, client: AsyncClient, connection: AsyncSession
+        self, client: AsyncClient, connection: AsyncSession
     ):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def get_verifier_and_challenge() -> tuple[str, str]:
-            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
-            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
             challenge = verifier
             return verifier, challenge
 
@@ -215,7 +239,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -270,16 +294,22 @@ class TestAuthorizationCodeFlowWithPKCE:
         data = response.json()
         assert data == {"sub": str(user_id)}
 
-    async def test_unsuccessful_s256(
-            self, client: AsyncClient
-    ):
+    async def test_unsuccessful_s256(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def get_verifier_and_challenge() -> tuple[str, str]:
-            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
-            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
-            challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
-            challenge = base64.urlsafe_b64encode(challenge).decode('utf-8').rstrip('=')
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
+            challenge = hashlib.sha256(verifier.encode("utf-8")).digest()
+            challenge = (
+                base64.urlsafe_b64encode(challenge).decode("utf-8").rstrip("=")
+            )
             return verifier, challenge
 
         code_verifier, code_challenge = get_verifier_and_challenge()
@@ -304,7 +334,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
@@ -335,14 +365,18 @@ class TestAuthorizationCodeFlowWithPKCE:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    async def test_unsuccessful_plain(
-            self, client: AsyncClient
-    ):
+    async def test_unsuccessful_plain(self, client: AsyncClient):
         # 1. The user clicks Login within the application.
         # 2. Auth0's SDK creates a cryptographically-random `code_verifier` and from this generates a `code_challenge`.
         def get_verifier_and_challenge() -> tuple[str, str]:
-            verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
-            verifier = verifier[:128]  # Ensuring it doesn't exceed the maximum length
+            verifier = (
+                base64.urlsafe_b64encode(os.urandom(32))
+                .decode("utf-8")
+                .rstrip("=")
+            )
+            verifier = verifier[
+                :128
+            ]  # Ensuring it doesn't exceed the maximum length
             challenge = verifier
             return verifier, challenge
 
@@ -368,7 +402,7 @@ class TestAuthorizationCodeFlowWithPKCE:
             "POST",
             "/authorize/",
             data=params
-                 | {"username": "PeterParker", "password": "the_beginner"},
+            | {"username": "PeterParker", "password": "the_beginner"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
