@@ -7,7 +7,7 @@ from sqlalchemy import delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from src.di.providers import provide_jwt_manager
-from src.business_logic.services import UserInfoServices
+from src.business_logic.services import UserInfoService
 from src.data_access.postgresql.repositories.persistent_grant import PersistentGrantRepository
 # from src.business_logic.services.jwt_token import JWTService
 from src.business_logic.services import UserInfoService
