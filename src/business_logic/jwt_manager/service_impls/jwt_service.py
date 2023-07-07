@@ -8,11 +8,12 @@ from src.business_logic.jwt_manager.dto import (
     AccessTokenPayload,
     RefreshTokenPayload,
     IdTokenPayload,
+    AdminUIPayload
 )
 
 logger = logging.getLogger(__name__)
 
-Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload]
+Payload = Union[AccessTokenPayload, RefreshTokenPayload, IdTokenPayload, AdminUIPayload]
 
 class JWTManager:
     def __init__(

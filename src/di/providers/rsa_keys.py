@@ -8,7 +8,8 @@ def provide_rsa_keys_stub() -> None:
 
 
 def provide_rsa_keys() -> RSA_keys:
-    sync_session_factory = DatabaseSync(database_url=DB_URL).sync_session_factory
+    db_url = DB_URL.replace("+asyncpg",'')
+    sync_session_factory = DatabaseSync(database_url=db_url).sync_session_factory
     rsa_keys = RSAKeysService(
         sync_session_factory=sync_session_factory,
         rsa_keys_repo=RSAKeysRepository()
