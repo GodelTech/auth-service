@@ -8,7 +8,7 @@ from src.data_access.postgresql.repositories import UserRepository, PersistentGr
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 from src.dyna_config import DOMAIN_NAME
-
+from src.business_logic.jwt_manager.dto import AdminUIPayload
 logger = logging.getLogger(__name__)
 
 
@@ -34,16 +34,15 @@ class AdminAuthService:
             user_hash_password
         )
         return await self.jwt_service.encode(
-            payload={
-                "sub":user_id,
-                "exp": exp_time + int(time.time()),
-                "aud":["admin","introspection", "revoke"]
-            }
+            payload=AdminUIPayload(
+                sub=user_id,
+                exp=exp_time + int(time.time()),
+            )
         )
     
 
     async def authenticate(self, token: str) -> Union[None, RedirectResponse]:
-        if await self.jwt_service.verify_token(token=token, aud="admin"):
+        if await self.jwt_service.verify_token(token=token, aud="oidc:admin_ui"):
             return None
         else:
             # return None

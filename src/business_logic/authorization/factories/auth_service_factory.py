@@ -23,7 +23,7 @@ from src.data_access.postgresql.repositories import (
 )
 
 if TYPE_CHECKING:
-    from src.business_logic.services import PasswordHash # JWTService,
+    from src.business_logic.services import PasswordHash
     from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 
