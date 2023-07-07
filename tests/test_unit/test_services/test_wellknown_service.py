@@ -6,7 +6,7 @@ from jwkest import base64_to_long
 
 from src.dyna_config import DOMAIN_NAME
 from src.di.providers import provide_jwt_manager
-from src.business_logic.services.well_known import WellKnownServices
+from src.business_logic.services.well_known import WellKnownService
 from typing import Any, no_type_check
 
 
