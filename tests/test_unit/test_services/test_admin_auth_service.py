@@ -1,17 +1,17 @@
 import mock
 import pytest
 from sqlalchemy import delete
-
-# from src.business_logic.jwt_manager import JWTManager
-
 from src.business_logic.services.admin_auth import AdminAuthService
 from src.business_logic.dto.admin_credentials import AdminCredentialsDTO
 from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.errors.user import UserNotFoundError
 from src.data_access.postgresql.errors import WrongPasswordError
-from time import time, sleep
+from src.business_logic.jwt_manager.dto import AccessTokenPayload
+import time 
 from jwt.exceptions import InvalidAudienceError, ExpiredSignatureError
 from pydantic import SecretStr
+from starlette.responses import RedirectResponse
+
 
 @pytest.mark.asyncio
 class TestAdminAuthService:
@@ -41,32 +41,36 @@ class TestAdminAuthService:
         self, admin_auth_service: AdminAuthService
     ) -> None:
         service = admin_auth_service
-        payload = {
-            "aud": [
-                "admin",
-            ],
-            "exp": int(time()) + 1000,
-        }
+        payload = AccessTokenPayload(
+            sub=1,
+            iat=1,
+            client_id=1,
+            aud="oidc:admin_ui",
+            exp=int(time.time()) + 1000,
+        )
         token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
         assert result is None
 
-        payload = {
-            "aud": [
-                "not_admin",
-            ],
-            "exp": int(time()) + 1000,
-        }
+        payload = AccessTokenPayload(
+            aud="not_admin",
+            sub=1,
+            iat=1,
+            client_id=1,
+            exp=int(time.time()) + 1000,
+            )
+        
         token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
-        assert result is not None
+        assert type(result) is RedirectResponse
 
-        payload = {
-            "aud": [
-                "admin",
-            ],
-            "exp": 0,
-        }
+        payload = AccessTokenPayload(
+            sub=1,
+            iat=1,
+            client_id=1,
+            aud="oidc:admin_ui",
+            exp=0,
+        )
         token = await provide_jwt_manager().encode(payload)
         result = await service.authenticate(token=token)
         assert result is not None

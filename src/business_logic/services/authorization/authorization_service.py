@@ -14,8 +14,8 @@ from src.data_access.postgresql.repositories import (
     UserRepository,
 )
 from src.presentation.api.models import DataRequestModel
-# if TYPE_CHECKING:
-from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
+if TYPE_CHECKING:
+    from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class AuthorizationService:
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
         password_service: PasswordHash,
-        jwt_service: JWTManager,
+        jwt_service,
     ) -> None:
         self._request_model: Optional[DataRequestModel] = None
         self.client_repo = client_repo

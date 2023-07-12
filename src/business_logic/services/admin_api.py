@@ -7,13 +7,13 @@ from typing import Optional
 from src.business_logic.services.password import PasswordHash
 from src.data_access.postgresql.tables import Group, Role, User
 # if TYPE_CHECKING:
-from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
+# from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 
 class AdminService():
     def __init__(
         self,
-        jwt_service: JWTManager,
+        jwt_service#: JWTManager,
     ) -> None:
         self.jwt_service = jwt_service
 

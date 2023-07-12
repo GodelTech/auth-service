@@ -56,7 +56,7 @@ class TestAuthorizationMiddleware:
         request = RequestTest(connection)
 
         with mock.patch.object(
-            JWTManager, "decode_token", new=new_decode_token
+            JWTManager, "decode", new=new_decode_token
         ):
             for request_with_auth in self.REQUESTS_WITH_AUTH:
                 request = RequestTest(connection)
@@ -71,7 +71,7 @@ class TestAuthorizationMiddleware:
         request = RequestTest(connection)
 
         with mock.patch.object(
-            JWTManager, "decode_token", new=new_decode_token
+            JWTManager, "decode", new=new_decode_token
         ):
             for request_with_auth in self.REQUESTS_WITH_AUTH:
                 request = RequestTest(connection)

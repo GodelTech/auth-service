@@ -8,7 +8,7 @@ from src.data_access.postgresql.errors.persistent_grant import (
     PersistentGrantNotFoundError,
 )
 
-from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA
+# from tests.test_unit.fixtures import end_session_request_model, TOKEN_HINT_DATA
 from src.business_logic.services.endsession import EndSessionService
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from sqlalchemy.ext.asyncio.engine import AsyncEngine

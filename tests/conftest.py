@@ -199,7 +199,7 @@ async def end_session_service(connection: AsyncSession) -> EndSessionService:
         session=connection,
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
-        jwt_service=provide_jwt_manager(),
+        #jwt_service=provide_jwt_manager(),
     )
     return end_sess_service
 

@@ -2,8 +2,6 @@ import logging
 
 import jwt
 from typing import Any, no_type_check, Optional
-
-from src.di.providers.rsa_keys import provide_rsa_keys
 from src.config.rsa_keys import RSAKeypair
 
 logger = logging.getLogger(__name__)
@@ -17,7 +15,7 @@ class JWTService:
     
     def check_rsa_keys(self): 
         if not self.keys:
-            self.keys = provide_rsa_keys()
+            self.keys = 123 
             if self.keys is None:
                 raise ValueError("Keys don't exist or Docker is not running")
 

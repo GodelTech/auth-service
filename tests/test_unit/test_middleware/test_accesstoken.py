@@ -7,6 +7,7 @@ from fastapi import status
 from src.presentation.api import router
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from src.business_logic.jwt_manager import JWTManager
 from typing import Any
 
 async def new_decode_token(*args: Any, **kwargs: Any) -> bool:
@@ -44,7 +45,7 @@ class TestAccessTokenMiddleware:
     async def test_successful_auth(self, connection: AsyncSession) -> None:
         test_token = "Bearer AccessToken"
         with mock.patch.object(
-            JWTManager, "decode_token", new=new_decode_token
+            JWTManager, "decode", new=new_decode_token
         ):
             request = NewRequest(connection)
 
