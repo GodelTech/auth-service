@@ -81,9 +81,9 @@ class TestAuthorizationCodeFlow:
         assert token_response.status_code == status.HTTP_200_OK
 
         # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
-        user_id_query = select(User.id).where(User.username == "TestClient")
-        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
-
+        user_query = select(User).where(User.username == "TestClient")
+        user = (await connection.execute(user_query)).first()[0]
+        user_id = user.id
         user_claim_insertion = insert(UserClaim).values(
             user_id=user_id, claim_type_id=1, claim_value="Peter"
         )
@@ -187,6 +187,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         access_token = response_data.get("access_token")
         assert response.status_code == status.HTTP_200_OK
 
+
+        users = (await connection.execute(select(User))).all()
         user_id_query = select(User.id).where(User.username == "PeterParker")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
@@ -280,9 +282,10 @@ class TestAuthorizationCodeFlowWithPKCE:
         response_data = response.json()
         access_token = response_data.get("access_token")
         assert response.status_code == status.HTTP_200_OK
-
-        user_id_query = select(User.id).where(User.username == "PeterParker")
-        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
+       
+        user_query = select(User).where(User.username == "PeterParker")
+        user = (await connection.execute(user_query)).first()[0]
+        user_id = user.id
 
         # Prepare data for the next stage
         await connection.execute(

@@ -47,7 +47,7 @@ class ScopeService:
             
         if 'profile' in scope:
             scope.remove('profile')
-            response['Your  Information'] += [
+            response['Your Information'] += [
                 "name",
                 "given name",
                 "family name",
