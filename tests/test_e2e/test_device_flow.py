@@ -72,7 +72,7 @@ class TestDeviceFlow:
                                         data=auth_params,
                                         headers={"Content-Type": self.content_type},
                                         cookies={"user_code": user_code})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_302_FOUND
 
         # Stage 5: Client exchanges the device code for an access token
         token_params = {"client_id": "test_client", "grant_type": "urn:ietf:params:oauth:grant-type:device_code",

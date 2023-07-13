@@ -68,10 +68,20 @@ async def get_authorize(
     if request_model.response_type == "code":
         external_logins = await auth_class.form_providers_data_for_auth()
 
+    scope_service=ScopeService(
+            resource_repo=ResourcesRepository(session),
+            session=session
+        )
+    
+    confirm_text = await scope_service.get_scope_description(scope=request_model.scope)
+    # confirm_text = print_items(confirm_text)
+    header_text = 'The service want to get access to:'
     if return_form:
         return templates.TemplateResponse(
             "login_form.html",
             {
+                "confirm_text":confirm_text, 
+                "confirm_header":header_text,
                 "request": request,
                 "request_model": request_model,
                 "external_logins": external_logins,
@@ -103,16 +113,23 @@ async def post_authorize(
             session=session
         )
     )
-    scope_service = ScopeService(
-        session=session,
-        resource_repo=ResourcesRepository(session)
-        )
     setattr(request_body, "user_code", user_code)
     auth_service: AuthServiceProtocol = auth_service_factory.get_service_impl(
         request_body.response_type
     )
     result = await auth_service.get_redirect_url(request_body)
     await session.commit()
-    confirm_text = await scope_service.get_scope_description(scope=request_body.scope)
-    header_text = 'The service want to get access to:'
-    return JSONResponse({"redirect_url":result, "confirm_text":confirm_text, "header_text":header_text})
+    
+    return RedirectResponse(url=result, status_code=302)
+
+
+
+# def print_items(confirm_text:dict, style="list-style-type:circle"):
+#     result = '<ul> '
+#     for k in confirm_text:
+#         result += f"<li> {k} </li> "
+#         if type(confirm_text[k]) is dict:
+#            result += print_items(confirm_text[k])
+#         if type(confirm_text[k]) is str:
+#             result += f"<ul> <li> {confirm_text[k]} </li> </ul> "
+#     return result + ' </ul>'

@@ -13,6 +13,37 @@
   <div class="form_auth_block">
     <div class="form_auth_block_content">
       <p class="form_auth_block_head_text">Sign in to your account</p>
+    
+      <form id="confirm_header" class="form_auth_style">
+        <label>{{ confirm_header }}</label>
+        <ul>
+          {% for key, value in confirm_text.items() %}
+            <li>
+              {{ key }}:
+              {% if value is mapping %}
+                <ul>
+                  {% for subkey, subvalue in value.items() %}
+                    <li>{{ subkey }}:
+                      <ul>
+                        {% for subitem in subvalue %}
+                          <li>{{ subitem }}</li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <ul>
+                  {% for item in value %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>        
+      </form>
+    
       <form id="auth_form" class="form_auth_style" action="#" method="post" >
         <label>Enter Username</label>
         <input id="user" type="text" name="username" placeholder="Username" required >
@@ -50,13 +81,6 @@
     {% endfor %}
   </div>
 
-  <div class="modal" id="modal_window">
-    <p class="form_auth_block_head_text">Confirm Device Login</p>
-    <div class="buttons">
-      <button id="yes_butt" class="form_device_button" name="form_auth_submit">Confirm</button>
-      <button id="no_butt" class="form_device_button" name="form_auth_submit">Cancel</button>
-    </div>
-  </div>
 
   <div class="modal" id="credentials_modal_window">
     <p class="form_auth_block_head_text credentials_note">You have entered incorrect user credentials</p>
