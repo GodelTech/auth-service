@@ -34,21 +34,20 @@ class ScopeService:
 
     async def get_scope_description(
         self, scope:str
-    ) -> list[str]:
+    ) -> dict[str:Any]:
         scope:list = scope.split(' ')
-        response={'userinfo':[]}
+        response={'Your Information':[]}
         if not scope or 'openid' in scope:
             scope.remove('openid')
-            response['userinfo'] = [
+            response['Your Information'] = [
                 "information from our server that does NOT include your personal data\n\tLink for details https://oidc.com/details/openid"
             ]
             if not scope:
-                info = response['userinfo']
-                return f'- Your {info}\n'
-
+                return response
+            
         if 'profile' in scope:
             scope.remove('profile')
-            response['userinfo'] += [
+            response['Your Information'] += [
                 "name",
                 "given name",
                 "family name",
@@ -69,10 +68,8 @@ class ScopeService:
 
         if 'email' in scope:
             scope.remove('email')
-            response = response | {
-                "email and is it verified or not",
-            }
-
+            response['Your Information'] += ["email and is it verified or not"]
+            
         dict_of_descriptions = {}
         for scope_str in scope:
             if '.' in scope_str:
@@ -82,20 +79,15 @@ class ScopeService:
                 else:
                     dict_of_descriptions |= dict_answer
             else:
-                if scope_str not in response['userinfo']:
-                    response['userinfo'].append(scope_str)
+                if scope_str not in response['Your Information']:
+                    response['Your Information'].append(scope_str)
         
-
-        result = 'Information:\n'
-        for info in response['userinfo']:
-            result += f'- Your {info}\n'
-
-        result += '\nAccess to resources:'
-        for n, key in enumerate(dict_of_descriptions.keys()):
-            result += f'\n{n+1}. {key}:\n- {dict_of_descriptions[key]}'
-
-        return result
-    
+        if len(dict_of_descriptions) > 0:
+            response['Access to resources'] = []
+            for key in dict_of_descriptions.keys():
+                response['Access to resources'] += [f'{key}\n- {dict_of_descriptions[key]}']
+        return response
+            
     async def get_aud(self, scope:str = "openid") -> list[str]:
         result = await self.get_full_names(scope)
         return result + [
