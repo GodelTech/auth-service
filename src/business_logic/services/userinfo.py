@@ -1,8 +1,9 @@
 from typing import Any, Optional
 
-from jwt.exceptions import PyJWTError
+# from jwt.exceptions import PyJWTError
 
-from src.business_logic.services.jwt_token import JWTService
+from src.business_logic.jwt_manager import JWTManager
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
@@ -18,7 +19,7 @@ class UserInfoService:
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt: JWTService = JWTService(),
+        jwt: JWTManager = provide_jwt_manager(),
     ) -> None:
         self.jwt = jwt
         self.authorization: Optional[str] = None
@@ -92,5 +93,5 @@ class UserInfoService:
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        token = await self.jwt.encode_jwt(payload=result)
+        token = await self.jwt.encode(payload=result)
         return token

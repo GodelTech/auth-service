@@ -58,7 +58,7 @@ async def get_all_clients(
     access_token: str = Header(description="Access token"),
     auth: None = Depends(access_token_middleware),
     session: AsyncSession = Depends(provide_async_session_stub),
-) -> dict[str, list[dict[str, Any]]]:
+    ):
     client_service = ClientService(
         session=session, client_repo=ClientRepository(session)
     )

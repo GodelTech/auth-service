@@ -4,7 +4,7 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
 )
@@ -18,7 +18,7 @@ class TestRevokationEndpoint:
     async def test_successful_revoke_request(
         self, connection: AsyncSession, client: AsyncClient
     ) -> None:
-        jwt = JWTService()
+        jwt = provide_jwt_manager()
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "refresh_token"
         revoke_token = "----token_to_delete-----"
@@ -32,7 +32,7 @@ class TestRevokationEndpoint:
         )
         await connection.commit()
         headers = {
-            "authorization": await jwt.encode_jwt(
+            "authorization": await jwt.encode(
                 payload={"sub": "1", "aud":["revocation"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",
@@ -50,11 +50,11 @@ class TestRevokationEndpoint:
     async def test_token_does_not_exists(
         self, client: AsyncClient
     ) -> None:
-        jwt = JWTService()
+        jwt = provide_jwt_manager()
         grant_type = "code"
         revoke_token = "----token_not_exists-----"
         headers = {
-            "authorization": await jwt.encode_jwt(
+            "authorization": await jwt.encode(
                 payload={"sub": "1", "aud":["revocation"]}
             ),
             "Content-Type": "application/x-www-form-urlencoded",

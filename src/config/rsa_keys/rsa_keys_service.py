@@ -1,6 +1,6 @@
 from Crypto.PublicKey import RSA
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.exc import OperationalError
 from src.data_access.postgresql.repositories import RSAKeysRepository
 from src.data_access.postgresql.tables.rsa_keys import RSA_keys
 from .dto import RSAKeypair
@@ -16,13 +16,16 @@ class RSAKeysService:
         self.rsa_keys_repo = rsa_keys_repo
 
     def get_rsa_keys(self) -> RSA_keys:
-        with self.session() as session:
-            if self.rsa_keys_repo.validate_keys_exists(session=session):
-                self.rsa_keys = self.rsa_keys_repo.get_keys_from_repository(session)
-            else:
-                self.rsa_keys = self.create_rsa_keys()                         # RSAKeypair
-                self.rsa_keys_repo.put_keys_to_repository(rsa_keys=self.rsa_keys, session=session)
-                self.rsa_keys = self.rsa_keys_repo.get_keys_from_repository(session=session)  # RSA_keys
+        try:
+            with self.session() as session:
+                if self.rsa_keys_repo.validate_keys_exists(session=session):
+                    self.rsa_keys = self.rsa_keys_repo.get_keys_from_repository(session)
+                else:
+                    self.rsa_keys = self.create_rsa_keys()                         # RSAKeypair
+                    self.rsa_keys_repo.put_keys_to_repository(rsa_keys=self.rsa_keys, session=session)
+                    self.rsa_keys = self.rsa_keys_repo.get_keys_from_repository(session=session)  # RSA_keys
+        except OperationalError:
+            self.rsa_keys = None
         return self.rsa_keys
 
     def create_rsa_keys(self) -> RSAKeypair:    # or -> RSA_keys

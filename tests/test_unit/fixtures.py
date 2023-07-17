@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from pydantic import SecretStr
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.third_party_auth.dto.request import (
     StateRequestModel,
     ThirdPartyAccessTokenRequestModel,
@@ -164,7 +164,7 @@ def device_request_model() -> DeviceRequestModel:
     return request_model
 
 
-service = JWTService()
+service = provide_jwt_manager()
 
 TOKEN_HINT_DATA = {
     "sub": 3,
@@ -177,16 +177,16 @@ SHORT_TOKEN_HINT_DATA = {"sub": 3, "data": "secret_code", "type": "code"}
 
 
 class TokenHint:
-    sv = JWTService()
+    sv = provide_jwt_manager()
 
     @classmethod
     async def get_token_hint(cls) -> str:
-        token_hint = await cls.sv.encode_jwt(payload=TOKEN_HINT_DATA)
+        token_hint = await cls.sv.encode(payload=TOKEN_HINT_DATA)
         return token_hint
 
     @classmethod
     async def get_short_token_hint(cls) -> str:
-        short_token_hint = await cls.sv.encode_jwt(
+        short_token_hint = await cls.sv.encode(
             payload=SHORT_TOKEN_HINT_DATA
         )
         return short_token_hint

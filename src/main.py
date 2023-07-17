@@ -23,8 +23,6 @@ from src.dyna_config import (
 
 import src.presentation.admin_ui.controllers as ui
 import src.di.providers as prov
-# from src.di.providers.rsa_keys import provide_rsa_keys, provide_rsa_keys_stub  # removed from `prov` due to circular import
-from src.di.providers import provide_jwt_manager_stub, provide_jwt_manager
 import logging
 from src.log import LOGGING_CONFIG
 from src.data_access.postgresql.repositories import UserRepository
@@ -51,9 +49,8 @@ def get_application(test: bool = False) -> NewFastApi:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application = setup_exception_handlers(application)
-
-    application = setup_exception_handlers(application)
+    #application = setup_exception_handlers(application)
+    
     setup_di(application)
     container = Container()
     container.db()

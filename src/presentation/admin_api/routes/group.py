@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_access.postgresql.repositories import GroupRepository
 from src.business_logic.services.admin_api import AdminGroupService
-from src.data_access.postgresql.errors.user import DuplicationError
+# from src.data_access.postgresql.errors.user import DuplicationError
 from src.presentation.admin_api.models.group import *
 from src.di.providers import provide_async_session_stub
 

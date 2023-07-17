@@ -50,7 +50,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 
-from src.business_logic.services import JWTService
+# from src.business_logic.services import JWTService
 
 async def fake_authenticate(*args, **kwargs):
     return None

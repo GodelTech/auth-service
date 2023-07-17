@@ -1,8 +1,9 @@
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 from fastapi import Request
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
+
 from src.data_access.postgresql.errors import TokenIncorrectError
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
@@ -13,6 +14,8 @@ from src.presentation.api.models.introspection import (
     BodyRequestIntrospectionModel,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+# if TYPE_CHECKING:
+from src.business_logic.jwt_manager import JWTManager
 
 
 class IntrospectionService:
@@ -56,7 +59,7 @@ class IntrospectionService:
         user_repo: UserRepository,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt: JWTService = JWTService(),
+        jwt: JWTManager = provide_jwt_manager(),
     ) -> None:
         self.jwt = jwt
         self.request: Optional[Request] = None
@@ -102,7 +105,7 @@ class IntrospectionService:
         response: dict[str, Any] = {}
 
         try:
-            decoded_token = await self.jwt.decode_token(
+            decoded_token = await self.jwt.decode(
                 token=self.request_body.token, audience="introspection"
             )
         except ExpiredSignatureError:

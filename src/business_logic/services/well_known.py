@@ -1,11 +1,16 @@
+
+from src.data_access.postgresql.tables.persistent_grant import TYPES_OF_GRANTS
+from src.di.providers import provide_jwt_manager
+
 from src.business_logic.dto.open_id_config import OpenIdConfiguration
 from src.business_logic.services.jwt_token import JWTService
+
 from jwkest import long_to_base64, base64_to_long
 import logging
 from src.dyna_config import DOMAIN_NAME
 from jwkest import base64_to_long, long_to_base64
 from fastapi import Request
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from typing import Any, Union
 from src.data_access.postgresql.repositories import WellKnownRepository
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,6 +71,7 @@ class WellKnownService:
             route.name: result["issuer"] + route.path
             for route in self.request.app.routes
         } | {"false": "/ Not ready yet"}
+
 
     def get_algorithms(self) -> list[str]:
         """Retrieves a list of algorithms from the JWTService.
@@ -166,6 +172,7 @@ class WellKnownService:
         return result_model
 
     async def get_jwks(self) -> dict[str, Any]:
+
         """Retrieves the JWKS (JSON Web Key Set).
 
         Returns:

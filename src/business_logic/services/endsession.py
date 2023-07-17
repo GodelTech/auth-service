@@ -1,9 +1,10 @@
+from src.business_logic.jwt_manager import JWTManager
 from src.presentation.api.models.endsession import RequestEndSessionModel
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
 )
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from typing import Union, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,11 +15,10 @@ class EndSessionService:
         session:AsyncSession,
         client_repo: ClientRepository,
         persistent_grant_repo: PersistentGrantRepository,
-        jwt_service = JWTService()
     ) -> None:
         self.client_repo = client_repo
         self.persistent_grant_repo = persistent_grant_repo
-        self.jwt_service = jwt_service
+        self.jwt_service = provide_jwt_manager()
         self._request_model: Optional[RequestEndSessionModel] = None
         self.session = session
 
@@ -53,7 +53,7 @@ class EndSessionService:
     async def _decode_id_token_hint(
         self, id_token_hint: str
     ) -> dict[str, Any]:
-        decoded_data = await self.jwt_service.decode_token(token=id_token_hint)
+        decoded_data = await self.jwt_service.decode(token=id_token_hint)
         return decoded_data
 
     async def _logout(self, client_id: str, user_id: int) -> None:

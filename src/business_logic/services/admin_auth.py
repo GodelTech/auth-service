@@ -3,12 +3,12 @@ from typing import Optional, Union
 import time 
 from src.business_logic.dto import AdminCredentialsDTO
 from src.business_logic.services.password import PasswordHash
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.repositories import UserRepository, PersistentGrantRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 from src.dyna_config import DOMAIN_NAME
-
+from src.business_logic.jwt_manager.dto import AdminUIPayload
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +17,7 @@ class AdminAuthService:
         self,
         user_repo: UserRepository,
         password_service = PasswordHash(),
-        jwt_service = JWTService(),
+        jwt_service = provide_jwt_manager(),
     ) -> None:
         self.user_repo = user_repo
         self.password_service = password_service
@@ -33,17 +33,16 @@ class AdminAuthService:
             credentials.password, 
             user_hash_password
         )
-        return await self.jwt_service.encode_jwt(
-            payload={
-                "sub":user_id,
-                "exp": exp_time + int(time.time()),
-                "aud":["admin","introspection", "revoke"]
-            }
+        return await self.jwt_service.encode(
+            payload=AdminUIPayload(
+                sub=user_id,
+                exp=exp_time + int(time.time()),
+            )
         )
     
 
     async def authenticate(self, token: str) -> Union[None, RedirectResponse]:
-        if await self.jwt_service.verify_token(token=token, aud="admin"):
+        if await self.jwt_service.verify_token(token=token, aud="oidc:admin_ui"):
             return None
         else:
             # return None

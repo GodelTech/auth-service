@@ -105,13 +105,13 @@ class AuthorizationCodeTokenService:
             jti=str(uuid.uuid4()),
             acr=0,
         )
-        return self._jwt_manager.encode(payload=payload, algorithm='RS256')
+        return await self._jwt_manager.encode(payload=payload, algorithm='RS256')
 
     async def _get_refresh_token(self, request_data: RequestTokenModel) -> str:
         payload = RefreshTokenPayload(
             jti=str(uuid.uuid4())
         )
-        return self._jwt_manager.encode(payload=payload, algorithm='RS256') 
+        return await self._jwt_manager.encode(payload=payload, algorithm='RS256')
 
     async def _get_id_token(self, request_data: RequestTokenModel, user_id: int, unix_time: int) -> str:
         payload = IdTokenPayload(
@@ -123,4 +123,4 @@ class AuthorizationCodeTokenService:
             jti=str(uuid.uuid4()),
             acr=0,
         )
-        return self._jwt_manager.encode(payload=payload, algorithm='RS256')
+        return await self._jwt_manager.encode(payload=payload, algorithm='RS256')

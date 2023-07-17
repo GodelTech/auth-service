@@ -1,12 +1,13 @@
 import pytest
 import mock
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.presentation.middleware.access_token_validation import access_token_middleware
 from starlette.types import ASGIApp
 from fastapi import status
 from src.presentation.api import router
 from src.data_access.postgresql.repositories import BlacklistedTokenRepository
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from src.business_logic.jwt_manager import JWTManager
 from typing import Any
 
 async def new_decode_token(*args: Any, **kwargs: Any) -> bool:
@@ -44,7 +45,7 @@ class TestAccessTokenMiddleware:
     async def test_successful_auth(self, connection: AsyncSession) -> None:
         test_token = "Bearer AccessToken"
         with mock.patch.object(
-            JWTService, "decode_token", new=new_decode_token
+            JWTManager, "decode", new=new_decode_token
         ):
             request = NewRequest(connection)
 

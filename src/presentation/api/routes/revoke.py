@@ -4,7 +4,7 @@ from typing import Union
 from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories import (
     PersistentGrantRepository,
@@ -49,7 +49,7 @@ async def post_revoke_token(
         device_repo=DeviceRepository(session),
         code_challenge_repo=CodeChallengeRepository(session),
         blacklisted_repo=BlacklistedTokenRepository(session),
-        jwt_service=JWTService(),
+        jwt_service=provide_jwt_manager(),
     )
     token_class.request = request
     token_class.request_body = request_body

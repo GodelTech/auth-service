@@ -8,7 +8,7 @@ from httpx import AsyncClient, Client
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.tokens import TokenService
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
@@ -17,7 +17,7 @@ from src.data_access.postgresql.repositories.persistent_grant import (
 
 @pytest.mark.asyncio
 class TestTokenEndpoint:
-    jwt_service = JWTService()
+    jwt_service = provide_jwt_manager()
     refresh_token = None
     content_type = "application/x-www-form-urlencoded"
 
@@ -243,7 +243,7 @@ class TestTokenEndpoint:
         to 'refresh_token' in params
         """
 
-        test_token = await self.jwt_service.encode_jwt(
+        test_token = await self.jwt_service.encode(
             payload={"sub": 1, "exp": time.time() + 3600}
         )
 

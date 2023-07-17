@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy import insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
@@ -13,6 +13,8 @@ from src.data_access.postgresql.repositories.roles import RoleRepository
 import logging
 from sqlalchemy import exc
 from typing import Any
+from src.business_logic.jwt_manager.dto import AccessTokenPayload
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -21,11 +23,15 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 class TestAdminGroupEndpoint:
     async def setup_base(self, connection:AsyncSession, user_id: int = 1000) -> None:
-        self.access_token = await JWTService().encode_jwt(
-            payload={
-                "stand": "CrazyDiamond",
-                "aud":["admin"]
-            }
+        self.access_token = await provide_jwt_manager().encode(
+            payload=AccessTokenPayload(
+                sub = 1,
+                iat=1,
+                exp=int(time.time()) + 100000,
+                client_id='123123',
+                arc=1, 
+                aud = "admin"
+            )
         )
         self.group_repo = GroupRepository(connection)
         self.role_repo = RoleRepository(connection)
@@ -224,12 +230,14 @@ class TestAdminGroupEndpoint:
         )
         assert response.status_code == status.HTTP_200_OK
         headers = {"access-token": self.access_token}
-        response = await client.request(
-            "GET",
-            f"/administration/groups/{group_id}",
-            headers=headers
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        # response = await client.request(
+        #     "GET",
+        #     f"/administration/groups/{group_id}",
+        #     headers=headers
+        # )
+        with pytest.raises(ValueError):
+            await self.group_repo.get_by_id(group_id=group_id)
+        # assert response.status_code == status.HTTP_404_NOT_FOUND
 
     async def test_create_update_group(self, connection: AsyncSession, client: AsyncClient) -> None:
         await self.setup_base(

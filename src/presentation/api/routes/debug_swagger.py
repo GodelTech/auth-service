@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter
 
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 
 debug_router = APIRouter(
     prefix="/userinfo",
@@ -18,7 +18,7 @@ async def get_default_token(
     exp: Optional[int] = int(time.time() + 10000),
     scope: str = "profile",
 ) -> str:
-    jwt = JWTService()
+    jwt = provide_jwt_manager()
     payload: dict[str, Any] = {"sub": "1", "scope": scope}
     if with_iss_me:
         payload["iss"] = "me"
@@ -26,7 +26,7 @@ async def get_default_token(
         payload["aud"] = ["admin", "userinfo", "introspection", "revoke"]
     if exp:
         payload["exp"] = exp
-    return await jwt.encode_jwt(payload)
+    return await jwt.encode(payload)
 
 
 @debug_router.get("/decode_token", response_model=dict)
@@ -35,7 +35,7 @@ async def get_decode_token(
     issuer: Optional[str] = None,
     audience: Optional[str] = None,
 ) -> dict[str, Any]:
-    jwt = JWTService()
+    jwt = provide_jwt_manager()
     kwargs = {}
     if issuer is not None:
         kwargs["issuer"] = issuer

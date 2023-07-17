@@ -23,7 +23,8 @@ from src.data_access.postgresql.repositories import (
 )
 
 if TYPE_CHECKING:
-    from src.business_logic.services import JWTService, PasswordHash
+    from src.business_logic.services import PasswordHash
+    from src.business_logic.jwt_manager.service_impls.jwt_service import JWTManager
 
 
 FactoryMethod = Callable[..., AuthServiceProtocol]
@@ -41,7 +42,7 @@ class AuthServiceFactory:
         persistent_grant_repo: PersistentGrantRepository,
         device_repo: DeviceRepository,
         password_service: PasswordHash,
-        jwt_service: JWTService,
+        jwt_service: JWTManager,
     ) -> None:
         self.session = session
         self._client_repo = client_repo

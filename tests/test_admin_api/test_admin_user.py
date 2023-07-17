@@ -5,8 +5,8 @@ from httpx import AsyncClient
 from sqlalchemy import insert, delete, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-
-from src.business_logic.services.jwt_token import JWTService
+import time
+from src.di.providers import provide_jwt_manager
 from src.data_access.postgresql.tables.persistent_grant import PersistentGrant
 from src.data_access.postgresql.repositories.user import UserRepository
 from src.data_access.postgresql.repositories.groups import GroupRepository
@@ -15,6 +15,7 @@ import logging
 from sqlalchemy import exc
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from typing import Any
+from src.business_logic.jwt_manager.dto import AccessTokenPayload
 
 
 logger = logging.getLogger(__name__)
@@ -23,11 +24,15 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 class TestAdminUserEndpoint:
     async def setup_base(self, connection:AsyncSession, user_id: int = 1000) -> None:
-        self.access_token = await JWTService().encode_jwt(
-            payload={
-                "stand": "CrazyDiamond",
-                "aud":["admin"]
-            }
+        self.access_token = await provide_jwt_manager().encode(
+            payload=AccessTokenPayload(
+                sub = 1,
+                iat=1,
+                exp=int(time.time()) + 100000,
+                client_id='123123',
+                arc=1, 
+                aud = "admin"
+            )
         )
         self.group_repo = GroupRepository(connection)
         self.role_repo = RoleRepository(connection)

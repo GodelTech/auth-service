@@ -39,7 +39,7 @@ from src.data_access.postgresql.repositories import (
     CodeChallengeRepository,
 )
 from src.business_logic.services.password import PasswordHash
-from src.business_logic.services.jwt_token import JWTService
+from src.di.providers import provide_jwt_manager
 from src.business_logic.services.introspection import IntrospectionService
 from src.business_logic.services.tokens import TokenService
 from src.business_logic.services.login_form_service import LoginFormService
@@ -188,7 +188,7 @@ async def authorization_service(
         persistent_grant_repo=PersistentGrantRepository(session=connection),
         device_repo=DeviceRepository(session=connection),
         password_service=PasswordHash(),
-        jwt_service=JWTService(),
+        jwt_service=provide_jwt_manager(),
     )
     return auth_service
 
@@ -199,7 +199,7 @@ async def end_session_service(connection: AsyncSession) -> EndSessionService:
         session=connection,
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
-        jwt_service=JWTService(),
+        #jwt_service=provide_jwt_manager(),
     )
     return end_sess_service
 
@@ -213,7 +213,7 @@ async def introspection_service(
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
         user_repo=UserRepository(session=connection),
-        jwt=JWTService(),
+        jwt=provide_jwt_manager(),
     )
     return intro_service
 
@@ -222,7 +222,7 @@ async def introspection_service(
 async def user_info_service(connection: AsyncSession) -> UserInfoService:
     user_info = UserInfoService(
         session=connection,
-        jwt=JWTService(),
+        jwt=provide_jwt_manager(),
         client_repo=ClientRepository(session=connection),
         persistent_grant_repo=PersistentGrantRepository(session=connection),
         user_repo=UserRepository(session=connection),
@@ -239,7 +239,7 @@ async def token_service(connection: AsyncSession) -> TokenService:
         user_repo=UserRepository(session=connection),
         device_repo=DeviceRepository(session=connection),
         code_challenge_repo=CodeChallengeRepository(session=connection),
-        jwt_service=JWTService(),
+        jwt_service=provide_jwt_manager(),
         blacklisted_repo=BlacklistedTokenRepository(session=connection),
     )
     return tk_service
@@ -339,7 +339,7 @@ async def admin_auth_service(connection: AsyncSession) -> AdminAuthService:
     admin_auth_service = AdminAuthService(
         user_repo=UserRepository(session=connection),
         password_service=PasswordHash(),
-        jwt_service=JWTService(),
+        jwt_service=provide_jwt_manager(),
     )
     return admin_auth_service
 

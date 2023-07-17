@@ -105,4 +105,4 @@ async def get_userinfo_jwt(
     logger.info("Collecting Claims from DataBase.")
     result = await userinfo_class.get_user_info()
     result = {k: v for k, v in result.items() if v is not None}
-    return await userinfo_class.jwt.encode_jwt(payload=result)
+    return await userinfo_class.jwt.encode(payload=result, algorithm='RS256')
