@@ -98,7 +98,7 @@ class TestAuthorizeEndpointPOST:
             data=params,
             headers={"Content-Type": self.content_type},
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_302_FOUND
 
     async def test_unsuccessful_authorize_request_not_full_data(
         self, client: AsyncClient, engine: AsyncEngine,

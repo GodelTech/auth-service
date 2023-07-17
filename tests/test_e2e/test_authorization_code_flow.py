@@ -9,7 +9,7 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 import json
 from src.business_logic.services.jwt_token import JWTService
-
+from urllib.parse import urlparse, parse_qs
 from src.data_access.postgresql.tables.users import User, UserClaim
 
 scope = (
@@ -50,11 +50,18 @@ class TestAuthorizationCodeFlow:
             data={**authorization_params, **user_credentials},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_302_FOUND
 
         # Stage 2: Token endpoint changes the secret code in the Persistent Grant table to a token
-        secret_code = json.load(response)['redirect_url']
-        secret_code = secret_code.split('=')[1]
+
+        #def parse_code_from_url
+        url = response.headers["Location"]
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        secret_code = query_params.get("code", [None])[0]
+
+        # secret_code = json.load(response)['redirect_url']
+        # secret_code = secret_code.split('=')[1]
 
         token_params = {
             "client_id": "test_client",
@@ -74,9 +81,9 @@ class TestAuthorizationCodeFlow:
         assert token_response.status_code == status.HTTP_200_OK
 
         # Stage 3: UserInfo endpoint retrieves user data from UserClaims table
-        user_id_query = select(User.id).where(User.username == "TestClient")
-        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
-
+        user_query = select(User).where(User.username == "TestClient")
+        user = (await connection.execute(user_query)).first()[0]
+        user_id = user.id
         user_claim_insertion = insert(UserClaim).values(
             user_id=user_id, claim_type_id=1, claim_value="Peter"
         )
@@ -152,9 +159,9 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_302_FOUND
 
-        url = json.load(response)['redirect_url']
+        url = response.headers["Location"]
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -180,6 +187,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         access_token = response_data.get("access_token")
         assert response.status_code == status.HTTP_200_OK
 
+
+        users = (await connection.execute(select(User))).all()
         user_id_query = select(User.id).where(User.username == "PeterParker")
         user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
 
@@ -247,8 +256,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_200_OK
-        url = json.load(response)['redirect_url']
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["Location"]
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -273,9 +282,10 @@ class TestAuthorizationCodeFlowWithPKCE:
         response_data = response.json()
         access_token = response_data.get("access_token")
         assert response.status_code == status.HTTP_200_OK
-
-        user_id_query = select(User.id).where(User.username == "PeterParker")
-        user_id = (await connection.execute(user_id_query)).scalar_one_or_none()
+       
+        user_query = select(User).where(User.username == "PeterParker")
+        user = (await connection.execute(user_query)).first()[0]
+        user_id = user.id
 
         # Prepare data for the next stage
         await connection.execute(
@@ -342,8 +352,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_200_OK
-        url = json.load(response)['redirect_url']
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["Location"]
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
@@ -410,8 +420,8 @@ class TestAuthorizationCodeFlowWithPKCE:
         # and redirects the user back to the application with an authorization `code`, which is good for one use.
         from urllib.parse import urlparse, parse_qs
 
-        assert response.status_code == status.HTTP_200_OK
-        url = json.load(response)['redirect_url']
+        assert response.status_code == status.HTTP_302_FOUND
+        url = response.headers["Location"]
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
         code = query.get("code", [None])[0]
