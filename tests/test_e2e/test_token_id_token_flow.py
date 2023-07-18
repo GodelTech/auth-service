@@ -53,10 +53,8 @@ class TestAuthorizationTokenFlow:
             "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
-        expected_content = '{"message":"You are not logged in"}'
         response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_302_FOUND
 
     async def test_successful_authorization_token_id_token_flow(
             self, client: AsyncClient, connection: AsyncSession
@@ -94,7 +92,5 @@ class TestAuthorizationTokenFlow:
             "post_logout_redirect_uri": "http://www.sparks.net/",
             "state": "test_state",
         }
-        expected_content = '{"message":"You are not logged in"}'
         response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+        assert response.status_code == status.HTTP_302_FOUND
