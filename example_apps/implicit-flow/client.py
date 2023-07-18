@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 import jwt
-import requests
 from authlib.integrations.starlette_client import OAuth
 from fastapi import Depends
 from fastapi import FastAPI, Request
@@ -89,28 +88,6 @@ async def homepage(request: Request, user=Depends(get_user)):
     else:
         content = read_file_content("html/unauthorized-page.html")
         return HTMLResponse(content=content)
-
-
-@app.get("/userinfo")
-async def userinfo(request: Request):
-    server_metadata = await oauth.oidc_provider.load_server_metadata()
-    userinfo_endpoint = server_metadata.get("userinfo_endpoint")
-
-    auth_data = pseudo_db.get("auth_data")
-    if not auth_data:
-        pseudo_db.delete("auth_data")
-        request.session.clear()
-        return RedirectResponse(url="/")
-    breakpoint()
-    access_token = auth_data["access_token"]
-
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    response = requests.get(userinfo_endpoint, headers=headers)
-    content = read_file_content("html/userinfo-page.html").replace(
-        "{{{user_info_variable}}}", json.dumps(response.json(), indent=4)
-    )
-    return HTMLResponse(content=content)
 
 
 @app.get("/login")
