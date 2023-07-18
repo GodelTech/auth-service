@@ -79,8 +79,6 @@ def get_base_payload(
         base_payload = base_payload | scope
     if aud:
         base_payload["aud"] = aud
-    else:
-        base_payload["aud"] = [client_id]
     return base_payload
 
 
