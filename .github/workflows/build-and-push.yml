@@ -1,9 +1,12 @@
 name: Publish Docker Image
 
+#on:
+#  # run when a release has been created
+#  release:
+#    types: [published]
+
 on:
-  # run when a release has been created
-  release:
-    types: [published]
+  [push]
 
 jobs:
   push_to_registry:
