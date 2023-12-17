@@ -38,6 +38,8 @@ jobs:
               FULL_TAGS="$FULL_TAGS$DOCKER_URI:$TAG,"
           done
           echo "tags=$FULL_TAGS" >> $GITHUB_OUTPUT
+          echo $TAGS
+          echo $FULL_TAGS
 
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -45,6 +47,18 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.set-tags.outputs.tags }}
+#          labels: ${{ steps.set-tags.outputs.labels }}
 
+
+
+#    - name: Build and push Docker image
+#      uses: docker/build-push-action@v5
+#      with:
+#        file: ${{ inputs.dockerfile }}
+#        push: true
+#        provenance: false
+#        sbom: false
+#        tags: ${{ steps.set-tags.outputs.tags }}
+#        cache-from: type=gha,scope=${{ inputs.docker_repo }}
+#        cache-to: type=gha,mode=max,scope=${{ inputs.docker_repo }}
