@@ -1,7 +1,7 @@
 name: Build and Test
 
 on:
-  # run when a merge into main has been invoked
+  # run when a merge into main has been happened
   push:
     branches:
       - main
