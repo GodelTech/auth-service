@@ -23,5 +23,5 @@ jobs:
 
       - name: Push image to Docker
         run: |
-          docker tag auth-server-image levigoldman/auth-server
-          docker push levigoldman/auth-server
+          docker tag auth-server-image godeltech/py-identity-server
+          docker push godeltech/py-identity-server
