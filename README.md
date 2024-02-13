@@ -13,7 +13,7 @@
 - *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
 
 ##### Settings
-1. Create `.env` file in project root directory and add row:
+1. Create `.env` file in project root directory and add row :
 >ENV_FOR_DYNACONF=local
 2. Use local for ENV_FOR_DYNACONF if you want to run migrations and populate local database
 3. Use docker for ENV_FOR_DYNACONF if your database is running in a docker container
