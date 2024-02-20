@@ -8,10 +8,6 @@
 
 # Project installation
 
-##### Link to the GIT repository:
-
-- *https://gitlab.godeltech.com/gte-internal/python/identity-server-poc*
-
 ##### Settings
 1. Create `.env` file in project root directory and add row:
 >ENV_FOR_DYNACONF=local
@@ -41,7 +37,7 @@ Or run the following command to run just postgresql, pgadmin, and redis services
 - *docker-compose -f ./docker-compose.dev.yml up*
 
 ##### Starting poetry:
-
+Install poetry (bash: "pip install poetry")
 - *poetry install*
 - *poetry shell*
 
@@ -112,3 +108,4 @@ Example (add your versions to *.vscode/settings.json*):
 
 - PostgreSQL admin:
   *http://localhost/login?next=%2Fbrowser%2F*
+- test11
