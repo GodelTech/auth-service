@@ -13,6 +13,7 @@ from src.business_logic.common.validators import (
     ClientValidator,
     RedirectUriValidator,
 )
+from src.business_logic.jwt_manager import JWTManager
 
 if TYPE_CHECKING:
     from src.business_logic.authorization.interfaces import AuthServiceProtocol
@@ -25,13 +26,13 @@ if TYPE_CHECKING:
 
 
 def _create_id_token_token_auth_service(
-    *,
-    client_repo: ClientRepository,
-    user_repo: UserRepository,
-    password_service: PasswordHash,
-    jwt_service: JWTService,
-    scope_service,
-    **kwargs: Any,
+        *,
+        client_repo: ClientRepository,
+        user_repo: UserRepository,
+        password_service: PasswordHash,
+        jwt_service: JWTManagerProtocol,
+        scope_service,
+        **kwargs: Any,
 ) -> AuthServiceProtocol:
     """
     Factory method for creating an instance of IdTokenTokenAuthService, which is used for
@@ -61,5 +62,5 @@ def _create_id_token_token_auth_service(
             password_service=password_service,
         ),
         user_repo=user_repo,
-        jwt_manager=jwt_manager,
+        jwt_manager=JWTManager(),
     )
