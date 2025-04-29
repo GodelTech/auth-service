@@ -1,4 +1,5 @@
 from src.presentation.api.models.endsession import RequestEndSessionModel
+from src.data_access.postgresql.errors.persistent_grant import PersistentGrantNotFoundError
 from src.data_access.postgresql.repositories.client import ClientRepository
 from src.data_access.postgresql.repositories.persistent_grant import (
     PersistentGrantRepository,
@@ -53,13 +54,16 @@ class EndSessionService:
     async def _decode_id_token_hint(
         self, id_token_hint: str
     ) -> dict[str, Any]:
-        decoded_data = await self.jwt_service.decode_token(token=id_token_hint)
+        decoded_data = await self.jwt_service.decode_token_no_aud_iss_check(token=id_token_hint)
         return decoded_data
 
     async def _logout(self, client_id: str, user_id: int) -> None:
-        await self.persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(
-            client_id=client_id, user_id=user_id
-        )
+        try:
+            await self.persistent_grant_repo.delete_persistent_grant_by_client_and_user_id(
+                client_id=client_id, user_id=user_id
+            )
+        except PersistentGrantNotFoundError:
+            pass
 
     async def _validate_logout_redirect_uri(
         self, client_id: str, logout_redirect_uri: str
