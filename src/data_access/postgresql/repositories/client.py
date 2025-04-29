@@ -26,7 +26,6 @@ from src.data_access.postgresql.tables.client import (
 )
 from src.data_access.postgresql.tables import PersistentGrantType, ClientScope
 from typing import Optional, Any, Union
-from src.presentation.api.models.registration import ClientRequestModel, ClientUpdateRequestModel
 from src.data_access.postgresql.errors import DuplicationError, ClientScopesError
 import time
 
@@ -244,7 +243,7 @@ class ClientRepository(BaseRepository):
     ) -> None:
         scope_id = (await self.session.execute(
             select(ClientScope).where(
-                ClientScope.resource_id == scope_ids['resource_id'], 
+                ClientScope.resource_id == scope_ids['resource_id'],
                 ClientScope.scope_id == scope_ids['scope_id'],
                 ClientScope.claim_id == scope_ids['claim_id']
             )
@@ -258,7 +257,7 @@ class ClientRepository(BaseRepository):
             scope_id = scope_id,
             )
         )
-        
+
 
     async def add_redirect_uris(
         self, 
@@ -323,7 +322,7 @@ class ClientRepository(BaseRepository):
     ) -> None:
         sql = f'DELETE FROM clients_scopes WHERE client_id={client_id_int}'
         await self.session.execute(text(sql))
-    
+
     async def delete_redirect_uris(
         self, 
         client_id_int:int,
@@ -331,7 +330,7 @@ class ClientRepository(BaseRepository):
         await self.session.execute(
             delete(ClientRedirectUri).where(ClientRedirectUri.client_id == client_id_int)
         )
-        
+
     async def delete_client_by_client_id(
         self, 
         client_id:str,
