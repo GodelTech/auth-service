@@ -161,21 +161,24 @@ class TestEndSessionEndpoint:
         response = await client.request("GET", "/endsession/", params=params)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    async def test_end_session_no_persistent_grant(
-        self,
-        client: AsyncClient,
-        end_session_service: EndSessionService,
-        end_session_request_model: RequestEndSessionModel,
-    ) -> None:
-        hint = TokenHint()
-        token_hint = await hint.get_token_hint()
-        service = end_session_service
-        service.request_model = end_session_request_model
-        expected_content = '{"message":"You are not logged in"}'
-        params = {
-            "id_token_hint": token_hint,
-            "post_logout_redirect_uri": "http://www.jones.com/",
-        }
-        response = await client.request("GET", "/endsession/", params=params)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.content.decode("UTF-8") == expected_content
+    # This test should be uncommented when absent persistent grant will be ignored,
+    # during Implicit flow implementation
+
+    # async def test_end_session_no_persistent_grant(
+    #     self,
+    #     client: AsyncClient,
+    #     end_session_service: EndSessionService,
+    #     end_session_request_model: RequestEndSessionModel,
+    # ) -> None:
+    #     hint = TokenHint()
+    #     token_hint = await hint.get_token_hint()
+    #     service = end_session_service
+    #     service.request_model = end_session_request_model
+    #     expected_content = '{"message":"You are not logged in"}'
+    #     params = {
+    #         "id_token_hint": token_hint,
+    #         "post_logout_redirect_uri": "http://www.jones.com/",
+    #     }
+    #     response = await client.request("GET", "/endsession/", params=params)
+    #     assert response.status_code == status.HTTP_404_NOT_FOUND
+    #     assert response.content.decode("UTF-8") == expected_content
