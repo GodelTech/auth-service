@@ -1,14 +1,14 @@
-FROM python:3.9-slim-buster as requirements-stage
+FROM python:3.9-slim-bullseye as requirements-stage
 
 WORKDIR /tmp
 
-RUN pip install poetry
+RUN pip install poetry==1.8.3 poetry-plugin-export==1.8.0
 
 COPY ./pyproject.toml ./poetry.lock* /tmp/
 
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+RUN poetry export -f requirements.txt --output requirements.txt --without dev --without-hashes
 
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bullseye
 
 WORKDIR /Identity
 
@@ -28,7 +28,7 @@ RUN apt-get update \
 
 COPY . /Identity
 
-RUN chmod +x /Identity/start.sh
+RUN sed -i 's/\r//' /Identity/start.sh && chmod +x /Identity/start.sh
 
 EXPOSE 8000
 
