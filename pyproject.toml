@@ -5,7 +5,7 @@ description = ""
 authors = ["None"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 fastapi = "^0.95.2"
 pytest = "^7.2.0"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.44"}
@@ -34,14 +34,14 @@ pytest-cov = "^4.0.0"
 starlette = "0.27.0"
 WTForms = "3.0.1"
 requests = "^2.32.4"
-cryptography = "42.0.5"
+cryptography = "^46.0.5"
 fastapi-cache2 = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.20.0"
 uvicorn = "^0.29.0"
 sqlalchemy-utils = "^0.41.2"
-python-multipart = "^0.0.18"
+python-multipart = "^0.0.22"
 asgi-lifespan = "^2.0.0"
 aiosqlite = "^0.17.0"
 jinja2 = "^3.1.6"
@@ -80,7 +80,7 @@ line-length = 80
 
 [tool.mypy]
 files = "src"
-python_version = "3.9"
+python_version = "3.10"
 ignore_missing_imports = true
 check_untyped_defs = true
 disallow_any_generics = true
