@@ -102,7 +102,7 @@ class TestDeviceFlow:
 
         # Stage 7: User ends the session
         jwt_service = JWTService()
-        TOKEN_HINT_DATA["sub"] = user_id
+        TOKEN_HINT_DATA["sub"] = str(user_id)
         id_token_hint = await jwt_service.encode_jwt(payload=TOKEN_HINT_DATA)
         end_session_params = {
             "id_token_hint": id_token_hint,
