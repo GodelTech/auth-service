@@ -19,7 +19,7 @@ class TestUserInfoService:
         service = user_info_service
         data_to_code = {
             "scope": "openid profile",
-            "sub": 1,
+            "sub": "1",
             "aud": ["userinfo"],
         }
 

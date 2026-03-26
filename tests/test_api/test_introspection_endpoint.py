@@ -28,7 +28,7 @@ class TestIntrospectionEndpoint:
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
-            "sub": 1,
+            "sub": "1",
             "exp": time.time() + 3600,
             "client_id": "test_client",
             "aud": ["oidc:introspection:get"],
@@ -91,7 +91,7 @@ class TestIntrospectionEndpoint:
         jwt = JWTService()
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
-        payload = {"sub": 1, "exp": time.time(), "aud": ["introspection"]}
+        payload = {"sub": "1", "exp": time.time(), "aud": ["introspection"]}
         introspection_token = await jwt.encode_jwt(payload=payload)
 
         await persistent_grant_repo.create(
@@ -126,7 +126,7 @@ class TestIntrospectionEndpoint:
         persistent_grant_repo = PersistentGrantRepository(connection)
         grant_type = "authorization_code"
         payload = {
-            "sub": 1,
+            "sub": "1",
             "exp": time.time() + 3600,
             "client_id": "test_client",
             "aud": ["oidc:introspection:get"],

@@ -167,13 +167,13 @@ def device_request_model() -> DeviceRequestModel:
 service = JWTService()
 
 TOKEN_HINT_DATA = {
-    "sub": 3,
+    "sub": "3",
     "client_id": "santa",
     "data": "secret_code",
     "type": "code",
 }
 
-SHORT_TOKEN_HINT_DATA = {"sub": 3, "data": "secret_code", "type": "code"}
+SHORT_TOKEN_HINT_DATA = {"sub": "3", "data": "secret_code", "type": "code"}
 
 
 class TokenHint:

@@ -62,7 +62,7 @@ def get_base_payload(
     **kwargs: Any,
 ) -> dict[str, Any]:
     if kwargs.get("user_id") and kwargs["user_id"] != "":
-        kwargs["sub"] = kwargs.get("user_id")
+        kwargs["sub"] = str(kwargs.get("user_id"))
 
     if kwargs.get("user_id"):
         kwargs.pop("user_id")

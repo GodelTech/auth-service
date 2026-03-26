@@ -90,5 +90,5 @@ class UserInfoService:
 
     async def get_user_info_jwt(self) -> str:
         result = await self.get_user_info()
-        token = await self.jwt.encode_jwt(payload=result)
+        token = await self.jwt.encode_jwt(payload={k: v for k, v in result.items() if v is not None})
         return token

@@ -38,7 +38,7 @@ class AdminAuthService:
             raise UserNotInGroupError('administration')
         return await self.jwt_service.encode_jwt(
             payload={
-                "sub":user_id,
+                "sub": str(user_id),
                 "exp": exp_time + int(time.time()),
                 "aud":["admin"]
             }

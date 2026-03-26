@@ -30,7 +30,7 @@ class EndSessionService:
 
             await self._logout(
                 client_id=decoded_id_token_hint["client_id"],
-                user_id=decoded_id_token_hint["sub"],
+                user_id=int(decoded_id_token_hint["sub"]),
             )
             if self.request_model.post_logout_redirect_uri:
                 try:
