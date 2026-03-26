@@ -100,7 +100,7 @@ class TestThirdPartyLinkedinFlow:
         # Stage 5: EndSession endpoint deletes all records in the Persistent grant table for the corresponding user
         jwt_service = JWTService()
         token_hint_data = {
-            "sub": user_id,
+            "sub": str(user_id),
             "client_id": "spider_man",
             "type": "code",
         }

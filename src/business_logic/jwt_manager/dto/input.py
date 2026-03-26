@@ -3,7 +3,7 @@ from typing import Optional, Any, Union
 
 
 class BaseJWTPayload(BaseModel):
-    sub: Union[int, str]  # user id
+    sub: str  # user id
     iss: str  # auth service uri
     iat: int  # time of creation
     exp: int  # time when token will expire

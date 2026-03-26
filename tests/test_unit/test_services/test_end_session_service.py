@@ -97,7 +97,7 @@ class TestEndSessionService:
             service.request_model.id_token_hint
         )
 
-        assert data["sub"] == 3
+        assert data["sub"] == "3"
         assert data["data"] == "secret_code"
 
     async def test_decode_id_token_hint_error(

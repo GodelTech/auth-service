@@ -81,7 +81,7 @@ class TestWellKnown:
 
         jwt_service = JWTService()
         response_content = response_content["keys"][0]
-        test_token = await jwt_service.encode_jwt(payload={"sub": 1})
+        test_token = await jwt_service.encode_jwt(payload={"sub": "1"})
 
         if response_content["alg"] == "RS256":
             n = base64_to_long(response_content["n"])

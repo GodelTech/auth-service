@@ -42,7 +42,7 @@ class TestUserInfoEndpoint:
     ) -> None:
         jwt = JWTService()
 
-        token = await jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["profile"]})
+        token = await jwt.encode_jwt(payload={"sub": "1", 'scope': 'profile', "aud":["profile"]})
         headers = {
             "authorization": token,
         }
@@ -60,7 +60,7 @@ class TestUserInfoEndpoint:
         engine: AsyncEngine,
     ) -> None:
 
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1, 'scope': 'profile', "aud":["profile"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "1", 'scope': 'profile', "aud":["profile"]})
         headers = {"authorization": token, "accept": "application/json"}
         user_info_service.authorization = token
         response = await client.request("GET", "/userinfo/jwt", headers=headers)
@@ -118,7 +118,7 @@ class TestUserInfoEndpoint:
         client: AsyncClient,
         engine: AsyncEngine,
     ) -> None:
-        token = await user_info_service.jwt.encode_jwt(payload={"sub": 1,  'scope': 'profile', "aud":["profile"]})
+        token = await user_info_service.jwt.encode_jwt(payload={"sub": "1",  'scope': 'profile', "aud":["profile"]})
         headers = {
             "authorization": token,
         }
