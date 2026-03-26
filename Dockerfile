@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bullseye as requirements-stage
+FROM python:3.10-slim-bullseye as requirements-stage
 
 WORKDIR /tmp
 
@@ -8,7 +8,7 @@ COPY ./pyproject.toml ./poetry.lock* /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without dev --without-hashes
 
-FROM python:3.9-slim-bullseye
+FROM python:3.10-slim-bullseye
 
 WORKDIR /Identity
 
